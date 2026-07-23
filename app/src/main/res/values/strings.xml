@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RečPoReč</string>
+
+    <!-- Lista dokumenata -->
+    <string name="add_document">Dodaj dokument</string>
+    <string name="add_from_drive">Dodaj sa Google diska</string>
+    <string name="delete">Obriši</string>
+    <string name="no_documents">Nema dodatih dokumenata. Dodirnite dugme za dodavanje.</string>
+    <string name="confirm_delete_title">Obriši dokument</string>
+    <string name="confirm_delete_message">Da li sigurno želite da obrišete ovaj dokument i sav napredak čitanja?</string>
+    <string name="cancel">Otkaži</string>
+
+    <!-- Čitač - dugmad -->
+    <string name="btn_prev_chapter">Prethodno poglavlje</string>
+    <string name="btn_next_chapter">Sledeće poglavlje</string>
+    <string name="btn_timer">Tajmer za automatsku pauzu</string>
+    <string name="btn_vol_down">Smanji jačinu zvuka</string>
+    <string name="btn_vol_up">Pojačaj zvuk</string>
+    <string name="btn_voice">Izbor glasa</string>
+    <string name="btn_speed_down">Smanji brzinu čitanja</string>
+    <string name="btn_play_pause">Pusti ili pauziraj čitanje</string>
+    <string name="btn_speed_up">Povećaj brzinu čitanja</string>
+    <string name="btn_prev_page">Jedna stranica unazad</string>
+    <string name="btn_goto_page">Idi na stranicu</string>
+    <string name="btn_next_page">Jedna stranica unapred</string>
+    <string name="slider_position">Klizač za pomeranje kroz knjigu, pet posto po koraku</string>
+    <string name="slider_back">Pomeri pet posto unazad</string>
+    <string name="slider_forward">Pomeri pet posto unapred</string>
+
+    <!-- Statusna traka -->
+    <string name="status_pages">Ukupno stranica: %1$d</string>
+    <string name="status_elapsed">Proteklo vreme: %1$s</string>
+    <string name="status_remaining">Preostalo vreme: %1$s</string>
+
+    <!-- Dijalog za stranicu -->
+    <string name="goto_page_title">Unesite broj stranice</string>
+    <string name="ok">U redu</string>
+
+    <!-- Meni -->
+    <string name="menu_settings">Podešavanja</string>
+    <string name="menu_help">Pomoć</string>
+
+    <!-- Podešavanja -->
+    <string name="setting_background">Rad u pozadini</string>
+    <string name="setting_background_desc">Nastavi čitanje kada se aplikacija zatvori na početni ekran</string>
+    <string name="setting_uninterrupted">Čitanje bez prekida</string>
+    <string name="setting_uninterrupted_desc">Nastavi čitanje i kada se ekran telefona isključi</string>
+    <string name="setting_shake">Prodrmaj telefon za pauzu i nastavak</string>
+    <string name="setting_shake_desc">Drmanje telefona pauzira ili nastavlja čitanje</string>
+
+    <!-- Pomoć -->
+    <string name="help_title">Pomoć</string>
+
+    <!-- Tajmer obaveštenja -->
+    <string name="timer_set">Tajmer podešen na %1$d minuta</string>
+    <string name="timer_off">Tajmer isključen</string>
+
+    <string name="voice_dialog_title">Izaberite glas</string>
+</resources>

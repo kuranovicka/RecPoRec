@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- Traka statusa -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textDocTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Naslov" />
+
+            <TextView
+                android:id="@+id/textPages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/textElapsed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/textRemaining"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnOverflow"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/menu_settings"
+            android:src="@android:drawable/ic_menu_more" />
+    </LinearLayout>
+
+    <!-- Numerička tastatura, 4 reda x 3 kolone, fiksna, ravna -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Red: 1 2 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnPrevChapter" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_chapter"
+                android:contentDescription="@string/btn_prev_chapter"
+                android:text="⏮ Poglavlje" />
+
+            <Button android:id="@+id/btnTimer" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_timer"
+                android:contentDescription="@string/btn_timer"
+                android:text="⏱ Tajmer" />
+
+            <Button android:id="@+id/btnNextChapter" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_chapter"
+                android:contentDescription="@string/btn_next_chapter"
+                android:text="Poglavlje ⏭" />
+        </LinearLayout>
+
+        <!-- Red: 4 5 6 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnVolDown" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_volume"
+                android:contentDescription="@string/btn_vol_down"
+                android:text="🔉−" />
+
+            <Button android:id="@+id/btnVoice" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_voice"
+                android:contentDescription="@string/btn_voice"
+                android:text="🗣 Glas" />
+
+            <Button android:id="@+id/btnVolUp" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_volume"
+                android:contentDescription="@string/btn_vol_up"
+                android:text="🔊+" />
+        </LinearLayout>
+
+        <!-- Red: 7 8 9 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnSpeedDown" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_speed"
+                android:contentDescription="@string/btn_speed_down"
+                android:text="🐢−" />
+
+            <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_play"
+                android:contentDescription="@string/btn_play_pause"
+                android:text="▶ / ⏸" />
+
+            <Button android:id="@+id/btnSpeedUp" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_speed"
+                android:contentDescription="@string/btn_speed_up"
+                android:text="🐇+" />
+        </LinearLayout>
+
+        <!-- Red: * 0 # -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnStepBack" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_page_nav"
+                android:contentDescription="@string/slider_back"
+                android:text="◀ 5%" />
+
+            <Button android:id="@+id/btnGotoPage" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_goto_page"
+                android:contentDescription="@string/btn_goto_page"
+                android:text="Idi na str." />
+
+            <Button android:id="@+id/btnStepForward" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_page_nav"
+                android:contentDescription="@string/slider_forward"
+                android:text="5% ▶" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Klizač napretka kroz knjigu -->
+    <SeekBar
+        android:id="@+id/seekProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/slider_position"
+        android:max="100"
+        android:progressTint="@color/btn_voice"
+        android:thumbTint="@color/btn_voice" />
+
+</LinearLayout>
