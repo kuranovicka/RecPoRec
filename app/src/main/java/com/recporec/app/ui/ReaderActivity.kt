@@ -318,17 +318,13 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
-        val labels = languages.map { loc ->
-            val lang = loc.displayLanguage.replaceFirstChar { it.uppercase() }
-            val country = loc.displayCountry
-            if (country.isNotBlank() && country != lang) "$lang — $country" else lang
-        }
-        val current = doc?.languageTag?.let { tag ->
-            languages.firstOrNull { it.toLanguageTag() == tag }?.displayLanguage
+        val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
+        val current = doc?.languageTag?.let { code ->
+            languages.firstOrNull { it.language == code }?.displayLanguage
         }
         PickerDialog.show(this, "Jezik za ovaj dokument", labels, current) { index ->
             val chosen = languages[index]
-            doc = doc?.copy(languageTag = chosen.toLanguageTag())
+            doc = doc?.copy(languageTag = chosen.language)
             persistState()
             updateDocLanguageButtonText()
         }
@@ -337,7 +333,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun updateDocLanguageButtonText() {
         val tag = doc?.languageTag
         binding.btnDocLanguage.text = if (tag != null) {
-            "Jezik: ${java.util.Locale.forLanguageTag(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
+            "Jezik: ${java.util.Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
         } else {
             "Jezik"
         }
@@ -350,7 +346,7 @@ class ReaderActivity : AppCompatActivity() {
         }
         val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
         val filtered = if (languageFilter != null) {
-            voices.filter { it.voice.locale.toLanguageTag() == languageFilter }.ifEmpty { voices }
+            voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
         } else voices
 
         val labels = filtered.map { it.displayLabel }

@@ -57,6 +57,12 @@ class DocumentListActivity : AppCompatActivity() {
             )
         }
 
+        binding.btnExit.setOnClickListener {
+            com.recporec.app.service.ReadingService.stop(this)
+            com.recporec.app.tts.PlaybackController.release()
+            finishAffinity()
+        }
+
         binding.btnOverflow.setOnClickListener { view ->
             val popup = androidx.appcompat.widget.PopupMenu(this, view)
             popup.menuInflater.inflate(com.recporec.app.R.menu.menu_main_options, popup.menu)

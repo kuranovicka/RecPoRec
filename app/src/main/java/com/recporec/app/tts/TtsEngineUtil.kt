@@ -76,7 +76,7 @@ object TtsEngineUtil {
 
     fun distinctLanguages(voices: List<VoiceOption>): List<Locale> {
         return voices.map { it.voice.locale }
-            .distinctBy { it.toLanguageTag() }
+            .distinctBy { it.language }
             .sortedBy { it.displayLanguage }
     }
 }

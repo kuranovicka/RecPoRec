@@ -58,7 +58,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/menu_settings"
+            android:contentDescription="@string/menu_options_button"
             android:src="@android:drawable/ic_menu_more" />
     </LinearLayout>
 

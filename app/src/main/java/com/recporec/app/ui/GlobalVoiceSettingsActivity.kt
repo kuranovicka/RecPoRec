@@ -50,14 +50,13 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             return
         }
         val languages = TtsEngineUtil.distinctLanguages(voices)
-        val labels = languages.map { "${it.displayLanguage.replaceFirstChar { c -> c.uppercase() }}" +
-            if (it.displayCountry.isNotBlank() && it.displayCountry != it.displayLanguage) " — ${it.displayCountry}" else "" }
-        val current = settings.globalLanguageTag?.let { tag ->
-            languages.firstOrNull { it.toLanguageTag() == tag }?.displayLanguage
+        val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
+        val current = settings.globalLanguageTag?.let { code ->
+            languages.firstOrNull { it.language == code }?.displayLanguage
         }
         PickerDialog.show(this, "Izaberi jezik", labels, current) { index ->
             val chosen = languages[index]
-            settings.globalLanguageTag = chosen.toLanguageTag()
+            settings.globalLanguageTag = chosen.language
             refreshStatusTexts()
         }
     }
@@ -69,7 +68,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         }
         val languageFilter = settings.globalLanguageTag
         val filtered = if (languageFilter != null) {
-            voices.filter { it.voice.locale.toLanguageTag() == languageFilter }.ifEmpty { voices }
+            voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
         } else voices
 
         val labels = filtered.map { it.displayLabel }
@@ -99,7 +98,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
     private fun refreshStatusTexts() {
         val langTag = settings.globalLanguageTag
         binding.textLanguageStatus.text = if (langTag != null) {
-            "Potvrđeno: ${Locale.forLanguageTag(langTag).displayLanguage.replaceFirstChar { it.uppercase() }}"
+            "Potvrđeno: ${Locale(langTag).displayLanguage.replaceFirstChar { it.uppercase() }}"
         } else "Nije izabrano (koristi se podrazumevani jezik telefona)"
 
         val voiceName = settings.globalVoiceName

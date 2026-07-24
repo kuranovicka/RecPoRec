@@ -39,6 +39,7 @@
 
     <!-- Meni -->
     <string name="menu_settings">Podešavanja</string>
+    <string name="menu_options_button">Opcije</string>
     <string name="menu_help">Pomoć</string>
 
     <!-- Podešavanja -->

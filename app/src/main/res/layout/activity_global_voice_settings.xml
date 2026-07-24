@@ -81,6 +81,7 @@
                 android:textSize="20sp"
                 android:backgroundTint="@color/btn_speed"
                 android:textColor="@color/button_text"
+                android:contentDescription="Smanji brzinu čitanja"
                 android:text="−" />
 
             <TextView
@@ -101,6 +102,7 @@
                 android:textSize="20sp"
                 android:backgroundTint="@color/btn_speed"
                 android:textColor="@color/button_text"
+                android:contentDescription="Povećaj brzinu čitanja"
                 android:text="+" />
         </LinearLayout>
 
@@ -118,6 +120,7 @@
                 android:textSize="20sp"
                 android:backgroundTint="@color/btn_volume"
                 android:textColor="@color/button_text"
+                android:contentDescription="Smanji jačinu zvuka"
                 android:text="−" />
 
             <TextView
@@ -138,6 +141,7 @@
                 android:textSize="20sp"
                 android:backgroundTint="@color/btn_volume"
                 android:textColor="@color/button_text"
+                android:contentDescription="Povećaj jačinu zvuka"
                 android:text="+" />
         </LinearLayout>
 
