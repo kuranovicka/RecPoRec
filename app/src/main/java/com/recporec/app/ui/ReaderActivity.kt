@@ -44,7 +44,6 @@ class ReaderActivity : AppCompatActivity() {
 
     private var timerMinutesCycle = intArrayOf(0, 15, 30, 45, 60, 90)
     private var timerIndex = 0
-    private var timerRemainingSeconds: Int = 0
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
 
@@ -240,6 +239,7 @@ class ReaderActivity : AppCompatActivity() {
             updateSeekBar()
             updateDocLanguageButtonText()
             updateNavigationButtonLabels()
+            updateTimerStatusText()
         }
     }
 
@@ -498,26 +498,25 @@ class ReaderActivity : AppCompatActivity() {
         val minutes = timerMinutesCycle[timerIndex]
         doc = doc?.copy(timerMinutes = minutes)
         persistState()
+        PlaybackController.setTimerMinutes(minutes)
 
         if (minutes == 0) {
-            timerRemainingSeconds = 0
             android.widget.Toast.makeText(this, R.string.timer_off, android.widget.Toast.LENGTH_SHORT).show()
-            updateTimerStatusText()
-            return
+        } else {
+            android.widget.Toast.makeText(
+                this, getString(R.string.timer_set, minutes), android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
-        android.widget.Toast.makeText(
-            this, getString(R.string.timer_set, minutes), android.widget.Toast.LENGTH_SHORT
-        ).show()
-        timerRemainingSeconds = minutes * 60
         updateTimerStatusText()
     }
 
     private fun updateTimerStatusText() {
-        if (timerRemainingSeconds <= 0) {
+        val remaining = PlaybackController.timerRemainingSeconds
+        if (remaining <= 0) {
             binding.textTimerStatus.text = "Tajmer nije aktivan."
         } else {
-            val min = timerRemainingSeconds / 60
-            val sec = timerRemainingSeconds % 60
+            val min = remaining / 60
+            val sec = remaining % 60
             binding.textTimerStatus.text = "Tajmer: preostalo %d min %02d sek.".format(min, sec)
         }
     }
@@ -529,17 +528,7 @@ class ReaderActivity : AppCompatActivity() {
                 if (isSpeaking) {
                     updateStatusTexts()
                 }
-                if (timerRemainingSeconds > 0) {
-                    if (isSpeaking) {
-                        timerRemainingSeconds -= 1
-                        if (timerRemainingSeconds <= 0) {
-                            timerRemainingSeconds = 0
-                            timerIndex = 0
-                            doc = doc?.copy(timerMinutes = 0)
-                            persistState()
-                            PlaybackController.ttsManager?.pause()
-                        }
-                    }
+                if (PlaybackController.timerRemainingSeconds > 0) {
                     updateTimerStatusText()
                 }
                 handler.postDelayed(this, 1000)
@@ -606,6 +595,14 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiFinishedListener = {
             runOnUiThread { binding.btnPlayPause.text = "▶ / ⏸" }
         }
+        PlaybackController.uiTimerExpiredListener = {
+            runOnUiThread {
+                timerIndex = 0
+                doc = doc?.copy(timerMinutes = 0)
+                persistState()
+                updateTimerStatusText()
+            }
+        }
 
         if (settings.shakeEnabled) {
             val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -620,6 +617,7 @@ class ReaderActivity : AppCompatActivity() {
         super.onPause()
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
+        PlaybackController.uiTimerExpiredListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
         persistState()
         if (!settings.backgroundEnabled) {

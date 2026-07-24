@@ -29,6 +29,18 @@ object PlaybackController {
     var parsedDocument: ParsedDocument? = null
     var elapsedSeconds: Long = 0
 
+    /** Preostale sekunde tajmera za automatsku pauzu (0 = nije aktivan). Živi ovde (ne u
+     * ReaderActivity) da bi preživeo ako Android uništi i ponovo napravi ekran za čitanje
+     * dok app radi u pozadini - inače bi se tajmer "restartovao" na isključeno. */
+    var timerRemainingSeconds: Int = 0
+        private set
+
+    var uiTimerExpiredListener: (() -> Unit)? = null
+
+    fun setTimerMinutes(minutes: Int) {
+        timerRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
+    }
+
     /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
     var uiPositionListener: ((Int) -> Unit)? = null
     var uiFinishedListener: (() -> Unit)? = null
@@ -70,6 +82,15 @@ object PlaybackController {
                     currentDocument = currentDocument?.copy(elapsedSeconds = elapsedSeconds)
                     tick++
                     if (tick % 5 == 0) persistCurrentDocument()
+
+                    if (timerRemainingSeconds > 0) {
+                        timerRemainingSeconds -= 1
+                        if (timerRemainingSeconds <= 0) {
+                            timerRemainingSeconds = 0
+                            ttsManager?.pause()
+                            uiTimerExpiredListener?.invoke()
+                        }
+                    }
                 }
             }
         }
@@ -100,8 +121,10 @@ object PlaybackController {
         currentDocument = null
         parsedDocument = null
         elapsedSeconds = 0
+        timerRemainingSeconds = 0
         uiPositionListener = null
         uiFinishedListener = null
+        uiTimerExpiredListener = null
         scope.coroutineContext.cancelChildren()
         tickerStarted = false
     }
