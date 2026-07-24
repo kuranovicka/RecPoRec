@@ -25,12 +25,12 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install SDK platform & build-tools
-        run: sdkmanager --install "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.7
+          gradle-version: 8.10
 
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace

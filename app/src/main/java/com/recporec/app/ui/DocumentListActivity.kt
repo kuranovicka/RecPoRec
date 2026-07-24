@@ -12,7 +12,9 @@ import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.databinding.ActivityDocumentListBinding
 import com.recporec.app.parser.DocumentParser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DocumentListActivity : AppCompatActivity() {
 
@@ -41,8 +43,14 @@ class DocumentListActivity : AppCompatActivity() {
             pickFileLauncher.launch(
                 arrayOf(
                     "text/plain",
+                    "text/html",
+                    "text/rtf",
+                    "application/rtf",
                     "application/pdf",
                     "application/epub+zip",
+                    "application/x-fictionbook+xml",
+                    "application/x-mobipocket-ebook",
+                    "application/vnd.amazon.ebook",
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
             )
@@ -56,35 +64,67 @@ class DocumentListActivity : AppCompatActivity() {
             }
         }
 
-        // Ako je aplikacija otvorena preko "Otvori sa" iz drugog fajl menadžera
-        if (intent?.action == Intent.ACTION_VIEW) {
-            intent.data?.let { handlePickedFile(it) }
+        // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)
+        handleIncomingIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingIntent(intent)
+    }
+
+    private fun handleIncomingIntent(intent: Intent?) {
+        intent ?: return
+        val uri: Uri? = when (intent.action) {
+            Intent.ACTION_VIEW -> intent.data
+            Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
+            else -> null
         }
+        uri?.let { handlePickedFile(it) }
     }
 
     private fun handlePickedFile(uri: Uri) {
         val name = queryFileName(uri) ?: "dokument"
-        val format = DocumentParser.detectFormat(name) ?: run {
+        val mimeType = contentResolver.getType(uri)
+        val format = DocumentParser.detectFormat(name, mimeType) ?: run {
             AlertDialog.Builder(this)
                 .setMessage("Format ovog fajla nije podržan.")
                 .setPositiveButton("U redu", null)
                 .show()
             return
         }
-        try {
-            contentResolver.takePersistableUriPermission(
-                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-        } catch (_: SecurityException) { /* neki provajderi ne dozvoljavaju, nastavljamo */ }
 
         lifecycleScope.launch {
+            val localUri = withContext(Dispatchers.IO) { copyToLocalStorage(uri, format) }
+            if (localUri == null) {
+                AlertDialog.Builder(this@DocumentListActivity)
+                    .setMessage("Nije moguće pročitati fajl.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+                return@launch
+            }
             db.documentDao().insert(
                 DocumentEntity(
                     title = name.substringBeforeLast("."),
-                    uri = uri.toString(),
+                    uri = localUri.toString(),
                     format = format
                 )
             )
+        }
+    }
+
+    /** Kopira sadržaj u internu memoriju aplikacije da bi pristup bio trajan bez obzira na izvor (birač, Disk, Podeli). */
+    private fun copyToLocalStorage(sourceUri: Uri, format: String): Uri? {
+        return try {
+            val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
+            val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.$format")
+            contentResolver.openInputStream(sourceUri)?.use { input ->
+                destFile.outputStream().use { output -> input.copyTo(output) }
+            } ?: return null
+            Uri.fromFile(destFile)
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -108,7 +148,17 @@ class DocumentListActivity : AppCompatActivity() {
             .setMessage(getString(com.recporec.app.R.string.confirm_delete_message))
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
             .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
-                lifecycleScope.launch { db.documentDao().deleteById(doc.id) }
+                lifecycleScope.launch {
+                    db.documentDao().deleteById(doc.id)
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val uri = Uri.parse(doc.uri)
+                            if (uri.scheme == "file") {
+                                uri.path?.let { java.io.File(it).delete() }
+                            }
+                        } catch (_: Exception) { }
+                    }
+                }
             }
             .show()
     }

@@ -55,6 +55,10 @@ class ReaderActivity : AppCompatActivity() {
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { /* ako korisnik odbije, servis i dalje radi, samo bez vidljive notifikacije */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityReaderBinding.inflate(layoutInflater)
@@ -69,6 +73,15 @@ class ReaderActivity : AppCompatActivity() {
         setupButtons()
         loadDocument()
         startTicker()
+
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this, android.Manifest.permission.POST_NOTIFICATIONS
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     private fun setupButtons() = with(binding) {

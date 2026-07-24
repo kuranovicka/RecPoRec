@@ -1,4 +1,4 @@
-# RečPoReč
+# Reč po reč
 
 Android aplikacija za čitanje knjiga uz TTS (tekst-u-govor), namenjena slepim i slabovidim korisnicima.
 
@@ -6,7 +6,10 @@ Android aplikacija za čitanje knjiga uz TTS (tekst-u-govor), namenjena slepim i
 U razvoju. Svaki push na ovaj repozitorijum automatski pokreće build (GitHub Actions) i pravi debug APK, dostupan u sekciji **Releases** ili **Actions → poslednji run → Artifacts**.
 
 ## Podržani formati
-TXT, EPUB, PDF, DOCX
+TXT, EPUB, PDF, DOCX, HTML, FB2, RTF, MOBI/AZW (bez DRM-a)
+
+## Otvaranje iz drugih aplikacija
+Osim ručnog dodavanja, dokument se može otvoriti i direktno iz Google Diska ili drugih aplikacija preko "Otvori sa" / "Podeli", ako je Reč po reč instalirana.
 
 ## Kontrole (u čitaču — raspored kao numerička tastatura, 12 dugmadi)
 

@@ -51,7 +51,7 @@ object EpubParser {
             val html = fileBytes.toString(Charsets.UTF_8)
 
             val chapterTitle = extractTitle(html) ?: href.substringAfterLast("/").substringBeforeLast(".")
-            val plainText = htmlToPlainText(html)
+            val plainText = HtmlTextUtil.htmlToPlainText(html)
             if (plainText.isBlank()) continue
 
             chapters.add(ParsedChapter(chapterTitle, textBuilder.length))
@@ -68,7 +68,7 @@ object EpubParser {
         entries.entries
             .filter { it.key.endsWith(".xhtml") || it.key.endsWith(".html") || it.key.endsWith(".htm") }
             .sortedBy { it.key }
-            .forEach { sb.append(htmlToPlainText(it.value.toString(Charsets.UTF_8))).append("\n\n") }
+            .forEach { sb.append(HtmlTextUtil.htmlToPlainText(it.value.toString(Charsets.UTF_8))).append("\n\n") }
         return ParsedDocument(fullText = sb.toString())
     }
 
@@ -87,39 +87,12 @@ object EpubParser {
     }
 
     private fun extractTitle(html: String): String? {
-        Regex("<title[^>]*>(.*?)</title>", RegexOption.DOT_MATCHES_ALL).find(html)?.let {
-            val t = it.groupValues[1].trim()
-            if (t.isNotBlank()) return t
-        }
+        HtmlTextUtil.extractTitleTag(html)?.let { return it }
         Regex("<h1[^>]*>(.*?)</h1>", RegexOption.DOT_MATCHES_ALL).find(html)?.let {
-            val t = stripTags(it.groupValues[1]).trim()
+            val t = HtmlTextUtil.stripTags(it.groupValues[1]).trim()
             if (t.isNotBlank()) return t
         }
         return null
-    }
-
-    private fun htmlToPlainText(html: String): String {
-        // Ukloni head, script, style
-        var body = Regex("<head[^>]*>.*?</head>", RegexOption.DOT_MATCHES_ALL).replace(html, "")
-        body = Regex("<script[^>]*>.*?</script>", RegexOption.DOT_MATCHES_ALL).replace(body, "")
-        body = Regex("<style[^>]*>.*?</style>", RegexOption.DOT_MATCHES_ALL).replace(body, "")
-        // Prelomi pasusa i redova
-        body = body.replace(Regex("(?i)<br\\s*/?>"), "\n")
-        body = body.replace(Regex("(?i)</p>"), "\n\n")
-        return stripTags(body).trim()
-    }
-
-    private fun stripTags(html: String): String {
-        val noTags = Regex("<[^>]+>").replace(html, "")
-        return noTags
-            .replace("&nbsp;", " ")
-            .replace("&amp;", "&")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&quot;", "\"")
-            .replace("&#39;", "'")
-            .replace(Regex("[ \\t]+"), " ")
-            .replace(Regex("\\n{3,}"), "\n\n")
     }
 
     private fun readZipEntries(context: Context, uri: Uri): Map<String, ByteArray> {

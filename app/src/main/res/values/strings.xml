@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RečPoReč</string>
+    <string name="app_name">Reč po reč</string>
 
     <!-- Lista dokumenata -->
     <string name="add_document">Dodaj dokument</string>
