@@ -70,6 +70,28 @@
         android:orientation="vertical"
         android:padding="8dp">
 
+        <!-- Red: Idi na pocetak / Idi na kraj -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnGoStart" style="@style/KeyButton"
+                android:layout_weight="2"
+                android:backgroundTint="@color/btn_goto_page"
+                android:contentDescription="Idi na početak dokumenta"
+                android:textSize="15sp"
+                android:text="⏮⏮ Početak" />
+
+            <Button android:id="@+id/btnGoEnd" style="@style/KeyButton"
+                android:layout_weight="2"
+                android:backgroundTint="@color/btn_goto_page"
+                android:contentDescription="Idi na kraj dokumenta"
+                android:textSize="15sp"
+                android:text="Kraj ⏭⏭" />
+        </LinearLayout>
+
         <!-- Red: 1 2 3 -->
         <LinearLayout
             android:layout_width="match_parent"

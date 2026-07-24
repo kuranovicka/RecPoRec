@@ -153,6 +153,9 @@ class ReaderActivity : AppCompatActivity() {
 
         btnOverflow.setOnClickListener(clickSound { showOverflowMenu(btnOverflow) })
 
+        btnGoStart.setOnClickListener(clickSound { goToStart() })
+        btnGoEnd.setOnClickListener(clickSound { goToEnd() })
+
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
 
@@ -269,6 +272,15 @@ class ReaderActivity : AppCompatActivity() {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
         }
+    }
+
+    private fun goToStart() {
+        moveTo(0)
+    }
+
+    private fun goToEnd() {
+        val length = parsed?.length ?: return
+        moveTo(max(0, length - 1))
     }
 
     private fun goToPercent(percent: Int) {

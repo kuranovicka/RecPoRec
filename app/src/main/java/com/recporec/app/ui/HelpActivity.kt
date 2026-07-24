@@ -59,8 +59,15 @@ class HelpActivity : AppCompatActivity() {
         To je baš ovaj ekran koji sada čitaš.
 
         Sada idemo u sam dokument.
-        Tastatura ima šesnaest polja.
+        Tastatura ima osamnaest polja.
         Neka polja su prazna, samo da red bude ravan.
+
+        Na samom vrhu tastature su dva dugmeta.
+        Prvo dugme je "Idi na početak".
+        Ono vraća na sam početak dokumenta.
+        Drugo dugme je "Idi na kraj".
+        Ono ide na sam kraj dokumenta.
+        Ova dva dugmeta su tu jer aplikacija pamti gde si stala, pa ovako lako osvežiš čitanje.
 
         Prvi red ima tri dugmeta.
         Prvo dugme je "Prethodno poglavlje".
