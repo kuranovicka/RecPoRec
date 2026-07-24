@@ -67,7 +67,7 @@ class HelpActivity : AppCompatActivity() {
         Ono vraća na sam početak dokumenta.
         Drugo dugme je "Idi na stranicu".
         Ono otvara polje gde upišeš broj stranice.
-        Treće dugme je "Idi na Minut".
+        Treće dugme je "Idi na minut".
         Ono otvara polje gde upišeš broj minuta od početka, pa te odvede tamo.
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
 
