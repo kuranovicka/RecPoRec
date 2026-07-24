@@ -187,11 +187,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun loadDocument() {
         lifecycleScope.launch {
             val entity = db.documentDao().getById(documentId) ?: return@launch
-            doc = entity
             binding.textDocTitle.text = entity.title
-
-            PlaybackController.currentDocument = entity
-            PlaybackController.elapsedSeconds = entity.elapsedSeconds
 
             val cachedParsed = PlaybackController.parsedDocument
             val parsedDoc = if (cachedParsed != null && PlaybackController.currentDocument?.id == entity.id) {
@@ -214,13 +210,21 @@ class ReaderActivity : AppCompatActivity() {
             parsed = parsedDoc
             PlaybackController.parsedDocument = parsedDoc
 
+            // Sve dopune (npr. broj stranica) se izracunaju PRE nego sto doc postane vidljiv/dostupan
+            // ostatku ekrana - da ne postoji prozor u kom je doc "napola gotov" i neko dugme
+            // (idi na, itd) radi sa nepotpunim podacima (npr. brojem stranica 0).
             val totalPages = max(1, (parsedDoc.length + charsPerPage - 1) / charsPerPage)
-            if (entity.totalPages != totalPages) {
-                doc = entity.copy(totalPages = totalPages)
-                db.documentDao().update(doc!!)
-            }
+            val finalEntity = if (entity.totalPages != totalPages) {
+                val updated = entity.copy(totalPages = totalPages)
+                db.documentDao().update(updated)
+                updated
+            } else entity
 
-            setupTts(parsedDoc, entity)
+            doc = finalEntity
+            PlaybackController.currentDocument = finalEntity
+            PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
+
+            setupTts(parsedDoc, finalEntity)
             updateStatusTexts()
             updateSeekBar()
             updateDocLanguageButtonText()
