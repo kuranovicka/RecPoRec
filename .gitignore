@@ -12,4 +12,3 @@ app/build/
 app/release/
 *.apk
 *.aab
-.github/workflows/build-apk.yml
