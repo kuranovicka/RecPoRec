@@ -93,6 +93,24 @@ class TtsManager(private val appContext: Context) {
         tts?.voice = voice
     }
 
+    /**
+     * Kada nije eksplicitno izabran nijedan glas (ni za dokument ni globalno), TextToSpeech
+     * bi inače mogao da koristi glas koji se poklapa sa onim kojim čita ekranski čitač
+     * (jer oba mogu da koriste isti podrazumevani sistemski glas). Da bi čitanje knjiga bilo
+     * potpuno nezavisno, ovde SAMI biramo određen, dosledan podrazumevani glas.
+     */
+    fun applyIndependentDefaultVoice(): Voice? {
+        val allEngineVoices = tts?.voices?.toList() ?: return null
+        if (allEngineVoices.isEmpty()) return null
+        val deviceLanguage = Locale.getDefault().language
+        val candidates = allEngineVoices.filter { it.locale.language == deviceLanguage }
+            .ifEmpty { allEngineVoices }
+        val chosen = candidates.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.name })
+            .firstOrNull()
+        chosen?.let { tts?.voice = it }
+        return chosen
+    }
+
     fun setSpeechRate(rate: Float) {
         tts?.setSpeechRate(rate)
     }

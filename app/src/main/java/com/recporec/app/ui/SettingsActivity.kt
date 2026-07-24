@@ -36,5 +36,20 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
         }
+
+        val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta")
+        val navValues = listOf("page", "min1", "min5", "min10")
+        fun refreshNavButton() {
+            val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
+            binding.btnNavigationMode.text = navLabels[idx]
+        }
+        refreshNavButton()
+        binding.btnNavigationMode.setOnClickListener {
+            val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
+            PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel) { index ->
+                settings.navigationMode = navValues[index]
+                refreshNavButton()
+            }
+        }
     }
 }

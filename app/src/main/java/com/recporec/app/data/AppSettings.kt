@@ -17,6 +17,11 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
+    /** Nacin pomeranja dugmadima * i # u citacu: "page", "min1", "min5" ili "min10". */
+    var navigationMode: String
+        get() = prefs.getString(KEY_NAVIGATION, "page") ?: "page"
+        set(value) = prefs.edit().putString(KEY_NAVIGATION, value).apply()
+
     // Opšta (globalna) podešavanja glasa - važe za svaki dokument dok se ne prepiše posebno
     var globalLanguageTag: String?
         get() = prefs.getString(KEY_G_LANG, null)
@@ -42,6 +47,7 @@ class AppSettings(context: Context) {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
+        private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_G_LANG = "global_language_tag"
         private const val KEY_G_VOICE = "global_voice_name"
         private const val KEY_G_ENGINE = "global_voice_engine"

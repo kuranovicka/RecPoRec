@@ -67,83 +67,52 @@
             android:accessibilityLiveRegion="polite"
             android:text="Nije izabran" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/textSpeedStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_margin="16dp">
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Brzina: 100%" />
 
-            <Button
-                android:id="@+id/btnSpeedDown"
-                android:layout_width="72dp"
-                android:layout_height="64dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_speed"
-                android:textColor="@color/button_text"
-                android:contentDescription="Smanji brzinu čitanja"
-                android:text="−" />
-
-            <TextView
-                android:id="@+id/textSpeedStatus"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:accessibilityLiveRegion="polite"
-                android:text="Brzina: 100%" />
-
-            <Button
-                android:id="@+id/btnSpeedUp"
-                android:layout_width="72dp"
-                android:layout_height="64dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_speed"
-                android:textColor="@color/button_text"
-                android:contentDescription="Povećaj brzinu čitanja"
-                android:text="+" />
-        </LinearLayout>
-
-        <LinearLayout
+        <SeekBar
+            android:id="@+id/seekSpeed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_margin="16dp">
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="Brzina čitanja"
+            android:max="270"
+            android:progress="70"
+            android:progressTint="@color/btn_speed"
+            android:thumbTint="@color/btn_speed" />
 
-            <Button
-                android:id="@+id/btnVolumeDown"
-                android:layout_width="72dp"
-                android:layout_height="64dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_volume"
-                android:textColor="@color/button_text"
-                android:contentDescription="Smanji jačinu zvuka"
-                android:text="−" />
+        <TextView
+            android:id="@+id/textVolumeStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Jačina: 100%" />
 
-            <TextView
-                android:id="@+id/textVolumeStatus"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:accessibilityLiveRegion="polite"
-                android:text="Jačina: 100%" />
-
-            <Button
-                android:id="@+id/btnVolumeUp"
-                android:layout_width="72dp"
-                android:layout_height="64dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_volume"
-                android:textColor="@color/button_text"
-                android:contentDescription="Povećaj jačinu zvuka"
-                android:text="+" />
-        </LinearLayout>
+        <SeekBar
+            android:id="@+id/seekVolume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="Jačina zvuka"
+            android:max="100"
+            android:progress="100"
+            android:progressTint="@color/btn_volume"
+            android:thumbTint="@color/btn_volume" />
 
     </LinearLayout>
 </ScrollView>

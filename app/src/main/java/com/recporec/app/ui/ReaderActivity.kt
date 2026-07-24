@@ -150,8 +150,8 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnClickListener { adjustSpeed(0.05f) }
         btnPlayPause.setOnClickListener { togglePlayPause() }
 
-        btnStepBack.setOnClickListener { stepPercent(-5) }
-        btnStepForward.setOnClickListener { stepPercent(5) }
+        btnStepBack.setOnClickListener { stepNavigate(forward = false) }
+        btnStepForward.setOnClickListener { stepNavigate(forward = true) }
         btnGotoPage.setOnClickListener { showGotoPageDialog() }
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -194,6 +194,7 @@ class ReaderActivity : AppCompatActivity() {
             updateStatusTexts()
             updateSeekBar()
             updateDocLanguageButtonText()
+            updateNavigationButtonLabels()
         }
     }
 
@@ -203,7 +204,18 @@ class ReaderActivity : AppCompatActivity() {
         fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
             tts.setSpeechRate(entity.speechRate)
-            entity.voiceName?.let { tts.setVoiceByName(it) }
+            if (entity.voiceName != null) {
+                tts.setVoiceByName(entity.voiceName)
+            } else {
+                // Nijedan glas nije izabran - biramo nezavisan podrazumevani glas
+                // umesto da TTS slučajno preuzme isti glas kojim čita ekranski čitač.
+                val chosen = tts.applyIndependentDefaultVoice()
+                if (chosen != null) {
+                    doc = doc?.copy(voiceName = chosen.name, voiceEngine = tts.currentEnginePackage)
+                    persistState()
+                    runOnUiThread { updateStatusTexts() }
+                }
+            }
         }
 
         val needsEngineSwitch = entity.voiceEngine != null && entity.voiceEngine != tts.currentEnginePackage
@@ -242,18 +254,44 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun stepPercent(deltaPercent: Int) {
-        val length = parsed?.length ?: return
-        val current = doc?.currentCharacterOffset ?: 0
-        val currentPercent = if (length == 0) 0 else (current * 100 / length)
-        val newPercent = (currentPercent + deltaPercent).coerceIn(0, 100)
-        goToPercent(newPercent)
-    }
-
     private fun goToPercent(percent: Int) {
         val length = parsed?.length ?: return
         val offset = (length * percent / 100).coerceIn(0, max(0, length - 1))
         moveTo(offset)
+    }
+
+    private fun stepNavigate(forward: Boolean) {
+        val length = parsed?.length ?: return
+        val current = doc?.currentCharacterOffset ?: 0
+        val mode = settings.navigationMode
+        val delta: Int = when (mode) {
+            "min1" -> minutesToChars(1)
+            "min5" -> minutesToChars(5)
+            "min10" -> minutesToChars(10)
+            else -> charsPerPage // "page"
+        }
+        val signedDelta = if (forward) delta else -delta
+        val newOffset = (current + signedDelta).coerceIn(0, max(0, length - 1))
+        moveTo(newOffset)
+    }
+
+    private fun minutesToChars(minutes: Int): Int {
+        val rate = doc?.speechRate ?: 1.0f
+        return (minutes * baseCharsPerMinute * rate.coerceAtLeast(0.3f)).toInt()
+    }
+
+    private fun updateNavigationButtonLabels() {
+        val mode = settings.navigationMode
+        val (label, description) = when (mode) {
+            "min1" -> "1 min" to "1 minut"
+            "min5" -> "5 min" to "5 minuta"
+            "min10" -> "10 min" to "10 minuta"
+            else -> "Str." to "Stranica"
+        }
+        binding.btnStepBack.text = "◀ $label"
+        binding.btnStepBack.contentDescription = "$description unazad"
+        binding.btnStepForward.text = "$label ▶"
+        binding.btnStepForward.contentDescription = "$description unapred"
     }
 
     private fun moveTo(offset: Int) {
@@ -349,7 +387,7 @@ class ReaderActivity : AppCompatActivity() {
             voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
         } else voices
 
-        val labels = filtered.map { it.displayLabel }
+        val labels = com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
         val current = doc?.voiceName?.let { name ->
             filtered.firstOrNull { it.voice.name == name }?.displayLabel
         }

@@ -21,7 +21,15 @@ data class VoiceOption(
     val displayLabel: String
         get() {
             val country = if (displayCountry.isNotBlank() && displayCountry != displayLanguage) " — $displayCountry" else ""
-            return "$displayLanguage$country ($engineLabel)"
+            val qualityTag = when (voice.quality) {
+                android.speech.tts.Voice.QUALITY_VERY_HIGH -> " • vrlo visok kvalitet"
+                android.speech.tts.Voice.QUALITY_HIGH -> " • visok kvalitet"
+                android.speech.tts.Voice.QUALITY_LOW -> " • nizak kvalitet"
+                android.speech.tts.Voice.QUALITY_VERY_LOW -> " • vrlo nizak kvalitet"
+                else -> ""
+            }
+            val networkTag = if (voice.isNetworkConnectionRequired) " • zahteva internet" else ""
+            return "$displayLanguage$country ($engineLabel)$qualityTag$networkTag"
         }
 }
 
@@ -78,5 +86,20 @@ object TtsEngineUtil {
         return voices.map { it.voice.locale }
             .distinctBy { it.language }
             .sortedBy { it.displayLanguage }
+    }
+
+    /** Ako više glasova ima potpuno isti prikazani naziv, doda redni broj da bi bili razlučivi. */
+    fun disambiguatedLabels(voices: List<VoiceOption>): List<String> {
+        val counts = mutableMapOf<String, Int>()
+        val seen = mutableMapOf<String, Int>()
+        voices.forEach { counts[it.displayLabel] = (counts[it.displayLabel] ?: 0) + 1 }
+        return voices.map { voice ->
+            val base = voice.displayLabel
+            if ((counts[base] ?: 0) > 1) {
+                val n = (seen[base] ?: 0) + 1
+                seen[base] = n
+                "$base — glas $n"
+            } else base
+        }
     }
 }

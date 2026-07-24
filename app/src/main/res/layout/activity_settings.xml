@@ -81,4 +81,28 @@
             android:contentDescription="@string/setting_shake" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:text="Navigacija (dugmad ◀ ▶ u dokumentu)" />
+
+        <Button
+            android:id="@+id/btnNavigationMode"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_page_nav"
+            android:textColor="@color/button_text"
+            android:text="Stranica" />
+    </LinearLayout>
+
 </LinearLayout>

@@ -32,10 +32,30 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         binding.btnLanguage.setOnClickListener { showLanguagePicker() }
         binding.btnVoice.setOnClickListener { showVoicePicker() }
 
-        binding.btnSpeedDown.setOnClickListener { changeSpeed(-0.05f) }
-        binding.btnSpeedUp.setOnClickListener { changeSpeed(0.05f) }
-        binding.btnVolumeDown.setOnClickListener { changeVolume(-5) }
-        binding.btnVolumeUp.setOnClickListener { changeVolume(5) }
+        // Brzina: klizač 0..270 predstavlja stopu 0.30x .. 3.00x (korak 0.01)
+        binding.seekSpeed.max = 270
+        binding.seekSpeed.progress = ((settings.globalSpeechRate * 100).roundToInt() - 30).coerceIn(0, 270)
+        binding.seekSpeed.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                settings.globalSpeechRate = (progress + 30) / 100f
+                refreshStatusTexts()
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
+        binding.seekVolume.max = 100
+        binding.seekVolume.progress = settings.globalVolumePercent
+        binding.seekVolume.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                settings.globalVolumePercent = progress
+                refreshStatusTexts()
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
     }
 
     private fun loadVoices() {
@@ -71,7 +91,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
         } else voices
 
-        val labels = filtered.map { it.displayLabel }
+        val labels = TtsEngineUtil.disambiguatedLabels(filtered)
         val current = settings.globalVoiceName?.let { name ->
             filtered.firstOrNull { it.voice.name == name }?.displayLabel
         }
@@ -81,18 +101,6 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             settings.globalVoiceEngine = chosen.enginePackage
             refreshStatusTexts()
         }
-    }
-
-    private fun changeSpeed(delta: Float) {
-        val newRate = (settings.globalSpeechRate + delta).coerceIn(0.3f, 3.0f)
-        settings.globalSpeechRate = newRate
-        refreshStatusTexts()
-    }
-
-    private fun changeVolume(deltaPercent: Int) {
-        val newVol = (settings.globalVolumePercent + deltaPercent).coerceIn(0, 100)
-        settings.globalVolumePercent = newVol
-        refreshStatusTexts()
     }
 
     private fun refreshStatusTexts() {
