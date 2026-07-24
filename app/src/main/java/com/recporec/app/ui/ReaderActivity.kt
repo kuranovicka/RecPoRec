@@ -56,6 +56,14 @@ class ReaderActivity : AppCompatActivity() {
     private var shakeDetector: ShakeDetector? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
 
+    // Detekcija dodira sa dva prsta (pauza/nastavak)
+    private var twoFingerActive = false
+    private var twoFingerStartTime = 0L
+    private var twoFingerStartX0 = 0f
+    private var twoFingerStartY0 = 0f
+    private var twoFingerStartX1 = 0f
+    private var twoFingerStartY1 = 0f
+
     private val notificationPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { /* ako korisnik odbije, servis i dalje radi, samo bez vidljive notifikacije */ }
@@ -86,6 +94,43 @@ class ReaderActivity : AppCompatActivity() {
                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            android.view.MotionEvent.ACTION_POINTER_DOWN -> {
+                if (ev.pointerCount == 2) {
+                    twoFingerActive = true
+                    twoFingerStartTime = System.currentTimeMillis()
+                    twoFingerStartX0 = ev.getX(0); twoFingerStartY0 = ev.getY(0)
+                    twoFingerStartX1 = ev.getX(1); twoFingerStartY1 = ev.getY(1)
+                } else if (ev.pointerCount > 2) {
+                    twoFingerActive = false
+                }
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                if (twoFingerActive && ev.pointerCount >= 2) {
+                    val moved0 = kotlin.math.hypot((ev.getX(0) - twoFingerStartX0), (ev.getY(0) - twoFingerStartY0))
+                    val moved1 = kotlin.math.hypot((ev.getX(1) - twoFingerStartX1), (ev.getY(1) - twoFingerStartY1))
+                    if (moved0 > 40f || moved1 > 40f) {
+                        twoFingerActive = false // previše pomereno, nije tap - verovatno skrol
+                    }
+                }
+            }
+            android.view.MotionEvent.ACTION_POINTER_UP, android.view.MotionEvent.ACTION_UP -> {
+                if (twoFingerActive) {
+                    val elapsed = System.currentTimeMillis() - twoFingerStartTime
+                    if (elapsed in 0..500) {
+                        togglePlayPause()
+                    }
+                    twoFingerActive = false
+                }
+            }
+            android.view.MotionEvent.ACTION_CANCEL -> {
+                twoFingerActive = false
+            }
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun setupButtons() = with(binding) {
