@@ -148,6 +148,13 @@ class TtsManager(private val appContext: Context) {
         speakCurrentChunk()
     }
 
+    /** Uskladi internu poziciju sa datim offsetom BEZ pokretanja govora (npr. dok je pauzirano). */
+    fun syncPositionOnly(offset: Int) {
+        val idx = java.util.Collections.binarySearch(chunkOffsets, offset)
+        currentChunkIndex = (if (idx >= 0) idx else -idx - 1)
+            .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
+    }
+
     fun pause() {
         tts?.stop()
         isSpeaking = false

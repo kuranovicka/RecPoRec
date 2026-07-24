@@ -366,10 +366,10 @@ class ReaderActivity : AppCompatActivity() {
         updateSeekBar()
         persistState()
         val tts = PlaybackController.ttsManager ?: return
-        // startFromOffset koristi QUEUE_FLUSH koji sam vec prekida trenutni govor,
-        // pa nema potrebe za odvojenim pause() pre toga - to je samo dodavalo kasnjenje.
         if (tts.isSpeaking) {
             tts.startFromOffset(offset)
+        } else {
+            tts.syncPositionOnly(offset)
         }
     }
 
