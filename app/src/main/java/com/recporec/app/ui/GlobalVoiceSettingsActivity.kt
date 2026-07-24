@@ -56,6 +56,25 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
+
+        binding.btnSpeedDown.setOnClickListener { changeSpeed(-0.05f) }
+        binding.btnSpeedUp.setOnClickListener { changeSpeed(0.05f) }
+        binding.btnVolumeDown.setOnClickListener { changeVolume(-5) }
+        binding.btnVolumeUp.setOnClickListener { changeVolume(5) }
+    }
+
+    private fun changeSpeed(delta: Float) {
+        val newRate = (settings.globalSpeechRate + delta).coerceIn(0.3f, 3.0f)
+        settings.globalSpeechRate = newRate
+        binding.seekSpeed.progress = ((newRate * 100).roundToInt() - 30).coerceIn(0, 270)
+        refreshStatusTexts()
+    }
+
+    private fun changeVolume(deltaPercent: Int) {
+        val newVol = (settings.globalVolumePercent + deltaPercent).coerceIn(0, 100)
+        settings.globalVolumePercent = newVol
+        binding.seekVolume.progress = newVol
+        refreshStatusTexts()
     }
 
     private fun loadVoices() {

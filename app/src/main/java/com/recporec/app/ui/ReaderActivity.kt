@@ -335,6 +335,10 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun moveTo(offset: Int) {
+        if (doc == null || parsed == null) {
+            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         doc = doc?.copy(currentCharacterOffset = offset)
         updateStatusTexts()
         updateSeekBar()

@@ -36,7 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:accessibilityLiveRegion="polite" />
 
             <TextView
                 android:id="@+id/textElapsed"
