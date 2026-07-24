@@ -54,6 +54,11 @@ class ReaderActivity : AppCompatActivity() {
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var toneGenerator: android.media.ToneGenerator? = null
 
+    // Da li je TTS spreman za govor (tekst ucitan, glas primenjen). Dok se motor prebacuje
+    // (npr. zbog izabranog glasa), ovo je false, i komande se cuvaju da se izvrse cim bude spremno.
+    private var ttsReady = false
+    private var pendingPlayAfterReady = false
+
     // Detekcija dodira sa dva prsta (pauza/nastavak)
     private var twoFingerActive = false
     private var twoFingerStartTime = 0L
@@ -223,8 +228,17 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    private fun markTtsReady() {
+        ttsReady = true
+        if (pendingPlayAfterReady) {
+            pendingPlayAfterReady = false
+            togglePlayPause()
+        }
+    }
+
     private fun setupTts(parsedDoc: ParsedDocument, entity: DocumentEntity) {
         val tts = PlaybackController.ttsManager ?: return
+        ttsReady = false
 
         // Lanac: glas ovog dokumenta -> opšti (globalni) glas -> nezavisan podrazumevani glas.
         // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
@@ -242,6 +256,7 @@ class ReaderActivity : AppCompatActivity() {
                 // podrazumevani glas umesto da TTS slučajno preuzme glas ekranskog čitača.
                 tts.applyIndependentDefaultVoice()
             }
+            markTtsReady()
         }
 
         val needsEngineSwitch = effectiveEngine != null && effectiveEngine != tts.currentEnginePackage
@@ -249,15 +264,27 @@ class ReaderActivity : AppCompatActivity() {
             tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
                 tts.loadText(parsedDoc.fullText)
                 if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
+                markTtsReady()
             }
         } else {
             tts.onReady = { applyVoiceAndText() }
-            applyVoiceAndText()
+            if (tts.isEngineReady) {
+                // Motor je vec spreman (npr. nastavak iz iste sesije) - primeni odmah.
+                applyVoiceAndText()
+            }
+            // Ako motor još nije spreman, čekamo legitiman onReady poziv iznad -
+            // pokušaj "na silu" ovde bi tiho promašio postavljanje glasa (motor još
+            // nema učitanu listu glasova), a lažno bi označio da je sve spremno.
         }
     }
 
     private fun togglePlayPause() {
         val tts = PlaybackController.ttsManager ?: return
+        if (!ttsReady) {
+            pendingPlayAfterReady = true
+            android.widget.Toast.makeText(this, "Glas se priprema, kreće za trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         if (tts.isSpeaking) {
             tts.pause()
         } else {
@@ -438,8 +465,10 @@ class ReaderActivity : AppCompatActivity() {
             val chosen = filtered[index]
             val tts = PlaybackController.ttsManager
             if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
+                ttsReady = false
                 tts.switchEngine(chosen.enginePackage, chosen.voice.name, doc?.speechRate ?: 1.0f) {
                     parsed?.let { tts.loadText(it.fullText) }
+                    markTtsReady()
                 }
             } else {
                 tts?.setVoiceByName(chosen.voice.name)

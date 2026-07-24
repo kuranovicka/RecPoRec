@@ -23,6 +23,9 @@ class TtsManager(private val appContext: Context) {
     var currentEnginePackage: String? = null
         private set
 
+    /** Da li je trenutni TTS motor zaista zavrsio inicijalizaciju (spreman za setVoice/speak). */
+    val isEngineReady: Boolean get() = ready
+
     private var chunks: List<String> = emptyList()
     private var chunkOffsets: List<Int> = emptyList()
     private var currentChunkIndex = 0
