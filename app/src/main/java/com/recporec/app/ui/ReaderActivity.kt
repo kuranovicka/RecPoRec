@@ -45,6 +45,7 @@ class ReaderActivity : AppCompatActivity() {
     private var timerMinutesCycle = intArrayOf(0, 15, 30, 45, 60, 90)
     private var timerIndex = 0
     private var timerRunnable: Runnable? = null
+    private var timerEndTimeMillis: Long = 0L
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
 
@@ -501,15 +502,39 @@ class ReaderActivity : AppCompatActivity() {
         persistState()
 
         if (minutes == 0) {
+            timerEndTimeMillis = 0L
             android.widget.Toast.makeText(this, R.string.timer_off, android.widget.Toast.LENGTH_SHORT).show()
+            updateTimerStatusText()
             return
         }
         android.widget.Toast.makeText(
             this, getString(R.string.timer_set, minutes), android.widget.Toast.LENGTH_SHORT
         ).show()
-        val runnable = Runnable { PlaybackController.ttsManager?.pause() }
+        timerEndTimeMillis = System.currentTimeMillis() + minutes * 60_000L
+        val runnable = Runnable {
+            PlaybackController.ttsManager?.pause()
+            timerEndTimeMillis = 0L
+            updateTimerStatusText()
+        }
         timerRunnable = runnable
         handler.postDelayed(runnable, minutes * 60_000L)
+        updateTimerStatusText()
+    }
+
+    private fun updateTimerStatusText() {
+        if (timerEndTimeMillis <= 0L) {
+            binding.textTimerStatus.text = "Tajmer nije aktivan."
+            return
+        }
+        val remainingMs = timerEndTimeMillis - System.currentTimeMillis()
+        if (remainingMs <= 0) {
+            binding.textTimerStatus.text = "Tajmer nije aktivan."
+        } else {
+            val totalSec = remainingMs / 1000
+            val min = totalSec / 60
+            val sec = totalSec % 60
+            binding.textTimerStatus.text = "Tajmer: preostalo %d min %02d sek.".format(min, sec)
+        }
     }
 
     private fun startTicker() {
@@ -517,6 +542,9 @@ class ReaderActivity : AppCompatActivity() {
             override fun run() {
                 if (PlaybackController.ttsManager?.isSpeaking == true) {
                     updateStatusTexts()
+                }
+                if (timerEndTimeMillis > 0L) {
+                    updateTimerStatusText()
                 }
                 handler.postDelayed(this, 1000)
             }

@@ -45,6 +45,14 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/textTimerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:text="Tajmer nije aktivan." />
     </LinearLayout>
 
     <!-- Numerička tastatura, 4 reda x 3 kolone, fiksna, ravna -->

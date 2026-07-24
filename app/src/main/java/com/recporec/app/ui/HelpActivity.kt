@@ -77,6 +77,7 @@ class HelpActivity : AppCompatActivity() {
         Drugo dugme je "Tajmer".
         Svaki dodir menja tajmer: petnaest minuta, trideset minuta, četrdeset pet minuta, šezdeset minuta, devedeset minuta, pa opet isključeno.
         Kad tajmer istekne, čitanje se pauzira samo.
+        Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
         Treće dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
