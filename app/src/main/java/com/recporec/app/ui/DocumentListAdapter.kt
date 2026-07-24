@@ -28,7 +28,7 @@ class DocumentListAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val doc = items[position]
-        holder.binding.textTitle.text = doc.title
+        holder.binding.textTitle.text = "${doc.title}.${doc.format}"
         holder.binding.root.setOnClickListener { onOpen(doc) }
         holder.binding.btnDelete.setOnClickListener { onDelete(doc) }
     }

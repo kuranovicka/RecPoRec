@@ -256,15 +256,29 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showVoiceDialog() {
         val tts = PlaybackController.ttsManager ?: return
-        val voices = tts.availableVoices()
+        val allVoices = tts.availableVoices()
+        val voices = allVoices.filterNot { it.isNetworkConnectionRequired }
+            .ifEmpty { allVoices }
+            .sortedBy { it.locale.displayName }
         if (voices.isEmpty()) return
-        val names = voices.map { it.name }.toTypedArray()
+
+        val labels = voices.map { voice ->
+            val lang = voice.locale.displayLanguage.replaceFirstChar { c -> c.uppercase() }
+            val country = voice.locale.displayCountry
+            val quality = when (voice.quality) {
+                android.speech.tts.Voice.QUALITY_VERY_HIGH -> " (visok kvalitet)"
+                android.speech.tts.Voice.QUALITY_HIGH -> ""
+                else -> ""
+            }
+            if (country.isNotBlank() && country != lang) "$lang — $country$quality" else "$lang$quality"
+        }.toTypedArray()
+
         AlertDialog.Builder(this)
             .setTitle(R.string.voice_dialog_title)
-            .setItems(names) { _, which ->
-                val chosen = names[which]
-                tts.setVoiceByName(chosen)
-                doc = doc?.copy(voiceName = chosen)
+            .setItems(labels) { _, which ->
+                val chosen = voices[which]
+                tts.setVoiceByName(chosen.name)
+                doc = doc?.copy(voiceName = chosen.name)
                 persistState()
             }
             .show()
