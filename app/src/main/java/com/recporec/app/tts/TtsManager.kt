@@ -93,6 +93,8 @@ class TtsManager(private val appContext: Context) {
         tts?.voice = voice
     }
 
+    fun currentVoiceName(): String? = tts?.voice?.name
+
     /**
      * Kada nije eksplicitno izabran nijedan glas (ni za dokument ni globalno), TextToSpeech
      * bi inače mogao da koristi glas koji se poklapa sa onim kojim čita ekranski čitač

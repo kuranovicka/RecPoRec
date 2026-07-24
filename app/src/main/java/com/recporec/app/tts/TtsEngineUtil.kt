@@ -88,19 +88,23 @@ object TtsEngineUtil {
             .sortedBy { it.displayLanguage }
     }
 
-    /** Ako više glasova ima potpuno isti prikazani naziv, doda redni broj da bi bili razlučivi. */
+    /** Ako više glasova ima potpuno isti prikazani naziv, doda kratak stabilan kod iz internog imena glasa
+     * (umesto proizvoljnog brojanja koje bi se moglo promeniti od sesije do sesije). */
     fun disambiguatedLabels(voices: List<VoiceOption>): List<String> {
         val counts = mutableMapOf<String, Int>()
-        val seen = mutableMapOf<String, Int>()
         voices.forEach { counts[it.displayLabel] = (counts[it.displayLabel] ?: 0) + 1 }
         return voices.map { voice ->
             val base = voice.displayLabel
             if ((counts[base] ?: 0) > 1) {
-                val n = (seen[base] ?: 0) + 1
-                seen[base] = n
-                "$base — glas $n"
+                "$base — kod ${shortVoiceCode(voice.voice.name)}"
             } else base
         }
+    }
+
+    private fun shortVoiceCode(name: String): String {
+        val afterX = name.substringAfter("-x-", "")
+        val code = if (afterX.isNotEmpty()) afterX.substringBefore("-") else name.substringAfterLast("-")
+        return code.ifBlank { name.takeLast(6) }
     }
 
     /** Izgovara kratak primer datim glasom, da bi korisnik čuo razliku umesto da nagađa iz naziva. */

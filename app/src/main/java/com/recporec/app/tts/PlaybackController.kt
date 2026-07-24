@@ -1,12 +1,24 @@
 package com.recporec.app.tts
 
 import android.content.Context
+import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.parser.ParsedDocument
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Drži jedinu instancu TtsManager-a i trenutno otvoren dokument,
  * dostupno i Activity-ju i pozadinskom servisu.
+ *
+ * VAŽNO: ovaj objekat SAM čuva poziciju u dokumentu (i vreme čitanja) u bazu,
+ * nezavisno od toga da li je ReaderActivity trenutno otvorena. Ranije je to
+ * radila sama Activity, pa bi se čuvanje pozicije prekinulo čim korisnik
+ * ode na listu dokumenata ili potpuno izađe dok se čita u pozadini.
  */
 object PlaybackController {
 
@@ -17,9 +29,59 @@ object PlaybackController {
     var parsedDocument: ParsedDocument? = null
     var elapsedSeconds: Long = 0
 
+    /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
+    var uiPositionListener: ((Int) -> Unit)? = null
+    var uiFinishedListener: (() -> Unit)? = null
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var appContext: Context? = null
+    private var tickerStarted = false
+
     fun ensureInitialized(context: Context) {
+        appContext = context.applicationContext
         if (ttsManager == null) {
-            ttsManager = TtsManager(context)
+            ttsManager = TtsManager(context.applicationContext)
+            wireCallbacks()
+        }
+        startTickerIfNeeded()
+    }
+
+    private fun wireCallbacks() {
+        val tts = ttsManager ?: return
+        tts.onPositionChanged = { offset ->
+            currentDocument = currentDocument?.copy(currentCharacterOffset = offset)
+            persistCurrentDocument()
+            uiPositionListener?.invoke(offset)
+        }
+        tts.onFinished = {
+            uiFinishedListener?.invoke()
+        }
+    }
+
+    private fun startTickerIfNeeded() {
+        if (tickerStarted) return
+        tickerStarted = true
+        scope.launch {
+            var tick = 0
+            while (true) {
+                delay(1000)
+                if (ttsManager?.isSpeaking == true) {
+                    elapsedSeconds += 1
+                    currentDocument = currentDocument?.copy(elapsedSeconds = elapsedSeconds)
+                    tick++
+                    if (tick % 5 == 0) persistCurrentDocument()
+                }
+            }
+        }
+    }
+
+    private fun persistCurrentDocument() {
+        val ctx = appContext ?: return
+        val doc = currentDocument ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                AppDatabase.getInstance(ctx).documentDao().update(doc)
+            } catch (_: Exception) { }
         }
     }
 
@@ -31,5 +93,9 @@ object PlaybackController {
         currentDocument = null
         parsedDocument = null
         elapsedSeconds = 0
+        uiPositionListener = null
+        uiFinishedListener = null
+        scope.coroutineContext.cancelChildren()
+        tickerStarted = false
     }
 }

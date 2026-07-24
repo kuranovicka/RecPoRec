@@ -201,43 +201,33 @@ class ReaderActivity : AppCompatActivity() {
     private fun setupTts(parsedDoc: ParsedDocument, entity: DocumentEntity) {
         val tts = PlaybackController.ttsManager ?: return
 
+        // Lanac: glas ovog dokumenta -> opšti (globalni) glas -> nezavisan podrazumevani glas.
+        // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
+        // i dalje važi za dokumente koji nemaju sopstveni izbor.
+        val effectiveVoiceName = entity.voiceName ?: settings.globalVoiceName
+        val effectiveEngine = entity.voiceEngine ?: settings.globalVoiceEngine
+
         fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
             tts.setSpeechRate(entity.speechRate)
-            if (entity.voiceName != null) {
-                tts.setVoiceByName(entity.voiceName)
+            if (effectiveVoiceName != null) {
+                tts.setVoiceByName(effectiveVoiceName)
             } else {
-                // Nijedan glas nije izabran - biramo nezavisan podrazumevani glas
-                // umesto da TTS slučajno preuzme isti glas kojim čita ekranski čitač.
-                val chosen = tts.applyIndependentDefaultVoice()
-                if (chosen != null) {
-                    doc = doc?.copy(voiceName = chosen.name, voiceEngine = tts.currentEnginePackage)
-                    persistState()
-                    runOnUiThread { updateStatusTexts() }
-                }
+                // Ni dokument ni opšta podešavanja nemaju izabran glas - biramo nezavisan
+                // podrazumevani glas umesto da TTS slučajno preuzme glas ekranskog čitača.
+                tts.applyIndependentDefaultVoice()
             }
         }
 
-        val needsEngineSwitch = entity.voiceEngine != null && entity.voiceEngine != tts.currentEnginePackage
+        val needsEngineSwitch = effectiveEngine != null && effectiveEngine != tts.currentEnginePackage
         if (needsEngineSwitch) {
-            tts.switchEngine(entity.voiceEngine, entity.voiceName, entity.speechRate) {
+            tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
                 tts.loadText(parsedDoc.fullText)
+                if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
             }
         } else {
             tts.onReady = { applyVoiceAndText() }
             applyVoiceAndText()
-        }
-
-        tts.onPositionChanged = { offset ->
-            runOnUiThread {
-                doc = doc?.copy(currentCharacterOffset = offset)
-                updateStatusTexts()
-                updateSeekBar()
-                persistState()
-            }
-        }
-        tts.onFinished = {
-            runOnUiThread { binding.btnPlayPause.text = "▶ / ⏸" }
         }
     }
 
@@ -388,7 +378,8 @@ class ReaderActivity : AppCompatActivity() {
         } else voices
 
         val labels = com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
-        val current = doc?.voiceName?.let { name ->
+        val effectiveVoiceName = doc?.voiceName ?: settings.globalVoiceName ?: PlaybackController.ttsManager?.currentVoiceName()
+        val current = effectiveVoiceName?.let { name ->
             filtered.firstOrNull { it.voice.name == name }?.displayLabel
         }
         PickerDialog.show(
@@ -432,8 +423,6 @@ class ReaderActivity : AppCompatActivity() {
         tickerRunnable = object : Runnable {
             override fun run() {
                 if (PlaybackController.ttsManager?.isSpeaking == true) {
-                    PlaybackController.elapsedSeconds += 1
-                    doc = doc?.copy(elapsedSeconds = PlaybackController.elapsedSeconds)
                     updateStatusTexts()
                 }
                 handler.postDelayed(this, 1000)
@@ -474,6 +463,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun persistState() {
         val entity = doc ?: return
+        PlaybackController.currentDocument = entity
         lifecycleScope.launch { db.documentDao().update(entity) }
     }
 
@@ -498,6 +488,27 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // Uskladi lokalni prikaz sa stvarnim stanjem (moglo je da napreduje dok je citac
+        // radio u pozadini, van ove Activity-je).
+        val playbackDoc = PlaybackController.currentDocument
+        if (playbackDoc != null && playbackDoc.id == documentId) {
+            doc = playbackDoc
+            updateStatusTexts()
+            updateSeekBar()
+        }
+
+        PlaybackController.uiPositionListener = { offset ->
+            runOnUiThread {
+                doc = doc?.copy(currentCharacterOffset = offset)
+                updateStatusTexts()
+                updateSeekBar()
+            }
+        }
+        PlaybackController.uiFinishedListener = {
+            runOnUiThread { binding.btnPlayPause.text = "▶ / ⏸" }
+        }
+
         if (settings.shakeEnabled) {
             val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             if (accel != null) {
@@ -509,6 +520,8 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        PlaybackController.uiPositionListener = null
+        PlaybackController.uiFinishedListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
         persistState()
         if (!settings.backgroundEnabled) {
