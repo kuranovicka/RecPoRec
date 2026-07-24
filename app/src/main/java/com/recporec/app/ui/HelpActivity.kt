@@ -67,7 +67,7 @@ class HelpActivity : AppCompatActivity() {
         Ono vraća na sam početak dokumenta.
         Drugo dugme je "Idi na stranicu".
         Ono otvara polje gde upišeš broj stranice.
-        Treće dugme je "Idi na minut".
+        Treće dugme je "Idi na Minut".
         Ono otvara polje gde upišeš broj minuta od početka, pa te odvede tamo.
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
 
@@ -106,6 +106,9 @@ class HelpActivity : AppCompatActivity() {
 
         Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige.
 
+        Gore desno u dokumentu je opet dugme "Opcije".
+        Tu su "Podešavanja" i "Pomoć".
+
         Postoji i gest sa dva prsta.
         Dodirni ekran sa dva prsta odjednom, kratko.
         Taj gest pauzira ili nastavlja čitanje.
@@ -118,6 +121,7 @@ class HelpActivity : AppCompatActivity() {
 
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
