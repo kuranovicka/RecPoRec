@@ -594,6 +594,7 @@ class ReaderActivity : AppCompatActivity() {
             updateSeekBar()
         }
         updateTimerStatusText()
+        updateNavigationButtonLabels()
 
         PlaybackController.uiPositionListener = { offset ->
             runOnUiThread {

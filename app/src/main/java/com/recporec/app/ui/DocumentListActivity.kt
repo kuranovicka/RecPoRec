@@ -198,10 +198,12 @@ class DocumentListActivity : AppCompatActivity() {
     }
 
     private fun queryFileName(uri: Uri): String? {
-        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-            if (idx >= 0 && cursor.moveToFirst()) return cursor.getString(idx)
-        }
+        try {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0 && cursor.moveToFirst()) return cursor.getString(idx)
+            }
+        } catch (_: Exception) { }
         return uri.lastPathSegment
     }
 
@@ -218,6 +220,13 @@ class DocumentListActivity : AppCompatActivity() {
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
             .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
                 lifecycleScope.launch {
+                    // Ako je ovo dokument koji trenutno svira (npr. u pozadini),
+                    // zaustavi čitanje i ugasi servis pre brisanja - inače bi nastavilo
+                    // da čita fajl koji upravo brišemo, sa "zaglavljenom" notifikacijom.
+                    if (com.recporec.app.tts.PlaybackController.currentDocument?.id == doc.id) {
+                        com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
+                        com.recporec.app.tts.PlaybackController.release()
+                    }
                     db.documentDao().deleteById(doc.id)
                     withContext(Dispatchers.IO) {
                         try {
