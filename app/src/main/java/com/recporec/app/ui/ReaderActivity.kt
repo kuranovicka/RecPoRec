@@ -526,6 +526,11 @@ class ReaderActivity : AppCompatActivity() {
             override fun run() {
                 val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
                 if (isSpeaking) {
+                    PlaybackController.currentDocument?.let { pcDoc ->
+                        if (pcDoc.id == doc?.id) {
+                            doc = doc?.copy(currentCharacterOffset = pcDoc.currentCharacterOffset)
+                        }
+                    }
                     updateStatusTexts()
                 }
                 if (PlaybackController.timerRemainingSeconds > 0) {

@@ -61,12 +61,14 @@ object PlaybackController {
     private fun wireCallbacks() {
         val tts = ttsManager ?: return
         tts.onPositionChanged = { offset ->
-            currentDocument = currentDocument?.copy(currentCharacterOffset = offset)
-            persistCurrentDocument()
-            uiPositionListener?.invoke(offset)
+            scope.launch {
+                currentDocument = currentDocument?.copy(currentCharacterOffset = offset)
+                persistCurrentDocument()
+                uiPositionListener?.invoke(offset)
+            }
         }
         tts.onFinished = {
-            uiFinishedListener?.invoke()
+            scope.launch { uiFinishedListener?.invoke() }
         }
     }
 
