@@ -85,6 +85,13 @@ object PlaybackController {
         }
     }
 
+    /** Ručno čuvanje (npr. posle navigacije dugmadima/klizačem) kroz isti nezavisan mehanizam,
+     * da upis ne zavisi od toga da li je ReaderActivity još živa u tom trenutku. */
+    fun persistDocumentNow(entity: DocumentEntity) {
+        currentDocument = entity
+        persistCurrentDocument()
+    }
+
     fun isActive(): Boolean = ttsManager?.isSpeaking == true
 
     fun release() {

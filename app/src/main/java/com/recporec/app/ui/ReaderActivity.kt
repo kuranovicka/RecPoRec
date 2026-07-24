@@ -517,8 +517,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun persistState() {
         val entity = doc ?: return
-        PlaybackController.currentDocument = entity
-        lifecycleScope.launch { db.documentDao().update(entity) }
+        PlaybackController.persistDocumentNow(entity)
     }
 
     private fun showOverflowMenu(anchor: android.view.View) {
