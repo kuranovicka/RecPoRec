@@ -154,7 +154,8 @@ class ReaderActivity : AppCompatActivity() {
         btnOverflow.setOnClickListener(clickSound { showOverflowMenu(btnOverflow) })
 
         btnGoStart.setOnClickListener(clickSound { goToStart() })
-        btnGoEnd.setOnClickListener(clickSound { goToEnd() })
+        btnGotoPage.setOnClickListener(clickSound { showGotoPageDialog() })
+        btnGotoMinute.setOnClickListener(clickSound { showGotoMinuteDialog() })
 
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
@@ -172,7 +173,6 @@ class ReaderActivity : AppCompatActivity() {
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
-        btnGotoPage.setOnClickListener(clickSound { showGotoPageDialog() })
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {}
@@ -278,9 +278,20 @@ class ReaderActivity : AppCompatActivity() {
         moveTo(0)
     }
 
-    private fun goToEnd() {
-        val length = parsed?.length ?: return
-        moveTo(max(0, length - 1))
+    private fun showGotoMinuteDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        AlertDialog.Builder(this)
+            .setTitle("Unesi broj minuta od početka")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val minute = input.text.toString().toIntOrNull() ?: return@setPositiveButton
+                val length = parsed?.length ?: return@setPositiveButton
+                val offset = minutesToChars(minute).coerceIn(0, max(0, length - 1))
+                moveTo(offset)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun goToPercent(percent: Int) {

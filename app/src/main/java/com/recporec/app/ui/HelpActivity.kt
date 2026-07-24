@@ -62,12 +62,14 @@ class HelpActivity : AppCompatActivity() {
         Tastatura ima osamnaest polja.
         Neka polja su prazna, samo da red bude ravan.
 
-        Na samom vrhu tastature su dva dugmeta.
-        Prvo dugme je "Idi na početak".
+        Na samom vrhu tastature su tri dugmeta.
+        Prvo dugme je "Početak".
         Ono vraća na sam početak dokumenta.
-        Drugo dugme je "Idi na kraj".
-        Ono ide na sam kraj dokumenta.
-        Ova dva dugmeta su tu jer aplikacija pamti gde si stala, pa ovako lako osvežiš čitanje.
+        Drugo dugme je "Str.", to jest stranica.
+        Ono otvara polje gde upišeš broj stranice.
+        Treće dugme je "Minut".
+        Ono otvara polje gde upišeš broj minuta od početka, pa te odvede tamo.
+        Ova dugmad su tu jer aplikacija pamti gde si stala, pa ovako lako osvežiš čitanje.
 
         Prvi red ima tri dugmeta.
         Prvo dugme je "Prethodno poglavlje".
@@ -93,14 +95,12 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
 
-        Četvrti red ima tri dugmeta.
+        Četvrti red ima dva dugmeta.
         Prvo dugme pomera unazad.
-        Drugo dugme je "Idi na stranicu".
-        Ono otvara polje gde upišeš broj stranice.
-        Treće dugme pomera unapred.
+        Drugo dugme pomera unapred.
         Šta znače "unazad" i "unapred" zavisi od podešavanja "Navigacija".
 
-        Ispod tastature je klizač.
+        Ispod tastature je klizač, malo veći radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
         Možeš ga i prevući prstom do drugog mesta.
 
