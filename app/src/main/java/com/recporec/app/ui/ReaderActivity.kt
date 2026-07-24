@@ -53,6 +53,7 @@ class ReaderActivity : AppCompatActivity() {
     private var shakeDetector: ShakeDetector? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var toneGenerator: android.media.ToneGenerator? = null
+    private var seekBarTouchTracking = false
 
     // Da li je TTS spreman za govor (tekst ucitan, glas primenjen). Dok se motor prebacuje
     // (npr. zbog izabranog glasa), ovo je false, i komande se cuvaju da se izvrse cim bude spremno.
@@ -175,9 +176,19 @@ class ReaderActivity : AppCompatActivity() {
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {}
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                // Ako promena dolazi od korisnika ali NE u sklopu obicnog prevlacenja prstom
+                // (npr. čitač ekrana pomeri vrednost jednim prstom gore/dole), to ne prolazi
+                // kroz onStartTrackingTouch/onStopTrackingTouch, pa je primenjujemo odmah ovde.
+                if (fromUser && !seekBarTouchTracking) {
+                    goToPercent(progress)
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {
+                seekBarTouchTracking = true
+            }
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
+                seekBarTouchTracking = false
                 seekBar ?: return
                 goToPercent(seekBar.progress)
             }
