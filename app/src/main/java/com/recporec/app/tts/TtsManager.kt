@@ -137,9 +137,9 @@ class TtsManager(private val appContext: Context) {
 
     /** Počni čitanje od zadatog offseta u tekstu (karakter). */
     fun startFromOffset(offset: Int) {
-        currentChunkIndex = chunkOffsets.indexOfFirst { it >= offset }.let {
-            if (it == -1) chunks.size - 1 else it
-        }.coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
+        val idx = java.util.Collections.binarySearch(chunkOffsets, offset)
+        currentChunkIndex = (if (idx >= 0) idx else -idx - 1)
+            .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
         if (chunks.isEmpty()) return
         isSpeaking = true
         speakCurrentChunk()
