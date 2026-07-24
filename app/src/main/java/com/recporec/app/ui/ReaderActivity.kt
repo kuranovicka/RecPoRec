@@ -515,9 +515,7 @@ class ReaderActivity : AppCompatActivity() {
         if (remaining <= 0) {
             binding.textTimerStatus.text = "Tajmer nije aktivan."
         } else {
-            val min = remaining / 60
-            val sec = remaining % 60
-            binding.textTimerStatus.text = "Tajmer: preostalo %d min %02d sek.".format(min, sec)
+            binding.textTimerStatus.text = "Tajmer: preostalo ${formatTime(remaining.toLong())}."
         }
     }
 
@@ -569,7 +567,11 @@ class ReaderActivity : AppCompatActivity() {
         val h = totalSeconds / 3600
         val m = (totalSeconds % 3600) / 60
         val s = totalSeconds % 60
-        return if (h > 0) String.format("%d:%02d:%02d", h, m, s) else String.format("%d:%02d", m, s)
+        return when {
+            h > 0 -> "%d sati %d min".format(h, m)
+            m > 0 -> "%d min %d sek".format(m, s)
+            else -> "%d sek".format(s)
+        }
     }
 
     private fun persistState() {
