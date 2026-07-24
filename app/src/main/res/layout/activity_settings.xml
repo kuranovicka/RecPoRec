@@ -114,7 +114,7 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textColor="@color/text_primary"
-            android:text="Navigacija (dugmad ◀ ▶ u dokumentu)" />
+            android:text="Navigacija: po stranici ili minutima" />
 
         <Button
             android:id="@+id/btnNavigationMode"

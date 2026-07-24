@@ -534,6 +534,9 @@ class ReaderActivity : AppCompatActivity() {
                         timerRemainingSeconds -= 1
                         if (timerRemainingSeconds <= 0) {
                             timerRemainingSeconds = 0
+                            timerIndex = 0
+                            doc = doc?.copy(timerMinutes = 0)
+                            persistState()
                             PlaybackController.ttsManager?.pause()
                         }
                     }
@@ -591,6 +594,7 @@ class ReaderActivity : AppCompatActivity() {
             updateStatusTexts()
             updateSeekBar()
         }
+        updateTimerStatusText()
 
         PlaybackController.uiPositionListener = { offset ->
             runOnUiThread {
