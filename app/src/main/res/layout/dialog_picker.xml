@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background">
+
+    <EditText
+        android:id="@+id/editSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pretraga..."
+        android:textSize="18sp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="#AAAAAA"
+        android:inputType="text"
+        android:autofillHints="" />
+
+    <ListView
+        android:id="@+id/listChoices"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:choiceMode="singleChoice" />
+
+    <TextView
+        android:id="@+id/textConfirmStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/btn_page_nav"
+        android:accessibilityLiveRegion="polite"
+        android:text="Nije potvrđeno" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:textSize="16sp"
+            android:text="Otkaži" />
+
+        <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:textSize="16sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Potvrdi" />
+    </LinearLayout>
+
+</LinearLayout>

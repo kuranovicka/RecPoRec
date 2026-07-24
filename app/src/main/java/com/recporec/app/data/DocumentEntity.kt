@@ -19,6 +19,8 @@ data class DocumentEntity(
     val speechRate: Float = 1.0f,
     val volumePercent: Int = 100,
     val voiceName: String? = null,
+    val voiceEngine: String? = null,
+    val languageTag: String? = null,
     val elapsedSeconds: Long = 0,
     val timerMinutes: Int = 0,
     val dateAdded: Long = System.currentTimeMillis()

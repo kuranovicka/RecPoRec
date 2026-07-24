@@ -54,6 +54,7 @@ class ReaderActivity : AppCompatActivity() {
     private var audioManager: AudioManager? = null
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
+    private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
 
     private val notificationPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
@@ -68,11 +69,14 @@ class ReaderActivity : AppCompatActivity() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
-        PlaybackController.ensureInitialized(this)
+        PlaybackController.ensureInitialized(applicationContext)
 
         setupButtons()
         loadDocument()
         startTicker()
+        lifecycleScope.launch {
+            allVoices = com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
+        }
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(
@@ -92,6 +96,7 @@ class ReaderActivity : AppCompatActivity() {
 
         btnTimer.setOnClickListener { cycleTimer() }
 
+        btnDocLanguage.setOnClickListener { showDocLanguagePicker() }
         btnVolDown.setOnClickListener { adjustVolume(-1) }
         btnVolUp.setOnClickListener { adjustVolume(1) }
         btnVoice.setOnClickListener { showVoiceDialog() }
@@ -143,20 +148,28 @@ class ReaderActivity : AppCompatActivity() {
             setupTts(parsedDoc, entity)
             updateStatusTexts()
             updateSeekBar()
+            updateDocLanguageButtonText()
         }
     }
 
     private fun setupTts(parsedDoc: ParsedDocument, entity: DocumentEntity) {
         val tts = PlaybackController.ttsManager ?: return
-        tts.onReady = {
+
+        fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
             tts.setSpeechRate(entity.speechRate)
             entity.voiceName?.let { tts.setVoiceByName(it) }
         }
-        // Ako je motor vec spreman (nastavak iz iste sesije)
-        tts.loadText(parsedDoc.fullText)
-        tts.setSpeechRate(entity.speechRate)
-        entity.voiceName?.let { tts.setVoiceByName(it) }
+
+        val needsEngineSwitch = entity.voiceEngine != null && entity.voiceEngine != tts.currentEnginePackage
+        if (needsEngineSwitch) {
+            tts.switchEngine(entity.voiceEngine, entity.voiceName, entity.speechRate) {
+                tts.loadText(parsedDoc.fullText)
+            }
+        } else {
+            tts.onReady = { applyVoiceAndText() }
+            applyVoiceAndText()
+        }
 
         tts.onPositionChanged = { offset ->
             runOnUiThread {
@@ -254,34 +267,64 @@ class ReaderActivity : AppCompatActivity() {
         persistState()
     }
 
+    private fun showDocLanguagePicker() {
+        val voices = allVoices.ifEmpty {
+            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
+        val labels = languages.map { loc ->
+            val lang = loc.displayLanguage.replaceFirstChar { it.uppercase() }
+            val country = loc.displayCountry
+            if (country.isNotBlank() && country != lang) "$lang — $country" else lang
+        }
+        val current = doc?.languageTag?.let { tag ->
+            languages.firstOrNull { it.toLanguageTag() == tag }?.displayLanguage
+        }
+        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current) { index ->
+            val chosen = languages[index]
+            doc = doc?.copy(languageTag = chosen.toLanguageTag())
+            persistState()
+            updateDocLanguageButtonText()
+        }
+    }
+
+    private fun updateDocLanguageButtonText() {
+        val tag = doc?.languageTag
+        binding.btnDocLanguage.text = if (tag != null) {
+            "Jezik: ${java.util.Locale.forLanguageTag(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
+        } else {
+            "Jezik"
+        }
+    }
+
     private fun showVoiceDialog() {
-        val tts = PlaybackController.ttsManager ?: return
-        val allVoices = tts.availableVoices()
-        val voices = allVoices.filterNot { it.isNetworkConnectionRequired }
-            .ifEmpty { allVoices }
-            .sortedBy { it.locale.displayName }
-        if (voices.isEmpty()) return
+        val voices = allVoices.ifEmpty {
+            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
+        val filtered = if (languageFilter != null) {
+            voices.filter { it.voice.locale.toLanguageTag() == languageFilter }.ifEmpty { voices }
+        } else voices
 
-        val labels = voices.map { voice ->
-            val lang = voice.locale.displayLanguage.replaceFirstChar { c -> c.uppercase() }
-            val country = voice.locale.displayCountry
-            val quality = when (voice.quality) {
-                android.speech.tts.Voice.QUALITY_VERY_HIGH -> " (visok kvalitet)"
-                android.speech.tts.Voice.QUALITY_HIGH -> ""
-                else -> ""
+        val labels = filtered.map { it.displayLabel }
+        val current = doc?.voiceName?.let { name ->
+            filtered.firstOrNull { it.voice.name == name }?.displayLabel
+        }
+        PickerDialog.show(this, getString(R.string.voice_dialog_title), labels, current) { index ->
+            val chosen = filtered[index]
+            val tts = PlaybackController.ttsManager
+            if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
+                tts.switchEngine(chosen.enginePackage, chosen.voice.name, doc?.speechRate ?: 1.0f) {
+                    parsed?.let { tts.loadText(it.fullText) }
+                }
+            } else {
+                tts?.setVoiceByName(chosen.voice.name)
             }
-            if (country.isNotBlank() && country != lang) "$lang — $country$quality" else "$lang$quality"
-        }.toTypedArray()
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.voice_dialog_title)
-            .setItems(labels) { _, which ->
-                val chosen = voices[which]
-                tts.setVoiceByName(chosen.name)
-                doc = doc?.copy(voiceName = chosen.name)
-                persistState()
-            }
-            .show()
+            doc = doc?.copy(voiceName = chosen.voice.name, voiceEngine = chosen.enginePackage)
+            persistState()
+        }
     }
 
     private fun cycleTimer() {

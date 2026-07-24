@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/btn_voice"
+            android:titleTextColor="@color/text_primary"
+            app:title="Opšta podešavanja glasa" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:text="Ovo važi za svaki dokument, osim ako se za njega posebno ne izabere drugi jezik." />
+
+        <Button
+            android:id="@+id/btnLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Jezik" />
+
+        <TextView
+            android:id="@+id/textLanguageStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:textSize="16sp"
+            android:textColor="@color/btn_page_nav"
+            android:accessibilityLiveRegion="polite"
+            android:text="Nije izabrano" />
+
+        <Button
+            android:id="@+id/btnVoice"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_voice"
+            android:textColor="@color/button_text"
+            android:text="Glas" />
+
+        <TextView
+            android:id="@+id/textVoiceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:textSize="16sp"
+            android:textColor="@color/btn_page_nav"
+            android:accessibilityLiveRegion="polite"
+            android:text="Nije izabran" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_margin="16dp">
+
+            <Button
+                android:id="@+id/btnSpeedDown"
+                android:layout_width="72dp"
+                android:layout_height="64dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_speed"
+                android:textColor="@color/button_text"
+                android:text="−" />
+
+            <TextView
+                android:id="@+id/textSpeedStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:accessibilityLiveRegion="polite"
+                android:text="Brzina: 100%" />
+
+            <Button
+                android:id="@+id/btnSpeedUp"
+                android:layout_width="72dp"
+                android:layout_height="64dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_speed"
+                android:textColor="@color/button_text"
+                android:text="+" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_margin="16dp">
+
+            <Button
+                android:id="@+id/btnVolumeDown"
+                android:layout_width="72dp"
+                android:layout_height="64dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_volume"
+                android:textColor="@color/button_text"
+                android:text="−" />
+
+            <TextView
+                android:id="@+id/textVolumeStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:accessibilityLiveRegion="polite"
+                android:text="Jačina: 100%" />
+
+            <Button
+                android:id="@+id/btnVolumeUp"
+                android:layout_width="72dp"
+                android:layout_height="64dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_volume"
+                android:textColor="@color/button_text"
+                android:text="+" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

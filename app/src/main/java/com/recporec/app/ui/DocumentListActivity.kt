@@ -21,6 +21,7 @@ class DocumentListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDocumentListBinding
     private lateinit var adapter: DocumentListAdapter
     private val db by lazy { AppDatabase.getInstance(this) }
+    private val settings by lazy { com.recporec.app.data.AppSettings(this) }
 
     private val pickFileLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -54,6 +55,29 @@ class DocumentListActivity : AppCompatActivity() {
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
             )
+        }
+
+        binding.btnOverflow.setOnClickListener { view ->
+            val popup = androidx.appcompat.widget.PopupMenu(this, view)
+            popup.menuInflater.inflate(com.recporec.app.R.menu.menu_main_options, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    com.recporec.app.R.id.action_global_voice -> {
+                        startActivity(Intent(this, GlobalVoiceSettingsActivity::class.java))
+                        true
+                    }
+                    com.recporec.app.R.id.action_settings -> {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                        true
+                    }
+                    com.recporec.app.R.id.action_help -> {
+                        startActivity(Intent(this, HelpActivity::class.java))
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
 
         lifecycleScope.launch {
@@ -108,7 +132,12 @@ class DocumentListActivity : AppCompatActivity() {
                 DocumentEntity(
                     title = name.substringBeforeLast("."),
                     uri = localUri.toString(),
-                    format = format
+                    format = format,
+                    speechRate = settings.globalSpeechRate,
+                    volumePercent = settings.globalVolumePercent,
+                    voiceName = settings.globalVoiceName,
+                    voiceEngine = settings.globalVoiceEngine,
+                    languageTag = settings.globalLanguageTag
                 )
             )
         }

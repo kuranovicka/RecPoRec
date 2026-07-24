@@ -25,7 +25,7 @@ class HelpActivity : AppCompatActivity() {
             Tastatura u čitaču (12 dugmadi):
 
             Gornji red: prethodno poglavlje — tajmer za automatsku pauzu — sledeće poglavlje.
-            Drugi red: smanji jačinu zvuka — izbor glasa — pojačaj zvuk.
+            Drugi red: jezik za ovaj dokument — smanji jačinu zvuka — izbor glasa — pojačaj zvuk.
             Treći red: smanji brzinu čitanja — pusti ili pauziraj — povećaj brzinu čitanja.
             Donji red: pomeri pet posto unazad — idi na određenu stranicu — pomeri pet posto unapred.
 
@@ -41,6 +41,11 @@ class HelpActivity : AppCompatActivity() {
             - Prodrmaj telefon za pauzu i nastavak: drmanjem telefona pauzirate ili nastavljate čitanje.
 
             Sve se pamti automatski: mesto gde ste stali, brzina, jačina zvuka i izabrani glas — sve dok ne obrišete dokument.
+
+            Opšta podešavanja glasa (meni na listi dokumenata, gore desno):
+            Ovde se bira podrazumevani jezik, glas, brzina i jačina za sve nove dokumente. Dugme jezika u samom dokumentu menja jezik samo za taj dokument.
+
+            Izbor jezika i glasa: prvo se izabere stavka sa liste (može i pretraga), pa se dodirne "Potvrdi" — dok se ne potvrdi, izmena se ne primenjuje, i to jasno piše na ekranu.
         """.trimIndent()
     }
 }

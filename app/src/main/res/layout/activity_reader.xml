@@ -93,12 +93,18 @@
                 android:text="Poglavlje ⏭" />
         </LinearLayout>
 
-        <!-- Red: 4 5 6 -->
+        <!-- Red: Jezik(dokument) 4 5 6 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
+
+            <Button android:id="@+id/btnDocLanguage" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_goto_page"
+                android:contentDescription="Jezik za ovaj dokument"
+                android:textSize="14sp"
+                android:text="Jezik" />
 
             <Button android:id="@+id/btnVolDown" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_volume"
