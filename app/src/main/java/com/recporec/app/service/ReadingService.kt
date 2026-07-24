@@ -17,6 +17,7 @@ class ReadingService : Service() {
 
     private var mediaSession: MediaSessionCompat? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var wifiLock: android.net.wifi.WifiManager.WifiLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -38,9 +39,18 @@ class ReadingService : Service() {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RecPoRec:UninterruptedReading")
             wakeLock?.setReferenceCounted(false)
             wakeLock?.acquire(12 * 60 * 60 * 1000L) // maks 12h zaštita
+
+            try {
+                val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                wifiLock = wm.createWifiLock(android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF, "RecPoRec:Wifi")
+                wifiLock?.setReferenceCounted(false)
+                wifiLock?.acquire()
+            } catch (_: Exception) { /* neki uređaji/verzije mogu odbiti - nastavljamo bez toga */ }
         } else {
             wakeLock?.let { if (it.isHeld) it.release() }
             wakeLock = null
+            wifiLock?.let { if (it.isHeld) it.release() }
+            wifiLock = null
         }
 
         return START_STICKY
@@ -100,6 +110,7 @@ class ReadingService : Service() {
 
     override fun onDestroy() {
         wakeLock?.let { if (it.isHeld) it.release() }
+        wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()
         super.onDestroy()
     }
