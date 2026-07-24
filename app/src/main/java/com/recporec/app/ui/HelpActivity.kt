@@ -20,11 +20,11 @@ class HelpActivity : AppCompatActivity() {
         Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
 
         Prvi ekran je lista dokumenata.
-        Tu vidiš sve knjige koje si dodala.
+        Tu vidiš sve knjige koje dodaš.
         Dodirni dokument da ga otvoriš i čitaš.
 
         Dugme "Dodaj dokument" je desno, na sredini ekrana.
-        Dodirni ga da izabereš fajl sa telefona ili sa Google diska.
+        Dodirni ga da izabereš da li dodaješ sa Google diska ili iz telefona.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
 
         Ispod tog dugmeta je dugme "Izlaz".
@@ -42,16 +42,16 @@ class HelpActivity : AppCompatActivity() {
         Prvo izaberi jezik.
         Onda izaberi glas.
         Kad dodirneš stavku na listi, ona još nije potvrđena.
-        Dodirni dugme "Potvrdi" da se izbor sačuva.
-        Ako dodirneš glas na listi, čućeš kratak primer tim glasom.
+        Dodirni dugme "Potvrdi" da sačuvaš izbor.
+        Ako dodirneš glas na listi, čućeš kratak primer teksta izgovoren tim glasom.
         Tako lakše prepoznaš koji glas ti se sviđa.
 
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
-        Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad zatvoriš aplikaciju na početni ekran.
+        Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
         Prekidač "Čitanje bez prekida" znači da čitanje ne prestaje ni kad se ekran ugasi.
         Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
-        Prekidač "Zvuk" znači da dugmad tiho pisnu kad ih dodirneš.
+        Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
         Možeš izabrati: stranicu, jedan minut, pet minuta ili deset minuta.
 
@@ -59,17 +59,17 @@ class HelpActivity : AppCompatActivity() {
         To je baš ovaj ekran koji sada čitaš.
 
         Sada idemo u sam dokument.
-        Tastatura ima osamnaest polja.
-        Neka polja su prazna, samo da red bude ravan.
+        Tastatura ima osamnaest dugmića.
+        Podseća na numeričku tastaturu na računaru.
 
         Na samom vrhu tastature su tri dugmeta.
-        Prvo dugme je "Početak".
+        Prvo dugme je "Idi na početak".
         Ono vraća na sam početak dokumenta.
-        Drugo dugme je "Str.", to jest stranica.
+        Drugo dugme je "Idi na stranicu".
         Ono otvara polje gde upišeš broj stranice.
-        Treće dugme je "Minut".
+        Treće dugme je "Idi na minut".
         Ono otvara polje gde upišeš broj minuta od početka, pa te odvede tamo.
-        Ova dugmad su tu jer aplikacija pamti gde si stala, pa ovako lako osvežiš čitanje.
+        Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
 
         Prvi red ima tri dugmeta.
         Prvo dugme je "Prethodno poglavlje".
@@ -98,29 +98,27 @@ class HelpActivity : AppCompatActivity() {
         Četvrti red ima dva dugmeta.
         Prvo dugme pomera unazad.
         Drugo dugme pomera unapred.
-        Šta znače "unazad" i "unapred" zavisi od podešavanja "Navigacija".
+        Šta znači "unazad" i "unapred", zavisi od podešavanja "Navigacije".
 
-        Ispod tastature je klizač, malo veći radi lakšeg dodira.
+        Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
         Možeš ga i prevući prstom do drugog mesta.
 
         Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige.
 
-        Gore desno u dokumentu je opet dugme "Opcije".
-        Tu su "Podešavanja" i "Pomoć".
-
         Postoji i gest sa dva prsta.
         Dodirni ekran sa dva prsta odjednom, kratko.
-        To pauzira ili nastavlja čitanje.
+        Taj gest pauzira ili nastavlja čitanje.
         Ovo pouzdano radi dok je aplikacija otvorena.
-        Sa nekim čitačima ekrana radi i kad je aplikacija u pozadini, ali to nije obećanje za svaki telefon.
+        Sa nekim čitačima ekrana radi i kad je aplikacija u pozadini, ali to nije garancija za svaki telefon.
 
-        Sve se pamti samo.
-        Mesto gde si stala, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
-        To važi i kad potpuno izađeš i vratiš se.
+        Sva podešavanja se pamte za ceo program.
+        Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
+        Naravno, ako promeniš ta podešavanja.
 
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

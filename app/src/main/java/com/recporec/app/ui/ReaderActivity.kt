@@ -9,10 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.EditText
-import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.recporec.app.R
@@ -150,8 +147,6 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun setupButtons() = with(binding) {
         val clickSound: (() -> Unit) -> (android.view.View) -> Unit = { action -> { _ -> playClickSound(); action() } }
-
-        btnOverflow.setOnClickListener(clickSound { showOverflowMenu(btnOverflow) })
 
         btnGoStart.setOnClickListener(clickSound { goToStart() })
         btnGotoPage.setOnClickListener(clickSound { showGotoPageDialog() })
@@ -518,25 +513,6 @@ class ReaderActivity : AppCompatActivity() {
     private fun persistState() {
         val entity = doc ?: return
         PlaybackController.persistDocumentNow(entity)
-    }
-
-    private fun showOverflowMenu(anchor: android.view.View) {
-        val popup = PopupMenu(this, anchor)
-        popup.menuInflater.inflate(R.menu.menu_options, popup.menu)
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_settings -> {
-                    startActivity(android.content.Intent(this, SettingsActivity::class.java))
-                    true
-                }
-                R.id.action_help -> {
-                    startActivity(android.content.Intent(this, HelpActivity::class.java))
-                    true
-                }
-                else -> false
-            }
-        }
-        popup.show()
     }
 
     override fun onResume() {
