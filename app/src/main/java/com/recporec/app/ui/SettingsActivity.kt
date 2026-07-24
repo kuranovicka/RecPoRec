@@ -33,6 +33,7 @@ class SettingsActivity : AppCompatActivity() {
                 settings.backgroundEnabled = true
             }
             settings.uninterruptedEnabled = checked
+            if (checked) requestIgnoreBatteryOptimizations()
         }
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
@@ -54,6 +55,31 @@ class SettingsActivity : AppCompatActivity() {
                 settings.navigationMode = navValues[index]
                 refreshNavButton()
             }
+        }
+    }
+
+    /** Traži od sistema da ne ograničava aplikaciju radi štednje baterije, da bi čitanje
+     * moglo pouzdano da nastavi i kada se ekran zaključa. */
+    private fun requestIgnoreBatteryOptimizations() {
+        try {
+            val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                android.widget.Toast.makeText(
+                    this,
+                    "Na sledećem ekranu izaberi \"Dozvoli\" ili \"Bez ograničenja\", da bi čitanje pouzdano radilo i kad je ekran zaključan.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                val intent = android.content.Intent(
+                    android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    android.net.Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
+            }
+        } catch (_: Exception) {
+            // Neki telefoni (npr. pojedini Xiaomi, Huawei modeli) imaju svoja dodatna
+            // podešavanja štednje baterije van standardnog Android sistema, koja aplikacija
+            // ne može programski da otvori - tada korisnik mora ručno da ih pronađe u
+            // podešavanjima telefona (obično "Baterija" -> ime aplikacije -> "Bez ograničenja").
         }
     }
 }
