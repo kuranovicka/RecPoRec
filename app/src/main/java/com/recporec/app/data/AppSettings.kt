@@ -22,6 +22,10 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_NAVIGATION, "page") ?: "page"
         set(value) = prefs.edit().putString(KEY_NAVIGATION, value).apply()
 
+    var soundFeedbackEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SOUND, false)
+        set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
+
     // Opšta (globalna) podešavanja glasa - važe za svaki dokument dok se ne prepiše posebno
     var globalLanguageTag: String?
         get() = prefs.getString(KEY_G_LANG, null)
@@ -48,6 +52,7 @@ class AppSettings(context: Context) {
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
         private const val KEY_NAVIGATION = "navigation_mode"
+        private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_G_LANG = "global_language_tag"
         private const val KEY_G_VOICE = "global_voice_name"
         private const val KEY_G_ENGINE = "global_voice_engine"

@@ -21,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchBackground.isChecked = settings.backgroundEnabled
         binding.switchUninterrupted.isChecked = settings.uninterruptedEnabled
         binding.switchShake.isChecked = settings.shakeEnabled
+        binding.switchSound.isChecked = settings.soundFeedbackEnabled
 
         binding.switchBackground.setOnCheckedChangeListener { _, checked ->
             settings.backgroundEnabled = checked
@@ -35,6 +36,9 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
+        }
+        binding.switchSound.setOnCheckedChangeListener { _, checked ->
+            settings.soundFeedbackEnabled = checked
         }
 
         val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta")

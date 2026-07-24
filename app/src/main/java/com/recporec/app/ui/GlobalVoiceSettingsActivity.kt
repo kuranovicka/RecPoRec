@@ -60,7 +60,11 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
 
     private fun loadVoices() {
         lifecycleScope.launch {
-            allVoices = TtsEngineUtil.listAllVoices(this@GlobalVoiceSettingsActivity)
+            allVoices = try {
+                TtsEngineUtil.listAllVoices(this@GlobalVoiceSettingsActivity)
+            } catch (e: Exception) {
+                emptyList()
+            }
         }
     }
 

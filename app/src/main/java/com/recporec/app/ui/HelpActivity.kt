@@ -1,12 +1,119 @@
 package com.recporec.app.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.recporec.app.databinding.ActivityHelpBinding
+import java.io.File
 
 class HelpActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHelpBinding
+
+    private val helpText = """
+        Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
+
+        Prvi ekran je lista dokumenata.
+        Tu vidiš sve knjige koje si dodala.
+        Dodirni dokument da ga otvoriš i čitaš.
+
+        Dugme "Dodaj dokument" je desno, na sredini ekrana.
+        Dodirni ga da izabereš fajl sa telefona ili sa Google diska.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
+
+        Ispod tog dugmeta je dugme "Izlaz".
+        Dodirni ga da potpuno zatvoriš aplikaciju.
+        Tada se prekida i čitanje u pozadini.
+
+        Pored svakog dokumenta je dugme "Obriši".
+        Ono trajno briše taj dokument i sav napredak čitanja.
+
+        Gore desno je dugme "Opcije".
+        Tu se nalaze tri stavke.
+
+        Prva stavka je "Opšta podešavanja glasa".
+        Tu biraš jezik, glas, brzinu i jačinu za sve nove dokumente.
+        Prvo izaberi jezik.
+        Onda izaberi glas.
+        Kad dodirneš stavku na listi, ona još nije potvrđena.
+        Dodirni dugme "Potvrdi" da se izbor sačuva.
+        Ako dodirneš glas na listi, čućeš kratak primer tim glasom.
+        Tako lakše prepoznaš koji glas ti se sviđa.
+
+        Druga stavka je "Podešavanja".
+        Tu su prekidači i jedno dugme.
+        Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad zatvoriš aplikaciju na početni ekran.
+        Prekidač "Čitanje bez prekida" znači da čitanje ne prestaje ni kad se ekran ugasi.
+        Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
+        Prekidač "Zvuk" znači da dugmad tiho pisnu kad ih dodirneš.
+        Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
+        Možeš izabrati: stranicu, jedan minut, pet minuta ili deset minuta.
+
+        Treća stavka je "Pomoć".
+        To je baš ovaj ekran koji sada čitaš.
+
+        Sada idemo u sam dokument.
+        Tastatura ima šesnaest polja.
+        Neka polja su prazna, samo da red bude ravan.
+
+        Prvi red ima tri dugmeta.
+        Prvo dugme je "Prethodno poglavlje".
+        Ono vraća na početak prethodnog poglavlja.
+        Drugo dugme je "Tajmer".
+        Svaki dodir menja tajmer: petnaest minuta, trideset minuta, četrdeset pet minuta, šezdeset minuta, devedeset minuta, pa opet isključeno.
+        Kad tajmer istekne, čitanje se pauzira samo.
+        Treće dugme je "Sledeće poglavlje".
+        Ono ide na početak sledećeg poglavlja.
+        Poglavlja rade samo ako ih program prepozna u dokumentu.
+
+        Drugi red ima četiri dugmeta.
+        Prvo dugme je "Jezik".
+        Ono menja jezik samo za ovaj dokument.
+        Drugo dugme smanjuje jačinu zvuka.
+        Treće dugme je "Glas".
+        Ono menja glas samo za ovaj dokument.
+        Četvrto dugme pojačava jačinu zvuka.
+
+        Treći red ima tri dugmeta.
+        Prvo dugme smanjuje brzinu čitanja.
+        Drugo dugme pušta ili pauzira čitanje.
+        Treće dugme povećava brzinu čitanja.
+        Brzina se menja bez promene visine glasa.
+
+        Četvrti red ima tri dugmeta.
+        Prvo dugme pomera unazad.
+        Drugo dugme je "Idi na stranicu".
+        Ono otvara polje gde upišeš broj stranice.
+        Treće dugme pomera unapred.
+        Šta znače "unazad" i "unapred" zavisi od podešavanja "Navigacija".
+
+        Ispod tastature je klizač.
+        On pokazuje gde si trenutno u knjizi.
+        Možeš ga i prevući prstom do drugog mesta.
+
+        Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige.
+
+        Gore desno u dokumentu je opet dugme "Opcije".
+        Tu su "Podešavanja" i "Pomoć".
+
+        Postoji i gest sa dva prsta.
+        Dodirni ekran sa dva prsta odjednom, kratko.
+        To pauzira ili nastavlja čitanje.
+        Ovo pouzdano radi dok je aplikacija otvorena.
+        Sa nekim čitačima ekrana radi i kad je aplikacija u pozadini, ali to nije obećanje za svaki telefon.
+
+        Sve se pamti samo.
+        Mesto gde si stala, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
+        To važi i kad potpuno izađeš i vratiš se.
+
+        Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
+    """.trimIndent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,36 +123,32 @@ class HelpActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        binding.textHelpBody.text = """
-            RečPoReč — kako se koristi
+        binding.textHelpBody.text = helpText
 
-            Lista dokumenata:
-            Dodirnite "Dodaj dokument" da izaberete fajl sa telefona ili sa Google diska (podržani formati: TXT, EPUB, PDF, DOCX). Dodirom na dokument otvara se čitanje. Dugme "Obriši" pored svakog dokumenta trajno briše dokument i sav napredak čitanja.
+        binding.btnCopyHelp.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newPlainText("Pomoć", helpText))
+            Toast.makeText(this, "Tekst pomoći je kopiran.", Toast.LENGTH_SHORT).show()
+        }
 
-            Tastatura u čitaču (12 dugmadi):
+        binding.btnShareHelp.setOnClickListener { shareHelpAsTxt() }
+    }
 
-            Gornji red: prethodno poglavlje — tajmer za automatsku pauzu — sledeće poglavlje.
-            Drugi red: jezik za ovaj dokument — smanji jačinu zvuka — izbor glasa — pojačaj zvuk.
-            Treći red: smanji brzinu čitanja — pusti ili pauziraj — povećaj brzinu čitanja.
-            Donji red: pomeri pet posto unazad — idi na određenu stranicu — pomeri pet posto unapred.
+    private fun shareHelpAsTxt() {
+        try {
+            val shareDir = File(cacheDir, "share").apply { mkdirs() }
+            val file = File(shareDir, "pomoc_rec_po_rec.txt")
+            file.writeText(helpText)
+            val uri: Uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
 
-            Ispod tastature nalazi se klizač koji pokazuje vaš položaj u knjizi.
-
-            Tajmer za automatsku pauzu (dugme u gornjem redu) menja se svakim dodirom: 15, 30, 45, 60, 90 minuta, pa se ponovo isključuje.
-
-            Pri vrhu ekrana ispisano je: ukupan broj stranica, proteklo vreme čitanja i procenjeno preostalo vreme do kraja knjige.
-
-            Podešavanja (gore desno):
-            - Rad u pozadini: čitanje se nastavlja i kada napustite aplikaciju.
-            - Čitanje bez prekida: čitanje se nastavlja i kada se ekran telefona isključi.
-            - Prodrmaj telefon za pauzu i nastavak: drmanjem telefona pauzirate ili nastavljate čitanje.
-
-            Sve se pamti automatski: mesto gde ste stali, brzina, jačina zvuka i izabrani glas — sve dok ne obrišete dokument.
-
-            Opšta podešavanja glasa (meni na listi dokumenata, gore desno):
-            Ovde se bira podrazumevani jezik, glas, brzina i jačina za sve nove dokumente. Dugme jezika u samom dokumentu menja jezik samo za taj dokument.
-
-            Izbor jezika i glasa: prvo se izabere stavka sa liste (može i pretraga), pa se dodirne "Potvrdi" — dok se ne potvrdi, izmena se ne primenjuje, i to jasno piše na ekranu.
-        """.trimIndent()
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, "Podeli pomoć"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Deljenje trenutno nije uspelo.", Toast.LENGTH_SHORT).show()
+        }
     }
 }

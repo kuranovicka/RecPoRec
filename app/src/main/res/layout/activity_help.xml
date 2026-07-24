@@ -17,7 +17,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/textHelpBody"
@@ -28,5 +29,34 @@
             android:lineSpacingExtra="6dp"
             android:textColor="@color/text_primary" />
     </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/btnCopyHelp"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:textSize="16sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Kopiraj tekst pomoći" />
+
+        <Button
+            android:id="@+id/btnShareHelp"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:textSize="16sp"
+            android:backgroundTint="@color/btn_voice"
+            android:textColor="@color/button_text"
+            android:text="Podeli" />
+    </LinearLayout>
 
 </LinearLayout>

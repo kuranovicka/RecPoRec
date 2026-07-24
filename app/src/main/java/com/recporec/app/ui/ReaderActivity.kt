@@ -55,6 +55,7 @@ class ReaderActivity : AppCompatActivity() {
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
+    private var toneGenerator: android.media.ToneGenerator? = null
 
     // Detekcija dodira sa dva prsta (pauza/nastavak)
     private var twoFingerActive = false
@@ -83,7 +84,11 @@ class ReaderActivity : AppCompatActivity() {
         loadDocument()
         startTicker()
         lifecycleScope.launch {
-            allVoices = com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
+            allVoices = try {
+                com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
+            } catch (e: Exception) {
+                emptyList()
+            }
         }
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
@@ -133,26 +138,38 @@ class ReaderActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
+    private fun playClickSound() {
+        if (!settings.soundFeedbackEnabled) return
+        try {
+            if (toneGenerator == null) {
+                toneGenerator = android.media.ToneGenerator(AudioManager.STREAM_MUSIC, 70)
+            }
+            toneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+        } catch (_: Exception) { }
+    }
+
     private fun setupButtons() = with(binding) {
-        btnOverflow.setOnClickListener { showOverflowMenu(it) }
+        val clickSound: (() -> Unit) -> (android.view.View) -> Unit = { action -> { _ -> playClickSound(); action() } }
 
-        btnPrevChapter.setOnClickListener { jumpChapter(-1) }
-        btnNextChapter.setOnClickListener { jumpChapter(1) }
+        btnOverflow.setOnClickListener(clickSound { showOverflowMenu(btnOverflow) })
 
-        btnTimer.setOnClickListener { cycleTimer() }
+        btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
+        btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
 
-        btnDocLanguage.setOnClickListener { showDocLanguagePicker() }
-        btnVolDown.setOnClickListener { adjustVolume(-1) }
-        btnVolUp.setOnClickListener { adjustVolume(1) }
-        btnVoice.setOnClickListener { showVoiceDialog() }
+        btnTimer.setOnClickListener(clickSound { cycleTimer() })
 
-        btnSpeedDown.setOnClickListener { adjustSpeed(-0.05f) }
-        btnSpeedUp.setOnClickListener { adjustSpeed(0.05f) }
-        btnPlayPause.setOnClickListener { togglePlayPause() }
+        btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
+        btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
+        btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
+        btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
 
-        btnStepBack.setOnClickListener { stepNavigate(forward = false) }
-        btnStepForward.setOnClickListener { stepNavigate(forward = true) }
-        btnGotoPage.setOnClickListener { showGotoPageDialog() }
+        btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
+        btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
+        btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
+
+        btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
+        btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
+        btnGotoPage.setOnClickListener(clickSound { showGotoPageDialog() })
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {}
@@ -177,8 +194,18 @@ class ReaderActivity : AppCompatActivity() {
             val parsedDoc = if (cachedParsed != null && PlaybackController.currentDocument?.id == entity.id) {
                 cachedParsed
             } else {
-                withContext(Dispatchers.IO) {
-                    DocumentParser.parse(this@ReaderActivity, android.net.Uri.parse(entity.uri), entity.format)
+                try {
+                    withContext(Dispatchers.IO) {
+                        DocumentParser.parse(this@ReaderActivity, android.net.Uri.parse(entity.uri), entity.format)
+                    }
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(
+                        this@ReaderActivity,
+                        "Nije moguće pročitati ovaj dokument. Fajl je možda oštećen ili nepodržan.",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    finish()
+                    return@launch
                 }
             }
             parsed = parsedDoc
@@ -533,6 +560,7 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         timerRunnable?.let { handler.removeCallbacks(it) }
         tickerRunnable?.let { handler.removeCallbacks(it) }
+        toneGenerator?.release()
     }
 
     companion object {
