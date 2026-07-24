@@ -102,4 +102,23 @@ object TtsEngineUtil {
             } else base
         }
     }
+
+    /** Izgovara kratak primer datim glasom, da bi korisnik čuo razliku umesto da nagađa iz naziva. */
+    fun previewVoice(context: Context, option: VoiceOption) {
+        var tts: TextToSpeech? = null
+        tts = TextToSpeech(context, { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.voice = option.voice
+                tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) { tts?.shutdown() }
+                    @Deprecated("Deprecated in Java")
+                    override fun onError(utteranceId: String?) { tts?.shutdown() }
+                })
+                tts?.speak("Ovo je primer ovog glasa.", TextToSpeech.QUEUE_FLUSH, null, "preview")
+            } else {
+                tts?.shutdown()
+            }
+        }, option.enginePackage)
+    }
 }

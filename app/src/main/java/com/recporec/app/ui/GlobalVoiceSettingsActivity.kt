@@ -95,7 +95,10 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         val current = settings.globalVoiceName?.let { name ->
             filtered.firstOrNull { it.voice.name == name }?.displayLabel
         }
-        PickerDialog.show(this, "Izaberi glas", labels, current) { index ->
+        PickerDialog.show(
+            this, "Izaberi glas", labels, current,
+            onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this, filtered[index]) }
+        ) { index ->
             val chosen = filtered[index]
             settings.globalVoiceName = chosen.voice.name
             settings.globalVoiceEngine = chosen.enginePackage

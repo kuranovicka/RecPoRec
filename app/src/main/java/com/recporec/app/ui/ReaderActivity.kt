@@ -391,7 +391,10 @@ class ReaderActivity : AppCompatActivity() {
         val current = doc?.voiceName?.let { name ->
             filtered.firstOrNull { it.voice.name == name }?.displayLabel
         }
-        PickerDialog.show(this, getString(R.string.voice_dialog_title), labels, current) { index ->
+        PickerDialog.show(
+            this, getString(R.string.voice_dialog_title), labels, current,
+            onSelectionPreview = { index -> com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index]) }
+        ) { index ->
             val chosen = filtered[index]
             val tts = PlaybackController.ttsManager
             if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {

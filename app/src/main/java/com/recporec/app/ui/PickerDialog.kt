@@ -24,6 +24,7 @@ object PickerDialog {
         title: String,
         items: List<String>,
         currentLabel: String?,
+        onSelectionPreview: ((Int) -> Unit)? = null,
         onConfirmed: (Int) -> Unit
     ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_picker, null)
@@ -70,6 +71,7 @@ object PickerDialog {
             selectedOriginalIndex = visibleIndices.getOrNull(position)
             val label = selectedOriginalIndex?.let { items[it] } ?: ""
             textStatus.text = "Izabrano: $label — dodirni Potvrdi da sačuvaš (nije potvrđeno)"
+            selectedOriginalIndex?.let { onSelectionPreview?.invoke(it) }
         }
 
         btnCancel.setOnClickListener { dialog.dismiss() }
