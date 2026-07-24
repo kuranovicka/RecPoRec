@@ -15,39 +15,54 @@
         android:titleTextColor="@color/text_primary"
         app:title="@string/app_name" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerDocuments"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp" />
-
-    <TextView
-        android:id="@+id/emptyView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:visibility="gone"
-        android:padding="24dp"
-        android:textSize="18sp"
-        android:textColor="@color/text_primary"
-        android:text="@string/no_documents" />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btnAddDocument"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:textSize="18sp"
-            android:backgroundTint="@color/btn_chapter"
-            android:textColor="@color/button_text"
-            android:text="@string/add_document" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerDocuments"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/emptyView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="24dp"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:text="@string/no_documents" />
+        </FrameLayout>
+
+        <!-- Dugme za dodavanje - desna strana, na sredini visine ekrana -->
+        <LinearLayout
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="12dp">
+
+            <Button
+                android:id="@+id/btnAddDocument"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:textSize="18sp"
+                android:backgroundTint="@color/btn_chapter"
+                android:textColor="@color/button_text"
+                android:background="@drawable/key_button_shape"
+                android:text="@string/add_document" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>
