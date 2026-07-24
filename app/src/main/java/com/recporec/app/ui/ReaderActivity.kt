@@ -548,10 +548,13 @@ class ReaderActivity : AppCompatActivity() {
         binding.textPages.text = getString(R.string.status_pages, entity.totalPages).let {
             "$it  ($currentPage/${entity.totalPages})"
         }
-        binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(PlaybackController.elapsedSeconds))
+
+        val effectiveRate = max(0.3f, entity.speechRate)
+        val consumedChars = entity.currentCharacterOffset.coerceIn(0, length)
+        val elapsedEstimateSeconds = (consumedChars / (baseCharsPerMinute * effectiveRate) * 60).toLong()
+        binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(elapsedEstimateSeconds))
 
         val remainingChars = max(0, length - entity.currentCharacterOffset)
-        val effectiveRate = max(0.3f, entity.speechRate)
         val remainingSeconds = (remainingChars / (baseCharsPerMinute * effectiveRate) * 60).toLong()
         binding.textRemaining.text = getString(R.string.status_remaining, formatTime(remainingSeconds))
     }
