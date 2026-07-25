@@ -312,6 +312,8 @@ class ReaderActivity : AppCompatActivity() {
     private fun showGotoMinuteDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.hint = "Broj minuta od početka"
+        input.contentDescription = "Broj minuta od početka dokumenta"
         AlertDialog.Builder(this)
             .setTitle("Unesi broj minuta od početka")
             .setView(input)
@@ -385,6 +387,8 @@ class ReaderActivity : AppCompatActivity() {
     private fun showGotoPageDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.hint = "Broj stranice"
+        input.contentDescription = "Broj stranice na koju treba preći"
         AlertDialog.Builder(this)
             .setTitle(R.string.goto_page_title)
             .setView(input)
@@ -415,6 +419,8 @@ class ReaderActivity : AppCompatActivity() {
         val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
         val newVol = (current + direction * step).coerceIn(0, maxVol)
         am.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
+        val percent = if (maxVol > 0) (newVol * 100 / maxVol) else 0
+        android.widget.Toast.makeText(this, "Jačina zvuka: $percent%", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun adjustSpeed(delta: Float) {
@@ -423,6 +429,8 @@ class ReaderActivity : AppCompatActivity() {
         doc = entity.copy(speechRate = newRate)
         PlaybackController.ttsManager?.setSpeechRate(newRate)
         persistState()
+        val roundedRate = (newRate * 100).roundToInt() / 100f
+        android.widget.Toast.makeText(this, "Brzina čitanja: ${roundedRate}x", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun showDocLanguagePicker() {
@@ -598,7 +606,10 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         PlaybackController.uiFinishedListener = {
-            runOnUiThread { binding.btnPlayPause.text = "▶ / ⏸" }
+            runOnUiThread {
+                binding.btnPlayPause.text = "▶ / ⏸"
+                android.widget.Toast.makeText(this, "Čitanje završeno.", android.widget.Toast.LENGTH_LONG).show()
+            }
         }
         PlaybackController.uiTimerExpiredListener = {
             runOnUiThread {
