@@ -3,8 +3,6 @@ package com.recporec.app.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -12,10 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import com.recporec.app.data.AppSettings
 import com.recporec.app.tts.PlaybackController
 import com.recporec.app.ui.ReaderActivity
-import com.recporec.app.util.ShakeDetector
 
 class ReadingService : Service() {
 
@@ -23,92 +19,20 @@ class ReadingService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: android.net.wifi.WifiManager.WifiLock? = null
 
-    // Detekcija drmanja živi ovde (ne u ReaderActivity) da bi pauza/nastavak
-    // drmanjem radili i dok je čitanje u pozadini, van otvorenog ekrana.
-    private var sensorManager: SensorManager? = null
-    private var shakeDetector: ShakeDetector? = null
-
     override fun onCreate() {
         super.onCreate()
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
             setCallback(object : MediaSessionCompat.Callback() {
-                override fun onPlay() {
-                    PlaybackController.ttsManager?.resume()
-                    onPlaybackChanged()
-                }
-                override fun onPause() {
-                    PlaybackController.ttsManager?.pause()
-                    onPlaybackChanged()
-                }
-                // Neki uređaji/TalkBack šalju generičku "play/pause" komandu preko medija tastera
-                // umesto odvojenih onPlay/onPause poziva - obradi i taj slučaj eksplicitno.
-                override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
-                    val keyEvent = mediaButtonEvent?.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                    if (keyEvent?.action == android.view.KeyEvent.ACTION_DOWN &&
-                        keyEvent.keyCode == android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-                    ) {
-                        togglePlayPause()
-                        return true
-                    }
-                    return super.onMediaButtonEvent(mediaButtonEvent)
-                }
+                override fun onPlay() { PlaybackController.ttsManager?.resume() }
+                override fun onPause() { PlaybackController.ttsManager?.pause() }
             })
             isActive = true
-        }
-        PlaybackController.playbackStateListener = { onPlaybackChanged() }
-        updatePlaybackState()
-    }
-
-    /** Pauzira ako trenutno čita, nastavlja ako je pauzirano. Koristi se za drmanje i za
-     * generičku "play/pause" komandu sa medija tastera/TalkBack-a. */
-    private fun togglePlayPause() {
-        val tts = PlaybackController.ttsManager ?: return
-        if (tts.isSpeaking) tts.pause() else tts.resume()
-        onPlaybackChanged()
-    }
-
-    private fun onPlaybackChanged() {
-        refreshNotification()
-    }
-
-    private fun updatePlaybackState() {
-        val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
-        val position = PlaybackController.currentDocument?.currentCharacterOffset?.toLong() ?: 0L
-        val state = PlaybackStateCompat.Builder()
-            .setActions(
-                PlaybackStateCompat.ACTION_PLAY or
-                    PlaybackStateCompat.ACTION_PAUSE or
-                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                    PlaybackStateCompat.ACTION_STOP
-            )
-            .setState(
-                if (isSpeaking) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
-                position,
-                if (isSpeaking) 1f else 0f
-            )
-            .build()
-        mediaSession?.setPlaybackState(state)
-    }
-
-    private fun setupShakeDetector() {
-        val settings = AppSettings(this)
-        shakeDetector?.let { sensorManager?.unregisterListener(it) }
-        shakeDetector = null
-        if (settings.shakeEnabled) {
-            val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            if (accel != null) {
-                shakeDetector = ShakeDetector { togglePlayPause() }
-                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
-            }
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val uninterrupted = intent?.getBooleanExtra(EXTRA_UNINTERRUPTED, false) ?: false
         startForeground(NOTIFICATION_ID, buildNotification())
-        updatePlaybackState()
-        setupShakeDetector()
 
         if (uninterrupted) {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -178,7 +102,6 @@ class ReadingService : Service() {
     }
 
     fun refreshNotification() {
-        updatePlaybackState()
         val nm = getSystemService(NotificationManager::class.java)
         nm.notify(NOTIFICATION_ID, buildNotification())
     }
@@ -186,8 +109,6 @@ class ReadingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        PlaybackController.playbackStateListener = null
-        shakeDetector?.let { sensorManager?.unregisterListener(it) }
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()

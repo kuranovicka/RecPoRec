@@ -37,16 +37,6 @@ object PlaybackController {
 
     var uiTimerExpiredListener: (() -> Unit)? = null
 
-    /** ReadingService se prijavi ovde dok radi, da bi osvežio notifikaciju i MediaSession
-     * (bitno za dugmad na notifikaciji, Bluetooth/žičane komande i TalkBack-ov gest za
-     * pauzu/nastavak medija) svaki put kad se stanje čitanja promeni bilo odakle - iz
-     * ReaderActivity-je (dugme, gest), iz tajmera, ili iz samog servisa. */
-    var playbackStateListener: (() -> Unit)? = null
-
-    fun notifyPlaybackStateChanged() {
-        playbackStateListener?.invoke()
-    }
-
     fun setTimerMinutes(minutes: Int) {
         timerRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
     }
@@ -78,7 +68,6 @@ object PlaybackController {
             }
         }
         tts.onFinished = {
-            notifyPlaybackStateChanged()
             scope.launch { uiFinishedListener?.invoke() }
         }
     }
@@ -101,7 +90,6 @@ object PlaybackController {
                         if (timerRemainingSeconds <= 0) {
                             timerRemainingSeconds = 0
                             ttsManager?.pause()
-                            notifyPlaybackStateChanged()
                             uiTimerExpiredListener?.invoke()
                         }
                     }

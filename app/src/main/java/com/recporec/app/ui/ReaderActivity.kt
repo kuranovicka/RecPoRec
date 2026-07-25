@@ -2,6 +2,8 @@ package com.recporec.app.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
@@ -19,6 +21,7 @@ import com.recporec.app.parser.DocumentParser
 import com.recporec.app.parser.ParsedDocument
 import com.recporec.app.service.ReadingService
 import com.recporec.app.tts.PlaybackController
+import com.recporec.app.util.ShakeDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +48,8 @@ class ReaderActivity : AppCompatActivity() {
     private var tickerRunnable: Runnable? = null
 
     private var audioManager: AudioManager? = null
+    private var sensorManager: SensorManager? = null
+    private var shakeDetector: ShakeDetector? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var toneGenerator: android.media.ToneGenerator? = null
     private var seekBarTouchTracking = false
@@ -72,6 +77,7 @@ class ReaderActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
         PlaybackController.ensureInitialized(applicationContext)
@@ -98,15 +104,6 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        // Kad je TalkBack (ili neki drugi čitač ekrana sa istraživanjem dodirom) aktivan,
-        // sistem sam presreće višedodirne gestove pre nego što stignu ovde, pa ih ne
-        // pokušavamo detektovati - umesto toga koristi se TalkBack-ov sopstveni gest,
-        // dvostruki dodir sa dva prsta, koji upravlja MediaSession-om (vidi ReadingService).
-        val axManager = getSystemService(Context.ACCESSIBILITY_SERVICE)
-            as? android.view.accessibility.AccessibilityManager
-        if (axManager?.isTouchExplorationEnabled == true) {
-            return super.dispatchTouchEvent(ev)
-        }
         when (ev.actionMasked) {
             android.view.MotionEvent.ACTION_POINTER_DOWN -> {
                 if (ev.pointerCount == 2) {
@@ -312,11 +309,6 @@ class ReaderActivity : AppCompatActivity() {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
         }
-        // Osveži notifikaciju/MediaSession odmah, i kad servis još nije bio pokrenut u ovom
-        // pozivu (npr. background čitanje isključeno) i kad je promena došla iz same app-e -
-        // bez ovoga, dugmad na notifikaciji i TalkBack-ov gest za pauzu/nastavak medija
-        // ostaju "zaglavljeni" na starom stanju.
-        PlaybackController.notifyPlaybackStateChanged()
     }
 
     private fun goToStart() {
@@ -623,8 +615,13 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
 
-        // Napomena: drmanje za pauzu/nastavak se sada osluškuje u ReadingService, ne ovde -
-        // tako radi i dok je čitanje u pozadini, van ovog ekrana (vidi ReadingService.kt).
+        if (settings.shakeEnabled) {
+            val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            if (accel != null) {
+                shakeDetector = ShakeDetector { togglePlayPause() }
+                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
+            }
+        }
     }
 
     override fun onPause() {
@@ -632,10 +629,10 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
+        shakeDetector?.let { sensorManager?.unregisterListener(it) }
         persistState()
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
-            PlaybackController.notifyPlaybackStateChanged()
         }
     }
 
