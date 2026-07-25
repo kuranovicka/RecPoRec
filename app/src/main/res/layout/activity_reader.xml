@@ -17,7 +17,7 @@
             android:id="@+id/textDocTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
             android:maxLines="1"
@@ -28,7 +28,7 @@
             android:id="@+id/textPages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:accessibilityLiveRegion="polite" />
 
@@ -36,21 +36,21 @@
             android:id="@+id/textElapsed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/textRemaining"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/textTimerStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="Tajmer nije aktivan." />
     </LinearLayout>
@@ -73,19 +73,19 @@
             <Button android:id="@+id/btnGoStart" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Idi na početak dokumenta"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="⏮ Početak" />
 
             <Button android:id="@+id/btnGotoPage" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="@string/btn_goto_page"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="Str." />
 
             <Button android:id="@+id/btnGotoMinute" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Idi na određeni minut u dokumentu"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="Minut" />
         </LinearLayout>
 
@@ -128,7 +128,7 @@
             <Button android:id="@+id/btnDocLanguage" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Jezik za ovaj dokument"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:text="Jezik" />
 
             <Button android:id="@+id/btnVolDown" style="@style/KeyButton"

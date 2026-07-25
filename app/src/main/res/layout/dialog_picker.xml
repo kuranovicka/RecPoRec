@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Pretraga..."
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textColor="@color/text_primary"
         android:textColorHint="#AAAAAA"
         android:inputType="text"
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/btn_page_nav"
         android:accessibilityLiveRegion="polite"
@@ -48,7 +48,7 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:text="Otkaži" />
 
         <Button
@@ -57,7 +57,7 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:backgroundTint="@color/btn_chapter"
             android:textColor="@color/button_text"
             android:text="Potvrdi" />

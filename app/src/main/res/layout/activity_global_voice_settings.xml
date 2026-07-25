@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/text_primary"
             android:text="Ovo važi za svaki dokument, osim ako se za njega posebno ne izabere drugi jezik." />
 
@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:layout_margin="16dp"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:backgroundTint="@color/btn_chapter"
             android:textColor="@color/button_text"
             android:text="Jezik" />
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/btn_page_nav"
             android:accessibilityLiveRegion="polite"
             android:text="Nije izabrano" />
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:layout_margin="16dp"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:backgroundTint="@color/btn_voice"
             android:textColor="@color/button_text"
             android:text="Glas" />
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/btn_page_nav"
             android:accessibilityLiveRegion="polite"
             android:text="Nije izabran" />
@@ -74,7 +74,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginHorizontal="16dp"
             android:gravity="center"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:accessibilityLiveRegion="polite"
             android:text="Brzina: 100%" />
@@ -103,7 +103,7 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_speed"
                 android:textColor="@color/button_text"
                 android:contentDescription="Smanji brzinu čitanja"
@@ -115,7 +115,7 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_speed"
                 android:textColor="@color/button_text"
                 android:contentDescription="Povećaj brzinu čitanja"
@@ -129,7 +129,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginHorizontal="16dp"
             android:gravity="center"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:accessibilityLiveRegion="polite"
             android:text="Jačina: 100%" />
@@ -159,7 +159,7 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_volume"
                 android:textColor="@color/button_text"
                 android:contentDescription="Smanji jačinu zvuka"
@@ -171,7 +171,7 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_volume"
                 android:textColor="@color/button_text"
                 android:contentDescription="Povećaj jačinu zvuka"

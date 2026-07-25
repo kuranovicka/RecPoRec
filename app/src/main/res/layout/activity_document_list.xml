@@ -49,7 +49,7 @@
                 android:gravity="center"
                 android:visibility="gone"
                 android:padding="24dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textColor="@color/text_primary"
                 android:text="@string/no_documents" />
         </FrameLayout>
@@ -66,7 +66,7 @@
                 android:id="@+id/btnAddDocument"
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_chapter"
                 android:textColor="@color/button_text"
                 android:background="@drawable/key_button_shape"
@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginTop="16dp"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:backgroundTint="@color/btn_page_nav"
                 android:textColor="@color/button_text"
                 android:background="@drawable/key_button_shape"

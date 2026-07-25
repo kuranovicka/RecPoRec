@@ -26,7 +26,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="@string/setting_background" />
 
@@ -48,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="@string/setting_uninterrupted" />
 
@@ -70,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="@string/setting_shake" />
 
@@ -92,7 +92,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="Zvuk (kratak zvuk pri dodiru dugmadi)" />
 
@@ -112,7 +112,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="Navigacija: po stranici ili minutima" />
 
@@ -121,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="10dp"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:backgroundTint="@color/btn_page_nav"
             android:textColor="@color/button_text"
             android:text="Stranica" />
