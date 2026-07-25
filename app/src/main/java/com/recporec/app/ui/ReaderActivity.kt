@@ -2,8 +2,6 @@ package com.recporec.app.ui
 
 import android.app.AlertDialog
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorManager
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
@@ -21,7 +19,6 @@ import com.recporec.app.parser.DocumentParser
 import com.recporec.app.parser.ParsedDocument
 import com.recporec.app.service.ReadingService
 import com.recporec.app.tts.PlaybackController
-import com.recporec.app.util.ShakeDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,8 +45,6 @@ class ReaderActivity : AppCompatActivity() {
     private var tickerRunnable: Runnable? = null
 
     private var audioManager: AudioManager? = null
-    private var sensorManager: SensorManager? = null
-    private var shakeDetector: ShakeDetector? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var toneGenerator: android.media.ToneGenerator? = null
     private var seekBarTouchTracking = false
@@ -77,7 +72,6 @@ class ReaderActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
         PlaybackController.ensureInitialized(applicationContext)
@@ -615,13 +609,8 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
 
-        if (settings.shakeEnabled) {
-            val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            if (accel != null) {
-                shakeDetector = ShakeDetector { togglePlayPause() }
-                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
-            }
-        }
+        // Napomena: drmanje za pauzu/nastavak se sada osluškuje u ReadingService, ne ovde -
+        // tako radi i dok je čitanje u pozadini, van ovog ekrana (vidi ReadingService.kt).
     }
 
     override fun onPause() {
@@ -629,7 +618,6 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
-        shakeDetector?.let { sensorManager?.unregisterListener(it) }
         persistState()
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()

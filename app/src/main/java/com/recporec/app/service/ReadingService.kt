@@ -3,6 +3,8 @@ package com.recporec.app.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -10,8 +12,10 @@ import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import com.recporec.app.data.AppSettings
 import com.recporec.app.tts.PlaybackController
 import com.recporec.app.ui.ReaderActivity
+import com.recporec.app.util.ShakeDetector
 
 class ReadingService : Service() {
 
@@ -19,8 +23,15 @@ class ReadingService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: android.net.wifi.WifiManager.WifiLock? = null
 
+    // Detekcija drmanja živi ovde (ne u ReaderActivity) da bi pauza/nastavak drmanjem
+    // radili i dok je čitanje u pozadini. Namerno NE dira dodir ekrana ni MediaSession
+    // stanje (to je pravilo problema sa TalkBack-om ranije) - čisto senzor -> toggle.
+    private var sensorManager: SensorManager? = null
+    private var shakeDetector: ShakeDetector? = null
+
     override fun onCreate() {
         super.onCreate()
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() { PlaybackController.ttsManager?.resume() }
@@ -30,9 +41,29 @@ class ReadingService : Service() {
         }
     }
 
+    private fun setupShakeDetector() {
+        val settings = AppSettings(this)
+        shakeDetector?.let { sensorManager?.unregisterListener(it) }
+        shakeDetector = null
+        if (settings.shakeEnabled) {
+            val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            if (accel != null) {
+                shakeDetector = ShakeDetector {
+                    val tts = PlaybackController.ttsManager
+                    if (tts != null) {
+                        if (tts.isSpeaking) tts.pause() else tts.resume()
+                        refreshNotification()
+                    }
+                }
+                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
+            }
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val uninterrupted = intent?.getBooleanExtra(EXTRA_UNINTERRUPTED, false) ?: false
         startForeground(NOTIFICATION_ID, buildNotification())
+        setupShakeDetector()
 
         if (uninterrupted) {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -109,6 +140,7 @@ class ReadingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        shakeDetector?.let { sensorManager?.unregisterListener(it) }
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()
