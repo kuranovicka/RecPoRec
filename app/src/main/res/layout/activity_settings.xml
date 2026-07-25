@@ -34,6 +34,8 @@
             android:id="@+id/switchBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:thumbTint="@color/btn_chapter"
+            android:trackTint="@color/btn_chapter"
             android:contentDescription="@string/setting_background" />
     </LinearLayout>
 
@@ -56,6 +58,8 @@
             android:id="@+id/switchUninterrupted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:thumbTint="@color/btn_timer"
+            android:trackTint="@color/btn_timer"
             android:contentDescription="@string/setting_uninterrupted" />
     </LinearLayout>
 
@@ -78,6 +82,8 @@
             android:id="@+id/switchShake"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:thumbTint="@color/btn_speed"
+            android:trackTint="@color/btn_speed"
             android:contentDescription="@string/setting_shake" />
     </LinearLayout>
 
@@ -100,6 +106,8 @@
             android:id="@+id/switchSound"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:thumbTint="@color/btn_volume"
+            android:trackTint="@color/btn_volume"
             android:contentDescription="Zvuk pri dodiru dugmadi" />
     </LinearLayout>
 
