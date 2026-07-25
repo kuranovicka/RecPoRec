@@ -11,7 +11,7 @@
     <color name="btn_voice">#1565C0</color>          <!-- 5: glas - plava -->
     <color name="btn_speed">#00838F</color>          <!-- 7 i 9: brzina - tirkizna -->
     <color name="btn_play">#D84315</color>           <!-- 8: play/pauza - narandžasta -->
-    <color name="btn_goto_page">#4527A0</color>       <!-- 0: idi na stranicu - indigo -->
+    <color name="btn_goto_page">#5D4037</color>       <!-- 0: idi na stranicu - braon -->
     <color name="slider_track">#555555</color>
     <color name="button_text">#FFFFFF</color>
 </resources>
