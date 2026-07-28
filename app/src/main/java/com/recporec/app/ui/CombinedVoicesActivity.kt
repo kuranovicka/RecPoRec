@@ -30,6 +30,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private var scopeId: Long = 0L
     private var defaultLanguageTag: String? = null
     private var defaultVoiceName: String? = null
+    private var defaultVoiceEngine: String? = null
     private var allVoices: List<VoiceOption> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         scopeId = intent.getLongExtra(EXTRA_SCOPE_ID, 0L)
         defaultLanguageTag = intent.getStringExtra(EXTRA_DEFAULT_LANGUAGE_TAG)
         defaultVoiceName = intent.getStringExtra(EXTRA_DEFAULT_VOICE_NAME)
+        defaultVoiceEngine = intent.getStringExtra(EXTRA_DEFAULT_VOICE_ENGINE)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -105,24 +107,32 @@ class CombinedVoicesActivity : AppCompatActivity() {
                     .show()
                 return@launch
             }
+
+            fun confirmRemove(lang: CombinedVoiceLanguageEntity) {
+                AlertDialog.Builder(this@CombinedVoicesActivity)
+                    .setTitle("Ukloni jezik")
+                    .setMessage("Ukloniti \"${langLabel(lang.languageTag)}\"? Uklonićeš i sve dodate glasove tog jezika.")
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                        lifecycleScope.launch {
+                            db.combinedVoiceDao().deleteVoicesForLanguage(scopeId, lang.languageTag)
+                            db.combinedVoiceDao().deleteLanguage(lang.id)
+                            refreshStatusTexts()
+                        }
+                    }
+                    .show()
+            }
+
+            // Kad postoji samo jedan dodat jezik, nema potrebe da se prvo bira sa liste -
+            // odmah se pita samo za potvrdu brisanja.
+            if (languages.size == 1) {
+                confirmRemove(languages[0])
+                return@launch
+            }
             val labels = languages.map { langLabel(it.languageTag) }.toTypedArray()
             AlertDialog.Builder(this@CombinedVoicesActivity)
                 .setTitle("Ukloni jezik")
-                .setItems(labels) { _, which ->
-                    val lang = languages[which]
-                    AlertDialog.Builder(this@CombinedVoicesActivity)
-                        .setTitle("Ukloni jezik")
-                        .setMessage("Ukloniti \"${langLabel(lang.languageTag)}\"? Uklonićeš i sve dodate glasove tog jezika.")
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                            lifecycleScope.launch {
-                                db.combinedVoiceDao().deleteVoicesForLanguage(scopeId, lang.languageTag)
-                                db.combinedVoiceDao().deleteLanguage(lang.id)
-                                refreshStatusTexts()
-                            }
-                        }
-                        .show()
-                }
+                .setItems(labels) { _, which -> confirmRemove(languages[which]) }
                 .show()
         }
     }
@@ -142,15 +152,17 @@ class CombinedVoicesActivity : AppCompatActivity() {
 
             // Svi kombinovani glasovi moraju biti iz ISTOG TTS motora - prebacivanje motora
             // usred čitanja je sporo i nepouzdano, pa ograničavamo izbor da čitanje ostane
-            // stabilno. Ako je već dodat neki glas, dalji izbor se svodi na taj isti motor.
+            // stabilno. Ako je već dodat neki glas ILI postoji obični (već izabrani) glas,
+            // dalji izbor se svodi na taj isti motor - glasovi drugog motora se uopšte ne
+            // nude, umesto da se tiho dodaju pa ne rade.
             val existingVoices = db.combinedVoiceDao().getVoices(scopeId)
-            val lockedEngine = existingVoices.firstOrNull()?.voiceEngine
+            val lockedEngine = existingVoices.firstOrNull()?.voiceEngine ?: defaultVoiceEngine
             if (lockedEngine != null) {
                 candidates = candidates.filter { it.enginePackage == lockedEngine }
                 if (candidates.isEmpty()) {
                     Toast.makeText(
                         this@CombinedVoicesActivity,
-                        "Nema više glasova iz istog motora (${existingVoices.first().voiceEngine}) za dodate jezike. Kombinovani glasovi moraju biti iz istog TTS motora.",
+                        "Nema više glasova iz istog motora za dodate jezike. Kombinovani glasovi moraju biti iz istog TTS motora.",
                         Toast.LENGTH_LONG
                     ).show()
                     return@launch
@@ -213,23 +225,31 @@ class CombinedVoicesActivity : AppCompatActivity() {
             val labels = voices.map { entry ->
                 val match = allVoices.firstOrNull { it.voice.name == entry.voiceName }
                 match?.displayLabel ?: "${langLabel(entry.languageTag)} — ${entry.voiceName}"
-            }.toTypedArray()
+            }
+
+            fun confirmRemove(voice: CombinedVoiceEntryEntity, label: String) {
+                AlertDialog.Builder(this@CombinedVoicesActivity)
+                    .setTitle("Ukloni glas")
+                    .setMessage("Ukloniti \"$label\"?")
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                        lifecycleScope.launch {
+                            db.combinedVoiceDao().deleteVoice(voice.id)
+                            refreshStatusTexts()
+                        }
+                    }
+                    .show()
+            }
+
+            // Kad postoji samo jedan dodat glas, nema potrebe da se prvo bira sa liste -
+            // odmah se pita samo za potvrdu brisanja.
+            if (voices.size == 1) {
+                confirmRemove(voices[0], labels[0])
+                return@launch
+            }
             AlertDialog.Builder(this@CombinedVoicesActivity)
                 .setTitle("Ukloni glas")
-                .setItems(labels) { _, which ->
-                    val voice = voices[which]
-                    AlertDialog.Builder(this@CombinedVoicesActivity)
-                        .setTitle("Ukloni glas")
-                        .setMessage("Ukloniti \"${labels[which]}\"?")
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                            lifecycleScope.launch {
-                                db.combinedVoiceDao().deleteVoice(voice.id)
-                                refreshStatusTexts()
-                            }
-                        }
-                        .show()
-                }
+                .setItems(labels.toTypedArray()) { _, which -> confirmRemove(voices[which], labels[which]) }
                 .show()
         }
     }
@@ -290,5 +310,6 @@ class CombinedVoicesActivity : AppCompatActivity() {
         const val EXTRA_SCOPE_ID = "extra_scope_id"
         const val EXTRA_DEFAULT_LANGUAGE_TAG = "extra_default_language_tag"
         const val EXTRA_DEFAULT_VOICE_NAME = "extra_default_voice_name"
+        const val EXTRA_DEFAULT_VOICE_ENGINE = "extra_default_voice_engine"
     }
 }

@@ -180,6 +180,7 @@ class ReaderActivity : AppCompatActivity() {
                     .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc?.languageTag ?: settings.globalLanguageTag)
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, doc?.voiceName ?: settings.globalVoiceName)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
             )
         })
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
