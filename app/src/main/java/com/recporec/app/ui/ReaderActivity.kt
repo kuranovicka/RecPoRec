@@ -149,7 +149,20 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() = with(binding) {
-        val clickSound: (() -> Unit) -> (android.view.View) -> Unit = { action -> { _ -> playClickSound(); action() } }
+        var lastClickAt = 0L
+        val clickSound: (() -> Unit) -> (android.view.View) -> Unit = { action ->
+            { _ ->
+                // Bezbednosna mera za uređaje kod kojih TalkBack ponekad duplo registruje
+                // dvostruki dodir (primećeno na nekim MIUI/Xiaomi telefonima) - ignoriše se
+                // drugi dodir ako stigne u vrlo kratkom razmaku od prvog, za SVA dugmad.
+                val now = android.os.SystemClock.elapsedRealtime()
+                if (now - lastClickAt >= 400L) {
+                    lastClickAt = now
+                    playClickSound()
+                    action()
+                }
+            }
+        }
 
         btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
@@ -323,18 +336,8 @@ class ReaderActivity : AppCompatActivity() {
         handler.postDelayed(runnable, 1000L)
     }
 
-    private var lastTogglePlayPauseAt = 0L
-
     private fun togglePlayPause() {
         val tts = PlaybackController.ttsManager ?: return
-        // Na nekim uređajima (primećeno uz TalkBack, npr. MIUI/Xiaomi) dupli dodir zna da
-        // "aktivira" dugme dva puta zaredom u istom trenutku - kod običnog dugmeta se to ne
-        // primeti, ali ovde bi to značilo pauziraj-pa-odmah-nastavi, što deluje kao da dugme
-        // ništa ne radi. Ignorišemo drugi poziv ako stigne u istom, veoma kratkom razmaku.
-        val now = android.os.SystemClock.elapsedRealtime()
-        if (now - lastTogglePlayPauseAt < 400L) return
-        lastTogglePlayPauseAt = now
-
         if (!ttsReady) {
             pendingPlayAfterReady = true
             android.widget.Toast.makeText(this, "Glas se priprema, kreće za trenutak.", android.widget.Toast.LENGTH_SHORT).show()
