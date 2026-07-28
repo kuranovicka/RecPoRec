@@ -972,20 +972,20 @@ class ReaderActivity : AppCompatActivity() {
 
         // Osveži kombinovane glasove - ako su dodati/uklonjeni dok si bila na ekranu
         // "Kombinovani glasovi" i vratila se ovde, bez ovoga bi citanje nastavilo da
-        // koristi staro stanje sve dok se dokument ponovo ne otvori od pocetka.
-        if (ttsReady) {
-            lifecycleScope.launch {
-                val tts = PlaybackController.ttsManager ?: return@launch
-                val combined = resolveCombinedVoiceConfig(
-                    documentId,
-                    doc?.voiceName ?: settings.globalVoiceName,
-                    doc?.voiceEngine ?: settings.globalVoiceEngine
-                )
-                if (combined != null) {
-                    tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice)
-                } else {
-                    tts.setCombinedVoices(emptyList(), 1)
-                }
+        // koristi staro stanje sve dok se dokument ponovo ne otvori od pocetka. Namerno
+        // BEZ uslova "ttsReady" - taj uslov je mogao da preskoci osvezavanje bas u
+        // trenutku kad je najpotrebnije (odmah posle vracanja sa tog ekrana).
+        lifecycleScope.launch {
+            val tts = PlaybackController.ttsManager ?: return@launch
+            val combined = resolveCombinedVoiceConfig(
+                documentId,
+                doc?.voiceName ?: settings.globalVoiceName,
+                doc?.voiceEngine ?: settings.globalVoiceEngine
+            )
+            if (combined != null) {
+                tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice)
+            } else {
+                tts.setCombinedVoices(emptyList(), 1)
             }
         }
 
