@@ -26,6 +26,7 @@ class HelpActivity : AppCompatActivity() {
         Dugme "Dodaj dokument" je desno, na sredini ekrana.
         Dodirni ga da izabereš da li dodaješ sa Google diska ili iz telefona.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
+        Novi dokument se dodaje na kraj liste.
 
         Ispod tog dugmeta je dugme "Izlaz".
         Dodirni ga da potpuno zatvoriš aplikaciju.
@@ -61,9 +62,10 @@ class HelpActivity : AppCompatActivity() {
         Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
         Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.
+        Sva podešavanja se pamte za ceo program.
+        Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
 
         Treća stavka je "Pomoć".
-        To je baš ovaj ekran koji sada čitaš.
 
         Sada idemo u sam dokument.
         Tastatura ima četrnaest dugmića.
@@ -123,29 +125,15 @@ class HelpActivity : AppCompatActivity() {
         Prvo dugme pomera unazad.
         Drugo dugme pomera unapred.
         Šta tačno rade, zavisi od podešavanja "Navigacije".
-        Ako je izabrana stranica, dugmad se zovu "Prethodna stranica" i "Sledeća stranica".
-        Ako je izabran minut, dugmad pomeraju za jedan, pet ili deset minuta.
-        Ako je izabrana oznaka, dugmad se zovu "Prethodna oznaka" i "Sledeća oznaka".
-        Odvedu te tačno na tu oznaku, ne na fiksnu udaljenost.
+        Ako je izabrana stranica, ideš na prethodnu ili na sledeću stranicu.
+        Ako je izabran minut, ideš jedan, pet ili deset minuta unapred-unazad.
+        Ako je izabrana oznaka, ideš tačno na prethodnu ili sledeću oznaku, ne na fiksnu udaljenost.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
         Možeš ga i prevući prstom do drugog mesta.
 
-        Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige.
-
-        Gore desno u dokumentu je opet dugme "Opcije".
-        Tu su "Podešavanja" i "Pomoć".
-
-        Postoji i gest sa dva prsta.
-        Dodirni ekran sa dva prsta odjednom, kratko.
-        Taj gest pauzira ili nastavlja čitanje.
-        Ovo pouzdano radi dok je aplikacija otvorena.
-        Sa nekim čitačima ekrana radi i kad je aplikacija u pozadini, ali to nije garancija za svaki telefon.
-
-        Sva podešavanja se pamte za ceo program.
-        Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
-        Naravno, ako promeniš ta podešavanja.
+        Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige ili tajmera.
 
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
