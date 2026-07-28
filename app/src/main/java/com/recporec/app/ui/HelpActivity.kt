@@ -59,7 +59,6 @@ class HelpActivity : AppCompatActivity() {
         Tvoj obični, već izabrani glas se automatski računa kao prvi u smeni.
         Dovoljno je da dodaš samo još jedan glas da bi se smenjivanje aktiviralo.
         Glasovi mogu biti i iz različitih govornih mehanizama, na primer Google i AlfaNum.
-        Npr: Google muški i ženski, samsung muški i ženski.
 
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
