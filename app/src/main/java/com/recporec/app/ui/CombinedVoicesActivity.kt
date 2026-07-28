@@ -180,6 +180,14 @@ class CombinedVoicesActivity : AppCompatActivity() {
 
             fun addVoice(index: Int) {
                 val chosen = candidates[index]
+                if (chosen.voice.name == defaultVoiceName) {
+                    Toast.makeText(
+                        this@CombinedVoicesActivity,
+                        "To je već tvoj obični glas (računa se automatski kao prvi). Izaberi neki drugi glas da bi se kombinacija aktivirala.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return
+                }
                 lifecycleScope.launch {
                     val already = db.combinedVoiceDao().getVoices(scopeId).any { it.voiceName == chosen.voice.name }
                     if (already) {
