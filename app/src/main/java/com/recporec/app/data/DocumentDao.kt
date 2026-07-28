@@ -6,11 +6,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DocumentDao {
 
-    @Query("SELECT * FROM documents ORDER BY dateAdded DESC")
+    @Query("SELECT * FROM documents ORDER BY sortOrder ASC, dateAdded DESC")
     fun observeAll(): Flow<List<DocumentEntity>>
+
+    @Query("SELECT * FROM documents ORDER BY sortOrder ASC, dateAdded DESC")
+    suspend fun observeAllOnce(): List<DocumentEntity>
 
     @Query("SELECT * FROM documents WHERE id = :id")
     suspend fun getById(id: Long): DocumentEntity?
+
+    @Query("SELECT MIN(sortOrder) FROM documents")
+    suspend fun minSortOrder(): Int?
+
+    @Query("UPDATE documents SET sortOrder = :order WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, order: Int)
 
     @Insert
     suspend fun insert(document: DocumentEntity): Long

@@ -22,6 +22,7 @@ class DocumentListActivity : AppCompatActivity() {
     private lateinit var adapter: DocumentListAdapter
     private val db by lazy { AppDatabase.getInstance(this) }
     private val settings by lazy { com.recporec.app.data.AppSettings(this) }
+    private var currentList: List<DocumentEntity> = emptyList()
 
     private val pickFileLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -77,7 +78,7 @@ class DocumentListActivity : AppCompatActivity() {
 
         adapter = DocumentListAdapter(
             onOpen = { doc -> openDocument(doc) },
-            onDelete = { doc -> confirmDelete(doc) }
+            onActions = { doc -> showActionsMenu(doc) }
         )
         binding.recyclerDocuments.layoutManager = LinearLayoutManager(this)
         binding.recyclerDocuments.adapter = adapter
@@ -122,6 +123,7 @@ class DocumentListActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             db.documentDao().observeAll().collect { list ->
+                currentList = list
                 adapter.submitList(list)
                 binding.emptyView.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
                 binding.recyclerDocuments.visibility = if (list.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
@@ -168,6 +170,7 @@ class DocumentListActivity : AppCompatActivity() {
                     .show()
                 return@launch
             }
+            val topOrder = (db.documentDao().minSortOrder() ?: 0) - 1
             db.documentDao().insert(
                 DocumentEntity(
                     title = name.substringBeforeLast("."),
@@ -177,7 +180,8 @@ class DocumentListActivity : AppCompatActivity() {
                     volumePercent = settings.globalVolumePercent,
                     voiceName = settings.globalVoiceName,
                     voiceEngine = settings.globalVoiceEngine,
-                    languageTag = settings.globalLanguageTag
+                    languageTag = settings.globalLanguageTag,
+                    sortOrder = topOrder
                 )
             )
         }
@@ -211,6 +215,36 @@ class DocumentListActivity : AppCompatActivity() {
         val intent = Intent(this, ReaderActivity::class.java)
         intent.putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, doc.id)
         startActivity(intent)
+    }
+
+    private fun showActionsMenu(doc: DocumentEntity) {
+        AlertDialog.Builder(this)
+            .setTitle(doc.title)
+            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Obriši")) { _, which ->
+                when (which) {
+                    0 -> moveDocument(doc, up = true)
+                    1 -> moveDocument(doc, up = false)
+                    2 -> confirmDelete(doc)
+                }
+            }
+            .show()
+    }
+
+    private fun moveDocument(doc: DocumentEntity, up: Boolean) {
+        val index = currentList.indexOfFirst { it.id == doc.id }
+        if (index < 0) return
+        val targetIndex = if (up) index - 1 else index + 1
+        if (targetIndex < 0 || targetIndex >= currentList.size) {
+            val msg = if (up) "Već je na vrhu liste." else "Već je na dnu liste."
+            android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val target = currentList[targetIndex]
+        lifecycleScope.launch {
+            // Zamena mesta - dokument nosi sortOrder suseda i obrnuto.
+            db.documentDao().updateSortOrder(doc.id, target.sortOrder)
+            db.documentDao().updateSortOrder(target.id, doc.sortOrder)
+        }
     }
 
     private fun confirmDelete(doc: DocumentEntity) {

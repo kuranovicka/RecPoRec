@@ -31,8 +31,10 @@ class HelpActivity : AppCompatActivity() {
         Dodirni ga da potpuno zatvoriš aplikaciju.
         Tada se prekida i čitanje u pozadini.
 
-        Pored svakog dokumenta je dugme "Obriši".
-        Ono trajno briše taj dokument i sav napredak čitanja.
+        Pored svakog dokumenta je dugme "Radnje".
+        Meni radnje ti omogućava da premeštaš i brišeš dokumente.
+        Unutra su tri stavke: "Premesti nagore", "Premesti nadole" i "Obriši".
+        "Obriši" trajno briše taj dokument i sav napredak čitanja.
 
         Gore desno je dugme "Opcije".
         Tu se nalaze tri stavke.
@@ -52,6 +54,11 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Čitanje bez prekida" znači da čitanje ne prestaje ni kad se ekran ugasi.
         Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
+        Sada možeš napraviti pauzu između dve rečenice.
+        Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
+        Kad ga uključiš, pojavljuje se izbor: biraš između 300 i 500 milisekundi.
+        Opcija "Pređi automatski na čitanje sledećeg dokumenta" omogućava ti da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim se prethodni do kraja pročita.
+        Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
         Možeš izabrati: stranicu, jedan minut, pet minuta ili deset minuta.
 
@@ -75,7 +82,7 @@ class HelpActivity : AppCompatActivity() {
         Prvo dugme je "Prethodno poglavlje".
         Ono vraća na početak prethodnog poglavlja.
         Drugo dugme je "Tajmer".
-        Svaki dodir menja tajmer: petnaest minuta, trideset minuta, četrdeset pet minuta, šezdeset minuta, devedeset minuta, pa opet isključeno.
+        Svaki dodir menja tajmer: petnaest minuta, trideset minuta, četrdeset pet minuta, šezdeset minuta, sedamdeset pet minuta, devedeset minuta, pa opet isključeno.
         Kad tajmer istekne, čitanje se pauzira samo.
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
         Treće dugme je "Sledeće poglavlje".

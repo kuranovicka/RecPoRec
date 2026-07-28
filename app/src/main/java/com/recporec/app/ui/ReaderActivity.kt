@@ -39,10 +39,11 @@ class ReaderActivity : AppCompatActivity() {
     private val charsPerPage = 1800
     private val baseCharsPerMinute = 800f // procenjena brzina čitanja pri rate=1.0
 
-    private var timerMinutesCycle = intArrayOf(0, 15, 30, 45, 60, 90)
+    private var timerMinutesCycle = intArrayOf(0, 15, 30, 45, 60, 75, 90)
     private var timerIndex = 0
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
+    private var autoNextRunnable: Runnable? = null
 
     private var audioManager: AudioManager? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
@@ -74,6 +75,9 @@ class ReaderActivity : AppCompatActivity() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
+        if (intent.getBooleanExtra(EXTRA_AUTOPLAY, false)) {
+            pendingPlayAfterReady = true
+        }
         PlaybackController.ensureInitialized(applicationContext)
 
         setupButtons()
@@ -258,6 +262,7 @@ class ReaderActivity : AppCompatActivity() {
         fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
             tts.setSpeechRate(entity.speechRate)
+            tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
             if (effectiveVoiceName != null) {
                 tts.setVoiceByName(effectiveVoiceName)
             } else {
@@ -272,6 +277,7 @@ class ReaderActivity : AppCompatActivity() {
         if (needsEngineSwitch) {
             tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
                 tts.loadText(parsedDoc.fullText)
+                tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                 if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
                 markTtsReady()
             }
@@ -285,6 +291,36 @@ class ReaderActivity : AppCompatActivity() {
             // pokušaj "na silu" ovde bi tiho promašio postavljanje glasa (motor još
             // nema učitanu listu glasova), a lažno bi označio da je sve spremno.
         }
+    }
+
+    /** Kad se dokument do kraja pročita i uključeno je "Pređi automatski na sledeći",
+     * nakon kratke pauze (i zvučnog signala) prelazi na sledeći dokument u listi (isti
+     * redosled kao na glavnom ekranu) i odmah počinje njegovo čitanje. */
+    private fun advanceToNextDocumentAfterDelay() {
+        val runnable = Runnable {
+            lifecycleScope.launch {
+                val list = withContext(Dispatchers.IO) { db.documentDao().observeAllOnce() }
+                val currentIndex = list.indexOfFirst { it.id == documentId }
+                val next = if (currentIndex in 0 until list.size - 1) list[currentIndex + 1] else null
+                if (next == null) {
+                    android.widget.Toast.makeText(
+                        this@ReaderActivity, "Ovo je poslednji dokument u listi.", android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+                if (toneGenerator == null) {
+                    toneGenerator = android.media.ToneGenerator(AudioManager.STREAM_MUSIC, 70)
+                }
+                toneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_ACK, 200)
+                val intent = android.content.Intent(this@ReaderActivity, ReaderActivity::class.java)
+                intent.putExtra(EXTRA_DOCUMENT_ID, next.id)
+                intent.putExtra(EXTRA_AUTOPLAY, true)
+                startActivity(intent)
+                finish()
+            }
+        }
+        autoNextRunnable = runnable
+        handler.postDelayed(runnable, 1000L)
     }
 
     private fun togglePlayPause() {
@@ -609,6 +645,9 @@ class ReaderActivity : AppCompatActivity() {
             runOnUiThread {
                 binding.btnPlayPause.text = "▶ / ⏸"
                 android.widget.Toast.makeText(this, "Čitanje završeno.", android.widget.Toast.LENGTH_LONG).show()
+                if (settings.autoNextDocumentEnabled) {
+                    advanceToNextDocumentAfterDelay()
+                }
             }
         }
         PlaybackController.uiTimerExpiredListener = {
@@ -638,10 +677,12 @@ class ReaderActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
+        autoNextRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
     }
 
     companion object {
         const val EXTRA_DOCUMENT_ID = "extra_document_id"
+        const val EXTRA_AUTOPLAY = "extra_autoplay"
     }
 }

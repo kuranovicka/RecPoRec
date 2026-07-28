@@ -26,6 +26,21 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SOUND, false)
         set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
 
+    /** Pauza između rečenica tokom čitanja - podrazumevano isključena. */
+    var sentencePauseEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SENTENCE_PAUSE_ENABLED, false)
+        set(value) = prefs.edit().putBoolean(KEY_SENTENCE_PAUSE_ENABLED, value).apply()
+
+    /** Trajanje pauze između rečenica u milisekundama - 300 ili 500. */
+    var sentencePauseMs: Int
+        get() = prefs.getInt(KEY_SENTENCE_PAUSE_MS, 300)
+        set(value) = prefs.edit().putInt(KEY_SENTENCE_PAUSE_MS, value).apply()
+
+    /** Kad se dokument do kraja pročita, automatski pređi na čitanje sledećeg u listi. */
+    var autoNextDocumentEnabled: Boolean
+        get() = prefs.getBoolean(KEY_AUTO_NEXT, false)
+        set(value) = prefs.edit().putBoolean(KEY_AUTO_NEXT, value).apply()
+
     // Opšta (globalna) podešavanja glasa - važe za svaki dokument dok se ne prepiše posebno
     var globalLanguageTag: String?
         get() = prefs.getString(KEY_G_LANG, null)
@@ -53,6 +68,9 @@ class AppSettings(context: Context) {
         private const val KEY_SHAKE = "shake_enabled"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_SOUND = "sound_feedback_enabled"
+        private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
+        private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
+        private const val KEY_AUTO_NEXT = "auto_next_document_enabled"
         private const val KEY_G_LANG = "global_language_tag"
         private const val KEY_G_VOICE = "global_voice_name"
         private const val KEY_G_ENGINE = "global_voice_engine"
