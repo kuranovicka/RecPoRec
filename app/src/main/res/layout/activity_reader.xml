@@ -79,6 +79,12 @@
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Idi na stranicu, minut ili oznaku"
                 android:text="➜ Idi na" />
+
+            <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_goto_page"
+                android:contentDescription="Pretraži tekst dokumenta"
+                android:textSize="16sp"
+                android:text="🔍 Pretraga" />
         </LinearLayout>
 
         <!-- Red: 1 2 3 -->

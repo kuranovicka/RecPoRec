@@ -153,6 +153,7 @@ class ReaderActivity : AppCompatActivity() {
 
         btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
+        btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
 
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
@@ -462,6 +463,58 @@ class ReaderActivity : AppCompatActivity() {
             tts.startFromOffset(offset)
         } else {
             tts.syncPositionOnly(offset)
+        }
+    }
+
+    /** Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu. */
+    private fun showSearchTextDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "Pojam za pretragu"
+        input.contentDescription = "Pojam koji tražiš u dokumentu"
+        AlertDialog.Builder(this)
+            .setTitle("Pretraži tekst")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val query = input.text.toString().trim()
+                if (query.isNotEmpty()) performTextSearch(query)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun performTextSearch(query: String) {
+        val fullText = parsed?.fullText ?: return
+        lifecycleScope.launch {
+            val results = withContext(Dispatchers.Default) {
+                val matches = mutableListOf<Pair<Int, String>>()
+                var idx = fullText.indexOf(query, 0, ignoreCase = true)
+                while (idx >= 0 && matches.size < 200) {
+                    val start = max(0, idx - 30)
+                    val end = min(fullText.length, idx + query.length + 30)
+                    val snippet = fullText.substring(start, end)
+                        .replace("\n", " ")
+                        .trim()
+                    matches.add(idx to snippet)
+                    idx = fullText.indexOf(query, idx + query.length, ignoreCase = true)
+                }
+                matches
+            }
+            if (results.isEmpty()) {
+                AlertDialog.Builder(this@ReaderActivity)
+                    .setTitle("Pretraži tekst")
+                    .setMessage("Nema rezultata.")
+                    .setPositiveButton(R.string.ok, null)
+                    .show()
+                return@launch
+            }
+            val labels = results.mapIndexed { i, pair -> "${i + 1}. …${pair.second}…" }.toTypedArray()
+            AlertDialog.Builder(this@ReaderActivity)
+                .setTitle("Rezultati pretrage (${results.size})")
+                .setItems(labels) { _, which ->
+                    moveTo(results[which].first)
+                }
+                .show()
         }
     }
 

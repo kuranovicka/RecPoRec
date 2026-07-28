@@ -113,6 +113,16 @@
                 android:text="300 ms" />
 
             <RadioButton
+                android:id="@+id/radioPause400"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_page_nav"
+                android:text="400 ms" />
+
+            <RadioButton
                 android:id="@+id/radioPause500"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

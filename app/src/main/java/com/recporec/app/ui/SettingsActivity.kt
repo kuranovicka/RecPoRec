@@ -27,10 +27,10 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        if (settings.sentencePauseMs == 500) {
-            binding.radioPause500.isChecked = true
-        } else {
-            binding.radioPause300.isChecked = true
+        when (settings.sentencePauseMs) {
+            400 -> binding.radioPause400.isChecked = true
+            500 -> binding.radioPause500.isChecked = true
+            else -> binding.radioPause300.isChecked = true
         }
 
         binding.switchBackground.setOnCheckedChangeListener { _, checked ->
@@ -57,7 +57,11 @@ class SettingsActivity : AppCompatActivity() {
                 if (checked) android.view.View.VISIBLE else android.view.View.GONE
         }
         binding.groupSentencePauseMs.setOnCheckedChangeListener { _, checkedId ->
-            settings.sentencePauseMs = if (checkedId == binding.radioPause500.id) 500 else 300
+            settings.sentencePauseMs = when (checkedId) {
+                binding.radioPause400.id -> 400
+                binding.radioPause500.id -> 500
+                else -> 300
+            }
         }
         binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
             settings.autoNextDocumentEnabled = checked

@@ -57,7 +57,7 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
-        Kad ga uključiš, pojavljuje se izbor: biraš između 300 i 500 milisekundi.
+        Kad ga uključiš, pojavljuje se izbor: biraš između 300, 400 i 500 milisekundi.
         Opcija "Pređi automatski na čitanje sledećeg dokumenta" omogućava ti da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim se prethodni do kraja pročita.
         Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
@@ -68,10 +68,10 @@ class HelpActivity : AppCompatActivity() {
         Treća stavka je "Pomoć".
 
         Sada idemo u sam dokument.
-        Tastatura ima četrnaest dugmića.
+        Tastatura ima petnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
 
-        Na samom vrhu tastature su dva veća dugmeta.
+        Na samom vrhu tastature su tri dugmeta.
         Prvo dugme je "Oznake".
         Ono otvara meni sa tri stavke.
         Prva stavka je "Dodaj oznaku".
@@ -95,6 +95,13 @@ class HelpActivity : AppCompatActivity() {
         Dodirneš oznaku sa liste da odeš na nju.
         Ako nemaš nijednu oznaku, piše "Nema oznaka".
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
+
+        Pored njih je i dugme "Pretraga".
+        Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu.
+        Upišeš pojam koji tražiš.
+        Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
+        Dodirneš rezultat da odeš tačno na to mesto.
+        Ako ništa nije pronađeno, piše "Nema rezultata".
 
         Prvi red ima tri dugmeta.
         Prvo dugme je "Prethodno poglavlje".
