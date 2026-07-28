@@ -156,6 +156,11 @@ class CombinedVoicesActivity : AppCompatActivity() {
             ) { index ->
                 val chosen = candidates[index]
                 lifecycleScope.launch {
+                    val already = db.combinedVoiceDao().getVoices(scopeId).any { it.voiceName == chosen.voice.name }
+                    if (already) {
+                        Toast.makeText(this@CombinedVoicesActivity, "Taj glas je već dodat.", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
                     val nextOrder = (db.combinedVoiceDao().maxVoiceOrder(scopeId) ?: -1) + 1
                     db.combinedVoiceDao().insertVoice(
                         CombinedVoiceEntryEntity(

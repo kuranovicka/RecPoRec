@@ -918,6 +918,21 @@ class ReaderActivity : AppCompatActivity() {
         updateTimerStatusText()
         updateNavigationButtonLabels()
 
+        // Osveži kombinovane glasove - ako su dodati/uklonjeni dok si bila na ekranu
+        // "Kombinovani glasovi" i vratila se ovde, bez ovoga bi citanje nastavilo da
+        // koristi staro stanje sve dok se dokument ponovo ne otvori od pocetka.
+        if (ttsReady) {
+            lifecycleScope.launch {
+                val tts = PlaybackController.ttsManager ?: return@launch
+                val combined = resolveCombinedVoiceConfig(documentId)
+                if (combined != null) {
+                    tts.setCombinedVoices(combined.voiceNames, combined.sentencesPerVoice)
+                } else {
+                    tts.setCombinedVoices(emptyList(), 1)
+                }
+            }
+        }
+
         PlaybackController.uiPositionListener = { offset ->
             runOnUiThread {
                 doc = doc?.copy(currentCharacterOffset = offset)
