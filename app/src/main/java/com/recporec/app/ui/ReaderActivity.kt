@@ -787,12 +787,21 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
-        val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
-        val current = doc?.languageTag?.let { code ->
-            languages.firstOrNull { it.language == code }?.displayLanguage
+        val resetLabel = "Koristi opšti jezik (ukloni poseban izbor za ovaj dokument)"
+        val labels = listOf(resetLabel) + languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
+        val current = if (doc?.languageTag == null) {
+            resetLabel
+        } else {
+            doc?.languageTag?.let { code -> languages.firstOrNull { it.language == code }?.displayLanguage }
         }
-        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current) { index ->
-            val chosen = languages[index]
+        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current, autoConfirm = true) { index ->
+            if (index == 0) {
+                doc = doc?.copy(languageTag = null)
+                persistState()
+                updateDocLanguageButtonText()
+                return@show
+            }
+            val chosen = languages[index - 1]
             doc = doc?.copy(languageTag = chosen.language)
             persistState()
             updateDocLanguageButtonText()
@@ -818,16 +827,27 @@ class ReaderActivity : AppCompatActivity() {
             voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
         } else voices
 
-        val labels = com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
+        val resetLabel = "Koristi opšti glas (ukloni poseban izbor za ovaj dokument)"
+        val labels = listOf(resetLabel) + com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
         val effectiveVoiceName = doc?.voiceName ?: settings.globalVoiceName ?: PlaybackController.ttsManager?.currentVoiceName()
-        val current = effectiveVoiceName?.let { name ->
-            filtered.firstOrNull { it.voice.name == name }?.displayLabel
+        val current = if (doc?.voiceName == null) {
+            resetLabel
+        } else {
+            effectiveVoiceName?.let { name -> filtered.firstOrNull { it.voice.name == name }?.displayLabel }
         }
         PickerDialog.show(
             this, getString(R.string.voice_dialog_title), labels, current,
-            onSelectionPreview = { index -> com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index]) }
+            onSelectionPreview = { index -> if (index > 0) com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index - 1]) },
+            autoConfirm = true
         ) { index ->
-            val chosen = filtered[index]
+            if (index == 0) {
+                // Ukloni poseban glas ovog dokumenta - vraća se na opšti (globalni) glas.
+                doc = doc?.copy(voiceName = null, voiceEngine = null)
+                persistState()
+                loadDocument()
+                return@show
+            }
+            val chosen = filtered[index - 1]
             val tts = PlaybackController.ttsManager
             if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
                 ttsReady = false

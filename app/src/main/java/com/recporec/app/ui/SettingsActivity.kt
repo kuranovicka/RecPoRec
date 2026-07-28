@@ -76,7 +76,7 @@ class SettingsActivity : AppCompatActivity() {
         refreshNavButton()
         binding.btnNavigationMode.setOnClickListener {
             val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
-            PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel) { index ->
+            PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel, autoConfirm = true) { index ->
                 settings.navigationMode = navValues[index]
                 refreshNavButton()
             }

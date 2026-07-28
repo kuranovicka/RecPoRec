@@ -106,7 +106,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         val current = settings.globalLanguageTag?.let { code ->
             languages.firstOrNull { it.language == code }?.displayLanguage
         }
-        PickerDialog.show(this, "Izaberi jezik", labels, current) { index ->
+        PickerDialog.show(this, "Izaberi jezik", labels, current, autoConfirm = true) { index ->
             val chosen = languages[index]
             settings.globalLanguageTag = chosen.language
             refreshStatusTexts()
@@ -129,7 +129,8 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         }
         PickerDialog.show(
             this, "Izaberi glas", labels, current,
-            onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this, filtered[index]) }
+            onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this, filtered[index]) },
+            autoConfirm = true
         ) { index ->
             val chosen = filtered[index]
             settings.globalVoiceName = chosen.voice.name

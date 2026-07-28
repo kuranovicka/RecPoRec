@@ -92,7 +92,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         if (languages.size == 1) {
             addLanguage(0)
         } else {
-            PickerDialog.show(this, "Dodaj jezik", labels, null) { index -> addLanguage(index) }
+            PickerDialog.show(this, "Dodaj jezik", labels, null, autoConfirm = true) { index -> addLanguage(index) }
         }
     }
 
@@ -186,7 +186,8 @@ class CombinedVoicesActivity : AppCompatActivity() {
             } else {
                 PickerDialog.show(
                     this@CombinedVoicesActivity, "Dodaj glas", labels, null,
-                    onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this@CombinedVoicesActivity, candidates[index]) }
+                    onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this@CombinedVoicesActivity, candidates[index]) },
+                    autoConfirm = true
                 ) { index -> addVoice(index) }
             }
         }

@@ -25,6 +25,7 @@ object PickerDialog {
         items: List<String>,
         currentLabel: String?,
         onSelectionPreview: ((Int) -> Unit)? = null,
+        autoConfirm: Boolean = false,
         onConfirmed: (Int) -> Unit
     ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_picker, null)
@@ -38,7 +39,10 @@ object PickerDialog {
         var visibleIndices = items.indices.toList()
         var selectedOriginalIndex: Int? = null
 
-        textStatus.text = if (currentLabel != null) "Trenutno: $currentLabel (nije potvrđena izmena)" else "Nije potvrđeno"
+        textStatus.text = if (currentLabel != null) "Trenutno: $currentLabel" else "Nije izabrano"
+        if (autoConfirm) {
+            btnConfirm.visibility = android.view.View.GONE
+        }
 
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_single_choice, items.toMutableList())
         listView.adapter = adapter
@@ -68,10 +72,16 @@ object PickerDialog {
             .create()
 
         listView.setOnItemClickListener { _, _, position, _ ->
-            selectedOriginalIndex = visibleIndices.getOrNull(position)
-            val label = selectedOriginalIndex?.let { items[it] } ?: ""
-            textStatus.text = "Izabrano: $label — dodirni Potvrdi da sačuvaš (nije potvrđeno)"
+            val idx = visibleIndices.getOrNull(position) ?: return@setOnItemClickListener
+            selectedOriginalIndex = idx
             selectedOriginalIndex?.let { onSelectionPreview?.invoke(it) }
+            if (autoConfirm) {
+                // Dodir odmah bira i potvrđuje - jedan korak umesto dva.
+                onConfirmed(idx)
+                dialog.dismiss()
+            } else {
+                textStatus.text = "Izabrano: ${items[idx]} — dodirni Potvrdi da sačuvaš (nije potvrđeno)"
+            }
         }
 
         btnCancel.setOnClickListener { dialog.dismiss() }

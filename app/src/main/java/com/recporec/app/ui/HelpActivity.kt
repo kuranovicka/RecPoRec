@@ -44,8 +44,7 @@ class HelpActivity : AppCompatActivity() {
         Tu biraš jezik, glas, brzinu i jačinu za sve nove dokumente.
         Prvo izaberi jezik.
         Onda izaberi glas.
-        Kad dodirneš stavku na listi, ona još nije potvrđena.
-        Dodirni dugme "Potvrdi" da sačuvaš izbor.
+        Dodirom na stavku na listi odmah se i bira i potvrđuje - nema posebnog dugmeta za potvrdu.
         Ako dodirneš glas na listi, čućeš kratak primer teksta izgovoren tim glasom.
         Tako lakše prepoznaš koji glas ti se sviđa.
 
@@ -131,8 +130,10 @@ class HelpActivity : AppCompatActivity() {
         Prvo dugme smanjuje jačinu zvuka.
         Drugo dugme je "Jezik".
         Ono menja jezik samo za ovaj dokument.
+        U toj listi je i stavka "Koristi opšti jezik", koja uklanja poseban izbor za ovaj dokument.
         Treće dugme je "Glas".
         Ono menja glas samo za ovaj dokument.
+        U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
 
