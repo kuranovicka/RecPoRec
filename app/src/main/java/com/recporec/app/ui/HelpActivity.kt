@@ -18,40 +18,34 @@ class HelpActivity : AppCompatActivity() {
 
     private val helpText = """
         Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
-
         Prvi ekran je lista dokumenata.
         Tu vidiš sve knjige koje dodaš.
         Dodirni dokument da ga otvoriš i čitaš.
-
         Dugme "Dodaj dokument" je desno, na sredini ekrana.
         Dodirni ga da izabereš da li dodaješ sa Google diska ili iz telefona.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
         Novi dokument se dodaje na kraj liste.
-
         Ispod tog dugmeta je dugme "Izlaz".
         Dodirni ga da potpuno zatvoriš aplikaciju.
         Tada se prekida i čitanje u pozadini.
-
         Pored svakog dokumenta je dugme "Radnje".
         Meni radnje ti omogućava da premeštaš i brišeš dokumente.
         Unutra su tri stavke: "Premesti nagore", "Premesti nadole" i "Obriši".
         "Obriši" trajno briše taj dokument i sav napredak čitanja.
-
         Gore desno je dugme "Opcije".
         Tu se nalaze tri stavke.
-
         Prva stavka je "Opšta podešavanja glasa".
         Tu biraš jezik, glas, brzinu i jačinu za sve nove dokumente.
         Prvo izaberi jezik.
         Onda izaberi glas.
-        Dodirom na stavku na listi odmah se i bira i potvrđuje - nema posebnog dugmeta za potvrdu.
+        Dodirom na stavku na listi odmah se i bira i potvrđuje.
+        Nema posebnog dugmeta za potvrdu.
         Ako dodirneš glas na listi, čućeš kratak primer teksta izgovoren tim glasom.
         Tako lakše prepoznaš koji glas ti se sviđa.
-
         Posle glasa je dugme "Kombinovani glasovi".
         Njime dodaješ dva ili više glasova koji se smenjuju dok čitaš knjigu.
-        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove, ili dodaje drugi glas iz već odabranog jezika.
-        Dugme "Dodaj glas" dodaje glas iz dodatih jezika.
+        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove.
+        Dugme "Dodaj glas" dodaje glas iz dodatih ili već odabranog jezika.
         Dugme "Ukloni jezik" i dugme "Ukloni glas," uklanjaju dodatni glas i jezik.
         Dugme "Broj rečenica po glasu" bira posle koliko rečenica se menja glas.
         Ako polje ostane prazno, svaki glas čita po jednu rečenicu.
@@ -59,7 +53,6 @@ class HelpActivity : AppCompatActivity() {
         Tvoj obični, već izabrani glas se automatski računa kao prvi u smeni.
         Dovoljno je da dodaš samo još jedan glas da bi se smenjivanje aktiviralo.
         Glasovi mogu biti i iz različitih govornih mehanizama, na primer Google i AlfaNum.
-
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
         Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
@@ -75,13 +68,10 @@ class HelpActivity : AppCompatActivity() {
         Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.
         Sva podešavanja se pamte za ceo program.
         Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
-
         Treća stavka je "Pomoć".
-
         Sada idemo u sam dokument.
         Tastatura ima šesnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
-
         Na samom vrhu tastature su tri dugmeta.
         Prvo dugme je "Oznake".
         Ono otvara meni sa tri stavke.
@@ -106,14 +96,12 @@ class HelpActivity : AppCompatActivity() {
         Dodirneš oznaku sa liste da odeš na nju.
         Ako nemaš nijednu oznaku, piše "Nema oznaka".
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
-
         Pored njih je i dugme "Pretraga".
         Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu.
         Upišeš pojam koji tražiš.
         Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
         Dodirneš rezultat da odeš tačno na to mesto.
         Ako ništa nije pronađeno, piše "Nema rezultata".
-
         Prvi red ima tri dugmeta.
         Prvo dugme je "Prethodno poglavlje".
         Ono vraća na početak prethodnog poglavlja.
@@ -124,7 +112,6 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
-
         Drugi red ima pet dugmadi.
         Prvo dugme smanjuje jačinu zvuka.
         Drugo dugme je "Jezik".
@@ -135,13 +122,11 @@ class HelpActivity : AppCompatActivity() {
         U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
-
         Treći red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
-
         Četvrti red ima dva dugmeta.
         Prvo dugme pomera unazad.
         Drugo dugme pomera unapred.
@@ -149,13 +134,10 @@ class HelpActivity : AppCompatActivity() {
         Ako je izabrana stranica, ideš na prethodnu ili na sledeću stranicu.
         Ako je izabran minut, ideš jedan, pet ili deset minuta unapred-unazad.
         Ako je izabrana oznaka, ideš tačno na prethodnu ili sledeću oznaku, ne na fiksnu udaljenost.
-
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
         Možeš ga i prevući prstom do drugog mesta.
-
         Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige ili tajmera.
-
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
 
