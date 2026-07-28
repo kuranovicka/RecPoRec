@@ -323,8 +323,18 @@ class ReaderActivity : AppCompatActivity() {
         handler.postDelayed(runnable, 1000L)
     }
 
+    private var lastTogglePlayPauseAt = 0L
+
     private fun togglePlayPause() {
         val tts = PlaybackController.ttsManager ?: return
+        // Na nekim uređajima (primećeno uz TalkBack, npr. MIUI/Xiaomi) dupli dodir zna da
+        // "aktivira" dugme dva puta zaredom u istom trenutku - kod običnog dugmeta se to ne
+        // primeti, ali ovde bi to značilo pauziraj-pa-odmah-nastavi, što deluje kao da dugme
+        // ništa ne radi. Ignorišemo drugi poziv ako stigne u istom, veoma kratkom razmaku.
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastTogglePlayPauseAt < 400L) return
+        lastTogglePlayPauseAt = now
+
         if (!ttsReady) {
             pendingPlayAfterReady = true
             android.widget.Toast.makeText(this, "Glas se priprema, kreće za trenutak.", android.widget.Toast.LENGTH_SHORT).show()
