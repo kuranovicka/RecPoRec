@@ -118,11 +118,17 @@ class TtsManager(private val appContext: Context) {
         }
         activeInstance = instance
         val voice = instance.voices?.firstOrNull { it.name == ref.voiceName } ?: return
+        // setLanguage() se poziva SAMO kad se jezik stvarno menja - kod nekih motora, poziv
+        // sa VEĆ AKTIVNIM jezikom (npr. prelazak sa jednog na drugi srpski glas) zna tiho da
+        // vrati podrazumevani glas tog jezika, poništavajući baš izabrani glas.
+        val languageChanged = instance.voice?.locale?.language != voice.locale.language
         instance.voice = voice
-        try {
-            instance.setLanguage(voice.locale)
-        } catch (_: Exception) {
-            // Neki motori/lokali mogu odbiti setLanguage - glas je već postavljen gore.
+        if (languageChanged) {
+            try {
+                instance.setLanguage(voice.locale)
+            } catch (_: Exception) {
+                // Neki motori/lokali mogu odbiti setLanguage - glas je već postavljen gore.
+            }
         }
     }
 
@@ -213,15 +219,18 @@ class TtsManager(private val appContext: Context) {
 
     fun setVoiceByName(name: String) {
         val voice = tts?.voices?.firstOrNull { it.name == name } ?: return
+        // setLanguage() se poziva SAMO kad se jezik stvarno menja - kod nekih motora, poziv
+        // sa VEĆ AKTIVNIM jezikom (npr. prelazak sa jednog na drugi glas istog jezika) zna
+        // tiho da vrati podrazumevani glas tog jezika, poništavajući baš izabrani glas.
+        val languageChanged = tts?.voice?.locale?.language != voice.locale.language
         tts?.voice = voice
-        // Neki manji/regionalni TTS motori ne prate pouzdano samo noviju Voice metodu kad se
-        // menja i JEZIK glasa - dodatno postavljamo i jezik preko starije metode, radi
-        // sigurnosti. Za motore kojima ovo nije potrebno, poziv je bezopasan.
-        try {
-            tts?.setLanguage(voice.locale)
-        } catch (_: Exception) {
-            // Neki motori/lokali mogu odbiti setLanguage - glas je vec postavljen gore,
-            // pa nastavljamo bez prekida.
+        if (languageChanged) {
+            try {
+                tts?.setLanguage(voice.locale)
+            } catch (_: Exception) {
+                // Neki motori/lokali mogu odbiti setLanguage - glas je vec postavljen gore,
+                // pa nastavljamo bez prekida.
+            }
         }
     }
 
