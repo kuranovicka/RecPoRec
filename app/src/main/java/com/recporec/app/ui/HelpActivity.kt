@@ -122,6 +122,8 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme je "Glas".
         Ono menja glas samo za ovaj dokument.
         U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
+        Ta stavka uklanja i kombinovane glasove ovog dokumenta, ako ih ima.
+        Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
         Treći red ima tri dugmeta.

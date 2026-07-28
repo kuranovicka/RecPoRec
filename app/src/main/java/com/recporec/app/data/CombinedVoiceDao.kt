@@ -40,4 +40,20 @@ interface CombinedVoiceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setSettings(settings: CombinedVoiceSettingsEntity)
+
+    @Query("DELETE FROM combined_voice_languages WHERE scopeId = :scopeId")
+    suspend fun deleteAllLanguagesForScope(scopeId: Long)
+
+    @Query("DELETE FROM combined_voice_entries WHERE scopeId = :scopeId")
+    suspend fun deleteAllVoicesForScope(scopeId: Long)
+
+    @Query("DELETE FROM combined_voice_settings WHERE scopeId = :scopeId")
+    suspend fun deleteSettingsForScope(scopeId: Long)
+
+    /** Potpuno briše kombinovane glasove/jezike/broj rečenica za dati opseg (dokument). */
+    suspend fun clearScope(scopeId: Long) {
+        deleteAllLanguagesForScope(scopeId)
+        deleteAllVoicesForScope(scopeId)
+        deleteSettingsForScope(scopeId)
+    }
 }

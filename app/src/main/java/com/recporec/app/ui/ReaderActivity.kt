@@ -841,10 +841,14 @@ class ReaderActivity : AppCompatActivity() {
             autoConfirm = true
         ) { index ->
             if (index == 0) {
-                // Ukloni poseban glas ovog dokumenta - vraća se na opšti (globalni) glas.
+                // Ukloni poseban glas ovog dokumenta I sve njegove kombinovane glasove/jezike -
+                // dokument se u potpunosti oslanja na opšta podešavanja, kombinovana ili ne.
                 doc = doc?.copy(voiceName = null, voiceEngine = null)
                 persistState()
-                loadDocument()
+                lifecycleScope.launch {
+                    db.combinedVoiceDao().clearScope(documentId)
+                    loadDocument()
+                }
                 return@show
             }
             val chosen = filtered[index - 1]
