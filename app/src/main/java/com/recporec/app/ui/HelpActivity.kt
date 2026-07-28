@@ -77,7 +77,9 @@ class HelpActivity : AppCompatActivity() {
         Možeš upisati naziv oznake.
         Ako ne upišeš naziv, oznaka dobija broj, počevši od jedan.
         Druga stavka je "Ukloni oznaku".
-        Upišeš naziv oznake koju želiš da ukloniš.
+        Ona prikazuje listu tvojih oznaka za ovaj dokument.
+        Dodirneš oznaku sa liste, pa potvrdiš da je želiš obrisati.
+        Ako nemaš nijednu oznaku, piše "Nema oznaka".
         Treća stavka je "Ukloni sve oznake".
         Tu samo potvrdiš, nema polja za unos.
         Drugo dugme je "Idi na".

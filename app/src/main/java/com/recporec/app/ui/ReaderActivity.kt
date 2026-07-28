@@ -496,25 +496,38 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showRemoveBookmarkDialog() {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        input.hint = "Naziv oznake za uklanjanje"
-        input.contentDescription = "Naziv oznake koju treba ukloniti"
-        AlertDialog.Builder(this)
-            .setTitle("Ukloni oznaku")
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val name = input.text.toString().trim()
-                if (name.isEmpty()) return@setPositiveButton
-                val currentDocId = documentId
-                lifecycleScope.launch {
-                    val deleted = db.bookmarkDao().deleteByName(currentDocId, name)
-                    val msg = if (deleted > 0) "Oznaka \"$name\" je uklonjena." else "Oznaka \"$name\" nije pronađena."
-                    android.widget.Toast.makeText(this@ReaderActivity, msg, android.widget.Toast.LENGTH_SHORT).show()
-                }
+        val currentDocId = documentId
+        lifecycleScope.launch {
+            val bookmarks = db.bookmarkDao().getForDocument(currentDocId)
+            if (bookmarks.isEmpty()) {
+                AlertDialog.Builder(this@ReaderActivity)
+                    .setTitle("Ukloni oznaku")
+                    .setMessage("Nema oznaka.")
+                    .setPositiveButton(R.string.ok, null)
+                    .show()
+                return@launch
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+            val names = bookmarks.map { it.name }.toTypedArray()
+            AlertDialog.Builder(this@ReaderActivity)
+                .setTitle("Ukloni oznaku")
+                .setItems(names) { _, which ->
+                    val bookmark = bookmarks[which]
+                    AlertDialog.Builder(this@ReaderActivity)
+                        .setTitle("Ukloni oznaku")
+                        .setMessage("Da li sigurno želiš da ukloniš oznaku \"${bookmark.name}\"?")
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                            lifecycleScope.launch {
+                                db.bookmarkDao().deleteById(bookmark.id)
+                                android.widget.Toast.makeText(
+                                    this@ReaderActivity, "Oznaka \"${bookmark.name}\" je uklonjena.", android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        .show()
+                }
+                .show()
+        }
     }
 
     private fun confirmRemoveAllBookmarks() {
