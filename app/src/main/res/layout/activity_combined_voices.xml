@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textColor="@color/btn_page_nav"
-            android:text="Motor za ovaj opseg: još nije određen" />
+            android:text="Motori u upotrebi: još nije određeno" />
 
         <TextView
             android:id="@+id/textLanguagesStatus"

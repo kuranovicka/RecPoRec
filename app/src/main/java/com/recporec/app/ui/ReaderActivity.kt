@@ -271,13 +271,14 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private data class CombinedVoiceConfig(val voiceNames: List<String>, val engine: String, val sentencesPerVoice: Int)
+    private data class CombinedVoiceConfig(val voices: List<com.recporec.app.tts.CombinedVoiceRef>, val sentencesPerVoice: Int)
 
     /** Kombinovani glasovi za dokument imaju prednost nad opštim; ako dokument nema
      * validnu kombinaciju, koriste se opšti (globalni) kombinovani glasovi, ako postoje.
      * Obican, vec izabran glas (regularVoiceName) automatski ulazi kao prvi u smeni ako
      * je bar jedan glas eksplicitno dodat - korisnica ne mora da ga posebno "doda", pošto
-     * je već njen izbor. */
+     * je već njen izbor. Glasovi mogu biti iz RAZLIČITIH TTS motora - TtsManager drži
+     * odvojenu, unapred upaljenu vezu po motoru. */
     private suspend fun resolveCombinedVoiceConfig(
         docId: Long,
         regularVoiceName: String?,
@@ -288,21 +289,18 @@ class ReaderActivity : AppCompatActivity() {
         suspend fun resolveForScope(scopeId: Long): CombinedVoiceConfig? {
             val explicit = dao.getVoices(scopeId)
             if (explicit.isEmpty()) return null
-            val engine = explicit.first().voiceEngine
-            if (explicit.any { it.voiceEngine != engine }) return null // bezbednosna provera
 
-            val names = mutableListOf<String>()
-            if (regularVoiceName != null &&
-                (regularEngine == null || regularEngine == engine) &&
+            val refs = mutableListOf<com.recporec.app.tts.CombinedVoiceRef>()
+            if (regularVoiceName != null && regularEngine != null &&
                 explicit.none { it.voiceName == regularVoiceName }
             ) {
-                names.add(regularVoiceName)
+                refs.add(com.recporec.app.tts.CombinedVoiceRef(regularEngine, regularVoiceName))
             }
-            names.addAll(explicit.map { it.voiceName })
-            if (names.size < 2) return null
+            refs.addAll(explicit.map { com.recporec.app.tts.CombinedVoiceRef(it.voiceEngine, it.voiceName) })
+            if (refs.size < 2) return null
 
             val count = dao.getSettings(scopeId)?.sentencesPerVoice ?: 1
-            return CombinedVoiceConfig(names, engine, count)
+            return CombinedVoiceConfig(refs, count)
         }
 
         return resolveForScope(docId) ?: resolveForScope(0L)
@@ -324,12 +322,12 @@ class ReaderActivity : AppCompatActivity() {
         // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
         // i dalje važi za dokumente koji nemaju sopstveni izbor.
         // Ako postoje kombinovani glasovi (za dokument ili opšte), oni imaju prednost.
-        val effectiveVoiceName = combined?.voiceNames?.first() ?: (entity.voiceName ?: settings.globalVoiceName)
-        val effectiveEngine = combined?.engine ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
+        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (entity.voiceName ?: settings.globalVoiceName)
+        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
 
         fun applyCombinedVoicesIfAny() {
             if (combined != null) {
-                tts.setCombinedVoices(combined.voiceNames, combined.sentencesPerVoice)
+                tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice)
             } else {
                 tts.setCombinedVoices(emptyList(), 1)
             }
@@ -960,7 +958,7 @@ class ReaderActivity : AppCompatActivity() {
                     doc?.voiceEngine ?: settings.globalVoiceEngine
                 )
                 if (combined != null) {
-                    tts.setCombinedVoices(combined.voiceNames, combined.sentencesPerVoice)
+                    tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice)
                 } else {
                     tts.setCombinedVoices(emptyList(), 1)
                 }

@@ -59,7 +59,7 @@ class HelpActivity : AppCompatActivity() {
         Isto dugme postoji i u svakom dokumentu, samo za taj dokument.
         Tvoj obični, već izabrani glas se automatski računa kao prvi u smeni.
         Dovoljno je da dodaš samo još jedan glas da bi se smenjivanje aktiviralo.
-        Svi kombinovani glasovi iz tehničkih razloga, moraju biti iz istog govornog mehanizma.
+        Glasovi mogu biti i iz različitih govornih mehanizama, na primer Google i AlfaNum.
         Npr: Google muški i ženski, samsung muški i ženski.
 
         Druga stavka je "Podešavanja".
