@@ -8,12 +8,28 @@ android {
     namespace = "com.recporec.app"
     compileSdk = 35
 
+    // Broj build-a sa GitHub Actions-a (uvek raste) - koristi se za versionCode da bi
+    // Android uvek prepoznao noviji APK kao "ažuriranje", umesto da traži deinstalaciju.
+    val ciRunNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+
     defaultConfig {
         applicationId = "com.recporec.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = ciRunNumber ?: 1
+        versionName = "0.1.${ciRunNumber ?: 0}"
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            // Fiksan, u repo-u sačuvan keystore - da bi svaki CI build imao ISTI potpis.
+            // Bez ovoga, svaki build na novom serveru dobija nasumičan debug ključ, pa
+            // Android odbija instalaciju "preko" prethodne verzije (traži deinstalaciju).
+            storeFile = file("../keystore/recporec-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {

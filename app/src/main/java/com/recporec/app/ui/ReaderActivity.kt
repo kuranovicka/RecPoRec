@@ -386,16 +386,32 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode
-        val (label, description) = when (mode) {
-            "min1" -> "1 min" to "1 minut"
-            "min5" -> "5 min" to "5 minuta"
-            "min10" -> "10 min" to "10 minuta"
-            else -> "Str." to "Stranica"
+        when (mode) {
+            "min1" -> {
+                binding.btnStepBack.text = "◀ 1 min"
+                binding.btnStepBack.contentDescription = "1 minut unazad"
+                binding.btnStepForward.text = "1 min ▶"
+                binding.btnStepForward.contentDescription = "1 minut unapred"
+            }
+            "min5" -> {
+                binding.btnStepBack.text = "◀ 5 min"
+                binding.btnStepBack.contentDescription = "5 minuta unazad"
+                binding.btnStepForward.text = "5 min ▶"
+                binding.btnStepForward.contentDescription = "5 minuta unapred"
+            }
+            "min10" -> {
+                binding.btnStepBack.text = "◀ 10 min"
+                binding.btnStepBack.contentDescription = "10 minuta unazad"
+                binding.btnStepForward.text = "10 min ▶"
+                binding.btnStepForward.contentDescription = "10 minuta unapred"
+            }
+            else -> {
+                binding.btnStepBack.text = "◀ Str."
+                binding.btnStepBack.contentDescription = "Prethodna stranica"
+                binding.btnStepForward.text = "Str. ▶"
+                binding.btnStepForward.contentDescription = "Sledeća stranica"
+            }
         }
-        binding.btnStepBack.text = "◀ $label"
-        binding.btnStepBack.contentDescription = "$description unazad"
-        binding.btnStepForward.text = "$label ▶"
-        binding.btnStepForward.contentDescription = "$description unapred"
     }
 
     private fun moveTo(offset: Int) {
@@ -519,30 +535,25 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showGoToBookmarkDialog() {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        input.hint = "Naziv oznake"
-        input.contentDescription = "Naziv oznake na koju treba preći"
-        AlertDialog.Builder(this)
-            .setTitle("Idi na oznaku")
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val name = input.text.toString().trim()
-                if (name.isEmpty()) return@setPositiveButton
-                val currentDocId = documentId
-                lifecycleScope.launch {
-                    val bookmark = db.bookmarkDao().findByName(currentDocId, name)
-                    if (bookmark != null) {
-                        moveTo(bookmark.characterOffset)
-                    } else {
-                        android.widget.Toast.makeText(
-                            this@ReaderActivity, "Oznaka \"$name\" nije pronađena.", android.widget.Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+        val currentDocId = documentId
+        lifecycleScope.launch {
+            val bookmarks = db.bookmarkDao().getForDocument(currentDocId)
+            if (bookmarks.isEmpty()) {
+                AlertDialog.Builder(this@ReaderActivity)
+                    .setTitle("Idi na oznaku")
+                    .setMessage("Nema oznaka.")
+                    .setPositiveButton(R.string.ok, null)
+                    .show()
+                return@launch
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+            val names = bookmarks.map { it.name }.toTypedArray()
+            AlertDialog.Builder(this@ReaderActivity)
+                .setTitle("Idi na oznaku")
+                .setItems(names) { _, which ->
+                    moveTo(bookmarks[which].characterOffset)
+                }
+                .show()
+        }
     }
 
     private fun showGotoPageDialog() {

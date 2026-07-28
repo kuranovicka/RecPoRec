@@ -87,7 +87,9 @@ class HelpActivity : AppCompatActivity() {
         Druga stavka je "Idi na minut".
         Upišeš broj minuta od početka dokumenta.
         Treća stavka je "Idi na oznaku".
-        Upišeš naziv oznake koju si ranije dodala.
+        Ona prikazuje listu tvojih oznaka za ovaj dokument.
+        Dodirneš oznaku sa liste da odeš na nju.
+        Ako nemaš nijednu oznaku, piše "Nema oznaka".
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
 
         Prvi red ima tri dugmeta.
@@ -118,7 +120,9 @@ class HelpActivity : AppCompatActivity() {
         Četvrti red ima dva dugmeta.
         Prvo dugme pomera unazad.
         Drugo dugme pomera unapred.
-        Šta znači "unazad" i "unapred", zavisi od podešavanja "Navigacije".
+        Šta tačno rade, zavisi od podešavanja "Navigacije".
+        Ako je izabrana stranica, dugmad se zovu "Prethodna stranica" i "Sledeća stranica".
+        Ako je izabran minut, dugmad pomeraju za jedan, pet ili deset minuta.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
