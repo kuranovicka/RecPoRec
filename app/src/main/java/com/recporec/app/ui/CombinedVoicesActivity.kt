@@ -160,9 +160,10 @@ class CombinedVoicesActivity : AppCompatActivity() {
             if (lockedEngine != null) {
                 candidates = candidates.filter { it.enginePackage == lockedEngine }
                 if (candidates.isEmpty()) {
+                    val engineLabel = allVoices.firstOrNull { it.enginePackage == lockedEngine }?.engineLabel ?: lockedEngine
                     Toast.makeText(
                         this@CombinedVoicesActivity,
-                        "Nema više glasova iz istog motora za dodate jezike. Kombinovani glasovi moraju biti iz istog TTS motora.",
+                        "Nema više glasova iz istog motora ($engineLabel) za dodate jezike. Kombinovani glasovi moraju biti iz istog TTS motora. Ako očekuješ drugi motor, proveri da li OVAJ dokument ima svoj poseban glas (dugme \"Glas\"), različit od opšteg.",
                         Toast.LENGTH_LONG
                     ).show()
                     return@launch
@@ -279,6 +280,13 @@ class CombinedVoicesActivity : AppCompatActivity() {
             val languages = db.combinedVoiceDao().getLanguages(scopeId)
             val voices = db.combinedVoiceDao().getVoices(scopeId)
             val settingsEntity = db.combinedVoiceDao().getSettings(scopeId)
+            val lockedEngine = voices.firstOrNull()?.voiceEngine ?: defaultVoiceEngine
+            val lockedEngineLabel = lockedEngine?.let { pkg -> allVoices.firstOrNull { it.enginePackage == pkg }?.engineLabel ?: pkg }
+            binding.textEngineStatus.text = if (lockedEngineLabel != null) {
+                "Motor za ovaj opseg: $lockedEngineLabel"
+            } else {
+                "Motor za ovaj opseg: još nije određen"
+            }
 
             binding.textLanguagesStatus.text = if (languages.isEmpty()) {
                 "Dodati jezici: nema"

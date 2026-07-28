@@ -26,9 +26,18 @@
         android:padding="20dp">
 
         <TextView
+            android:id="@+id/textEngineStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/btn_page_nav"
+            android:text="Motor za ovaj opseg: još nije određen" />
+
+        <TextView
             android:id="@+id/textLanguagesStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="Dodati jezici: nema" />
