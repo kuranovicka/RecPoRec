@@ -63,30 +63,22 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-        <!-- Red: Idi na pocetak / Idi na stranicu / Idi na minut -->
+        <!-- Red: Oznake / Idi na -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnGoStart" style="@style/KeyButton"
+            <Button android:id="@+id/btnBookmarks" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Idi na početak dokumenta"
-                android:textSize="16sp"
-                android:text="⏮ Početak" />
+                android:contentDescription="Oznake - dodaj, ukloni ili ukloni sve oznake u ovom dokumentu"
+                android:text="🔖 Oznake" />
 
-            <Button android:id="@+id/btnGotoPage" style="@style/KeyButton"
+            <Button android:id="@+id/btnGoTo" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="@string/btn_goto_page"
-                android:textSize="16sp"
-                android:text="Str." />
-
-            <Button android:id="@+id/btnGotoMinute" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Idi na određeni minut u dokumentu"
-                android:textSize="16sp"
-                android:text="Minut" />
+                android:contentDescription="Idi na stranicu, minut ili oznaku"
+                android:text="➜ Idi na" />
         </LinearLayout>
 
         <!-- Red: 1 2 3 -->
@@ -112,23 +104,23 @@
                 android:text="Poglavlje ⏭" />
         </LinearLayout>
 
-        <!-- Red: Jezik(dokument) 4 5 6 -->
+        <!-- Red: jačina- / Jezik(dokument) / Glas / jačina+ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
+            <Button android:id="@+id/btnVolDown" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_volume"
+                android:contentDescription="@string/btn_vol_down"
+                android:text="🔉−" />
+
             <Button android:id="@+id/btnDocLanguage" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Jezik za ovaj dokument"
                 android:textSize="16sp"
                 android:text="Jezik" />
-
-            <Button android:id="@+id/btnVolDown" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_volume"
-                android:contentDescription="@string/btn_vol_down"
-                android:text="🔉−" />
 
             <Button android:id="@+id/btnVoice" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_voice"

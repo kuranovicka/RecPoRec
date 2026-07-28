@@ -151,9 +151,8 @@ class ReaderActivity : AppCompatActivity() {
     private fun setupButtons() = with(binding) {
         val clickSound: (() -> Unit) -> (android.view.View) -> Unit = { action -> { _ -> playClickSound(); action() } }
 
-        btnGoStart.setOnClickListener(clickSound { goToStart() })
-        btnGotoPage.setOnClickListener(clickSound { showGotoPageDialog() })
-        btnGotoMinute.setOnClickListener(clickSound { showGotoMinuteDialog() })
+        btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
+        btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
 
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
@@ -341,10 +340,6 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun goToStart() {
-        moveTo(0)
-    }
-
     private fun showGotoMinuteDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
@@ -418,6 +413,136 @@ class ReaderActivity : AppCompatActivity() {
         } else {
             tts.syncPositionOnly(offset)
         }
+    }
+
+    /** Meni "Idi na": stranica, minut ili oznaka. */
+    private fun showGoToMenu() {
+        AlertDialog.Builder(this)
+            .setTitle("Idi na")
+            .setItems(arrayOf("Idi na stranicu", "Idi na minut", "Idi na oznaku")) { _, which ->
+                when (which) {
+                    0 -> showGotoPageDialog()
+                    1 -> showGotoMinuteDialog()
+                    2 -> showGoToBookmarkDialog()
+                }
+            }
+            .show()
+    }
+
+    /** Meni "Oznake": dodaj, ukloni jednu ili ukloni sve. */
+    private fun showBookmarksMenu() {
+        AlertDialog.Builder(this)
+            .setTitle("Oznake")
+            .setItems(arrayOf("Dodaj oznaku", "Ukloni oznaku", "Ukloni sve oznake")) { _, which ->
+                when (which) {
+                    0 -> showAddBookmarkDialog()
+                    1 -> showRemoveBookmarkDialog()
+                    2 -> confirmRemoveAllBookmarks()
+                }
+            }
+            .show()
+    }
+
+    private fun showAddBookmarkDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "Naziv oznake (nije obavezno)"
+        input.contentDescription = "Naziv nove oznake, nije obavezno - ako ostane prazno, dobija broj"
+        AlertDialog.Builder(this)
+            .setTitle("Dodaj oznaku")
+            .setMessage("Postavlja se oznaka na mesto na kome se trenutno nalaziš.")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val currentDocId = documentId
+                val offset = doc?.currentCharacterOffset ?: 0
+                val typedName = input.text.toString().trim()
+                lifecycleScope.launch {
+                    val name = if (typedName.isNotEmpty()) {
+                        typedName
+                    } else {
+                        val count = db.bookmarkDao().countForDocument(currentDocId)
+                        (count + 1).toString()
+                    }
+                    db.bookmarkDao().insert(
+                        com.recporec.app.data.BookmarkEntity(
+                            documentId = currentDocId,
+                            name = name,
+                            characterOffset = offset
+                        )
+                    )
+                    android.widget.Toast.makeText(
+                        this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showRemoveBookmarkDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "Naziv oznake za uklanjanje"
+        input.contentDescription = "Naziv oznake koju treba ukloniti"
+        AlertDialog.Builder(this)
+            .setTitle("Ukloni oznaku")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isEmpty()) return@setPositiveButton
+                val currentDocId = documentId
+                lifecycleScope.launch {
+                    val deleted = db.bookmarkDao().deleteByName(currentDocId, name)
+                    val msg = if (deleted > 0) "Oznaka \"$name\" je uklonjena." else "Oznaka \"$name\" nije pronađena."
+                    android.widget.Toast.makeText(this@ReaderActivity, msg, android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun confirmRemoveAllBookmarks() {
+        AlertDialog.Builder(this)
+            .setTitle("Ukloni sve oznake")
+            .setMessage("Da li sigurno želiš da obrišeš sve oznake u ovom dokumentu?")
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                val currentDocId = documentId
+                lifecycleScope.launch {
+                    db.bookmarkDao().deleteAllForDocument(currentDocId)
+                    android.widget.Toast.makeText(
+                        this@ReaderActivity, "Sve oznake su uklonjene.", android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            .show()
+    }
+
+    private fun showGoToBookmarkDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "Naziv oznake"
+        input.contentDescription = "Naziv oznake na koju treba preći"
+        AlertDialog.Builder(this)
+            .setTitle("Idi na oznaku")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isEmpty()) return@setPositiveButton
+                val currentDocId = documentId
+                lifecycleScope.launch {
+                    val bookmark = db.bookmarkDao().findByName(currentDocId, name)
+                    if (bookmark != null) {
+                        moveTo(bookmark.characterOffset)
+                    } else {
+                        android.widget.Toast.makeText(
+                            this@ReaderActivity, "Oznaka \"$name\" nije pronađena.", android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showGotoPageDialog() {

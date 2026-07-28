@@ -66,16 +66,28 @@ class HelpActivity : AppCompatActivity() {
         To je baš ovaj ekran koji sada čitaš.
 
         Sada idemo u sam dokument.
-        Tastatura ima osamnaest dugmića.
+        Tastatura ima četrnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
 
-        Na samom vrhu tastature su tri dugmeta.
-        Prvo dugme je "Idi na početak".
-        Ono vraća na sam početak dokumenta.
-        Drugo dugme je "Idi na stranicu".
-        Ono otvara polje gde upišeš broj stranice.
-        Treće dugme je "Idi na minut".
-        Ono otvara polje gde upišeš broj minuta od početka, pa te odvede tamo.
+        Na samom vrhu tastature su dva veća dugmeta.
+        Prvo dugme je "Oznake".
+        Ono otvara meni sa tri stavke.
+        Prva stavka je "Dodaj oznaku".
+        Ona postavlja oznaku na mesto na kome se trenutno nalaziš.
+        Možeš upisati naziv oznake.
+        Ako ne upišeš naziv, oznaka dobija broj, počevši od jedan.
+        Druga stavka je "Ukloni oznaku".
+        Upišeš naziv oznake koju želiš da ukloniš.
+        Treća stavka je "Ukloni sve oznake".
+        Tu samo potvrdiš, nema polja za unos.
+        Drugo dugme je "Idi na".
+        Ono otvara meni sa tri stavke.
+        Prva stavka je "Idi na stranicu".
+        Upišeš broj stranice.
+        Druga stavka je "Idi na minut".
+        Upišeš broj minuta od početka dokumenta.
+        Treća stavka je "Idi na oznaku".
+        Upišeš naziv oznake koju si ranije dodala.
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
 
         Prvi red ima tri dugmeta.
@@ -90,9 +102,9 @@ class HelpActivity : AppCompatActivity() {
         Poglavlja rade samo ako ih program prepozna u dokumentu.
 
         Drugi red ima četiri dugmeta.
-        Prvo dugme je "Jezik".
+        Prvo dugme smanjuje jačinu zvuka.
+        Drugo dugme je "Jezik".
         Ono menja jezik samo za ovaj dokument.
-        Drugo dugme smanjuje jačinu zvuka.
         Treće dugme je "Glas".
         Ono menja glas samo za ovaj dokument.
         Četvrto dugme pojačava jačinu zvuka.
