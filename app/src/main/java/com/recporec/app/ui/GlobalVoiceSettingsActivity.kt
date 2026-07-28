@@ -36,6 +36,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
                 android.content.Intent(this, CombinedVoicesActivity::class.java)
                     .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, 0L)
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, settings.globalLanguageTag)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, settings.globalVoiceName)
             )
         }
 

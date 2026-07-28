@@ -29,6 +29,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private val db by lazy { AppDatabase.getInstance(this) }
     private var scopeId: Long = 0L
     private var defaultLanguageTag: String? = null
+    private var defaultVoiceName: String? = null
     private var allVoices: List<VoiceOption> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +38,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         setContentView(binding.root)
         scopeId = intent.getLongExtra(EXTRA_SCOPE_ID, 0L)
         defaultLanguageTag = intent.getStringExtra(EXTRA_DEFAULT_LANGUAGE_TAG)
+        defaultVoiceName = intent.getStringExtra(EXTRA_DEFAULT_VOICE_NAME)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -250,7 +252,14 @@ class CombinedVoicesActivity : AppCompatActivity() {
                 val names = voices.map { entry ->
                     allVoices.firstOrNull { it.voice.name == entry.voiceName }?.displayLabel ?: entry.voiceName
                 }
-                "Dodati glasovi (${voices.size}): " + names.joinToString(", ")
+                val regularLabel = defaultVoiceName
+                    ?.takeIf { name -> voices.none { it.voiceName == name } }
+                    ?.let { name -> allVoices.firstOrNull { it.voice.name == name }?.displayLabel ?: name }
+                if (regularLabel != null) {
+                    "Dodati glasovi (${voices.size + 1}, uz tvoj obični glas): $regularLabel, " + names.joinToString(", ")
+                } else {
+                    "Dodati glasovi (${voices.size}): " + names.joinToString(", ")
+                }
             }
 
             binding.textCountStatus.text = "Broj rečenica po glasu: ${settingsEntity?.sentencesPerVoice ?: 1}"
@@ -260,5 +269,6 @@ class CombinedVoicesActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_SCOPE_ID = "extra_scope_id"
         const val EXTRA_DEFAULT_LANGUAGE_TAG = "extra_default_language_tag"
+        const val EXTRA_DEFAULT_VOICE_NAME = "extra_default_voice_name"
     }
 }

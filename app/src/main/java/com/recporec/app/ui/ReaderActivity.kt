@@ -179,6 +179,7 @@ class ReaderActivity : AppCompatActivity() {
                 android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
                     .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc?.languageTag ?: settings.globalLanguageTag)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, doc?.voiceName ?: settings.globalVoiceName)
             )
         })
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
@@ -252,7 +253,15 @@ class ReaderActivity : AppCompatActivity() {
             PlaybackController.currentDocument = finalEntity
             PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
 
-            setupTts(parsedDoc, finalEntity, resolveCombinedVoiceConfig(finalEntity.id))
+            setupTts(
+                parsedDoc,
+                finalEntity,
+                resolveCombinedVoiceConfig(
+                    finalEntity.id,
+                    finalEntity.voiceName ?: settings.globalVoiceName,
+                    finalEntity.voiceEngine ?: settings.globalVoiceEngine
+                )
+            )
             updateStatusTexts()
             updateSeekBar()
             updateDocLanguageButtonText()
@@ -264,18 +273,38 @@ class ReaderActivity : AppCompatActivity() {
     private data class CombinedVoiceConfig(val voiceNames: List<String>, val engine: String, val sentencesPerVoice: Int)
 
     /** Kombinovani glasovi za dokument imaju prednost nad opštim; ako dokument nema
-     * bar dva dodata glasa, koriste se opšti (globalni) kombinovani glasovi, ako postoje. */
-    private suspend fun resolveCombinedVoiceConfig(docId: Long): CombinedVoiceConfig? {
+     * validnu kombinaciju, koriste se opšti (globalni) kombinovani glasovi, ako postoje.
+     * Obican, vec izabran glas (regularVoiceName) automatski ulazi kao prvi u smeni ako
+     * je bar jedan glas eksplicitno dodat - korisnica ne mora da ga posebno "doda", pošto
+     * je već njen izbor. */
+    private suspend fun resolveCombinedVoiceConfig(
+        docId: Long,
+        regularVoiceName: String?,
+        regularEngine: String?
+    ): CombinedVoiceConfig? {
         val dao = db.combinedVoiceDao()
-        val docVoices = dao.getVoices(docId)
-        val scopeVoices = if (docVoices.size >= 2) docVoices else {
-            val globalVoices = dao.getVoices(0L)
-            if (globalVoices.size >= 2) globalVoices else return null
+
+        suspend fun resolveForScope(scopeId: Long): CombinedVoiceConfig? {
+            val explicit = dao.getVoices(scopeId)
+            if (explicit.isEmpty()) return null
+            val engine = explicit.first().voiceEngine
+            if (explicit.any { it.voiceEngine != engine }) return null // bezbednosna provera
+
+            val names = mutableListOf<String>()
+            if (regularVoiceName != null &&
+                (regularEngine == null || regularEngine == engine) &&
+                explicit.none { it.voiceName == regularVoiceName }
+            ) {
+                names.add(regularVoiceName)
+            }
+            names.addAll(explicit.map { it.voiceName })
+            if (names.size < 2) return null
+
+            val count = dao.getSettings(scopeId)?.sentencesPerVoice ?: 1
+            return CombinedVoiceConfig(names, engine, count)
         }
-        val engine = scopeVoices.first().voiceEngine
-        if (scopeVoices.any { it.voiceEngine != engine }) return null // bezbednosna provera
-        val count = dao.getSettings(scopeVoices.first().scopeId)?.sentencesPerVoice ?: 1
-        return CombinedVoiceConfig(scopeVoices.map { it.voiceName }, engine, count)
+
+        return resolveForScope(docId) ?: resolveForScope(0L)
     }
 
     private fun markTtsReady() {
@@ -924,7 +953,11 @@ class ReaderActivity : AppCompatActivity() {
         if (ttsReady) {
             lifecycleScope.launch {
                 val tts = PlaybackController.ttsManager ?: return@launch
-                val combined = resolveCombinedVoiceConfig(documentId)
+                val combined = resolveCombinedVoiceConfig(
+                    documentId,
+                    doc?.voiceName ?: settings.globalVoiceName,
+                    doc?.voiceEngine ?: settings.globalVoiceEngine
+                )
                 if (combined != null) {
                     tts.setCombinedVoices(combined.voiceNames, combined.sentencesPerVoice)
                 } else {
