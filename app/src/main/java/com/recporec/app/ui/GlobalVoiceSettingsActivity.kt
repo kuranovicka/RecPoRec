@@ -31,6 +31,12 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
 
         binding.btnLanguage.setOnClickListener { showLanguagePicker() }
         binding.btnVoice.setOnClickListener { showVoicePicker() }
+        binding.btnCombinedVoices.setOnClickListener {
+            startActivity(
+                android.content.Intent(this, CombinedVoicesActivity::class.java)
+                    .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, 0L)
+            )
+        }
 
         // Brzina: klizač 0..270 predstavlja stopu 0.30x .. 3.00x (korak 0.01)
         binding.seekSpeed.max = 270

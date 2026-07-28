@@ -49,6 +49,16 @@ class HelpActivity : AppCompatActivity() {
         Ako dodirneš glas na listi, čućeš kratak primer teksta izgovoren tim glasom.
         Tako lakše prepoznaš koji glas ti se sviđa.
 
+        Posle glasa je dugme "Kombinovani glasovi".
+        Njime dodaješ dva ili više glasova koji se smenjuju dok čita.
+        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove.
+        Dugme "Dodaj glas" dodaje glas iz dodatih jezika.
+        Dugme "Ukloni jezik" i dugme "Ukloni glas" ih uklanjaju.
+        Dugme "Broj rečenica po glasu" bira posle koliko rečenica se menja glas.
+        Ako ostane prazno, svaki glas čita po jednu rečenicu.
+        Isto dugme postoji i u samom dokumentu, samo za taj dokument.
+        Svi kombinovani glasovi moraju biti iz istog govornog motora.
+
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
         Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
@@ -68,7 +78,7 @@ class HelpActivity : AppCompatActivity() {
         Treća stavka je "Pomoć".
 
         Sada idemo u sam dokument.
-        Tastatura ima petnaest dugmića.
+        Tastatura ima šesnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
 
         Na samom vrhu tastature su tri dugmeta.
@@ -114,13 +124,14 @@ class HelpActivity : AppCompatActivity() {
         Ono ide na početak sledećeg poglavlja.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
 
-        Drugi red ima četiri dugmeta.
+        Drugi red ima pet dugmadi.
         Prvo dugme smanjuje jačinu zvuka.
         Drugo dugme je "Jezik".
         Ono menja jezik samo za ovaj dokument.
         Treće dugme je "Glas".
         Ono menja glas samo za ovaj dokument.
-        Četvrto dugme pojačava jačinu zvuka.
+        Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
+        Peto dugme pojačava jačinu zvuka.
 
         Treći red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.

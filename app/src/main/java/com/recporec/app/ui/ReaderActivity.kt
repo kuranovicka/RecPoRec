@@ -174,6 +174,12 @@ class ReaderActivity : AppCompatActivity() {
         btnTimer.setOnClickListener(clickSound { cycleTimer() })
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
+        btnCombinedVoices.setOnClickListener(clickSound {
+            startActivity(
+                android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
+                    .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
+            )
+        })
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
@@ -245,13 +251,30 @@ class ReaderActivity : AppCompatActivity() {
             PlaybackController.currentDocument = finalEntity
             PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
 
-            setupTts(parsedDoc, finalEntity)
+            setupTts(parsedDoc, finalEntity, resolveCombinedVoiceConfig(finalEntity.id))
             updateStatusTexts()
             updateSeekBar()
             updateDocLanguageButtonText()
             updateNavigationButtonLabels()
             updateTimerStatusText()
         }
+    }
+
+    private data class CombinedVoiceConfig(val voiceNames: List<String>, val engine: String, val sentencesPerVoice: Int)
+
+    /** Kombinovani glasovi za dokument imaju prednost nad opštim; ako dokument nema
+     * bar dva dodata glasa, koriste se opšti (globalni) kombinovani glasovi, ako postoje. */
+    private suspend fun resolveCombinedVoiceConfig(docId: Long): CombinedVoiceConfig? {
+        val dao = db.combinedVoiceDao()
+        val docVoices = dao.getVoices(docId)
+        val scopeVoices = if (docVoices.size >= 2) docVoices else {
+            val globalVoices = dao.getVoices(0L)
+            if (globalVoices.size >= 2) globalVoices else return null
+        }
+        val engine = scopeVoices.first().voiceEngine
+        if (scopeVoices.any { it.voiceEngine != engine }) return null // bezbednosna provera
+        val count = dao.getSettings(scopeVoices.first().scopeId)?.sentencesPerVoice ?: 1
+        return CombinedVoiceConfig(scopeVoices.map { it.voiceName }, engine, count)
     }
 
     private fun markTtsReady() {
@@ -262,15 +285,24 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupTts(parsedDoc: ParsedDocument, entity: DocumentEntity) {
+    private fun setupTts(parsedDoc: ParsedDocument, entity: DocumentEntity, combined: CombinedVoiceConfig?) {
         val tts = PlaybackController.ttsManager ?: return
         ttsReady = false
 
         // Lanac: glas ovog dokumenta -> opšti (globalni) glas -> nezavisan podrazumevani glas.
         // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
         // i dalje važi za dokumente koji nemaju sopstveni izbor.
-        val effectiveVoiceName = entity.voiceName ?: settings.globalVoiceName
-        val effectiveEngine = entity.voiceEngine ?: settings.globalVoiceEngine
+        // Ako postoje kombinovani glasovi (za dokument ili opšte), oni imaju prednost.
+        val effectiveVoiceName = combined?.voiceNames?.first() ?: (entity.voiceName ?: settings.globalVoiceName)
+        val effectiveEngine = combined?.engine ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
+
+        fun applyCombinedVoicesIfAny() {
+            if (combined != null) {
+                tts.setCombinedVoices(combined.voiceNames, combined.sentencesPerVoice)
+            } else {
+                tts.setCombinedVoices(emptyList(), 1)
+            }
+        }
 
         fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
@@ -283,6 +315,7 @@ class ReaderActivity : AppCompatActivity() {
                 // podrazumevani glas umesto da TTS slučajno preuzme glas ekranskog čitača.
                 tts.applyIndependentDefaultVoice()
             }
+            applyCombinedVoicesIfAny()
             markTtsReady()
         }
 
@@ -292,6 +325,7 @@ class ReaderActivity : AppCompatActivity() {
                 tts.loadText(parsedDoc.fullText)
                 tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                 if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
+                applyCombinedVoicesIfAny()
                 markTtsReady()
             }
         } else {

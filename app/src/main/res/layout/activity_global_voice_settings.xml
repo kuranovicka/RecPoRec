@@ -67,6 +67,16 @@
             android:accessibilityLiveRegion="polite"
             android:text="Nije izabran" />
 
+        <Button
+            android:id="@+id/btnCombinedVoices"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="22sp"
+            android:backgroundTint="@color/btn_timer"
+            android:textColor="@color/button_text"
+            android:text="Kombinovani glasovi" />
+
         <TextView
             android:id="@+id/textSpeedStatus"
             android:layout_width="match_parent"

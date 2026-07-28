@@ -133,6 +133,12 @@
                 android:contentDescription="@string/btn_voice"
                 android:text="🗣 Glas" />
 
+            <Button android:id="@+id/btnCombinedVoices" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_timer"
+                android:contentDescription="Kombinovani glasovi za ovaj dokument"
+                android:textSize="14sp"
+                android:text="Komb. glasovi" />
+
             <Button android:id="@+id/btnVolUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_volume"
                 android:contentDescription="@string/btn_vol_up"

@@ -80,6 +80,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.CombinedVoicesActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.HelpActivity"
             android:exported="false" />
 

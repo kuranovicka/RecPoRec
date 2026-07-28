@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/btn_voice"
+        android:titleTextColor="@color/text_primary"
+        app:title="Kombinovani glasovi" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/textLanguagesStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:text="Dodati jezici: nema" />
+
+        <TextView
+            android:id="@+id/textVoicesStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:text="Dodati glasovi: nema" />
+
+        <TextView
+            android:id="@+id/textCountStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:text="Broj rečenica po glasu: 1" />
+
+        <Button
+            android:id="@+id/btnAddLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_goto_page"
+            android:textColor="@color/button_text"
+            android:text="Dodaj jezik" />
+
+        <Button
+            android:id="@+id/btnRemoveLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_goto_page"
+            android:textColor="@color/button_text"
+            android:text="Ukloni jezik" />
+
+        <Button
+            android:id="@+id/btnAddVoice"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_voice"
+            android:textColor="@color/button_text"
+            android:text="Dodaj glas" />
+
+        <Button
+            android:id="@+id/btnRemoveVoice"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_voice"
+            android:textColor="@color/button_text"
+            android:text="Ukloni glas" />
+
+        <Button
+            android:id="@+id/btnSentenceCount"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_speed"
+            android:textColor="@color/button_text"
+            android:text="Broj rečenica po glasu" />
+
+    </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -41,6 +41,34 @@ class TtsManager(private val appContext: Context) {
     private val pauseHandler = Handler(Looper.getMainLooper())
     private var pendingNextChunk: Runnable? = null
 
+    // Kombinovani glasovi (2+) koji se smenjuju na svakih N rečenica. Prazna lista = iskljuceno.
+    private var combinedVoiceNames: List<String> = emptyList()
+    private var combinedSentencesPerVoice: Int = 1
+    private var combinedVoiceIndex = 0
+    private var sentencesReadInCurrentVoice = 0
+
+    /** Postavlja listu glasova koji se smenjuju svakih [sentencesPerVoice] rečenica.
+     * Prazna ili jednočlana lista isključuje kombinovane glasove (čita se normalno, jednim glasom). */
+    fun setCombinedVoices(voiceNames: List<String>, sentencesPerVoice: Int) {
+        combinedVoiceNames = voiceNames
+        combinedSentencesPerVoice = sentencesPerVoice.coerceAtLeast(1)
+        combinedVoiceIndex = 0
+        sentencesReadInCurrentVoice = 0
+        if (combinedVoiceNames.size >= 2) {
+            setVoiceByName(combinedVoiceNames[0])
+        }
+    }
+
+    private fun advanceCombinedVoiceIfNeeded() {
+        if (combinedVoiceNames.size < 2) return
+        sentencesReadInCurrentVoice++
+        if (sentencesReadInCurrentVoice >= combinedSentencesPerVoice) {
+            sentencesReadInCurrentVoice = 0
+            combinedVoiceIndex = (combinedVoiceIndex + 1) % combinedVoiceNames.size
+            setVoiceByName(combinedVoiceNames[combinedVoiceIndex])
+        }
+    }
+
     init {
         initEngine(null)
     }
@@ -51,6 +79,7 @@ class TtsManager(private val appContext: Context) {
             override fun onDone(utteranceId: String?) {
                 currentChunkIndex++
                 if (currentChunkIndex < chunks.size) {
+                    advanceCombinedVoiceIfNeeded()
                     if (sentencePauseMs > 0) {
                         val runnable = Runnable { speakCurrentChunk() }
                         pendingNextChunk = runnable
@@ -158,6 +187,14 @@ class TtsManager(private val appContext: Context) {
         currentChunkIndex = (if (idx >= 0) idx else -idx - 1)
             .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
         if (chunks.isEmpty()) return
+        if (combinedVoiceNames.size >= 2) {
+            // Svaki novi početak čitanja (posle skoka na stranicu/oznaku/pretragu) počinje
+            // od prvog glasa u nizu - dosledno i lako za očekivati, umesto nagađanja koji bi
+            // glas "trebalo" da bude na tom mestu.
+            combinedVoiceIndex = 0
+            sentencesReadInCurrentVoice = 0
+            setVoiceByName(combinedVoiceNames[0])
+        }
         isSpeaking = true
         speakCurrentChunk()
     }

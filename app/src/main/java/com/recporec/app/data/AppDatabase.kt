@@ -7,11 +7,22 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [DocumentEntity::class, BookmarkEntity::class], version = 4, exportSchema = false)
+@Database(
+    entities = [
+        DocumentEntity::class,
+        BookmarkEntity::class,
+        CombinedVoiceLanguageEntity::class,
+        CombinedVoiceEntryEntity::class,
+        CombinedVoiceSettingsEntity::class
+    ],
+    version = 5,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun documentDao(): DocumentDao
     abstract fun bookmarkDao(): BookmarkDao
+    abstract fun combinedVoiceDao(): CombinedVoiceDao
 
     companion object {
         @Volatile
@@ -52,13 +63,48 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Nove tabele za kombinovane glasove - ne dira postojeće podatke. */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS combined_voice_languages (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        scopeId INTEGER NOT NULL,
+                        languageTag TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS combined_voice_entries (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        scopeId INTEGER NOT NULL,
+                        voiceName TEXT NOT NULL,
+                        voiceEngine TEXT NOT NULL,
+                        languageTag TEXT NOT NULL,
+                        orderIndex INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS combined_voice_settings (
+                        scopeId INTEGER PRIMARY KEY NOT NULL,
+                        sentencesPerVoice INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
