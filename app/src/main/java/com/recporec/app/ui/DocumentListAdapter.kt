@@ -8,7 +8,7 @@ import com.recporec.app.databinding.ItemDocumentBinding
 
 class DocumentListAdapter(
     private val onOpen: (DocumentEntity) -> Unit,
-    private val onDelete: (DocumentEntity) -> Unit
+    private val onActions: (DocumentEntity) -> Unit
 ) : RecyclerView.Adapter<DocumentListAdapter.VH>() {
 
     private val items = mutableListOf<DocumentEntity>()
@@ -30,7 +30,7 @@ class DocumentListAdapter(
         val doc = items[position]
         holder.binding.textTitle.text = "${doc.title}.${doc.format}"
         holder.binding.root.setOnClickListener { onOpen(doc) }
-        holder.binding.btnDelete.setOnClickListener { onDelete(doc) }
+        holder.binding.btnActions.setOnClickListener { onActions(doc) }
     }
 
     override fun getItemCount(): Int = items.size

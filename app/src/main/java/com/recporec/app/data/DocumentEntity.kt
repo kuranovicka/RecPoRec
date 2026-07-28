@@ -23,5 +23,8 @@ data class DocumentEntity(
     val languageTag: String? = null,
     val elapsedSeconds: Long = 0,
     val timerMinutes: Int = 0,
-    val dateAdded: Long = System.currentTimeMillis()
+    val dateAdded: Long = System.currentTimeMillis(),
+    /** Ručni redosled u listi (manje = više gore). Popunjava se migracijom za postojeće
+     * knjige, a nove knjige dobijaju vrednost manju od svih postojećih (idu na vrh). */
+    val sortOrder: Int = 0
 )

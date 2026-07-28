@@ -15,6 +15,16 @@
         android:titleTextColor="@color/text_primary"
         app:title="@string/menu_settings" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -117,6 +127,90 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="20sp"
+                android:textColor="@color/text_primary"
+                android:text="@string/setting_sentence_pause" />
+
+            <Switch
+                android:id="@+id/switchSentencePause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:thumbTint="@color/btn_page_nav"
+                android:trackTint="@color/btn_page_nav"
+                android:contentDescription="@string/setting_sentence_pause" />
+        </LinearLayout>
+
+        <!-- Vidljivo samo kad je pauza između rečenica uključena -->
+        <RadioGroup
+            android:id="@+id/groupSentencePauseMs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/radioPause300"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_page_nav"
+                android:text="300 ms" />
+
+            <RadioButton
+                android:id="@+id/radioPause500"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_page_nav"
+                android:text="500 ms" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:text="@string/setting_auto_next" />
+
+        <Switch
+            android:id="@+id/switchAutoNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumbTint="@color/btn_chapter"
+            android:trackTint="@color/btn_chapter"
+            android:contentDescription="@string/setting_auto_next" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -134,5 +228,8 @@
             android:textColor="@color/button_text"
             android:text="Stranica" />
     </LinearLayout>
+
+    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

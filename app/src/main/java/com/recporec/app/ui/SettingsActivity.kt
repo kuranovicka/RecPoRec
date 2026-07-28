@@ -22,6 +22,16 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchUninterrupted.isChecked = settings.uninterruptedEnabled
         binding.switchShake.isChecked = settings.shakeEnabled
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
+        binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
+        binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
+
+        binding.groupSentencePauseMs.visibility =
+            if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        if (settings.sentencePauseMs == 500) {
+            binding.radioPause500.isChecked = true
+        } else {
+            binding.radioPause300.isChecked = true
+        }
 
         binding.switchBackground.setOnCheckedChangeListener { _, checked ->
             settings.backgroundEnabled = checked
@@ -40,6 +50,17 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.switchSound.setOnCheckedChangeListener { _, checked ->
             settings.soundFeedbackEnabled = checked
+        }
+        binding.switchSentencePause.setOnCheckedChangeListener { _, checked ->
+            settings.sentencePauseEnabled = checked
+            binding.groupSentencePauseMs.visibility =
+                if (checked) android.view.View.VISIBLE else android.view.View.GONE
+        }
+        binding.groupSentencePauseMs.setOnCheckedChangeListener { _, checkedId ->
+            settings.sentencePauseMs = if (checkedId == binding.radioPause500.id) 500 else 300
+        }
+        binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
+            settings.autoNextDocumentEnabled = checked
         }
 
         val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta")

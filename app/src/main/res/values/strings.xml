@@ -6,6 +6,7 @@
     <string name="add_document">Dodaj dokument</string>
     <string name="add_from_drive">Dodaj sa Google diska</string>
     <string name="delete">Obriši</string>
+    <string name="actions_menu">Radnje</string>
     <string name="no_documents">Nema dodatih dokumenata. Dodirnite dugme za dodavanje.</string>
     <string name="confirm_delete_title">Obriši dokument</string>
     <string name="confirm_delete_message">Da li sigurno želite da obrišete ovaj dokument i sav napredak čitanja?</string>
@@ -49,6 +50,10 @@
     <string name="setting_uninterrupted_desc">Nastavi čitanje i kada se ekran telefona isključi</string>
     <string name="setting_shake">Prodrmaj telefon za pauzu i nastavak</string>
     <string name="setting_shake_desc">Drmanje telefona pauzira ili nastavlja čitanje</string>
+    <string name="setting_sentence_pause">Pauza između rečenica</string>
+    <string name="setting_sentence_pause_desc">Kratak predah između svake rečenice dok čita</string>
+    <string name="setting_auto_next">Pređi automatski na čitanje sledećeg dokumenta</string>
+    <string name="setting_auto_next_desc">Kad se dokument pročita do kraja, odmah počni sledeći</string>
 
     <!-- Pomoć -->
     <string name="help_title">Pomoć</string>

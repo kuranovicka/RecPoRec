@@ -1,6 +1,8 @@
 package com.recporec.app.tts
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
@@ -33,6 +35,12 @@ class TtsManager(private val appContext: Context) {
     var isSpeaking = false
         private set
 
+    /** Pauza između rečenica u milisekundama (0 = isključeno, čita se odmah dalje). */
+    var sentencePauseMs: Long = 0
+
+    private val pauseHandler = Handler(Looper.getMainLooper())
+    private var pendingNextChunk: Runnable? = null
+
     init {
         initEngine(null)
     }
@@ -43,7 +51,13 @@ class TtsManager(private val appContext: Context) {
             override fun onDone(utteranceId: String?) {
                 currentChunkIndex++
                 if (currentChunkIndex < chunks.size) {
-                    speakCurrentChunk()
+                    if (sentencePauseMs > 0) {
+                        val runnable = Runnable { speakCurrentChunk() }
+                        pendingNextChunk = runnable
+                        pauseHandler.postDelayed(runnable, sentencePauseMs)
+                    } else {
+                        speakCurrentChunk()
+                    }
                 } else {
                     isSpeaking = false
                     onFinished?.invoke()
@@ -156,6 +170,7 @@ class TtsManager(private val appContext: Context) {
     }
 
     fun pause() {
+        cancelPendingChunk()
         tts?.stop()
         isSpeaking = false
     }
@@ -167,8 +182,14 @@ class TtsManager(private val appContext: Context) {
     }
 
     fun stop() {
+        cancelPendingChunk()
         tts?.stop()
         isSpeaking = false
+    }
+
+    private fun cancelPendingChunk() {
+        pendingNextChunk?.let { pauseHandler.removeCallbacks(it) }
+        pendingNextChunk = null
     }
 
     fun currentOffset(): Int {
@@ -188,6 +209,7 @@ class TtsManager(private val appContext: Context) {
     }
 
     fun shutdown() {
+        cancelPendingChunk()
         tts?.stop()
         tts?.shutdown()
     }

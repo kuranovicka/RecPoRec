@@ -21,12 +21,12 @@
         android:text="Naslov dokumenta" />
 
     <Button
-        android:id="@+id/btnDelete"
+        android:id="@+id/btnActions"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:textSize="18sp"
         android:backgroundTint="@color/btn_page_nav"
         android:textColor="@color/button_text"
-        android:text="@string/delete" />
+        android:text="@string/actions_menu" />
 
 </LinearLayout>
