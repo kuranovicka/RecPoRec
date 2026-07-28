@@ -50,14 +50,15 @@ class HelpActivity : AppCompatActivity() {
         Tako lakše prepoznaš koji glas ti se sviđa.
 
         Posle glasa je dugme "Kombinovani glasovi".
-        Njime dodaješ dva ili više glasova koji se smenjuju dok čita.
-        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove.
+        Njime dodaješ dva ili više glasova koji se smenjuju dok čitaš knjigu.
+        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove, ili dodaje drugi glas iz već odabranog jezika.
         Dugme "Dodaj glas" dodaje glas iz dodatih jezika.
-        Dugme "Ukloni jezik" i dugme "Ukloni glas" ih uklanjaju.
+        Dugme "Ukloni jezik" i dugme "Ukloni glas," uklanjaju dodatni glas i jezik.
         Dugme "Broj rečenica po glasu" bira posle koliko rečenica se menja glas.
-        Ako ostane prazno, svaki glas čita po jednu rečenicu.
-        Isto dugme postoji i u samom dokumentu, samo za taj dokument.
-        Svi kombinovani glasovi moraju biti iz istog govornog motora.
+        Ako polje ostane prazno, svaki glas čita po jednu rečenicu.
+        Isto dugme postoji i u svakom dokumentu, samo za taj dokument.
+        Svi kombinovani glasovi iz tehničkih razloga, moraju biti iz istog govornog mehanizma.
+        Npr: Google muški i ženski, samsung muški i ženski.
 
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
@@ -68,7 +69,7 @@ class HelpActivity : AppCompatActivity() {
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
         Kad ga uključiš, pojavljuje se izbor: biraš između 300, 400 i 500 milisekundi.
-        Opcija "Pređi automatski na čitanje sledećeg dokumenta" omogućava ti da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim se prethodni do kraja pročita.
+        Opcija "Pređi automatski na čitanje sledećeg dokumenta" ti omogućava da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim čitanje prethodnog dokumenta bude završeno.
         Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
         Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.

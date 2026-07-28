@@ -178,6 +178,7 @@ class ReaderActivity : AppCompatActivity() {
             startActivity(
                 android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
                     .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc?.languageTag ?: settings.globalLanguageTag)
             )
         })
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })

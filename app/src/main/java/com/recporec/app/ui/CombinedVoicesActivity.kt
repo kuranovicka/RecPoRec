@@ -28,6 +28,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCombinedVoicesBinding
     private val db by lazy { AppDatabase.getInstance(this) }
     private var scopeId: Long = 0L
+    private var defaultLanguageTag: String? = null
     private var allVoices: List<VoiceOption> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +36,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         binding = ActivityCombinedVoicesBinding.inflate(layoutInflater)
         setContentView(binding.root)
         scopeId = intent.getLongExtra(EXTRA_SCOPE_ID, 0L)
+        defaultLanguageTag = intent.getStringExtra(EXTRA_DEFAULT_LANGUAGE_TAG)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -116,11 +118,14 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private fun showAddVoiceDialog() {
         lifecycleScope.launch {
             val addedLanguages = db.combinedVoiceDao().getLanguages(scopeId)
-            if (addedLanguages.isEmpty()) {
-                Toast.makeText(this@CombinedVoicesActivity, "Prvo dodaj bar jedan jezik.", Toast.LENGTH_SHORT).show()
+            // I bez eksplicitnog "Dodaj jezik", uvek se moze dodati jos jedan glas iz vec
+            // izabranog (obicnog) jezika za ovaj opseg - ako taj jezik ima vise glasova
+            // (npr. muski i zenski), nema potrebe da se isti jezik posebno dodaje.
+            val languageTags = (addedLanguages.map { it.languageTag } + listOfNotNull(defaultLanguageTag)).toSet()
+            if (languageTags.isEmpty()) {
+                Toast.makeText(this@CombinedVoicesActivity, "Prvo dodaj bar jedan jezik, ili izaberi obični jezik.", Toast.LENGTH_SHORT).show()
                 return@launch
             }
-            val languageTags = addedLanguages.map { it.languageTag }.toSet()
             var candidates = allVoices.filter { it.voice.locale.language in languageTags }
 
             // Svi kombinovani glasovi moraju biti iz ISTOG TTS motora - prebacivanje motora
@@ -249,5 +254,6 @@ class CombinedVoicesActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_SCOPE_ID = "extra_scope_id"
+        const val EXTRA_DEFAULT_LANGUAGE_TAG = "extra_default_language_tag"
     }
 }
