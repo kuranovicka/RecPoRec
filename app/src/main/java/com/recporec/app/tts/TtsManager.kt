@@ -137,6 +137,15 @@ class TtsManager(private val appContext: Context) {
     fun setVoiceByName(name: String) {
         val voice = tts?.voices?.firstOrNull { it.name == name } ?: return
         tts?.voice = voice
+        // Neki manji/regionalni TTS motori ne prate pouzdano samo noviju Voice metodu kad se
+        // menja i JEZIK glasa - dodatno postavljamo i jezik preko starije metode, radi
+        // sigurnosti. Za motore kojima ovo nije potrebno, poziv je bezopasan.
+        try {
+            tts?.setLanguage(voice.locale)
+        } catch (_: Exception) {
+            // Neki motori/lokali mogu odbiti setLanguage - glas je vec postavljen gore,
+            // pa nastavljamo bez prekida.
+        }
     }
 
     fun currentVoiceName(): String? = tts?.voice?.name

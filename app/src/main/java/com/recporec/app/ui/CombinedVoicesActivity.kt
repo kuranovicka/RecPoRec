@@ -70,7 +70,8 @@ class CombinedVoicesActivity : AppCompatActivity() {
         }
         val languages = TtsEngineUtil.distinctLanguages(allVoices)
         val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
-        PickerDialog.show(this, "Dodaj jezik", labels, null) { index ->
+
+        fun addLanguage(index: Int) {
             val tag = languages[index].language
             lifecycleScope.launch {
                 val existing = db.combinedVoiceDao().findLanguage(scopeId, tag)
@@ -78,9 +79,18 @@ class CombinedVoicesActivity : AppCompatActivity() {
                     Toast.makeText(this@CombinedVoicesActivity, "Taj jezik je već dodat.", Toast.LENGTH_SHORT).show()
                 } else {
                     db.combinedVoiceDao().insertLanguage(CombinedVoiceLanguageEntity(scopeId = scopeId, languageTag = tag))
+                    Toast.makeText(this@CombinedVoicesActivity, "Dodat jezik: ${labels[index]}.", Toast.LENGTH_SHORT).show()
                     refreshStatusTexts()
                 }
             }
+        }
+
+        // Kad postoji samo jedan jezik za izbor, nema potrebe za celim ekranom sa
+        // pretragom i listom - direktno se dodaje.
+        if (languages.size == 1) {
+            addLanguage(0)
+        } else {
+            PickerDialog.show(this, "Dodaj jezik", labels, null) { index -> addLanguage(index) }
         }
     }
 
@@ -152,10 +162,8 @@ class CombinedVoicesActivity : AppCompatActivity() {
                 return@launch
             }
             val labels = TtsEngineUtil.disambiguatedLabels(candidates)
-            PickerDialog.show(
-                this@CombinedVoicesActivity, "Dodaj glas", labels, null,
-                onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this@CombinedVoicesActivity, candidates[index]) }
-            ) { index ->
+
+            fun addVoice(index: Int) {
                 val chosen = candidates[index]
                 lifecycleScope.launch {
                     val already = db.combinedVoiceDao().getVoices(scopeId).any { it.voiceName == chosen.voice.name }
@@ -173,8 +181,20 @@ class CombinedVoicesActivity : AppCompatActivity() {
                             orderIndex = nextOrder
                         )
                     )
+                    Toast.makeText(this@CombinedVoicesActivity, "Dodat glas: ${labels[index]}.", Toast.LENGTH_SHORT).show()
                     refreshStatusTexts()
                 }
+            }
+
+            // Kad postoji samo jedan glas za izbor, nema potrebe za celim ekranom sa
+            // pretragom i listom - direktno se dodaje (prvi glas je vec izabran drugde).
+            if (candidates.size == 1) {
+                addVoice(0)
+            } else {
+                PickerDialog.show(
+                    this@CombinedVoicesActivity, "Dodaj glas", labels, null,
+                    onSelectionPreview = { index -> TtsEngineUtil.previewVoice(this@CombinedVoicesActivity, candidates[index]) }
+                ) { index -> addVoice(index) }
             }
         }
     }
