@@ -45,7 +45,9 @@ class HelpActivity : AppCompatActivity() {
         Posle glasa je dugme "Kombinovani glasovi".
         Njime dodaješ dva ili više glasova koji se smenjuju dok čitaš knjigu.
         Dugme "Dodaj jezik" dodaje jezik za dodatne glasove.
+        Može se dodati samo jedan dodatni jezik.
         Dugme "Dodaj glas" dodaje glas iz dodatih ili već odabranog jezika.
+        Može se dodati samo jedan dodatni glas.
         Dugme "Ukloni jezik" i dugme "Ukloni glas," uklanjaju dodatni glas i jezik.
         Dugme "Broj rečenica po glasu" bira posle koliko rečenica se menja glas.
         Ako polje ostane prazno, svaki glas čita po jednu rečenicu.

@@ -66,33 +66,44 @@ class CombinedVoicesActivity : AppCompatActivity() {
         Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }
 
     private fun showAddLanguageDialog() {
-        if (allVoices.isEmpty()) {
-            Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak i probaj ponovo.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val languages = TtsEngineUtil.distinctLanguages(allVoices)
-        val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
+        lifecycleScope.launch {
+            val alreadyAdded = db.combinedVoiceDao().getLanguages(scopeId)
+            if (alreadyAdded.isNotEmpty()) {
+                Toast.makeText(
+                    this@CombinedVoicesActivity,
+                    "Već je dodat jedan jezik (${langLabel(alreadyAdded.first().languageTag)}). Prvo ga ukloni ako želiš drugi.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+            if (allVoices.isEmpty()) {
+                Toast.makeText(this@CombinedVoicesActivity, "Učitavanje glasova, sačekaj trenutak i probaj ponovo.", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            val languages = TtsEngineUtil.distinctLanguages(allVoices)
+            val labels = languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
 
-        fun addLanguage(index: Int) {
-            val tag = languages[index].language
-            lifecycleScope.launch {
-                val existing = db.combinedVoiceDao().findLanguage(scopeId, tag)
-                if (existing != null) {
-                    Toast.makeText(this@CombinedVoicesActivity, "Taj jezik je već dodat.", Toast.LENGTH_SHORT).show()
-                } else {
-                    db.combinedVoiceDao().insertLanguage(CombinedVoiceLanguageEntity(scopeId = scopeId, languageTag = tag))
-                    Toast.makeText(this@CombinedVoicesActivity, "Dodat jezik: ${labels[index]}.", Toast.LENGTH_SHORT).show()
-                    refreshStatusTexts()
+            fun addLanguage(index: Int) {
+                val tag = languages[index].language
+                lifecycleScope.launch {
+                    val existing = db.combinedVoiceDao().findLanguage(scopeId, tag)
+                    if (existing != null) {
+                        Toast.makeText(this@CombinedVoicesActivity, "Taj jezik je već dodat.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        db.combinedVoiceDao().insertLanguage(CombinedVoiceLanguageEntity(scopeId = scopeId, languageTag = tag))
+                        Toast.makeText(this@CombinedVoicesActivity, "Dodat jezik: ${labels[index]}.", Toast.LENGTH_SHORT).show()
+                        refreshStatusTexts()
+                    }
                 }
             }
-        }
 
-        // Kad postoji samo jedan jezik za izbor, nema potrebe za celim ekranom sa
-        // pretragom i listom - direktno se dodaje.
-        if (languages.size == 1) {
-            addLanguage(0)
-        } else {
-            PickerDialog.show(this, "Dodaj jezik", labels, null, autoConfirm = true) { index -> addLanguage(index) }
+            // Kad postoji samo jedan jezik za izbor, nema potrebe za celim ekranom sa
+            // pretragom i listom - direktno se dodaje.
+            if (languages.size == 1) {
+                addLanguage(0)
+            } else {
+                PickerDialog.show(this@CombinedVoicesActivity, "Dodaj jezik", labels, null, autoConfirm = true) { index -> addLanguage(index) }
+            }
         }
     }
 
@@ -139,6 +150,17 @@ class CombinedVoicesActivity : AppCompatActivity() {
 
     private fun showAddVoiceDialog() {
         lifecycleScope.launch {
+            val existingVoices = db.combinedVoiceDao().getVoices(scopeId)
+            if (existingVoices.isNotEmpty()) {
+                val label = allVoices.firstOrNull { it.voice.name == existingVoices.first().voiceName }?.displayLabel
+                    ?: existingVoices.first().voiceName
+                Toast.makeText(
+                    this@CombinedVoicesActivity,
+                    "Već je dodat jedan glas ($label). Prvo ga ukloni ako želiš drugi.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
             val addedLanguages = db.combinedVoiceDao().getLanguages(scopeId)
             // I bez eksplicitnog "Dodaj jezik", uvek se moze dodati jos jedan glas iz vec
             // izabranog (obicnog) jezika za ovaj opseg - ako taj jezik ima vise glasova
