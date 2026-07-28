@@ -25,130 +25,73 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-    <LinearLayout
+    <Switch
+        android:id="@+id/switchBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_chapter"
+        android:trackTint="@color/btn_chapter"
+        android:text="@string/setting_background"
+        android:contentDescription="@string/setting_background" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
-            android:textColor="@color/text_primary"
-            android:text="@string/setting_background" />
-
-        <Switch
-            android:id="@+id/switchBackground"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="@color/btn_chapter"
-            android:trackTint="@color/btn_chapter"
-            android:contentDescription="@string/setting_background" />
-    </LinearLayout>
-
-    <LinearLayout
+    <Switch
+        android:id="@+id/switchUninterrupted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_timer"
+        android:trackTint="@color/btn_timer"
+        android:text="@string/setting_uninterrupted"
+        android:contentDescription="@string/setting_uninterrupted" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
-            android:textColor="@color/text_primary"
-            android:text="@string/setting_uninterrupted" />
-
-        <Switch
-            android:id="@+id/switchUninterrupted"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="@color/btn_timer"
-            android:trackTint="@color/btn_timer"
-            android:contentDescription="@string/setting_uninterrupted" />
-    </LinearLayout>
-
-    <LinearLayout
+    <Switch
+        android:id="@+id/switchShake"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_speed"
+        android:trackTint="@color/btn_speed"
+        android:text="@string/setting_shake"
+        android:contentDescription="@string/setting_shake" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
-            android:textColor="@color/text_primary"
-            android:text="@string/setting_shake" />
-
-        <Switch
-            android:id="@+id/switchShake"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="@color/btn_speed"
-            android:trackTint="@color/btn_speed"
-            android:contentDescription="@string/setting_shake" />
-    </LinearLayout>
-
-    <LinearLayout
+    <Switch
+        android:id="@+id/switchSound"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
-            android:textColor="@color/text_primary"
-            android:text="Zvuk (kratak zvuk pri dodiru dugmadi)" />
-
-        <Switch
-            android:id="@+id/switchSound"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="@color/btn_volume"
-            android:trackTint="@color/btn_volume"
-            android:contentDescription="Zvuk pri dodiru dugmadi" />
-    </LinearLayout>
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_volume"
+        android:trackTint="@color/btn_volume"
+        android:text="Zvuk"
+        android:contentDescription="Zvuk - kratak zvuk pri dodiru dugmadi" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="4dp">
 
-        <LinearLayout
+        <Switch
+            android:id="@+id/switchSentencePause"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:textColor="@color/text_primary"
-                android:text="@string/setting_sentence_pause" />
-
-            <Switch
-                android:id="@+id/switchSentencePause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumbTint="@color/btn_page_nav"
-                android:trackTint="@color/btn_page_nav"
-                android:contentDescription="@string/setting_sentence_pause" />
-        </LinearLayout>
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:thumbTint="@color/btn_page_nav"
+            android:trackTint="@color/btn_page_nav"
+            android:text="@string/setting_sentence_pause"
+            android:contentDescription="@string/setting_sentence_pause" />
 
         <!-- Vidljivo samo kad je pauza između rečenica uključena -->
         <RadioGroup
@@ -181,29 +124,17 @@
         </RadioGroup>
     </LinearLayout>
 
-    <LinearLayout
+    <Switch
+        android:id="@+id/switchAutoNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="20sp"
-            android:textColor="@color/text_primary"
-            android:text="@string/setting_auto_next" />
-
-        <Switch
-            android:id="@+id/switchAutoNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="@color/btn_chapter"
-            android:trackTint="@color/btn_chapter"
-            android:contentDescription="@string/setting_auto_next" />
-    </LinearLayout>
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_chapter"
+        android:trackTint="@color/btn_chapter"
+        android:text="@string/setting_auto_next"
+        android:contentDescription="@string/setting_auto_next" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -216,7 +147,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="@color/text_primary"
-            android:text="Navigacija: po stranici ili minutima" />
+            android:text="Navigacija: po stranici, minutima ili oznakama" />
 
         <Button
             android:id="@+id/btnNavigationMode"

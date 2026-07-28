@@ -18,6 +18,9 @@ interface DocumentDao {
     @Query("SELECT MIN(sortOrder) FROM documents")
     suspend fun minSortOrder(): Int?
 
+    @Query("SELECT MAX(sortOrder) FROM documents")
+    suspend fun maxSortOrder(): Int?
+
     @Query("UPDATE documents SET sortOrder = :order WHERE id = :id")
     suspend fun updateSortOrder(id: Long, order: Int)
 

@@ -5,5 +5,32 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="colorPrimary">@color/btn_voice</item>
         <item name="colorOnPrimary">@color/button_text</item>
+        <item name="alertDialogTheme">@style/RecPoRecAlertDialog</item>
+        <item name="android:alertDialogTheme">@style/RecPoRecAlertDialog</item>
+    </style>
+
+    <!-- Veći tekst i dosledna boja dugmadi za SVE dijaloge u aplikaciji (isti stil kao
+     ostatak tastature), da ne budu manji/drugačiji od ostatka aplikacije. -->
+    <style name="RecPoRecAlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="colorAccent">@color/btn_goto_page</item>
+        <item name="android:textAppearanceMedium">@style/RecPoRecDialogText</item>
+        <item name="android:textAppearanceListItem">@style/RecPoRecDialogText</item>
+        <item name="android:textAppearanceListItemSmall">@style/RecPoRecDialogText</item>
+        <item name="buttonBarPositiveButtonStyle">@style/RecPoRecDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/RecPoRecDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/RecPoRecDialogButton</item>
+    </style>
+
+    <style name="RecPoRecDialogText" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="RecPoRecDialogButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/btn_goto_page</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

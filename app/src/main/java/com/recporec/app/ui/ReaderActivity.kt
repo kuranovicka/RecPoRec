@@ -365,9 +365,13 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun stepNavigate(forward: Boolean) {
+        val mode = settings.navigationMode
+        if (mode == "bookmark") {
+            jumpBookmark(forward)
+            return
+        }
         val length = parsed?.length ?: return
         val current = doc?.currentCharacterOffset ?: 0
-        val mode = settings.navigationMode
         val delta: Int = when (mode) {
             "min1" -> minutesToChars(1)
             "min5" -> minutesToChars(5)
@@ -377,6 +381,30 @@ class ReaderActivity : AppCompatActivity() {
         val signedDelta = if (forward) delta else -delta
         val newOffset = (current + signedDelta).coerceIn(0, max(0, length - 1))
         moveTo(newOffset)
+    }
+
+    /** Prelazi na prethodnu/sledeću oznaku (po poziciji u dokumentu, ne po redosledu dodavanja). */
+    private fun jumpBookmark(forward: Boolean) {
+        val currentDocId = documentId
+        val current = doc?.currentCharacterOffset ?: 0
+        lifecycleScope.launch {
+            val bookmarks = db.bookmarkDao().getForDocument(currentDocId).sortedBy { it.characterOffset }
+            if (bookmarks.isEmpty()) {
+                android.widget.Toast.makeText(this@ReaderActivity, "Nema oznaka.", android.widget.Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            val target = if (forward) {
+                bookmarks.firstOrNull { it.characterOffset > current }
+            } else {
+                bookmarks.lastOrNull { it.characterOffset < current }
+            }
+            if (target == null) {
+                val msg = if (forward) "Ovo je poslednja oznaka." else "Ovo je prva oznaka."
+                android.widget.Toast.makeText(this@ReaderActivity, msg, android.widget.Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            moveTo(target.characterOffset)
+        }
     }
 
     private fun minutesToChars(minutes: Int): Int {
@@ -404,6 +432,12 @@ class ReaderActivity : AppCompatActivity() {
                 binding.btnStepBack.contentDescription = "10 minuta unazad"
                 binding.btnStepForward.text = "10 min ▶"
                 binding.btnStepForward.contentDescription = "10 minuta unapred"
+            }
+            "bookmark" -> {
+                binding.btnStepBack.text = "◀ Ozn."
+                binding.btnStepBack.contentDescription = "Prethodna oznaka"
+                binding.btnStepForward.text = "Ozn. ▶"
+                binding.btnStepForward.contentDescription = "Sledeća oznaka"
             }
             else -> {
                 binding.btnStepBack.text = "◀ Str."

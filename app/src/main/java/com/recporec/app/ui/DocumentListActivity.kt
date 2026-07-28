@@ -170,7 +170,7 @@ class DocumentListActivity : AppCompatActivity() {
                     .show()
                 return@launch
             }
-            val topOrder = (db.documentDao().minSortOrder() ?: 0) - 1
+            val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
             db.documentDao().insert(
                 DocumentEntity(
                     title = name.substringBeforeLast("."),
@@ -181,7 +181,7 @@ class DocumentListActivity : AppCompatActivity() {
                     voiceName = settings.globalVoiceName,
                     voiceEngine = settings.globalVoiceEngine,
                     languageTag = settings.globalLanguageTag,
-                    sortOrder = topOrder
+                    sortOrder = bottomOrder
                 )
             )
         }

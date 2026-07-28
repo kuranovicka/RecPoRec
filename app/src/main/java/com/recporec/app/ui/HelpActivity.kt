@@ -60,7 +60,7 @@ class HelpActivity : AppCompatActivity() {
         Opcija "Pređi automatski na čitanje sledećeg dokumenta" omogućava ti da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim se prethodni do kraja pročita.
         Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
-        Možeš izabrati: stranicu, jedan minut, pet minuta ili deset minuta.
+        Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.
 
         Treća stavka je "Pomoć".
         To je baš ovaj ekran koji sada čitaš.
@@ -125,6 +125,8 @@ class HelpActivity : AppCompatActivity() {
         Šta tačno rade, zavisi od podešavanja "Navigacije".
         Ako je izabrana stranica, dugmad se zovu "Prethodna stranica" i "Sledeća stranica".
         Ako je izabran minut, dugmad pomeraju za jedan, pet ili deset minuta.
+        Ako je izabrana oznaka, dugmad se zovu "Prethodna oznaka" i "Sledeća oznaka".
+        Odvedu te tačno na tu oznaku, ne na fiksnu udaljenost.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.

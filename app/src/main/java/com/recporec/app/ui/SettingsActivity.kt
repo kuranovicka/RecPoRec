@@ -63,8 +63,8 @@ class SettingsActivity : AppCompatActivity() {
             settings.autoNextDocumentEnabled = checked
         }
 
-        val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta")
-        val navValues = listOf("page", "min1", "min5", "min10")
+        val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka")
+        val navValues = listOf("page", "min1", "min5", "min10", "bookmark")
         fun refreshNavButton() {
             val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
             binding.btnNavigationMode.text = navLabels[idx]
