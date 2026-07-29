@@ -212,6 +212,18 @@ class ReaderActivity : AppCompatActivity() {
                 goToPercent(seekBar.progress)
             }
         })
+        // Klizač zadrži dodir isključivo za sebe tokom celog pokreta prsta (gore-dole
+        // uključeno) - bez ovoga, deo tog pokreta može da "iscuri" i sistem ga
+        // pogrešno protumači kao komandu za jačinu medija umesto pomeranja u knjizi.
+        seekProgress.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN ->
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL ->
+                    v.parent?.requestDisallowInterceptTouchEvent(false)
+            }
+            false
+        }
     }
 
     private fun loadDocument() {
