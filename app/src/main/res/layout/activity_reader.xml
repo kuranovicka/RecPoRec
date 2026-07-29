@@ -87,16 +87,23 @@
                 android:text="🔍 Pretraga" />
         </LinearLayout>
 
-        <!-- Red: 1 2 3 -->
+        <!-- Red: Visina- / Prethodno poglavlje / Tajmer / Sledeće poglavlje / Visina+ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
+            <Button android:id="@+id/btnPitchDown" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_pitch"
+                android:contentDescription="Smanji visinu glasa"
+                android:textSize="16sp"
+                android:text="🎵− Visina" />
+
             <Button android:id="@+id/btnPrevChapter" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_chapter"
                 android:contentDescription="@string/btn_prev_chapter"
+                android:textSize="14sp"
                 android:text="⏮ Poglavlje" />
 
             <Button android:id="@+id/btnTimer" style="@style/KeyButton"
@@ -107,7 +114,14 @@
             <Button android:id="@+id/btnNextChapter" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_chapter"
                 android:contentDescription="@string/btn_next_chapter"
+                android:textSize="14sp"
                 android:text="Poglavlje ⏭" />
+
+            <Button android:id="@+id/btnPitchUp" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_pitch"
+                android:contentDescription="Povećaj visinu glasa"
+                android:textSize="16sp"
+                android:text="Visina 🎵+" />
         </LinearLayout>
 
         <!-- Red: jačina- / Jezik(dokument) / Glas / jačina+ -->

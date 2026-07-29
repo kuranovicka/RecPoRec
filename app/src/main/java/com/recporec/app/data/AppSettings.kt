@@ -17,6 +17,11 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
+    /** Osetljivost drmanja: 0 = blago, 1 = srednje (podrazumevano), 2 = jako. */
+    var shakeSensitivity: Int
+        get() = prefs.getInt(KEY_SHAKE_SENSITIVITY, 1)
+        set(value) = prefs.edit().putInt(KEY_SHAKE_SENSITIVITY, value).apply()
+
     /** Nacin pomeranja dugmadima * i # u citacu: "page", "min1", "min5" ili "min10". */
     var navigationMode: String
         get() = prefs.getString(KEY_NAVIGATION, "page") ?: "page"
@@ -66,6 +71,7 @@ class AppSettings(context: Context) {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
+        private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"

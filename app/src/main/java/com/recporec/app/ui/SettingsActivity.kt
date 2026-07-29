@@ -33,6 +33,14 @@ class SettingsActivity : AppCompatActivity() {
             else -> binding.radioPause300.isChecked = true
         }
 
+        binding.groupShakeSensitivity.visibility =
+            if (settings.shakeEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        when (settings.shakeSensitivity) {
+            0 -> binding.radioShakeLight.isChecked = true
+            2 -> binding.radioShakeStrong.isChecked = true
+            else -> binding.radioShakeMedium.isChecked = true
+        }
+
         binding.switchBackground.setOnCheckedChangeListener { _, checked ->
             settings.backgroundEnabled = checked
             if (!checked) binding.switchUninterrupted.isChecked = false
@@ -47,6 +55,15 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
+            binding.groupShakeSensitivity.visibility =
+                if (checked) android.view.View.VISIBLE else android.view.View.GONE
+        }
+        binding.groupShakeSensitivity.setOnCheckedChangeListener { _, checkedId ->
+            settings.shakeSensitivity = when (checkedId) {
+                binding.radioShakeLight.id -> 0
+                binding.radioShakeStrong.id -> 2
+                else -> 1
+            }
         }
         binding.switchSound.setOnCheckedChangeListener { _, checked ->
             settings.soundFeedbackEnabled = checked

@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CombinedVoiceEntryEntity::class,
         CombinedVoiceSettingsEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -98,13 +98,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Dodaje visinu (ton) glasa i pamcenje pozicije poslednjeg tajmera - ne dira
+         * postojece podatke, samo dodaje dve nove kolone sa bezopasnim podrazumevanim
+         * vrednostima. */
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE documents ADD COLUMN pitch REAL NOT NULL DEFAULT 1.0")
+                db.execSQL("ALTER TABLE documents ADD COLUMN lastTimerStartOffset INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

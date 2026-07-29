@@ -49,17 +49,66 @@
         android:text="@string/setting_uninterrupted"
         android:contentDescription="@string/setting_uninterrupted" />
 
-    <Switch
-        android:id="@+id/switchShake"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="20sp"
-        android:textColor="@color/text_primary"
-        android:thumbTint="@color/btn_speed"
-        android:trackTint="@color/btn_speed"
-        android:text="@string/setting_shake"
-        android:contentDescription="@string/setting_shake" />
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="4dp">
+
+        <Switch
+            android:id="@+id/switchShake"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:thumbTint="@color/btn_speed"
+            android:trackTint="@color/btn_speed"
+            android:text="@string/setting_shake"
+            android:contentDescription="@string/setting_shake" />
+
+        <!-- Vidljivo samo kad je drmanje uključeno -->
+        <RadioGroup
+            android:id="@+id/groupShakeSensitivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/radioShakeLight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_speed"
+                android:text="Blago" />
+
+            <RadioButton
+                android:id="@+id/radioShakeMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_speed"
+                android:text="Srednje" />
+
+            <RadioButton
+                android:id="@+id/radioShakeStrong"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/btn_speed"
+                android:text="Jako" />
+        </RadioGroup>
+    </LinearLayout>
 
     <Switch
         android:id="@+id/switchSound"

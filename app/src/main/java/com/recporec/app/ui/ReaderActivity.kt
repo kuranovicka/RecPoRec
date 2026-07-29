@@ -39,11 +39,8 @@ class ReaderActivity : AppCompatActivity() {
     private val charsPerPage = 1800
     private val baseCharsPerMinute = 800f // procenjena brzina čitanja pri rate=1.0
 
-    private var timerMinutesCycle = intArrayOf(0, 15, 30, 45, 60, 75, 90)
-    private var timerIndex = 0
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
-    private var autoNextRunnable: Runnable? = null
 
     private var audioManager: AudioManager? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
@@ -168,10 +165,12 @@ class ReaderActivity : AppCompatActivity() {
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
 
+        btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
+        btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
 
-        btnTimer.setOnClickListener(clickSound { cycleTimer() })
+        btnTimer.setOnClickListener(clickSound { showTimerMenu() })
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
         btnCombinedVoices.setOnClickListener(clickSound {
@@ -336,6 +335,7 @@ class ReaderActivity : AppCompatActivity() {
         fun applyVoiceAndText() {
             tts.loadText(parsedDoc.fullText)
             tts.setSpeechRate(entity.speechRate)
+            tts.setPitch(entity.pitch)
             tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
             if (effectiveVoiceName != null) {
                 tts.setVoiceByName(effectiveVoiceName)
@@ -352,6 +352,7 @@ class ReaderActivity : AppCompatActivity() {
         if (needsEngineSwitch) {
             tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
                 tts.loadText(parsedDoc.fullText)
+                tts.setPitch(entity.pitch)
                 tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                 if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
                 applyCombinedVoicesIfAny()
@@ -367,36 +368,6 @@ class ReaderActivity : AppCompatActivity() {
             // pokušaj "na silu" ovde bi tiho promašio postavljanje glasa (motor još
             // nema učitanu listu glasova), a lažno bi označio da je sve spremno.
         }
-    }
-
-    /** Kad se dokument do kraja pročita i uključeno je "Pređi automatski na sledeći",
-     * nakon kratke pauze (i zvučnog signala) prelazi na sledeći dokument u listi (isti
-     * redosled kao na glavnom ekranu) i odmah počinje njegovo čitanje. */
-    private fun advanceToNextDocumentAfterDelay() {
-        val runnable = Runnable {
-            lifecycleScope.launch {
-                val list = withContext(Dispatchers.IO) { db.documentDao().observeAllOnce() }
-                val currentIndex = list.indexOfFirst { it.id == documentId }
-                val next = if (currentIndex in 0 until list.size - 1) list[currentIndex + 1] else null
-                if (next == null) {
-                    android.widget.Toast.makeText(
-                        this@ReaderActivity, "Ovo je poslednji dokument u listi.", android.widget.Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-                if (toneGenerator == null) {
-                    toneGenerator = android.media.ToneGenerator(AudioManager.STREAM_MUSIC, 70)
-                }
-                toneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_ACK, 200)
-                val intent = android.content.Intent(this@ReaderActivity, ReaderActivity::class.java)
-                intent.putExtra(EXTRA_DOCUMENT_ID, next.id)
-                intent.putExtra(EXTRA_AUTOPLAY, true)
-                startActivity(intent)
-                finish()
-            }
-        }
-        autoNextRunnable = runnable
-        handler.postDelayed(runnable, 1000L)
     }
 
     private fun togglePlayPause() {
@@ -781,6 +752,16 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, "Brzina čitanja: ${roundedRate}x", android.widget.Toast.LENGTH_SHORT).show()
     }
 
+    private fun adjustPitch(delta: Float) {
+        val entity = doc ?: return
+        val newPitch = (entity.pitch + delta).coerceIn(0.5f, 2.0f)
+        doc = entity.copy(pitch = newPitch)
+        PlaybackController.ttsManager?.setPitch(newPitch)
+        persistState()
+        val roundedPitch = (newPitch * 100).roundToInt() / 100f
+        android.widget.Toast.makeText(this, "Visina glasa: ${roundedPitch}x", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     private fun showDocLanguagePicker() {
         val voices = allVoices.ifEmpty {
             android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
@@ -867,10 +848,32 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun cycleTimer() {
-        timerIndex = (timerIndex + 1) % timerMinutesCycle.size
-        val minutes = timerMinutesCycle[timerIndex]
-        doc = doc?.copy(timerMinutes = minutes)
+    private fun showTimerMenu() {
+        val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
+        val labels = minuteOptions.map { "$it minuta" } +
+            listOf("Isključeno", "Vrati se na poslednji tajmer", "Zaboravi tajmer")
+        AlertDialog.Builder(this)
+            .setTitle("Tajmer")
+            .setItems(labels.toTypedArray()) { _, which ->
+                when {
+                    which < minuteOptions.size -> setTimer(minuteOptions[which])
+                    which == minuteOptions.size -> setTimer(0)
+                    which == minuteOptions.size + 1 -> showReturnToLastTimerDialog()
+                    else -> forgetLastTimer()
+                }
+            }
+            .show()
+    }
+
+    private fun setTimer(minutes: Int) {
+        doc = if (minutes > 0) {
+            // Novi tajmer - pamti gde je pocelo OVO odbrojavanje, brise prethodno pamcenje.
+            doc?.copy(timerMinutes = minutes, lastTimerStartOffset = doc?.currentCharacterOffset)
+        } else {
+            // Iskljuceno - zaustavlja odbrojavanje, ali NE brise pamcenje poslednjeg tajmera
+            // (za slucaj da korisnica zaspi i posle zeli da se vrati na tu poziciju).
+            doc?.copy(timerMinutes = 0)
+        }
         persistState()
         PlaybackController.setTimerMinutes(minutes)
 
@@ -882,6 +885,38 @@ class ReaderActivity : AppCompatActivity() {
             ).show()
         }
         updateTimerStatusText()
+    }
+
+    /** Vraća na mesto gde je počeo poslednji tajmer - korisno kad korisnica zaspi uz knjigu
+     * i ne zna tačno dokle je stigla dok je tajmer odbrojavao. */
+    private fun showReturnToLastTimerDialog() {
+        val startOffset = doc?.lastTimerStartOffset
+        if (startOffset == null) {
+            android.widget.Toast.makeText(this, "Nema prethodnog tajmera.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.hint = "Broj minuta posle početka (nije obavezno)"
+        input.contentDescription = "Broj minuta posle početka poslednjeg tajmera, nije obavezno"
+        AlertDialog.Builder(this)
+            .setTitle("Vrati se na poslednji tajmer")
+            .setMessage("Vraća te na mesto gde je počeo poslednji tajmer. Ako želiš, upiši koliko minuta posle toga da odeš.")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val extraMinutes = input.text.toString().trim().toIntOrNull() ?: 0
+                val target = startOffset + (if (extraMinutes > 0) minutesToChars(extraMinutes) else 0)
+                moveTo(target)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /** Briše SVE pamćenje poslednjeg tajmera, bez potvrde - vraća se odmah u knjigu. */
+    private fun forgetLastTimer() {
+        doc = doc?.copy(lastTimerStartOffset = null)
+        persistState()
+        android.widget.Toast.makeText(this, "Tajmer zaboravljen.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun updateTimerStatusText() {
@@ -1000,14 +1035,10 @@ class ReaderActivity : AppCompatActivity() {
             runOnUiThread {
                 binding.btnPlayPause.text = "▶ / ⏸"
                 android.widget.Toast.makeText(this, "Čitanje završeno.", android.widget.Toast.LENGTH_LONG).show()
-                if (settings.autoNextDocumentEnabled) {
-                    advanceToNextDocumentAfterDelay()
-                }
             }
         }
         PlaybackController.uiTimerExpiredListener = {
             runOnUiThread {
-                timerIndex = 0
                 doc = doc?.copy(timerMinutes = 0)
                 persistState()
                 updateTimerStatusText()
@@ -1032,7 +1063,6 @@ class ReaderActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
-        autoNextRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
     }
 

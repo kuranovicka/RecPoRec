@@ -39,6 +39,7 @@ class ReadingService : Service() {
             })
             isActive = true
         }
+        PlaybackController.playbackStateListener = { refreshNotification() }
     }
 
     private fun setupShakeDetector() {
@@ -48,7 +49,12 @@ class ReadingService : Service() {
         if (settings.shakeEnabled) {
             val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             if (accel != null) {
-                shakeDetector = ShakeDetector {
+                val threshold = when (settings.shakeSensitivity) {
+                    0 -> 7.0f  // blago - lako se okine
+                    2 -> 15.0f // jako - treba odlucno drmnuti
+                    else -> 11.0f // srednje
+                }
+                shakeDetector = ShakeDetector(shakeThreshold = threshold) {
                     val tts = PlaybackController.ttsManager
                     if (tts != null) {
                         if (tts.isSpeaking) tts.pause() else tts.resume()
@@ -140,6 +146,7 @@ class ReadingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        PlaybackController.playbackStateListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }

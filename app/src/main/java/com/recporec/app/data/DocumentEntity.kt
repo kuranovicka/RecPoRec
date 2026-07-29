@@ -26,5 +26,10 @@ data class DocumentEntity(
     val dateAdded: Long = System.currentTimeMillis(),
     /** Ručni redosled u listi (manje = više gore). Popunjava se migracijom za postojeće
      * knjige, a nove knjige dobijaju vrednost manju od svih postojećih (idu na vrh). */
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    /** Visina (ton) glasa - 1.0 je normalno. */
+    val pitch: Float = 1.0f,
+    /** Pozicija (karakter) u dokumentu na kojoj je poslednji put POKRENUT tajmer -
+     * koristi se za "Vrati se na poslednji tajmer". Null ako nikad nije postavljen. */
+    val lastTimerStartOffset: Int? = null
 )

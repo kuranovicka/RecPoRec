@@ -60,6 +60,8 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
         Prekidač "Čitanje bez prekida" znači da čitanje ne prestaje ni kad se ekran ugasi.
         Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
+        Kad ga uključiš, biraš jačinu drmanja: blago, srednje ili jako.
+        Čitanje se samo pauzira kad stigne telefonski poziv, i samo nastavi kad se poziv završi.
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
@@ -72,7 +74,7 @@ class HelpActivity : AppCompatActivity() {
         Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
         Treća stavka je "Pomoć".
         Sada idemo u sam dokument.
-        Tastatura ima šesnaest dugmića.
+        Tastatura ima osamnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
         Na samom vrhu tastature su tri dugmeta.
         Prvo dugme je "Oznake".
@@ -104,16 +106,27 @@ class HelpActivity : AppCompatActivity() {
         Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
         Dodirneš rezultat da odeš tačno na to mesto.
         Ako ništa nije pronađeno, piše "Nema rezultata".
-        Prvi red ima tri dugmeta.
-        Prvo dugme je "Prethodno poglavlje".
+        Prvi red ima pet dugmadi.
+        Prvo dugme smanjuje visinu glasa.
+        Drugo dugme je "Prethodno poglavlje".
         Ono vraća na početak prethodnog poglavlja.
-        Drugo dugme je "Tajmer".
-        Svaki dodir menja tajmer: petnaest minuta, trideset minuta, četrdeset pet minuta, šezdeset minuta, sedamdeset pet minuta, devedeset minuta, pa opet isključeno.
+        Treće dugme je "Tajmer".
+        Ono otvara meni sa više stavki.
+        Prve stavke su: petnaest, trideset, četrdeset pet, šezdeset, sedamdeset pet i devedeset minuta.
+        Dodirneš broj minuta da postaviš tajmer.
+        Sledeća stavka je "Isključeno" - zaustavlja tajmer, ali ga ne zaboravlja.
+        Sledeća stavka je "Vrati se na poslednji tajmer".
+        Ona te vraća na mesto gde je počeo poslednji tajmer koji si postavila.
+        Možeš upisati koliko minuta posle toga da odeš, ili ostaviti prazno.
+        Ovo je korisno ako zaspiš dok tajmer odbrojava.
+        Poslednja stavka je "Zaboravi tajmer".
+        Ona odmah, bez potvrde, briše pamćenje poslednjeg tajmera.
         Kad tajmer istekne, čitanje se pauzira samo.
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
-        Treće dugme je "Sledeće poglavlje".
+        Četvrto dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
+        Peto dugme povećava visinu glasa.
         Drugi red ima pet dugmadi.
         Prvo dugme smanjuje jačinu zvuka.
         Drugo dugme je "Jezik".

@@ -28,6 +28,11 @@ class TtsManager(private val appContext: Context) {
     var onPositionChanged: ((Int) -> Unit)? = null
     var onFinished: (() -> Unit)? = null
     var onReady: (() -> Unit)? = null
+    /** Pozvano kad čitanje automatski pauzira zbog telefonskog poziva ili nekog drugog
+     * zvuka koji preuzme prednost (audio fokus) - ne zbog korisnikovog dodira na dugme. */
+    var onAutoPaused: (() -> Unit)? = null
+    /** Pozvano kad se čitanje automatski nastavi posle takvog prekida. */
+    var onAutoResumed: (() -> Unit)? = null
 
     private var tts: TextToSpeech? = null
     private var ready = false
@@ -46,6 +51,64 @@ class TtsManager(private val appContext: Context) {
     private var activeInstance: TextToSpeech? = null
 
     private var lastSpeechRate: Float = 1.0f
+    private var lastPitch: Float = 1.0f
+
+    // Automatska pauza kad neko drugi (npr. telefonski poziv) preuzme audio - standardan
+    // Android mehanizam, ne zahteva nikakvu posebnu dozvolu. Kad poziv zavrsi, citanje se
+    // samo nastavi - ali SAMO ako je pauzirano zbog ovoga, ne ako je korisnica sama pauzirala.
+    private val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+    private var audioFocusRequest: android.media.AudioFocusRequest? = null
+    private var pausedDueToFocusLoss = false
+
+    private val focusChangeListener = android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            android.media.AudioManager.AUDIOFOCUS_LOSS,
+            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                if (isSpeaking) {
+                    pausedDueToFocusLoss = true
+                    pause()
+                    onAutoPaused?.invoke()
+                }
+            }
+            android.media.AudioManager.AUDIOFOCUS_GAIN -> {
+                if (pausedDueToFocusLoss) {
+                    pausedDueToFocusLoss = false
+                    resume()
+                    onAutoResumed?.invoke()
+                }
+            }
+        }
+    }
+
+    private fun requestAudioFocus() {
+        val am = audioManager ?: return
+        if (audioFocusRequest == null) {
+            val attrs = android.media.AudioAttributes.Builder()
+                .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            audioFocusRequest = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(attrs)
+                .setOnAudioFocusChangeListener(focusChangeListener)
+                .build()
+        }
+        try {
+            am.requestAudioFocus(audioFocusRequest!!)
+        } catch (_: Exception) {
+            // Bezopasno ako ne uspe - citanje samo nastavlja bez ove zastite.
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        val am = audioManager ?: return
+        audioFocusRequest?.let {
+            try {
+                am.abandonAudioFocusRequest(it)
+            } catch (_: Exception) {
+            }
+        }
+    }
 
     private var chunks: List<String> = emptyList()
     private var chunkOffsets: List<Int> = emptyList()
@@ -98,6 +161,7 @@ class TtsManager(private val appContext: Context) {
             if (success) {
                 secondaryEngines[enginePackage]?.setOnUtteranceProgressListener(makeSharedListener())
                 secondaryEngines[enginePackage]?.setSpeechRate(lastSpeechRate)
+                secondaryEngines[enginePackage]?.setPitch(lastPitch)
             }
         }, enginePackage)
         secondaryEngines[enginePackage] = instance
@@ -260,6 +324,12 @@ class TtsManager(private val appContext: Context) {
         secondaryEngines.values.forEach { it.setSpeechRate(rate) }
     }
 
+    fun setPitch(pitch: Float) {
+        lastPitch = pitch
+        tts?.setPitch(pitch)
+        secondaryEngines.values.forEach { it.setPitch(pitch) }
+    }
+
     /** Učitava puni tekst i deli ga na rečenice radi praćenja pozicije. */
     fun loadText(fullText: String) {
         val splitter = Regex("(?<=[.!?\\n])\\s+")
@@ -284,6 +354,8 @@ class TtsManager(private val appContext: Context) {
         currentChunkIndex = (if (idx >= 0) idx else -idx - 1)
             .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
         if (chunks.isEmpty()) return
+        requestAudioFocus()
+        pausedDueToFocusLoss = false
         if (combinedVoices.size >= 2) {
             // Svaki novi početak čitanja (posle skoka na stranicu/oznaku/pretragu) počinje
             // od prvog glasa u nizu - dosledno i lako za očekivati, umesto nagađanja koji bi
@@ -314,6 +386,7 @@ class TtsManager(private val appContext: Context) {
 
     fun resume() {
         if (chunks.isEmpty()) return
+        requestAudioFocus()
         isSpeaking = true
         speakCurrentChunk()
     }
@@ -323,6 +396,8 @@ class TtsManager(private val appContext: Context) {
         tts?.stop()
         secondaryEngines.values.forEach { it.stop() }
         isSpeaking = false
+        pausedDueToFocusLoss = false
+        abandonAudioFocus()
     }
 
     private fun cancelPendingChunk() {
@@ -349,6 +424,7 @@ class TtsManager(private val appContext: Context) {
 
     fun shutdown() {
         cancelPendingChunk()
+        abandonAudioFocus()
         tts?.stop()
         tts?.shutdown()
         secondaryEngines.values.forEach {

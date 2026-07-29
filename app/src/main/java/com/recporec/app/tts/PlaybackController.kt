@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Drži jedinu instancu TtsManager-a i trenutno otvoren dokument,
@@ -36,6 +37,14 @@ object PlaybackController {
         private set
 
     var uiTimerExpiredListener: (() -> Unit)? = null
+
+    /** ReadingService se prijavi ovde dok radi u pozadini, da bi osvežio notifikaciju kad
+     * se stanje čitanja promeni bilo odakle (dugme, tajmer, automatska pauza pri pozivu...). */
+    var playbackStateListener: (() -> Unit)? = null
+
+    fun notifyPlaybackStateChanged() {
+        playbackStateListener?.invoke()
+    }
 
     fun setTimerMinutes(minutes: Int) {
         timerRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
@@ -69,6 +78,42 @@ object PlaybackController {
         }
         tts.onFinished = {
             scope.launch { uiFinishedListener?.invoke() }
+            handleAutoAdvance()
+        }
+        tts.onAutoPaused = { notifyPlaybackStateChanged() }
+        tts.onAutoResumed = { notifyPlaybackStateChanged() }
+    }
+
+    /** Kad se dokument do kraja pročita i uključeno je "Pređi automatski na sledeći",
+     * nakon kratke pauze (i zvučnog signala) prelazi na sledeći dokument u listi. Živi ovde
+     * (ne u ReaderActivity) da bi radilo i kad je čitanje u pozadini, van otvorenog ekrana. */
+    private fun handleAutoAdvance() {
+        val ctx = appContext ?: return
+        val settings = com.recporec.app.data.AppSettings(ctx)
+        if (!settings.autoNextDocumentEnabled) return
+        val currentDocId = currentDocument?.id ?: return
+        scope.launch {
+            delay(1000)
+            val list = withContext(Dispatchers.IO) {
+                AppDatabase.getInstance(ctx).documentDao().observeAllOnce()
+            }
+            val currentIndex = list.indexOfFirst { it.id == currentDocId }
+            val next = if (currentIndex in 0 until list.size - 1) list[currentIndex + 1] else null
+            if (next == null) {
+                android.widget.Toast.makeText(
+                    ctx, "Ovo je poslednji dokument u listi.", android.widget.Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+            val tone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+            tone.startTone(android.media.ToneGenerator.TONE_PROP_ACK, 200)
+            val intent = android.content.Intent(ctx, com.recporec.app.ui.ReaderActivity::class.java).apply {
+                putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_DOCUMENT_ID, next.id)
+                putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_AUTOPLAY, true)
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            ctx.startActivity(intent)
+            tone.release()
         }
     }
 
@@ -90,6 +135,7 @@ object PlaybackController {
                         if (timerRemainingSeconds <= 0) {
                             timerRemainingSeconds = 0
                             ttsManager?.pause()
+                            notifyPlaybackStateChanged()
                             uiTimerExpiredListener?.invoke()
                         }
                     }
@@ -127,6 +173,7 @@ object PlaybackController {
         uiPositionListener = null
         uiFinishedListener = null
         uiTimerExpiredListener = null
+        playbackStateListener = null
         scope.coroutineContext.cancelChildren()
         tickerStarted = false
     }
