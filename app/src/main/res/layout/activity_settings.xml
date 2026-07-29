@@ -143,44 +143,85 @@
             android:contentDescription="@string/setting_sentence_pause" />
 
         <!-- Vidljivo samo kad je pauza između rečenica uključena -->
-        <RadioGroup
+        <LinearLayout
             android:id="@+id/groupSentencePauseMs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_marginTop="10dp"
             android:visibility="gone">
 
-            <RadioButton
-                android:id="@+id/radioPause300"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/textSentencePauseStatus"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:gravity="center"
                 android:textSize="18sp"
                 android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_page_nav"
-                android:text="300 ms" />
+                android:accessibilityLiveRegion="polite"
+                android:text="Pauza između rečenica: 300 ms" />
 
-            <RadioButton
-                android:id="@+id/radioPause400"
-                android:layout_width="0dp"
+            <SeekBar
+                android:id="@+id/seekSentencePause"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_page_nav"
-                android:text="400 ms" />
+                android:contentDescription="Trajanje pauze između rečenica u milisekundama"
+                android:max="1000"
+                android:progress="300"
+                android:progressTint="@color/btn_page_nav"
+                android:thumbTint="@color/btn_page_nav" />
+        </LinearLayout>
+    </LinearLayout>
 
-            <RadioButton
-                android:id="@+id/radioPause500"
-                android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="4dp">
+
+        <Switch
+            android:id="@+id/switchParagraphPause"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:thumbTint="@color/btn_timer"
+            android:trackTint="@color/btn_timer"
+            android:text="Pauza između pasusa"
+            android:contentDescription="Pauza između pasusa - primenjuje se umesto obične pauze na kraju pasusa" />
+
+        <!-- Vidljivo samo kad je pauza između pasusa uključena -->
+        <LinearLayout
+            android:id="@+id/groupParagraphPauseMs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textParagraphPauseStatus"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:gravity="center"
                 android:textSize="18sp"
                 android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_page_nav"
-                android:text="500 ms" />
-        </RadioGroup>
+                android:accessibilityLiveRegion="polite"
+                android:text="Pauza između pasusa: 800 ms" />
+
+            <SeekBar
+                android:id="@+id/seekParagraphPause"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="Trajanje pauze između pasusa u milisekundama"
+                android:max="3000"
+                android:progress="800"
+                android:progressTint="@color/btn_timer"
+                android:thumbTint="@color/btn_timer" />
+        </LinearLayout>
     </LinearLayout>
 
     <Switch

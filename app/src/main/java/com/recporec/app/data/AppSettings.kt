@@ -36,10 +36,21 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SENTENCE_PAUSE_ENABLED, false)
         set(value) = prefs.edit().putBoolean(KEY_SENTENCE_PAUSE_ENABLED, value).apply()
 
-    /** Trajanje pauze između rečenica u milisekundama - 300 ili 500. */
+    /** Trajanje pauze između rečenica u milisekundama (klizač, 0-1000). */
     var sentencePauseMs: Int
         get() = prefs.getInt(KEY_SENTENCE_PAUSE_MS, 300)
         set(value) = prefs.edit().putInt(KEY_SENTENCE_PAUSE_MS, value).apply()
+
+    /** Pauza između pasusa (paragrafa) - odvojena od pauze između rečenica, podrazumevano
+     * isključena. Kad je uključena, primenjuje se UMESTO obične pauze na kraju pasusa. */
+    var paragraphPauseEnabled: Boolean
+        get() = prefs.getBoolean(KEY_PARAGRAPH_PAUSE_ENABLED, false)
+        set(value) = prefs.edit().putBoolean(KEY_PARAGRAPH_PAUSE_ENABLED, value).apply()
+
+    /** Trajanje pauze između pasusa u milisekundama (klizač, 0-3000). */
+    var paragraphPauseMs: Int
+        get() = prefs.getInt(KEY_PARAGRAPH_PAUSE_MS, 800)
+        set(value) = prefs.edit().putInt(KEY_PARAGRAPH_PAUSE_MS, value).apply()
 
     /** Kad se dokument do kraja pročita, automatski pređi na čitanje sledećeg u listi. */
     var autoNextDocumentEnabled: Boolean
@@ -96,6 +107,8 @@ class AppSettings(context: Context) {
             .remove(KEY_SOUND)
             .remove(KEY_SENTENCE_PAUSE_ENABLED)
             .remove(KEY_SENTENCE_PAUSE_MS)
+            .remove(KEY_PARAGRAPH_PAUSE_ENABLED)
+            .remove(KEY_PARAGRAPH_PAUSE_MS)
             .remove(KEY_AUTO_NEXT)
             .apply()
     }
@@ -109,6 +122,8 @@ class AppSettings(context: Context) {
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
+        private const val KEY_PARAGRAPH_PAUSE_ENABLED = "paragraph_pause_enabled"
+        private const val KEY_PARAGRAPH_PAUSE_MS = "paragraph_pause_ms"
         private const val KEY_AUTO_NEXT = "auto_next_document_enabled"
         private const val KEY_G_LANG = "global_language_tag"
         private const val KEY_G_VOICE = "global_voice_name"

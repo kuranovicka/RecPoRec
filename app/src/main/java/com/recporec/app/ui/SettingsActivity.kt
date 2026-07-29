@@ -27,11 +27,16 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        when (settings.sentencePauseMs) {
-            400 -> binding.radioPause400.isChecked = true
-            500 -> binding.radioPause500.isChecked = true
-            else -> binding.radioPause300.isChecked = true
-        }
+        binding.seekSentencePause.max = 1000
+        binding.seekSentencePause.progress = settings.sentencePauseMs.coerceIn(0, 1000)
+        binding.textSentencePauseStatus.text = "Pauza između rečenica: ${settings.sentencePauseMs} ms"
+
+        binding.switchParagraphPause.isChecked = settings.paragraphPauseEnabled
+        binding.groupParagraphPauseMs.visibility =
+            if (settings.paragraphPauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        binding.seekParagraphPause.max = 3000
+        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 3000)
+        binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
 
         binding.groupShakeSensitivity.visibility =
             if (settings.shakeEnabled) android.view.View.VISIBLE else android.view.View.GONE
@@ -73,13 +78,29 @@ class SettingsActivity : AppCompatActivity() {
             binding.groupSentencePauseMs.visibility =
                 if (checked) android.view.View.VISIBLE else android.view.View.GONE
         }
-        binding.groupSentencePauseMs.setOnCheckedChangeListener { _, checkedId ->
-            settings.sentencePauseMs = when (checkedId) {
-                binding.radioPause400.id -> 400
-                binding.radioPause500.id -> 500
-                else -> 300
+        binding.seekSentencePause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                settings.sentencePauseMs = progress
+                binding.textSentencePauseStatus.text = "Pauza između rečenica: $progress ms"
             }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+        binding.switchParagraphPause.setOnCheckedChangeListener { _, checked ->
+            settings.paragraphPauseEnabled = checked
+            binding.groupParagraphPauseMs.visibility =
+                if (checked) android.view.View.VISIBLE else android.view.View.GONE
         }
+        binding.seekParagraphPause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                settings.paragraphPauseMs = progress
+                binding.textParagraphPauseStatus.text = "Pauza između pasusa: $progress ms"
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
         binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
             settings.autoNextDocumentEnabled = checked
         }

@@ -337,6 +337,7 @@ class ReaderActivity : AppCompatActivity() {
             tts.setSpeechRate(entity.speechRate)
             tts.setPitch(entity.pitch)
             tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+            tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
             if (effectiveVoiceName != null) {
                 tts.setVoiceByName(effectiveVoiceName)
             } else {
@@ -354,6 +355,7 @@ class ReaderActivity : AppCompatActivity() {
                 tts.loadText(parsedDoc.fullText)
                 tts.setPitch(entity.pitch)
                 tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+                tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
                 if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
                 applyCombinedVoicesIfAny()
                 markTtsReady()

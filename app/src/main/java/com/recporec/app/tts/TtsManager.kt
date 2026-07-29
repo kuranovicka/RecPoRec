@@ -112,6 +112,9 @@ class TtsManager(private val appContext: Context) {
 
     private var chunks: List<String> = emptyList()
     private var chunkOffsets: List<Int> = emptyList()
+    /** chunkParagraphAfter[i] = da li je kraj recenice chunks[i] ujedno i kraj pasusa
+     * (prazan red posle) - velicina je chunks.size - 1 (poslednja recenica nema "posle"). */
+    private var chunkParagraphAfter: List<Boolean> = emptyList()
     private var currentChunkIndex = 0
 
     var isSpeaking = false
@@ -119,6 +122,10 @@ class TtsManager(private val appContext: Context) {
 
     /** Pauza između rečenica u milisekundama (0 = isključeno, čita se odmah dalje). */
     var sentencePauseMs: Long = 0
+
+    /** Pauza između pasusa (paragrafa) u milisekundama - primenjuje se UMESTO obične pauze
+     * između rečenica kad je granica ujedno i kraj pasusa (0 = isključeno). */
+    var paragraphPauseMs: Long = 0
 
     private val pauseHandler = Handler(Looper.getMainLooper())
     private var pendingNextChunk: Runnable? = null
@@ -223,13 +230,20 @@ class TtsManager(private val appContext: Context) {
     }
 
     private fun handleUtteranceDone() {
+        val finishedIndex = currentChunkIndex
         currentChunkIndex++
         if (currentChunkIndex < chunks.size) {
             advanceCombinedVoiceIfNeeded()
-            if (sentencePauseMs > 0) {
+            val isParagraphBoundary = chunkParagraphAfter.getOrNull(finishedIndex) == true
+            val pauseMs = when {
+                isParagraphBoundary && paragraphPauseMs > 0 -> paragraphPauseMs
+                sentencePauseMs > 0 -> sentencePauseMs
+                else -> 0L
+            }
+            if (pauseMs > 0) {
                 val runnable = Runnable { speakCurrentChunk() }
                 pendingNextChunk = runnable
-                pauseHandler.postDelayed(runnable, sentencePauseMs)
+                pauseHandler.postDelayed(runnable, pauseMs)
             } else {
                 speakCurrentChunk()
             }
@@ -330,22 +344,58 @@ class TtsManager(private val appContext: Context) {
         secondaryEngines.values.forEach { it.setPitch(pitch) }
     }
 
-    /** Učitava puni tekst i deli ga na rečenice radi praćenja pozicije. */
+    /** Učitava puni tekst i deli ga na rečenice radi praćenja pozicije.
+     *
+     * Kraj rečenice prepoznaje tačku, upitnik i uzvičnik, uz dozvoljene zatvarajuće
+     * navodnike ili zagradu odmah posle (npr. rečenica koja se završava sa ."  ili  !').
+     * Tačka NEPOSREDNO iza broja (npr. godina "1958." ili redni broj) se namerno NE
+     * tretira kao kraj rečenice, da se npr. u kombinovanim glasovima ne bi jedan glas
+     * "zaglavio" samo na broju godine, a drugi nastavio ostatak rečenice.
+     *
+     * Paragraf (pasus) se prepoznaje kad posle kraja rečenice sledi prazan red (dva ili
+     * više preloma reda zaredom) - koristi se za posebnu, obično dužu pauzu.
+     */
     fun loadText(fullText: String) {
-        val splitter = Regex("(?<=[.!?\\n])\\s+")
-        val parts = fullText.split(splitter).filter { it.isNotBlank() }
-        val offsets = mutableListOf<Int>()
-        var pos = 0
+        // (?<!\d)[.!?]["'’”)]{0,2}(\s+) - kraj recenice (uz izuzetak brojeva ispred tacke)
+        // ILI (\n{2,}) - goli prazan red bez interpunkcije ispred (npr. naslov, lista)
+        val pattern = Regex("(?<!\\d)[.!?][\"'\u2019\u201d)]{0,2}(\\s+)|(\\n{2,})")
+
         val cleaned = mutableListOf<String>()
-        for (part in parts) {
-            val idx = fullText.indexOf(part, pos)
-            val safeIdx = if (idx >= 0) idx else pos
-            offsets.add(safeIdx)
-            cleaned.add(part)
-            pos = safeIdx + part.length
+        val offsets = mutableListOf<Int>()
+        val paragraphAfter = mutableListOf<Boolean>()
+
+        var pos = 0
+        for (match in pattern.findAll(fullText)) {
+            val g1 = match.groups[1]
+            val g2 = match.groups[2]
+            val wsRange = g1?.range ?: g2?.range ?: continue
+            val isParagraph = if (g1 != null) g1.value.count { it == '\n' } >= 2 else true
+
+            val rawPiece = fullText.substring(pos, wsRange.first)
+            val trimmed = rawPiece.trimStart()
+            val leadingWs = rawPiece.length - trimmed.length
+            val piece = trimmed.trimEnd()
+            if (piece.isNotEmpty()) {
+                cleaned.add(piece)
+                offsets.add(pos + leadingWs)
+                paragraphAfter.add(isParagraph)
+            }
+            pos = wsRange.last + 1
         }
+        if (pos < fullText.length) {
+            val rawPiece = fullText.substring(pos)
+            val trimmed = rawPiece.trimStart()
+            val leadingWs = rawPiece.length - trimmed.length
+            val piece = trimmed.trimEnd()
+            if (piece.isNotEmpty()) {
+                cleaned.add(piece)
+                offsets.add(pos + leadingWs)
+            }
+        }
+
         chunks = cleaned
         chunkOffsets = offsets
+        chunkParagraphAfter = paragraphAfter
     }
 
     /** Počni čitanje od zadatog offseta u tekstu (karakter). */

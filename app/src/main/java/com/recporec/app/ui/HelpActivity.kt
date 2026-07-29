@@ -68,7 +68,11 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
-        Kad ga uključiš, pojavljuje se izbor: biraš između 300, 400 i 500 milisekundi.
+        Kad ga uključiš, pojavljuje se klizač - biraš trajanje od 0 do 1000 milisekundi.
+        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa (odlomka).
+        Kad ga uključiš, pojavljuje se klizač - biraš trajanje od 0 do 3000 milisekundi.
+        Ako je uključena i pauza između rečenica i pauza između pasusa, na kraju pasusa se čuje samo pauza za pasus, ne obe zaredom.
+        Obe pauze prepoznaju kraj rečenice pametno - tačka posle godine, na primer 1958., se ne računa kao kraj rečenice.
         Opcija "Pređi automatski na čitanje sledećeg dokumenta" ti omogućava da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim čitanje prethodnog dokumenta bude završeno.
         Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
         Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
