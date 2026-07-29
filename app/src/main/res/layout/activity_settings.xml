@@ -219,6 +219,16 @@
             android:text="Stranica" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnResetGeneralDefaults"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_margin="20dp"
+        android:textSize="20sp"
+        android:backgroundTint="@color/btn_page_nav"
+        android:textColor="@color/button_text"
+        android:text="Vrati na zadano" />
+
     </LinearLayout>
     </ScrollView>
 

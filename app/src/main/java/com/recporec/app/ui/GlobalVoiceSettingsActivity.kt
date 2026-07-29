@@ -4,6 +4,8 @@ import android.media.AudioManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.recporec.app.R
+import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.AppSettings
 import com.recporec.app.databinding.ActivityGlobalVoiceSettingsBinding
 import com.recporec.app.tts.TtsEngineUtil
@@ -16,6 +18,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGlobalVoiceSettingsBinding
     private val settings by lazy { AppSettings(this) }
+    private val db by lazy { AppDatabase.getInstance(this) }
     private var allVoices: List<VoiceOption> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,10 +69,42 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
 
+        // Visina: klizač 0..150 predstavlja visinu 0.50x .. 2.00x (korak 0.01)
+        binding.seekPitch.max = 150
+        binding.seekPitch.progress = ((settings.globalPitch * 100).roundToInt() - 50).coerceIn(0, 150)
+        binding.seekPitch.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                settings.globalPitch = (progress + 50) / 100f
+                refreshStatusTexts()
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
         binding.btnSpeedDown.setOnClickListener { changeSpeed(-0.05f) }
         binding.btnSpeedUp.setOnClickListener { changeSpeed(0.05f) }
         binding.btnVolumeDown.setOnClickListener { changeVolume(-5) }
         binding.btnVolumeUp.setOnClickListener { changeVolume(5) }
+        binding.btnPitchDown.setOnClickListener { changePitch(-0.05f) }
+        binding.btnPitchUp.setOnClickListener { changePitch(0.05f) }
+
+        binding.btnResetVoiceDefaults.setOnClickListener { confirmResetVoiceDefaults() }
+    }
+
+    private fun confirmResetVoiceDefaults() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Vrati na zadano")
+            .setMessage("Vraća jezik, glas, brzinu, jačinu, visinu i kombinovane glasove na podrazumevano stanje. Ovo se odnosi samo na opšta podešavanja, ne na pojedinačne dokumente.")
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                settings.resetVoiceSettingsToDefaults()
+                lifecycleScope.launch {
+                    db.combinedVoiceDao().clearScope(0L)
+                    recreate()
+                }
+            }
+            .show()
     }
 
     private fun changeSpeed(delta: Float) {
@@ -83,6 +118,13 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         val newVol = (settings.globalVolumePercent + deltaPercent).coerceIn(0, 100)
         settings.globalVolumePercent = newVol
         binding.seekVolume.progress = newVol
+        refreshStatusTexts()
+    }
+
+    private fun changePitch(delta: Float) {
+        val newPitch = (settings.globalPitch + delta).coerceIn(0.5f, 2.0f)
+        settings.globalPitch = newPitch
+        binding.seekPitch.progress = ((newPitch * 100).roundToInt() - 50).coerceIn(0, 150)
         refreshStatusTexts()
     }
 
@@ -152,5 +194,6 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
 
         binding.textSpeedStatus.text = "Brzina: ${(settings.globalSpeechRate * 100).roundToInt()}%"
         binding.textVolumeStatus.text = "Jačina: ${settings.globalVolumePercent}%"
+        binding.textPitchStatus.text = "Visina: ${(settings.globalPitch * 100).roundToInt()}%"
     }
 }

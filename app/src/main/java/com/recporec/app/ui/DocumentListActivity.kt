@@ -181,6 +181,7 @@ class DocumentListActivity : AppCompatActivity() {
                     voiceName = settings.globalVoiceName,
                     voiceEngine = settings.globalVoiceEngine,
                     languageTag = settings.globalLanguageTag,
+                    pitch = settings.globalPitch,
                     sortOrder = bottomOrder
                 )
             )

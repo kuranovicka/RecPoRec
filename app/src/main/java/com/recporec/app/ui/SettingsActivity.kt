@@ -98,6 +98,18 @@ class SettingsActivity : AppCompatActivity() {
                 refreshNavButton()
             }
         }
+
+        binding.btnResetGeneralDefaults.setOnClickListener {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Vrati na zadano")
+                .setMessage("Vraća sva podešavanja na ovom ekranu (rad u pozadini, drmanje, zvuk, pauza između rečenica, automatski nastavak, navigacija) na podrazumevano stanje.")
+                .setNegativeButton(com.recporec.app.R.string.cancel, null)
+                .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
+                    settings.resetGeneralSettingsToDefaults()
+                    recreate()
+                }
+                .show()
+        }
     }
 
     /** Traži od sistema da ne ograničava aplikaciju radi štednje baterije, da bi čitanje

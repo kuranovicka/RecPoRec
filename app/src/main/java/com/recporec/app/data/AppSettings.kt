@@ -67,6 +67,39 @@ class AppSettings(context: Context) {
         get() = prefs.getInt(KEY_G_VOLUME, 100)
         set(value) = prefs.edit().putInt(KEY_G_VOLUME, value).apply()
 
+    var globalPitch: Float
+        get() = prefs.getFloat(KEY_G_PITCH, 1.0f)
+        set(value) = prefs.edit().putFloat(KEY_G_PITCH, value).apply()
+
+    /** Vraća SVA opšta podešavanja glasa (jezik/glas/brzina/jačina/visina) na podrazumevano.
+     * Ne dira podešavanja pojedinačnih dokumenata niti opšta podešavanja iz ekrana "Podešavanja". */
+    fun resetVoiceSettingsToDefaults() {
+        prefs.edit()
+            .remove(KEY_G_LANG)
+            .remove(KEY_G_VOICE)
+            .remove(KEY_G_ENGINE)
+            .remove(KEY_G_RATE)
+            .remove(KEY_G_VOLUME)
+            .remove(KEY_G_PITCH)
+            .apply()
+    }
+
+    /** Vraća SVA podešavanja sa ekrana "Podešavanja" na podrazumevano. Ne dira opšta
+     * podešavanja glasa niti podešavanja pojedinačnih dokumenata. */
+    fun resetGeneralSettingsToDefaults() {
+        prefs.edit()
+            .remove(KEY_BACKGROUND)
+            .remove(KEY_UNINTERRUPTED)
+            .remove(KEY_SHAKE)
+            .remove(KEY_SHAKE_SENSITIVITY)
+            .remove(KEY_NAVIGATION)
+            .remove(KEY_SOUND)
+            .remove(KEY_SENTENCE_PAUSE_ENABLED)
+            .remove(KEY_SENTENCE_PAUSE_MS)
+            .remove(KEY_AUTO_NEXT)
+            .apply()
+    }
+
     companion object {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
@@ -82,5 +115,6 @@ class AppSettings(context: Context) {
         private const val KEY_G_ENGINE = "global_voice_engine"
         private const val KEY_G_RATE = "global_speech_rate"
         private const val KEY_G_VOLUME = "global_volume_percent"
+        private const val KEY_G_PITCH = "global_pitch"
     }
 }

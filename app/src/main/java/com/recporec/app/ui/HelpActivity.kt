@@ -35,7 +35,7 @@ class HelpActivity : AppCompatActivity() {
         Gore desno je dugme "Opcije".
         Tu se nalaze tri stavke.
         Prva stavka je "Opšta podešavanja glasa".
-        Tu biraš jezik, glas, brzinu i jačinu za sve nove dokumente.
+        Tu biraš jezik, glas, brzinu, jačinu i visinu za sve nove dokumente.
         Prvo izaberi jezik.
         Onda izaberi glas.
         Dodirom na stavku na listi odmah se i bira i potvrđuje.
@@ -55,6 +55,9 @@ class HelpActivity : AppCompatActivity() {
         Tvoj obični, već izabrani glas se automatski računa kao prvi u smeni.
         Dovoljno je da dodaš samo još jedan glas da bi se smenjivanje aktiviralo.
         Glasovi mogu biti i iz različitih govornih mehanizama, na primer Google i AlfaNum.
+        Na dnu ovog ekrana je dugme "Vrati na zadano".
+        Ono vraća jezik, glas, brzinu, jačinu, visinu i kombinovane glasove na podrazumevano stanje.
+        Ne dira podešavanja pojedinačnih dokumenata.
         Druga stavka je "Podešavanja".
         Tu su prekidači i jedno dugme.
         Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
@@ -72,6 +75,8 @@ class HelpActivity : AppCompatActivity() {
         Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.
         Sva podešavanja se pamte za ceo program.
         Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
+        Na dnu ovog ekrana je dugme "Vrati na zadano".
+        Ono vraća sve prekidače i navigaciju na ovom ekranu na podrazumevano stanje.
         Treća stavka je "Pomoć".
         Sada idemo u sam dokument.
         Tastatura ima osamnaest dugmića.

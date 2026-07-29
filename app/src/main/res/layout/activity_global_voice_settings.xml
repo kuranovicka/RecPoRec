@@ -188,5 +188,70 @@
                 android:text="+" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/textPitchStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Visina: 100%" />
+
+        <SeekBar
+            android:id="@+id/seekPitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="Visina glasa. Dvostruko dodirni i prevuci, ili koristi dugmad ispod."
+            android:max="150"
+            android:progress="50"
+            android:progressTint="@color/btn_pitch"
+            android:thumbTint="@color/btn_pitch" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="24dp">
+
+            <Button
+                android:id="@+id/btnPitchDown"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_pitch"
+                android:textColor="@color/button_text"
+                android:contentDescription="Smanji visinu glasa"
+                android:text="−" />
+
+            <Button
+                android:id="@+id/btnPitchUp"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:textSize="20sp"
+                android:backgroundTint="@color/btn_pitch"
+                android:textColor="@color/button_text"
+                android:contentDescription="Povećaj visinu glasa"
+                android:text="+" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnResetVoiceDefaults"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_margin="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_page_nav"
+            android:textColor="@color/button_text"
+            android:text="Vrati na zadano" />
+
     </LinearLayout>
 </ScrollView>
