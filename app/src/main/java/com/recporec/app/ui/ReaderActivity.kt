@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.max
 import kotlin.math.min
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class ReaderActivity : AppCompatActivity() {
@@ -751,7 +752,9 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.ttsManager?.setSpeechRate(newRate)
         persistState()
         val roundedRate = (newRate * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(this, "Brzina čitanja: ${roundedRate}x", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(
+            this, "Brzina čitanja: ${String.format(Locale.US, "%.2f", roundedRate)}x", android.widget.Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun adjustPitch(delta: Float) {
@@ -761,7 +764,9 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.ttsManager?.setPitch(newPitch)
         persistState()
         val roundedPitch = (newPitch * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(this, "Visina glasa: ${roundedPitch}x", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(
+            this, "Visina glasa: ${String.format(Locale.US, "%.2f", roundedPitch)}x", android.widget.Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun showDocLanguagePicker() {
@@ -853,15 +858,15 @@ class ReaderActivity : AppCompatActivity() {
     private fun showTimerMenu() {
         val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
         val labels = minuteOptions.map { "$it minuta" } +
-            listOf("Zaboravi tajmer", "Isključeno", "Vrati se na poslednji tajmer")
+            listOf("Vrati se na poslednji tajmer", "Zaboravi tajmer", "Isključeno")
         AlertDialog.Builder(this)
             .setTitle("Tajmer")
             .setItems(labels.toTypedArray()) { _, which ->
                 when {
                     which < minuteOptions.size -> setTimer(minuteOptions[which])
-                    which == minuteOptions.size -> forgetLastTimer()
-                    which == minuteOptions.size + 1 -> setTimer(0)
-                    else -> showReturnToLastTimerDialog()
+                    which == minuteOptions.size -> showReturnToLastTimerDialog()
+                    which == minuteOptions.size + 1 -> forgetLastTimer()
+                    else -> setTimer(0)
                 }
             }
             .show()
@@ -869,8 +874,9 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun setTimer(minutes: Int) {
         doc = if (minutes > 0) {
-            // Novi tajmer - pamti gde je pocelo OVO odbrojavanje, brise prethodno pamcenje.
-            doc?.copy(timerMinutes = minutes, lastTimerStartOffset = doc?.currentCharacterOffset)
+            // Novi tajmer - pamti gde je pocelo OVO odbrojavanje i na koliko minuta je
+            // postavljeno, brise prethodno pamcenje.
+            doc?.copy(timerMinutes = minutes, lastTimerStartOffset = doc?.currentCharacterOffset, lastTimerMinutes = minutes)
         } else {
             // Iskljuceno - zaustavlja odbrojavanje, ali NE brise pamcenje poslednjeg tajmera
             // (za slucaj da korisnica zaspi i posle zeli da se vrati na tu poziciju).
@@ -897,13 +903,19 @@ class ReaderActivity : AppCompatActivity() {
             android.widget.Toast.makeText(this, "Nema prethodnog tajmera.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
+        val lastMinutes = doc?.lastTimerMinutes
+        val message = if (lastMinutes != null) {
+            "Poslednji tajmer je odbrojavao $lastMinutes minuta."
+        } else {
+            "Postoji prethodni tajmer."
+        }
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.hint = "Broj minuta posle početka (nije obavezno)"
-        input.contentDescription = "Broj minuta posle početka poslednjeg tajmera, nije obavezno"
+        input.hint = "Upiši minut na koji želiš da odeš"
+        input.contentDescription = "Upiši minut na koji želiš da odeš"
         AlertDialog.Builder(this)
             .setTitle("Vrati se na poslednji tajmer")
-            .setMessage("Vraća te na mesto gde je počeo poslednji tajmer. Ako želiš, upiši koliko minuta posle toga da odeš.")
+            .setMessage(message)
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val extraMinutes = input.text.toString().trim().toIntOrNull() ?: 0
@@ -916,7 +928,7 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Briše SVE pamćenje poslednjeg tajmera, bez potvrde - vraća se odmah u knjigu. */
     private fun forgetLastTimer() {
-        doc = doc?.copy(lastTimerStartOffset = null)
+        doc = doc?.copy(lastTimerStartOffset = null, lastTimerMinutes = null)
         persistState()
         android.widget.Toast.makeText(this, "Tajmer zaboravljen.", android.widget.Toast.LENGTH_SHORT).show()
     }

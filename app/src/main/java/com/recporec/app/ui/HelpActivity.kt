@@ -123,13 +123,14 @@ class HelpActivity : AppCompatActivity() {
         Ono otvara meni sa više stavki.
         Prve stavke su: petnaest, trideset, četrdeset pet, šezdeset, sedamdeset pet i devedeset minuta.
         Dodirneš broj minuta da postaviš tajmer.
+        Sledeća stavka je "Vrati se na poslednji tajmer".
+        Ona te vraća na mesto gde je počeo poslednji tajmer koji si postavila.
+        Kaže ti koliko je minuta taj tajmer odbrojavao.
+        Upišeš minut na koji želiš da odeš, ili ostaviš prazno da odeš na sam početak.
+        Ovo je korisno ako zaspiš dok tajmer odbrojava.
         Sledeća stavka je "Zaboravi tajmer".
         Ona odmah, bez potvrde, briše pamćenje poslednjeg tajmera.
-        Sledeća stavka je "Isključeno" - zaustavlja tajmer, ali ga ne zaboravlja.
-        Poslednja stavka je "Vrati se na poslednji tajmer".
-        Ona te vraća na mesto gde je počeo poslednji tajmer koji si postavila.
-        Možeš upisati koliko minuta posle toga da odeš, ili ostaviti prazno.
-        Ovo je korisno ako zaspiš dok tajmer odbrojava.
+        Poslednja stavka je "Isključeno" - zaustavlja tajmer, ali ga ne zaboravlja.
         Kad tajmer istekne, čitanje se pauzira samo.
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
         Četvrto dugme je "Sledeće poglavlje".

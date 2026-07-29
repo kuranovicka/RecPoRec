@@ -31,5 +31,8 @@ data class DocumentEntity(
     val pitch: Float = 1.0f,
     /** Pozicija (karakter) u dokumentu na kojoj je poslednji put POKRENUT tajmer -
      * koristi se za "Vrati se na poslednji tajmer". Null ako nikad nije postavljen. */
-    val lastTimerStartOffset: Int? = null
+    val lastTimerStartOffset: Int? = null,
+    /** Na koliko minuta je bio postavljen poslednji tajmer - koristi se da se korisniku
+     * javi na koji tajmer se tačno vraća (npr. "Poslednji tajmer je odbrojavao 30 minuta"). */
+    val lastTimerMinutes: Int? = null
 )

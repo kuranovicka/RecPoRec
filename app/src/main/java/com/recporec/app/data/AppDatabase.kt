@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CombinedVoiceEntryEntity::class,
         CombinedVoiceSettingsEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -108,13 +108,21 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Dodaje pamcenje na koliko minuta je bio poslednji tajmer - ne dira postojece
+         * podatke, samo dodaje kolonu sa bezopasnom podrazumevanom vrednoscu. */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE documents ADD COLUMN lastTimerMinutes INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

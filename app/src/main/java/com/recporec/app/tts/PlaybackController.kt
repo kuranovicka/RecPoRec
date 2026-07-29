@@ -136,6 +136,11 @@ object PlaybackController {
                             timerRemainingSeconds = 0
                             ttsManager?.pause()
                             notifyPlaybackStateChanged()
+                            // Cuvamo timerMinutes = 0 direktno ovde (ne cekajuci UI) - da bi
+                            // se ispravno upamtilo i kad tajmer istekne u pozadini, van
+                            // otvorenog ekrana za citanje (lastTimerStartOffset se NE dira).
+                            currentDocument = currentDocument?.copy(timerMinutes = 0)
+                            persistCurrentDocument()
                             uiTimerExpiredListener?.invoke()
                         }
                     }
