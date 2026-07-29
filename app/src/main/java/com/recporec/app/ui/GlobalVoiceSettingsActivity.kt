@@ -101,7 +101,15 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
                 settings.resetVoiceSettingsToDefaults()
                 lifecycleScope.launch {
                     db.combinedVoiceDao().clearScope(0L)
-                    recreate()
+                    // Direktno osvežavamo prikaz umesto da se oslanjamo na recreate() - na
+                    // nekim uređajima recreate() ume da se ne pokrene pouzdano posle dijaloga.
+                    binding.seekSpeed.progress = ((settings.globalSpeechRate * 100).roundToInt() - 30).coerceIn(0, 270)
+                    binding.seekVolume.progress = settings.globalVolumePercent
+                    binding.seekPitch.progress = ((settings.globalPitch * 100).roundToInt() - 50).coerceIn(0, 150)
+                    refreshStatusTexts()
+                    android.widget.Toast.makeText(
+                        this@GlobalVoiceSettingsActivity, "Podešavanja su vraćena na zadano.", android.widget.Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .show()

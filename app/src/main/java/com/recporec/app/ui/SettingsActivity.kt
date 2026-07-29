@@ -18,33 +18,7 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        binding.switchBackground.isChecked = settings.backgroundEnabled
-        binding.switchUninterrupted.isChecked = settings.uninterruptedEnabled
-        binding.switchShake.isChecked = settings.shakeEnabled
-        binding.switchSound.isChecked = settings.soundFeedbackEnabled
-        binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
-        binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
-
-        binding.groupSentencePauseMs.visibility =
-            if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        binding.seekSentencePause.max = 1000
-        binding.seekSentencePause.progress = settings.sentencePauseMs.coerceIn(0, 1000)
-        binding.textSentencePauseStatus.text = "Pauza između rečenica: ${settings.sentencePauseMs} ms"
-
-        binding.switchParagraphPause.isChecked = settings.paragraphPauseEnabled
-        binding.groupParagraphPauseMs.visibility =
-            if (settings.paragraphPauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        binding.seekParagraphPause.max = 3000
-        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 3000)
-        binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
-
-        binding.groupShakeSensitivity.visibility =
-            if (settings.shakeEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        when (settings.shakeSensitivity) {
-            0 -> binding.radioShakeLight.isChecked = true
-            2 -> binding.radioShakeStrong.isChecked = true
-            else -> binding.radioShakeMedium.isChecked = true
-        }
+        refreshFromSettings()
 
         binding.switchBackground.setOnCheckedChangeListener { _, checked ->
             settings.backgroundEnabled = checked
@@ -105,13 +79,6 @@ class SettingsActivity : AppCompatActivity() {
             settings.autoNextDocumentEnabled = checked
         }
 
-        val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka")
-        val navValues = listOf("page", "min1", "min5", "min10", "bookmark")
-        fun refreshNavButton() {
-            val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
-            binding.btnNavigationMode.text = navLabels[idx]
-        }
-        refreshNavButton()
         binding.btnNavigationMode.setOnClickListener {
             val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
             PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel, autoConfirm = true) { index ->
@@ -127,10 +94,55 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton(com.recporec.app.R.string.cancel, null)
                 .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
                     settings.resetGeneralSettingsToDefaults()
-                    recreate()
+                    // Direktno osvežavamo prikaz umesto da se oslanjamo na recreate() - na
+                    // nekim uređajima recreate() ume da se ne pokrene pouzdano posle dijaloga.
+                    refreshFromSettings()
+                    android.widget.Toast.makeText(this, "Podešavanja su vraćena na zadano.", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }
+    }
+
+    private val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka")
+    private val navValues = listOf("page", "min1", "min5", "min10", "bookmark")
+
+    private fun refreshNavButton() {
+        val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
+        binding.btnNavigationMode.text = navLabels[idx]
+    }
+
+    /** Učitava SVE prikazane vrednosti direktno iz sačuvanih podešavanja - koristi se i pri
+     * otvaranju ekrana i posle "Vrati na zadano", umesto oslanjanja na recreate(). */
+    private fun refreshFromSettings() {
+        binding.switchBackground.isChecked = settings.backgroundEnabled
+        binding.switchUninterrupted.isChecked = settings.uninterruptedEnabled
+        binding.switchShake.isChecked = settings.shakeEnabled
+        binding.switchSound.isChecked = settings.soundFeedbackEnabled
+        binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
+        binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
+
+        binding.groupSentencePauseMs.visibility =
+            if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        binding.seekSentencePause.max = 1000
+        binding.seekSentencePause.progress = settings.sentencePauseMs.coerceIn(0, 1000)
+        binding.textSentencePauseStatus.text = "Pauza između rečenica: ${settings.sentencePauseMs} ms"
+
+        binding.switchParagraphPause.isChecked = settings.paragraphPauseEnabled
+        binding.groupParagraphPauseMs.visibility =
+            if (settings.paragraphPauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        binding.seekParagraphPause.max = 3000
+        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 3000)
+        binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
+
+        binding.groupShakeSensitivity.visibility =
+            if (settings.shakeEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        when (settings.shakeSensitivity) {
+            0 -> binding.radioShakeLight.isChecked = true
+            2 -> binding.radioShakeStrong.isChecked = true
+            else -> binding.radioShakeMedium.isChecked = true
+        }
+
+        refreshNavButton()
     }
 
     /** Traži od sistema da ne ograničava aplikaciju radi štednje baterije, da bi čitanje
