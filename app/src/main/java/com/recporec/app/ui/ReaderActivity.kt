@@ -851,15 +851,15 @@ class ReaderActivity : AppCompatActivity() {
     private fun showTimerMenu() {
         val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
         val labels = minuteOptions.map { "$it minuta" } +
-            listOf("Isključeno", "Vrati se na poslednji tajmer", "Zaboravi tajmer")
+            listOf("Zaboravi tajmer", "Isključeno", "Vrati se na poslednji tajmer")
         AlertDialog.Builder(this)
             .setTitle("Tajmer")
             .setItems(labels.toTypedArray()) { _, which ->
                 when {
                     which < minuteOptions.size -> setTimer(minuteOptions[which])
-                    which == minuteOptions.size -> setTimer(0)
-                    which == minuteOptions.size + 1 -> showReturnToLastTimerDialog()
-                    else -> forgetLastTimer()
+                    which == minuteOptions.size -> forgetLastTimer()
+                    which == minuteOptions.size + 1 -> setTimer(0)
+                    else -> showReturnToLastTimerDialog()
                 }
             }
             .show()
