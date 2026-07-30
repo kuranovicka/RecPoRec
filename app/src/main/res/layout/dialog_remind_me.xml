@@ -5,25 +5,25 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <TextView
-        android:id="@+id/textRemindStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:textColor="@color/text_primary"
-        android:accessibilityLiveRegion="polite"
-        android:text="15 minuta" />
-
     <SeekBar
         android:id="@+id/seekRemindMinutes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:contentDescription="Broj minuta za podsetnik, od 5 do 120"
         android:max="23"
         android:progress="2"
         android:progressTint="@color/btn_timer"
         android:thumbTint="@color/btn_timer" />
+
+    <TextView
+        android:id="@+id/textRemindStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:accessibilityLiveRegion="polite"
+        android:text="15 minuta" />
 
 </LinearLayout>

@@ -45,19 +45,19 @@
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:text="Otkaži" />
 
         <Button
             android:id="@+id/btnConfirm"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:backgroundTint="@color/btn_chapter"
             android:textColor="@color/button_text"
             android:text="Potvrdi" />
