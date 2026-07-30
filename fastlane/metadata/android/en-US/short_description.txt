@@ -1,0 +1,1 @@
+A text-to-speech document reader built for blind and low-vision users.

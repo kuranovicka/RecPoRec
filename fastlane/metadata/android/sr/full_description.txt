@@ -1,0 +1,17 @@
+Reč po reč je aplikacija za čitanje dokumenata uz pomoć sinteze govora, napravljena od početka za slepe i slabovide korisnike koji koriste ekranski čitač (TalkBack).
+
+Podržani formati: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
+
+Glavne mogućnosti:
+
+* Jednostavna tastatura sa velikim dugmadima, raspoređena kao numerička tastatura na računaru
+* Oznake, pretraga teksta i skok na stranicu, minut ili oznaku
+* Podešavanje brzine, jačine i visine glasa, posebno za svaki dokument ili opšte za sve nove
+* Kombinovani glasovi - dva glasa koja se naizmenično smenjuju tokom čitanja, uz mogućnost mešanja različitih govornih mehanizama (na primer, Google i drugi instalirani motori)
+* Pauza između rečenica i pasusa, sa prepoznavanjem da tačka posle godine (na primer, 1958.) nije kraj rečenice
+* Tajmer za automatsku pauzu i "Podseti me" - vraćanje čitanja unazad za odabrani broj minuta, korisno kad zaspite uz knjigu
+* Rad u pozadini i automatska pauza pri telefonskom pozivu
+* Podrška za medijske tastere na slušalicama i spoljnim tastaturama
+* Automatski prelazak na sledeći dokument u listi
+
+Aplikacija je otvorenog koda i besplatna.

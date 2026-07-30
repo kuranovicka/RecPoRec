@@ -1,0 +1,17 @@
+Reč po reč ("Word by Word") is a text-to-speech document reader built from the ground up for blind and low-vision users who rely on a screen reader (TalkBack).
+
+Supported formats: txt, epub, pdf, docx, html, fb2, rtf, mobi, and azw.
+
+Main features:
+
+* A simple, large-button keypad layout, arranged like a numeric keypad
+* Bookmarks, text search, and jump to page, minute, or bookmark
+* Speed, volume, and pitch control, per document or as a general default for all new documents
+* Combined voices - two voices that alternate while reading, with support for mixing different TTS engines (for example, Google and other installed engines)
+* Pause between sentences and paragraphs, with smart sentence detection so a period after a year (e.g. 1958.) isn't treated as a sentence end
+* A timer for automatic pause, and "Remind me" - jump reading back by a chosen number of minutes, useful if you fall asleep while listening
+* Background playback and automatic pause during phone calls
+* Support for media buttons on headsets and external keyboards
+* Automatic advance to the next document in the list
+
+The app is free and open source.
