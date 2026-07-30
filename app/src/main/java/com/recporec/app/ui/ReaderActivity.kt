@@ -65,6 +65,11 @@ class ReaderActivity : AppCompatActivity() {
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { /* ako korisnik odbije, servis i dalje radi, samo bez vidljive notifikacije */ }
 
+    private val phoneStatePermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { /* ako korisnik odbije, i dalje se pokusava pauza preko audio fokusa, samo bez
+           rezervnog mehanizma za pozive */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityReaderBinding.inflate(layoutInflater)
@@ -95,6 +100,37 @@ class ReaderActivity : AppCompatActivity() {
                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+
+        maybeAskPhoneStatePermission()
+    }
+
+    /** Pita SAMO JEDNOM (ikad) za dozvolu stanja telefona - rezervni mehanizam za pauzu pri
+     * pozivu, odvojen od audio fokusa. Prvo objasnimo zašto, pa tek onda sistemski dijalog -
+     * ovo nije uobičajena dozvola za čitač knjiga, pa zaslužuje kratko objašnjenje. Ako
+     * korisnica odbije, ništa se ne pokvari - audio fokus i dalje pokušava da pauzira sam. */
+    private fun maybeAskPhoneStatePermission() {
+        if (settings.phoneStatePermissionAsked) return
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.READ_PHONE_STATE
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            settings.phoneStatePermissionAsked = true
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Pauza pri pozivu")
+            .setMessage(
+                "Da bi čitanje pouzdanije prepoznalo dolazni poziv i samo se pauziralo, " +
+                    "aplikacija može da traži dozvolu za stanje telefona (da li poziv postoji, " +
+                    "ne i sa kim, niti sadržaj poziva). Nije obavezno - možeš i odbiti, " +
+                    "čitanje će i dalje pokušati da se pauzira na uobičajen način."
+            )
+            .setNegativeButton("Ne sada") { _, _ -> settings.phoneStatePermissionAsked = true }
+            .setPositiveButton("Dozvoli") { _, _ ->
+                settings.phoneStatePermissionAsked = true
+                phoneStatePermissionLauncher.launch(android.Manifest.permission.READ_PHONE_STATE)
+            }
+            .show()
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {

@@ -29,9 +29,18 @@ class ReadingService : Service() {
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
 
+    // Rezervni, DIREKTAN mehanizam za pauzu pri pozivu - odvojen od audio fokusa (koji se na
+    // nekim uredjajima pokazao nepouzdanim, vidi TtsManager.pauseForCall/resumeForCall).
+    // Opciono - ako korisnik nije dao dozvolu za stanje telefona, ova zastita jednostavno
+    // ne radi, app inace normalno funkcionise (audio fokus i dalje pokusava da pauzira).
+    private var telephonyManager: android.telephony.TelephonyManager? = null
+    private var legacyPhoneStateListener: android.telephony.PhoneStateListener? = null
+    private var telephonyCallback: Any? = null // TelephonyCallback, samo na API 31+
+
     override fun onCreate() {
         super.onCreate()
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        setupCallStateListener()
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() { PlaybackController.ttsManager?.resume() }
@@ -69,6 +78,53 @@ class ReadingService : Service() {
                     }
                 }
                 sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setupCallStateListener() {
+        val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.READ_PHONE_STATE
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) return // bezopasno - app radi normalno i bez ovoga
+
+        telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
+        val tm = telephonyManager ?: return
+
+        fun handleCallState(state: Int) {
+            when (state) {
+                android.telephony.TelephonyManager.CALL_STATE_RINGING,
+                android.telephony.TelephonyManager.CALL_STATE_OFFHOOK -> {
+                    PlaybackController.ttsManager?.pauseForCall()
+                    refreshNotification()
+                }
+                android.telephony.TelephonyManager.CALL_STATE_IDLE -> {
+                    PlaybackController.ttsManager?.resumeForCall()
+                    refreshNotification()
+                }
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val callback = object : android.telephony.TelephonyCallback(), android.telephony.TelephonyCallback.CallStateListener {
+                override fun onCallStateChanged(state: Int) = handleCallState(state)
+            }
+            telephonyCallback = callback
+            try {
+                tm.registerTelephonyCallback(mainExecutor, callback)
+            } catch (_: SecurityException) {
+                // Dozvola formalno data ali odbijena od sistema iz nekog drugog razloga -
+                // bezbedno odustajemo, audio fokus mehanizam i dalje pokusava da radi.
+            }
+        } else {
+            val listener = object : android.telephony.PhoneStateListener() {
+                override fun onCallStateChanged(state: Int, phoneNumber: String?) = handleCallState(state)
+            }
+            legacyPhoneStateListener = listener
+            try {
+                tm.listen(listener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE)
+            } catch (_: SecurityException) {
             }
         }
     }
@@ -152,12 +208,25 @@ class ReadingService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    @Suppress("DEPRECATION")
     override fun onDestroy() {
         PlaybackController.playbackStateListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                (telephonyCallback as? android.telephony.TelephonyCallback)?.let {
+                    telephonyManager?.unregisterTelephonyCallback(it)
+                }
+            } else {
+                legacyPhoneStateListener?.let {
+                    telephonyManager?.listen(it, android.telephony.PhoneStateListener.LISTEN_NONE)
+                }
+            }
+        } catch (_: Exception) {
+        }
         super.onDestroy()
     }
 

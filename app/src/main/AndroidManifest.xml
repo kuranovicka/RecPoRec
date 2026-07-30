@@ -17,6 +17,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Opciono - za pouzdanije prepoznavanje telefonskog poziva (rezervni mehanizam uz
+         audio fokus, koji se na nekim uredjajima pokazao nepouzdanim). Ako korisnik odbije
+         ovu dozvolu, app i dalje radi normalno, samo se oslanja samo na audio fokus. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".RecPoRecApp"

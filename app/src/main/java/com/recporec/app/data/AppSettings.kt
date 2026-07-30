@@ -17,6 +17,12 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
+    /** Da li je ikad zatraženo dozvola za stanje telefona (rezervni mehanizam za pozive) -
+     * pitamo samo JEDNOM, čak i ako korisnik odbije, da ne dosađujemo pri svakom otvaranju. */
+    var phoneStatePermissionAsked: Boolean
+        get() = prefs.getBoolean(KEY_PHONE_STATE_ASKED, false)
+        set(value) = prefs.edit().putBoolean(KEY_PHONE_STATE_ASKED, value).apply()
+
     /** Osetljivost drmanja: 0 = blago, 1 = srednje (podrazumevano), 2 = jako. */
     var shakeSensitivity: Int
         get() = prefs.getInt(KEY_SHAKE_SENSITIVITY, 1)
@@ -117,6 +123,7 @@ class AppSettings(context: Context) {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
+        private const val KEY_PHONE_STATE_ASKED = "phone_state_permission_asked"
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_SOUND = "sound_feedback_enabled"

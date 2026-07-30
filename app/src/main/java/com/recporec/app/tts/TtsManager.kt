@@ -63,6 +63,28 @@ class TtsManager(private val appContext: Context) {
     private var audioFocusRequest: android.media.AudioFocusRequest? = null
     private var pausedDueToFocusLoss = false
 
+    // Rezervni mehanizam za pozive, odvojen od audio fokusa (koji se na nekim uredjajima
+    // pokazao nepouzdanim - fokus se dobije, ali se povratni poziv o gubljenju nikad ne
+    // pojavi). Ovaj mehanizam direktno prati stanje telefona (zahteva READ_PHONE_STATE),
+    // pa radi nezavisno od toga da li audio fokus ispravno funkcionise na datom uredjaju.
+    private var pausedDueToCall = false
+
+    fun pauseForCall() {
+        if (isSpeaking) {
+            pausedDueToCall = true
+            pause()
+            onAutoPaused?.invoke()
+        }
+    }
+
+    fun resumeForCall() {
+        if (pausedDueToCall) {
+            pausedDueToCall = false
+            resume()
+            onAutoResumed?.invoke()
+        }
+    }
+
     private val focusChangeListener = android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
         com.recporec.app.util.DiagLog.log("onAudioFocusChange PRIMLJEN, vrednost=$focusChange (isSpeaking=$isSpeaking)")
         when (focusChange) {

@@ -71,6 +71,8 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
         Kad ga uključiš, biraš jačinu drmanja: blago, srednje ili jako.
         Čitanje se samo pauzira kad stigne telefonski poziv, i samo nastavi kad se poziv završi.
+        Prvi put kad otvoriš dokument, aplikacija može da zatraži dodatnu dozvolu za stanje telefona, radi pouzdanije pauze pri pozivu.
+        Nije obavezno - možeš odbiti, čitanje će i dalje pokušati da se pauzira na uobičajen način.
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
