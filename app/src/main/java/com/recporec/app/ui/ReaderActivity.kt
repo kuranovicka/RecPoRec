@@ -230,7 +230,6 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
-        btnPlayPause.setOnLongClickListener { showDiagLog(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
@@ -462,36 +461,6 @@ class ReaderActivity : AppCompatActivity() {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
         }
-    }
-
-    /** PRIVREMENA DIJAGNOSTIKA - dug pritisak na Play/Pauza otvara pun dnevnik audio fokus
-     * dogadjaja (vezano za bag: citanje se ne pauzira pri pozivu/drugim zvukovima). Odvojeno
-     * od samog teksta dokumenta, sa dugmadima Kopiraj/Podeli. */
-    private fun showDiagLog() {
-        val logText = com.recporec.app.util.DiagLog.getAll()
-        val scrollView = android.widget.ScrollView(this)
-        val textView = android.widget.TextView(this).apply {
-            text = logText
-            setPadding(32, 24, 32, 24)
-            textSize = 14f
-            setTextIsSelectable(true)
-        }
-        scrollView.addView(textView)
-
-        AlertDialog.Builder(this)
-            .setTitle("Dijagnostika")
-            .setView(scrollView)
-            .setNeutralButton("Obriši") { _, _ ->
-                com.recporec.app.util.DiagLog.clear()
-                android.widget.Toast.makeText(this, "Dnevnik obrisan.", android.widget.Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Zatvori", null)
-            .setPositiveButton("Kopiraj") { _, _ ->
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Dijagnostika", logText))
-                android.widget.Toast.makeText(this, "Kopirano.", android.widget.Toast.LENGTH_SHORT).show()
-            }
-            .show()
     }
 
     private fun showGotoMinuteDialog() {

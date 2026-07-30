@@ -7,7 +7,7 @@ import android.hardware.SensorManager
 import kotlin.math.sqrt
 
 class ShakeDetector(
-    private val shakeThreshold: Float = 11.0f, // m/s^2 iznad gravitacije - "srednje" podrazumevano
+    private val shakeThreshold: Float = 9.5f, // m/s^2 iznad gravitacije - "srednje" podrazumevano
     private val onShake: () -> Unit
 ) : SensorEventListener {
 

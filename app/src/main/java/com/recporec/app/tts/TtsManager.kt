@@ -86,33 +86,25 @@ class TtsManager(private val appContext: Context) {
     }
 
     private val focusChangeListener = android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
-        com.recporec.app.util.DiagLog.log("onAudioFocusChange PRIMLJEN, vrednost=$focusChange (isSpeaking=$isSpeaking)")
         when (focusChange) {
             android.media.AudioManager.AUDIOFOCUS_LOSS,
             android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 audioFocusGranted = false
                 if (isSpeaking) {
-                    com.recporec.app.util.DiagLog.log("-> pauziram zbog gubitka fokusa")
                     pausedDueToFocusLoss = true
                     pause()
                     onAutoPaused?.invoke()
-                } else {
-                    com.recporec.app.util.DiagLog.log("-> ne radim nista, isSpeaking je vec false")
                 }
             }
             android.media.AudioManager.AUDIOFOCUS_GAIN -> {
                 audioFocusGranted = true
                 if (pausedDueToFocusLoss) {
-                    com.recporec.app.util.DiagLog.log("-> nastavljam, bilo pauzirano zbog fokusa")
                     pausedDueToFocusLoss = false
                     resume()
                     onAutoResumed?.invoke()
-                } else {
-                    com.recporec.app.util.DiagLog.log("-> ne radim nista, nije bilo pauzirano zbog fokusa")
                 }
             }
-            else -> com.recporec.app.util.DiagLog.log("-> nepoznata vrednost, ignorišem")
         }
     }
 
@@ -124,18 +116,9 @@ class TtsManager(private val appContext: Context) {
     private fun requestAudioFocus() {
         // Ako vec drzimo fokus, ne traziti ga ponovo - ponovljeno trazenje (bez otpustanja
         // izmedju) registruje app VISE PUTA u sistemskom "stogu" fokusa, sto pravi
-        // nepredvidivo ponasanje (npr. da se povratni poziv o gubljenju fokusa nikad ne
-        // pojavi, iako je poslednji zahtev vratio "dobijeno"). Ovo je verovatno pravi uzrok
-        // zasto se citanje nije pauziralo pri pozivu/drugim zvukovima uprkos "fokus dobijen".
-        if (audioFocusGranted) {
-            com.recporec.app.util.DiagLog.log("requestAudioFocus() preskočen - već držimo fokus")
-            return
-        }
-        val am = audioManager
-        if (am == null) {
-            com.recporec.app.util.DiagLog.log("requestAudioFocus() - AudioManager je NULL, odustajem")
-            return
-        }
+        // nepredvidivo ponasanje.
+        if (audioFocusGranted) return
+        val am = audioManager ?: return
         if (audioFocusRequest == null) {
             val attrs = android.media.AudioAttributes.Builder()
                 .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
@@ -147,21 +130,12 @@ class TtsManager(private val appContext: Context) {
                 // stigne na niti gde nesto (npr. pozivanje pause()) ne radi kako treba.
                 .setOnAudioFocusChangeListener(focusChangeListener, Handler(Looper.getMainLooper()))
                 .build()
-            com.recporec.app.util.DiagLog.log("Napravljen NOV AudioFocusRequest objekat")
         }
         try {
             val result = am.requestAudioFocus(audioFocusRequest!!)
             audioFocusGranted = result == android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-            val resultText = when (result) {
-                android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> "GRANTED"
-                android.media.AudioManager.AUDIOFOCUS_REQUEST_FAILED -> "FAILED"
-                android.media.AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> "DELAYED"
-                else -> "nepoznato ($result)"
-            }
-            com.recporec.app.util.DiagLog.log("requestAudioFocus() rezultat: $resultText")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             audioFocusGranted = false
-            com.recporec.app.util.DiagLog.log("requestAudioFocus() IZUZETAK: ${e.javaClass.simpleName}: ${e.message}")
             // Bezopasno ako ne uspe - citanje samo nastavlja bez ove zastite.
         }
     }
@@ -171,7 +145,6 @@ class TtsManager(private val appContext: Context) {
         audioFocusRequest?.let {
             try {
                 am.abandonAudioFocusRequest(it)
-                com.recporec.app.util.DiagLog.log("abandonAudioFocusRequest() pozvan")
             } catch (_: Exception) {
             }
         }
