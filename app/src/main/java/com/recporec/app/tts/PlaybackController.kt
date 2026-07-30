@@ -36,17 +36,7 @@ object PlaybackController {
     var timerRemainingSeconds: Int = 0
         private set
 
-    /** Preostale sekunde "Podseti me" (0 = nije aktivan). Kad istekne, čitanje se pauzira
-     * I vraća na mesto gde je "Podseti me" aktivirano - jednostavnija zamena za stari
-     * "tajmer koji pamti" pristup. */
-    var reminderRemainingSeconds: Int = 0
-        private set
-    private var reminderStartOffset: Int? = null
-
     var uiTimerExpiredListener: (() -> Unit)? = null
-    /** Pozvano kad "Podseti me" istekne, sa pozicijom na koju je čitanje vraćeno - da UI
-     * (ako je vidljiv) odmah osveži prikaz. */
-    var uiReminderFiredListener: ((Int) -> Unit)? = null
 
     /** ReadingService se prijavi ovde dok radi u pozadini, da bi osvežio notifikaciju kad
      * se stanje čitanja promeni bilo odakle (dugme, tajmer, automatska pauza pri pozivu...). */
@@ -58,13 +48,6 @@ object PlaybackController {
 
     fun setTimerMinutes(minutes: Int) {
         timerRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
-    }
-
-    /** Aktivira "Podseti me" - posle [minutes] minuta, čitanje se pauzira i vraća na
-     * [startOffset] (mesto odakle je aktivirano). */
-    fun setReminder(minutes: Int, startOffset: Int) {
-        reminderRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
-        reminderStartOffset = if (minutes > 0) startOffset else null
     }
 
     /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
@@ -142,26 +125,6 @@ object PlaybackController {
             while (true) {
                 delay(1000)
 
-                // "Podseti me" broji STVARNO proteklo vreme, ne samo vreme dok knjiga aktivno
-                // čita - inače bi se, ako se čitanje bilo kako prekine (poziv, dodir, bilo šta)
-                // u međuvremenu, brojač zamrznuo i nikad ne bi stigao do nule.
-                if (reminderRemainingSeconds > 0) {
-                    reminderRemainingSeconds -= 1
-                    if (reminderRemainingSeconds <= 0) {
-                        reminderRemainingSeconds = 0
-                        val backTo = reminderStartOffset
-                        reminderStartOffset = null
-                        if (backTo != null) {
-                            ttsManager?.pause()
-                            ttsManager?.syncPositionOnly(backTo)
-                            currentDocument = currentDocument?.copy(currentCharacterOffset = backTo)
-                            persistCurrentDocument()
-                            notifyPlaybackStateChanged()
-                            uiReminderFiredListener?.invoke(backTo)
-                        }
-                    }
-                }
-
                 if (ttsManager?.isSpeaking == true) {
                     elapsedSeconds += 1
                     currentDocument = currentDocument?.copy(elapsedSeconds = elapsedSeconds)
@@ -211,12 +174,9 @@ object PlaybackController {
         parsedDocument = null
         elapsedSeconds = 0
         timerRemainingSeconds = 0
-        reminderRemainingSeconds = 0
-        reminderStartOffset = null
         uiPositionListener = null
         uiFinishedListener = null
         uiTimerExpiredListener = null
-        uiReminderFiredListener = null
         playbackStateListener = null
         scope.coroutineContext.cancelChildren()
         tickerStarted = false

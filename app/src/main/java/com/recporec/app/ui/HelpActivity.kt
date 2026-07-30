@@ -168,10 +168,10 @@ class HelpActivity : AppCompatActivity() {
         Ako je izabran minut, ideš unazad za jedan, pet ili deset minuta.
         Ako je izabrana oznaka, ideš tačno na prethodnu oznaku, ne na fiksnu udaljenost.
         Drugo dugme je "Podseti me".
-        Ono vraća mesto na onoliko minuta ranije koliko izabereš.
+        Vraća vreme unazad za odabrani broj minuta.
         Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
         Izabereš broj minuta i potvrdiš.
-        Tada se čitanje vrati unazad na odabrani broj minuta.
+        Čitanje se odmah vrati unazad na odabrani broj minuta.
         Ovo je korisno kada se uspavaš.
         Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
 

@@ -905,10 +905,8 @@ class ReaderActivity : AppCompatActivity() {
         updateTimerStatusText()
     }
 
-    /** "Podseti me": posle izabranog broja minuta, čitanje se pauzira i vrati na mesto
-     * odakle je aktivirano - korisno kad nisi sigurna koliko dugo ćeš ostati budna.
-     * Klizač od 5 do 120 minuta (korak 5) - finiji izbor nego kod Tajmera, jer ovde
-     * ima smisla i kratko vreme (npr. "izađem na 10 minuta"). */
+    /** "Podseti me": vraća čitanje UNAZAD za izabrani broj minuta, odmah čim potvrdiš -
+     * korisno kad se probudiš i ne znaš tačno dokle si čula dok si zaspala. */
     private fun showRemindMeMenu() {
         val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
@@ -933,12 +931,13 @@ class ReaderActivity : AppCompatActivity() {
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val minutes = minutesFor(seek.progress)
-                val startOffset = doc?.currentCharacterOffset ?: 0
-                PlaybackController.setReminder(minutes, startOffset)
+                val current = doc?.currentCharacterOffset ?: 0
+                val target = (current - minutesToChars(minutes)).coerceAtLeast(0)
+                moveTo(target)
                 android.widget.Toast.makeText(
                     this,
-                    "Podsetnik za $minutes minuta. Kad prođe, knjiga će se vratiti na mesto $minutes minuta ranije - tačno ovde gde si sad.",
-                    android.widget.Toast.LENGTH_LONG
+                    "Vraćeno $minutes minuta unazad.",
+                    android.widget.Toast.LENGTH_SHORT
                 ).show()
             }
             .show()
@@ -1080,16 +1079,6 @@ class ReaderActivity : AppCompatActivity() {
                 updateTimerStatusText()
             }
         }
-        PlaybackController.uiReminderFiredListener = { backOffset ->
-            runOnUiThread {
-                doc = doc?.copy(currentCharacterOffset = backOffset)
-                updateStatusTexts()
-                updateSeekBar()
-                android.widget.Toast.makeText(
-                    this, "Podsetnik: vraćeno na mesto gde si aktivirala podsetnik.", android.widget.Toast.LENGTH_LONG
-                ).show()
-            }
-        }
 
         // Napomena: drmanje za pauzu/nastavak se sada osluškuje u ReadingService, ne ovde -
         // tako radi i dok je čitanje u pozadini, van ovog ekrana (vidi ReadingService.kt).
@@ -1100,7 +1089,6 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
-        PlaybackController.uiReminderFiredListener = null
         persistState()
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
