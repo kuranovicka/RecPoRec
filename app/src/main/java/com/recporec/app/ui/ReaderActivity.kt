@@ -346,32 +346,43 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         fun applyVoiceAndText() {
-            tts.loadText(parsedDoc.fullText)
-            tts.setSpeechRate(entity.speechRate)
-            tts.setPitch(entity.pitch)
-            tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
-            tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
-            if (effectiveVoiceName != null) {
-                tts.setVoiceByName(effectiveVoiceName)
-            } else {
-                // Ni dokument ni opšta podešavanja nemaju izabran glas - biramo nezavisan
-                // podrazumevani glas umesto da TTS slučajno preuzme glas ekranskog čitača.
-                tts.applyIndependentDefaultVoice()
+            // Deljenje na rečenice/pasuse je sad malo zahtevnije (prepoznavanje godina,
+            // navodnika, pasusa) - radi se u pozadini da otvaranje dokumenta ne "zamrzne"
+            // ekran na velikim knjigama.
+            lifecycleScope.launch {
+                withContext(Dispatchers.Default) {
+                    tts.loadText(parsedDoc.fullText)
+                }
+                tts.setSpeechRate(entity.speechRate)
+                tts.setPitch(entity.pitch)
+                tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+                tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
+                if (effectiveVoiceName != null) {
+                    tts.setVoiceByName(effectiveVoiceName)
+                } else {
+                    // Ni dokument ni opšta podešavanja nemaju izabran glas - biramo nezavisan
+                    // podrazumevani glas umesto da TTS slučajno preuzme glas ekranskog čitača.
+                    tts.applyIndependentDefaultVoice()
+                }
+                applyCombinedVoicesIfAny()
+                markTtsReady()
             }
-            applyCombinedVoicesIfAny()
-            markTtsReady()
         }
 
         val needsEngineSwitch = effectiveEngine != null && effectiveEngine != tts.currentEnginePackage
         if (needsEngineSwitch) {
             tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
-                tts.loadText(parsedDoc.fullText)
-                tts.setPitch(entity.pitch)
-                tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
-                tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
-                if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
-                applyCombinedVoicesIfAny()
-                markTtsReady()
+                lifecycleScope.launch {
+                    withContext(Dispatchers.Default) {
+                        tts.loadText(parsedDoc.fullText)
+                    }
+                    tts.setPitch(entity.pitch)
+                    tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+                    tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
+                    if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
+                    applyCombinedVoicesIfAny()
+                    markTtsReady()
+                }
             }
         } else {
             tts.onReady = { applyVoiceAndText() }
@@ -986,11 +997,22 @@ class ReaderActivity : AppCompatActivity() {
 
         val effectiveRate = max(0.3f, entity.speechRate)
         val consumedChars = entity.currentCharacterOffset.coerceIn(0, length)
-        val elapsedEstimateSeconds = (consumedChars / (baseCharsPerMinute * effectiveRate) * 60).toLong()
+
+        // Pauze između rečenica/pasusa dodaju stvarno vreme koje čisto računanje po broju
+        // karaktera ne bi videlo - zato su dva dokumenta sličnog obima mogla da pokazuju
+        // vrlo različito ukupno vreme (jedan ima mnogo više kratkih rečenica/pasusa od drugog).
+        val tts = PlaybackController.ttsManager
+        val sentenceMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+        val paragraphMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
+        val currentChunkIdx = tts?.chunkIndexForOffset(entity.currentCharacterOffset) ?: 0
+        val elapsedPauseMs = tts?.estimatedPauseMillis(0, currentChunkIdx, sentenceMs, paragraphMs) ?: 0L
+        val remainingPauseMs = tts?.estimatedPauseMillis(currentChunkIdx, Int.MAX_VALUE, sentenceMs, paragraphMs) ?: 0L
+
+        val elapsedEstimateSeconds = (consumedChars / (baseCharsPerMinute * effectiveRate) * 60).toLong() + elapsedPauseMs / 1000
         binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(elapsedEstimateSeconds))
 
         val remainingChars = max(0, length - entity.currentCharacterOffset)
-        val remainingSeconds = (remainingChars / (baseCharsPerMinute * effectiveRate) * 60).toLong()
+        val remainingSeconds = (remainingChars / (baseCharsPerMinute * effectiveRate) * 60).toLong() + remainingPauseMs / 1000
         binding.textRemaining.text = getString(R.string.status_remaining, formatTime(remainingSeconds))
     }
 
