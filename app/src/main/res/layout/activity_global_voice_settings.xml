@@ -94,43 +94,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:contentDescription="Brzina čitanja. Dvostruko dodirni i prevuci, ili koristi dugmad ispod."
+            android:layout_marginBottom="8dp"
+            android:contentDescription="Brzina čitanja. Dvostruko dodirni i prevuci prstom."
             android:max="270"
             android:progress="70"
             android:progressTint="@color/btn_speed"
             android:thumbTint="@color/btn_speed" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp">
-
-            <Button
-                android:id="@+id/btnSpeedDown"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_speed"
-                android:textColor="@color/button_text"
-                android:contentDescription="Smanji brzinu čitanja"
-                android:text="−" />
-
-            <Button
-                android:id="@+id/btnSpeedUp"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_speed"
-                android:textColor="@color/button_text"
-                android:contentDescription="Povećaj brzinu čitanja"
-                android:text="+" />
-        </LinearLayout>
 
         <TextView
             android:id="@+id/textVolumeStatus"
@@ -150,43 +119,11 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="8dp"
-            android:contentDescription="Jačina zvuka. Dvostruko dodirni i prevuci, ili koristi dugmad ispod."
+            android:contentDescription="Jačina zvuka. Dvostruko dodirni i prevuci prstom."
             android:max="100"
             android:progress="100"
             android:progressTint="@color/btn_volume"
             android:thumbTint="@color/btn_volume" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="24dp">
-
-            <Button
-                android:id="@+id/btnVolumeDown"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_volume"
-                android:textColor="@color/button_text"
-                android:contentDescription="Smanji jačinu zvuka"
-                android:text="−" />
-
-            <Button
-                android:id="@+id/btnVolumeUp"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_volume"
-                android:textColor="@color/button_text"
-                android:contentDescription="Povećaj jačinu zvuka"
-                android:text="+" />
-        </LinearLayout>
 
         <TextView
             android:id="@+id/textPitchStatus"
@@ -205,43 +142,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:contentDescription="Visina glasa. Dvostruko dodirni i prevuci, ili koristi dugmad ispod."
+            android:layout_marginBottom="24dp"
+            android:contentDescription="Visina glasa. Dvostruko dodirni i prevuci prstom."
             android:max="150"
             android:progress="50"
             android:progressTint="@color/btn_pitch"
             android:thumbTint="@color/btn_pitch" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="24dp">
-
-            <Button
-                android:id="@+id/btnPitchDown"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_pitch"
-                android:textColor="@color/button_text"
-                android:contentDescription="Smanji visinu glasa"
-                android:text="−" />
-
-            <Button
-                android:id="@+id/btnPitchUp"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:textSize="20sp"
-                android:backgroundTint="@color/btn_pitch"
-                android:textColor="@color/button_text"
-                android:contentDescription="Povećaj visinu glasa"
-                android:text="+" />
-        </LinearLayout>
 
         <Button
             android:id="@+id/btnResetVoiceDefaults"

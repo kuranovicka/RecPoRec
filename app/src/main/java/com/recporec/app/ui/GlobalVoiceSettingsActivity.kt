@@ -82,13 +82,6 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
 
-        binding.btnSpeedDown.setOnClickListener { changeSpeed(-0.05f) }
-        binding.btnSpeedUp.setOnClickListener { changeSpeed(0.05f) }
-        binding.btnVolumeDown.setOnClickListener { changeVolume(-5) }
-        binding.btnVolumeUp.setOnClickListener { changeVolume(5) }
-        binding.btnPitchDown.setOnClickListener { changePitch(-0.05f) }
-        binding.btnPitchUp.setOnClickListener { changePitch(0.05f) }
-
         binding.btnResetVoiceDefaults.setOnClickListener { confirmResetVoiceDefaults() }
     }
 
@@ -113,27 +106,6 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
                 }
             }
             .show()
-    }
-
-    private fun changeSpeed(delta: Float) {
-        val newRate = (settings.globalSpeechRate + delta).coerceIn(0.3f, 3.0f)
-        settings.globalSpeechRate = newRate
-        binding.seekSpeed.progress = ((newRate * 100).roundToInt() - 30).coerceIn(0, 270)
-        refreshStatusTexts()
-    }
-
-    private fun changeVolume(deltaPercent: Int) {
-        val newVol = (settings.globalVolumePercent + deltaPercent).coerceIn(0, 100)
-        settings.globalVolumePercent = newVol
-        binding.seekVolume.progress = newVol
-        refreshStatusTexts()
-    }
-
-    private fun changePitch(delta: Float) {
-        val newPitch = (settings.globalPitch + delta).coerceIn(0.5f, 2.0f)
-        settings.globalPitch = newPitch
-        binding.seekPitch.progress = ((newPitch * 100).roundToInt() - 50).coerceIn(0, 150)
-        refreshStatusTexts()
     }
 
     private fun loadVoices() {

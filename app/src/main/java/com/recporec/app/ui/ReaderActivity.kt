@@ -937,7 +937,7 @@ class ReaderActivity : AppCompatActivity() {
                 PlaybackController.setReminder(minutes, startOffset)
                 android.widget.Toast.makeText(
                     this,
-                    "Podsetnik za $minutes minuta - knjiga će se vratiti na ovo mesto.",
+                    "Podsetnik za $minutes minuta. Kad prođe, knjiga će se vratiti na mesto $minutes minuta ranije - tačno ovde gde si sad.",
                     android.widget.Toast.LENGTH_LONG
                 ).show()
             }

@@ -153,9 +153,10 @@ class HelpActivity : AppCompatActivity() {
         Ako je izabran minut, ideš unazad za jedan, pet ili deset minuta.
         Ako je izabrana oznaka, ideš tačno na prethodnu oznaku, ne na fiksnu udaljenost.
         Drugo dugme je "Podseti me".
-        Ono otvara klizač od pet do sto dvadeset minuta, po pet minuta.
+        Ono vraća mesto na onoliko minuta ranije koliko izabereš.
+        Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
         Izabereš broj minuta i potvrdiš.
-        Posle tog vremena, čitanje se pauzira i vrati na mesto na kome si dodirnula "Podseti me".
+        Posle tog vremena, čitanje se pauzira i vrati tačno na mesto gde si dodirnula "Podseti me".
         Ovo je korisno kad ne znaš koliko dugo ćeš ostati budna.
         Treće dugme pomera unapred, na isti način kao prvo, samo u drugom smeru.
         Ispod tastature je malo veći klizač, radi lakšeg dodira.

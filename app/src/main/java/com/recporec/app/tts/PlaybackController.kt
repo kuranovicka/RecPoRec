@@ -141,6 +141,27 @@ object PlaybackController {
             var tick = 0
             while (true) {
                 delay(1000)
+
+                // "Podseti me" broji STVARNO proteklo vreme, ne samo vreme dok knjiga aktivno
+                // čita - inače bi se, ako se čitanje bilo kako prekine (poziv, dodir, bilo šta)
+                // u međuvremenu, brojač zamrznuo i nikad ne bi stigao do nule.
+                if (reminderRemainingSeconds > 0) {
+                    reminderRemainingSeconds -= 1
+                    if (reminderRemainingSeconds <= 0) {
+                        reminderRemainingSeconds = 0
+                        val backTo = reminderStartOffset
+                        reminderStartOffset = null
+                        if (backTo != null) {
+                            ttsManager?.pause()
+                            ttsManager?.syncPositionOnly(backTo)
+                            currentDocument = currentDocument?.copy(currentCharacterOffset = backTo)
+                            persistCurrentDocument()
+                            notifyPlaybackStateChanged()
+                            uiReminderFiredListener?.invoke(backTo)
+                        }
+                    }
+                }
+
                 if (ttsManager?.isSpeaking == true) {
                     elapsedSeconds += 1
                     currentDocument = currentDocument?.copy(elapsedSeconds = elapsedSeconds)
@@ -157,23 +178,6 @@ object PlaybackController {
                             currentDocument = currentDocument?.copy(timerMinutes = 0)
                             persistCurrentDocument()
                             uiTimerExpiredListener?.invoke()
-                        }
-                    }
-
-                    if (reminderRemainingSeconds > 0) {
-                        reminderRemainingSeconds -= 1
-                        if (reminderRemainingSeconds <= 0) {
-                            reminderRemainingSeconds = 0
-                            val backTo = reminderStartOffset
-                            reminderStartOffset = null
-                            if (backTo != null) {
-                                ttsManager?.pause()
-                                ttsManager?.syncPositionOnly(backTo)
-                                currentDocument = currentDocument?.copy(currentCharacterOffset = backTo)
-                                persistCurrentDocument()
-                                notifyPlaybackStateChanged()
-                                uiReminderFiredListener?.invoke(backTo)
-                            }
                         }
                     }
                 }
