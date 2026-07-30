@@ -143,6 +143,7 @@ class HelpActivity : AppCompatActivity() {
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
         Četvrto dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
+        Dug pritisak na sledeće poglavlje, otvara spisak svih poglavlja - dodirneš neko da odeš direktno na njega.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
         Peto dugme povećava visinu glasa.
         Dug pritisak na bilo koje od ova dva dugmeta vraća visinu ovog dokumenta na zadano.
@@ -187,6 +188,7 @@ class HelpActivity : AppCompatActivity() {
         Čitanje se odmah vrati unazad na odabrani broj minuta.
         Ovo je korisno kada se uspavaš.
         Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
+        Dug pritisak na treće dugme, vraća tačno na mesto pre poslednjeg skoka, koji god da je bio.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.

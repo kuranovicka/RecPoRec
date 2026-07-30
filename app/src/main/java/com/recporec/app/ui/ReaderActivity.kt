@@ -205,6 +205,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
+        btnNextChapter.setOnLongClickListener { showChapterList(); true }
         btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
         btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
@@ -237,6 +238,7 @@ class ReaderActivity : AppCompatActivity() {
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
         btnStepBack.setOnLongClickListener { repeatCurrentPage(); true }
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
+        btnStepForward.setOnLongClickListener { undoLastJump(); true }
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -596,11 +598,17 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    /** Pamti gde si bila TAČNO PRE poslednjeg skoka (bilo koje dugme za navigaciju) - da bi
+     * dug pritisak na "Sledeći element" mogao da vrati tačno tamo ako se slučajno preskoči
+     * predaleko, bez računanja koliko unazad. */
+    private var positionBeforeLastJump: Int? = null
+
     private fun moveTo(offset: Int) {
         if (doc == null || parsed == null) {
             android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
+        positionBeforeLastJump = doc?.currentCharacterOffset
         doc = doc?.copy(currentCharacterOffset = offset)
         updateStatusTexts()
         updateSeekBar()
@@ -611,6 +619,32 @@ class ReaderActivity : AppCompatActivity() {
         } else {
             tts.syncPositionOnly(offset)
         }
+    }
+
+    /** Dug pritisak na "Sledeći element" (korak napred) - vraća tačno na mesto gde si bila
+     * PRE poslednjeg skoka, koji god da je bio (korak, poglavlje, oznaka, Podseti me...). */
+    private fun undoLastJump() {
+        val target = positionBeforeLastJump
+        if (target == null) {
+            android.widget.Toast.makeText(this, "Nema prethodnog skoka.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        moveTo(target)
+    }
+
+    /** Dug pritisak na "Sledeće poglavlje" - spisak SVIH poglavlja, dodirneš da odeš direktno
+     * na bilo koje, umesto da klikćeš jedno po jedno kroz dugačku knjigu. */
+    private fun showChapterList() {
+        val chapters = parsed?.chapters ?: emptyList()
+        if (chapters.isEmpty()) {
+            android.widget.Toast.makeText(this, "Ovaj dokument nema prepoznata poglavlja.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val labels = chapters.map { it.title }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Sadržaj")
+            .setItems(labels) { _, which -> moveTo(chapters[which].startOffset) }
+            .show()
     }
 
     /** Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu. */
