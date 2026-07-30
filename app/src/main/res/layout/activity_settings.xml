@@ -217,7 +217,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="Trajanje pauze između pasusa u milisekundama"
-                android:max="3000"
+                android:max="1000"
                 android:progress="800"
                 android:progressTint="@color/btn_timer"
                 android:thumbTint="@color/btn_timer" />

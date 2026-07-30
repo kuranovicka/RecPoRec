@@ -880,13 +880,30 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showTimerMenu() {
-        val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
-        val labels = minuteOptions.map { "$it minuta" } + listOf("Isključeno")
+        val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
+        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
+        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRemindMinutes)
+
+        fun minutesFor(progress: Int) = 5 + progress * 5
+
+        seek.max = 23 // (120 - 5) / 5
+        val currentMinutes = doc?.timerMinutes ?: 0
+        seek.progress = if (currentMinutes in 5..120) (currentMinutes - 5) / 5 else 2 // 15 min podrazumevano
+        textStatus.text = "${minutesFor(seek.progress)} minuta"
+        seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                textStatus.text = "${minutesFor(progress)} minuta"
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
         AlertDialog.Builder(this)
             .setTitle("Tajmer")
-            .setItems(labels.toTypedArray()) { _, which ->
-                if (which < minuteOptions.size) setTimer(minuteOptions[which]) else setTimer(0)
-            }
+            .setView(view)
+            .setNegativeButton(R.string.cancel, null)
+            .setNeutralButton("Isključi") { _, _ -> setTimer(0) }
+            .setPositiveButton("Postavi") { _, _ -> setTimer(minutesFor(seek.progress)) }
             .show()
     }
 

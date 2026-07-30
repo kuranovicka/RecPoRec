@@ -130,8 +130,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchParagraphPause.isChecked = settings.paragraphPauseEnabled
         binding.groupParagraphPauseMs.visibility =
             if (settings.paragraphPauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        binding.seekParagraphPause.max = 3000
-        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 3000)
+        binding.seekParagraphPause.max = 1000
+        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 1000)
         binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
 
         binding.groupShakeSensitivity.visibility =

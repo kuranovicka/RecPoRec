@@ -58,6 +58,11 @@ object PlaybackController {
     private var appContext: Context? = null
     private var tickerStarted = false
 
+    // Iste vrednosti kao u ReaderActivity - drzi korak navigacije dosledan bez obzira da li
+    // je pokrenut sa dugmeta u citacu ili sa medijskog tastera.
+    private const val CHARS_PER_PAGE = 1800
+    private const val BASE_CHARS_PER_MINUTE = 800f
+
     fun ensureInitialized(context: Context) {
         appContext = context.applicationContext
         if (ttsManager == null) {
@@ -166,6 +171,55 @@ object PlaybackController {
     }
 
     fun isActive(): Boolean = ttsManager?.isSpeaking == true
+
+    /** Isto što i dugmad "Prethodna/Sledeća" u čitaču (zavisno od podešavanja Navigacije) -
+     * ovde postoji posebno da bi radilo i pozvano iz servisa (npr. sa tastera za premotavanje
+     * na slušalicama/spoljnoj tastaturi), nezavisno od toga da li je ekran otvoren. */
+    fun stepNavigate(forward: Boolean, context: Context) {
+        val settings = com.recporec.app.data.AppSettings(context)
+        val mode = settings.navigationMode
+        val entity = currentDocument ?: return
+        val length = parsedDocument?.length ?: return
+
+        if (mode == "bookmark") {
+            scope.launch {
+                val bookmarks = withContext(Dispatchers.IO) {
+                    AppDatabase.getInstance(context).bookmarkDao().getForDocument(entity.id)
+                }.sortedBy { it.characterOffset }
+                if (bookmarks.isEmpty()) return@launch
+                val current = currentDocument?.currentCharacterOffset ?: 0
+                val target = if (forward) {
+                    bookmarks.firstOrNull { it.characterOffset > current } ?: bookmarks.first()
+                } else {
+                    bookmarks.lastOrNull { it.characterOffset < current } ?: bookmarks.last()
+                }
+                applyOffset(target.characterOffset)
+            }
+            return
+        }
+
+        val delta = when (mode) {
+            "min1" -> minutesToChars(1, entity.speechRate)
+            "min5" -> minutesToChars(5, entity.speechRate)
+            "min10" -> minutesToChars(10, entity.speechRate)
+            else -> CHARS_PER_PAGE
+        }
+        val signedDelta = if (forward) delta else -delta
+        val current = entity.currentCharacterOffset
+        val newOffset = (current + signedDelta).coerceIn(0, (length - 1).coerceAtLeast(0))
+        applyOffset(newOffset)
+    }
+
+    private fun minutesToChars(minutes: Int, rate: Float): Int =
+        (minutes * BASE_CHARS_PER_MINUTE * rate.coerceAtLeast(0.3f)).toInt()
+
+    private fun applyOffset(offset: Int) {
+        currentDocument = currentDocument?.copy(currentCharacterOffset = offset)
+        persistCurrentDocument()
+        val tts = ttsManager
+        if (tts?.isSpeaking == true) tts.startFromOffset(offset) else tts?.syncPositionOnly(offset)
+        uiPositionListener?.invoke(offset)
+    }
 
     fun release() {
         ttsManager?.shutdown()
