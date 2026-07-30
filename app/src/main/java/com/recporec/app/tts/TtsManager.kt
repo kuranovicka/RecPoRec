@@ -68,6 +68,7 @@ class TtsManager(private val appContext: Context) {
             android.media.AudioManager.AUDIOFOCUS_LOSS,
             android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                audioFocusGranted = false
                 if (isSpeaking) {
                     pausedDueToFocusLoss = true
                     pause()
@@ -75,6 +76,7 @@ class TtsManager(private val appContext: Context) {
                 }
             }
             android.media.AudioManager.AUDIOFOCUS_GAIN -> {
+                audioFocusGranted = true
                 if (pausedDueToFocusLoss) {
                     pausedDueToFocusLoss = false
                     resume()
@@ -90,6 +92,12 @@ class TtsManager(private val appContext: Context) {
     fun isAudioFocusGranted(): Boolean = audioFocusGranted
 
     private fun requestAudioFocus() {
+        // Ako vec drzimo fokus, ne traziti ga ponovo - ponovljeno trazenje (bez otpustanja
+        // izmedju) registruje app VISE PUTA u sistemskom "stogu" fokusa, sto pravi
+        // nepredvidivo ponasanje (npr. da se povratni poziv o gubljenju fokusa nikad ne
+        // pojavi, iako je poslednji zahtev vratio "dobijeno"). Ovo je verovatno pravi uzrok
+        // zasto se citanje nije pauziralo pri pozivu/drugim zvukovima uprkos "fokus dobijen".
+        if (audioFocusGranted) return
         val am = audioManager ?: return
         if (audioFocusRequest == null) {
             val attrs = android.media.AudioAttributes.Builder()
