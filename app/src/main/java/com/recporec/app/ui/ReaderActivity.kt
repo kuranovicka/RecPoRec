@@ -425,12 +425,23 @@ class ReaderActivity : AppCompatActivity() {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
             // PRIVREMENA DIJAGNOSTIKA - da vidimo da li se audio fokus stvarno dobija
-            // (vezano za bag: citanje se ne pauzira pri pozivu/drugim zvukovima).
-            android.widget.Toast.makeText(
-                this,
-                if (tts.isAudioFocusGranted()) "Dijagnostika: audio fokus DOBIJEN." else "Dijagnostika: audio fokus NIJE dobijen.",
-                android.widget.Toast.LENGTH_LONG
-            ).show()
+            // (vezano za bag: citanje se ne pauzira pri pozivu/drugim zvukovima). Dijalog
+            // (ne Toast) da poruka ne nestane sama i da moze da se kopira/posalje.
+            val diagText = if (tts.isAudioFocusGranted()) {
+                "Dijagnostika RečPoReč: audio fokus DOBIJEN."
+            } else {
+                "Dijagnostika RečPoReč: audio fokus NIJE dobijen."
+            }
+            AlertDialog.Builder(this)
+                .setTitle("Dijagnostika")
+                .setMessage(diagText)
+                .setNegativeButton("Zatvori", null)
+                .setPositiveButton("Kopiraj") { _, _ ->
+                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Dijagnostika", diagText))
+                    android.widget.Toast.makeText(this, "Kopirano.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                .show()
         }
     }
 
