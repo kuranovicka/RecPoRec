@@ -906,14 +906,33 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /** "Podseti me": posle izabranog broja minuta, čitanje se pauzira i vrati na mesto
-     * odakle je aktivirano - korisno kad nisi sigurna koliko dugo ćeš ostati budna. */
+     * odakle je aktivirano - korisno kad nisi sigurna koliko dugo ćeš ostati budna.
+     * Klizač od 5 do 120 minuta (korak 5) - finiji izbor nego kod Tajmera, jer ovde
+     * ima smisla i kratko vreme (npr. "izađem na 10 minuta"). */
     private fun showRemindMeMenu() {
-        val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
-        val labels = minuteOptions.map { "$it minuta" }
+        val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
+        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
+        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRemindMinutes)
+
+        fun minutesFor(progress: Int) = 5 + progress * 5
+
+        seek.max = 23 // (120 - 5) / 5
+        seek.progress = 5 // 30 minuta podrazumevano
+        textStatus.text = "${minutesFor(seek.progress)} minuta"
+        seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                textStatus.text = "${minutesFor(progress)} minuta"
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
         AlertDialog.Builder(this)
             .setTitle("Podseti me")
-            .setItems(labels.toTypedArray()) { _, which ->
-                val minutes = minuteOptions[which]
+            .setView(view)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val minutes = minutesFor(seek.progress)
                 val startOffset = doc?.currentCharacterOffset ?: 0
                 PlaybackController.setReminder(minutes, startOffset)
                 android.widget.Toast.makeText(

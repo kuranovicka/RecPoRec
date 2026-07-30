@@ -145,8 +145,9 @@ class HelpActivity : AppCompatActivity() {
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
         Treće dugme je "Podseti me".
-        Ono otvara meni sa istim brojevima minuta kao Tajmer.
-        Dodirneš broj minuta - posle tog vremena, čitanje se pauzira i vrati na mesto na kome si dodirnula "Podseti me".
+        Ono otvara klizač od pet do sto dvadeset minuta, po pet minuta.
+        Izabereš broj minuta i potvrdiš.
+        Posle tog vremena, čitanje se pauzira i vrati na mesto na kome si dodirnula "Podseti me".
         Ovo je korisno kad ne znaš koliko dugo ćeš ostati budna.
         Četvrto dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
