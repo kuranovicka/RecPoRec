@@ -76,7 +76,7 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
         Kad ga uključiš, pojavljuje se klizač.
         Biraš trajanje od 0 do 1000 milisekundi.
-        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa odlomka .
+        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa (odlomka).
         Kad ga uključiš, pojavljuje se klizač.
         Biraš trajanje od 0 do 3000 milisekundi.
         Ako je uključena i pauza između rečenica i pauza između pasusa, na kraju pasusa se čuje samo pauza za pasus, ne obe zaredom.
