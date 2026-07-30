@@ -141,6 +141,7 @@ class HelpActivity : AppCompatActivity() {
         Ono ide na početak sledećeg poglavlja.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
         Peto dugme povećava visinu glasa.
+        Dug pritisak na bilo koje od ova dva dugmeta vraća visinu ovog dokumenta na opštu.
 
         Treći red ima pet dugmadi.
         Prvo dugme smanjuje jačinu zvuka.
@@ -155,12 +156,14 @@ class HelpActivity : AppCompatActivity() {
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
         Jačina je vezana za ovu knjigu, kao i brzina i visina - ne menja jačinu telefona.
+        Dug pritisak na bilo koje od ova dva dugmeta vraća jačinu ovog dokumenta na opštu.
 
         Četvrti red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
+        Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na opštu.
         Ako imaš slušalice ili tastaturu sa medijskim tasterima plej, pauza, premotavanje , oni takođe rade.
         Premotavanje radi isto kao dugmad za prethodnu/sledeću stavku iz petog reda.
 

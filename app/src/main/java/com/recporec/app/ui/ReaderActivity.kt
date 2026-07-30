@@ -165,9 +165,11 @@ class ReaderActivity : AppCompatActivity() {
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
+        btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
         btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
+        btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
 
@@ -182,11 +184,15 @@ class ReaderActivity : AppCompatActivity() {
             )
         })
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
+        btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
+        btnVolUp.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
 
         btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
+        btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
+        btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
@@ -784,6 +790,35 @@ class ReaderActivity : AppCompatActivity() {
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         val targetIdx = (idx + direction).coerceIn(0, chapters.size - 1)
         moveTo(chapters[targetIdx].startOffset)
+    }
+
+    /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
+     * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
+     * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
+    private fun resetToGlobal(what: String) {
+        val entity = doc ?: return
+        val tts = PlaybackController.ttsManager
+        doc = when (what) {
+            "brzina" -> {
+                val newRate = settings.globalSpeechRate
+                tts?.setSpeechRate(newRate)
+                entity.copy(speechRate = -1f)
+            }
+            "visina" -> {
+                val newPitch = settings.globalPitch
+                tts?.setPitch(newPitch)
+                entity.copy(pitch = -1f)
+            }
+            else -> {
+                val newVolume = settings.globalVolumePercent
+                tts?.setVolume(newVolume / 100f)
+                entity.copy(volumePercent = -1)
+            }
+        }
+        persistState()
+        android.widget.Toast.makeText(
+            this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun adjustVolume(direction: Int) {
