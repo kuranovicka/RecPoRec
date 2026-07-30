@@ -176,12 +176,16 @@ class DocumentListActivity : AppCompatActivity() {
                     title = name.substringBeforeLast("."),
                     uri = localUri.toString(),
                     format = format,
-                    speechRate = settings.globalSpeechRate,
+                    // Namerno NE "zamrzavamo" trenutnu opštu vrednost ovde - nov dokument prati
+                    // opšta podešavanja dinamički (kao Jezik/Glas), sve dok se za NJEGA
+                    // posebno nešto ne promeni. -1 znači "nije posebno postavljeno" za
+                    // brzinu/visinu (0 i naviše su ispravne vrednosti).
+                    speechRate = -1f,
+                    pitch = -1f,
                     volumePercent = settings.globalVolumePercent,
-                    voiceName = settings.globalVoiceName,
-                    voiceEngine = settings.globalVoiceEngine,
-                    languageTag = settings.globalLanguageTag,
-                    pitch = settings.globalPitch,
+                    voiceName = null,
+                    voiceEngine = null,
+                    languageTag = null,
                     sortOrder = bottomOrder
                 )
             )

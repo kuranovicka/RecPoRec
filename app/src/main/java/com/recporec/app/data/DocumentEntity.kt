@@ -16,7 +16,9 @@ data class DocumentEntity(
     val currentCharacterOffset: Int = 0,
     val totalPages: Int = 0,
     val currentPage: Int = 0,
-    val speechRate: Float = 1.0f,
+    /** Brzina čitanja za ovaj dokument. -1 znači "nije posebno postavljeno" - koristi se
+     * opšta (globalna) vrednost, i to se osvežava ako se opšta vrednost kasnije promeni. */
+    val speechRate: Float = -1f,
     val volumePercent: Int = 100,
     val voiceName: String? = null,
     val voiceEngine: String? = null,
@@ -27,8 +29,9 @@ data class DocumentEntity(
     /** Ručni redosled u listi (manje = više gore). Popunjava se migracijom za postojeće
      * knjige, a nove knjige dobijaju vrednost manju od svih postojećih (idu na vrh). */
     val sortOrder: Int = 0,
-    /** Visina (ton) glasa - 1.0 je normalno. */
-    val pitch: Float = 1.0f,
+    /** Visina (ton) glasa - 1.0 je normalno. -1 znači "nije posebno postavljeno" - koristi
+     * se opšta vrednost, i osvežava ako se opšta vrednost kasnije promeni. */
+    val pitch: Float = -1f,
     /** Pozicija (karakter) u dokumentu na kojoj je poslednji put POKRENUT tajmer -
      * koristi se za "Vrati se na poslednji tajmer". Null ako nikad nije postavljen. */
     val lastTimerStartOffset: Int? = null,

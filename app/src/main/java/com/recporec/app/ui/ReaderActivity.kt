@@ -338,6 +338,11 @@ class ReaderActivity : AppCompatActivity() {
         // Ako postoje kombinovani glasovi (za dokument ili opšte), oni imaju prednost.
         val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (entity.voiceName ?: settings.globalVoiceName)
         val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
+        // Isti obrazac kao glas: dokumentova sopstvena brzina/visina ako je ikad eksplicitno
+        // postavljena, inače opšta - da izmena opštih podešavanja stvarno utiče na dokumente
+        // koji nemaju svoju (ranije je brzina/visina uvek bila "zamrznuta" od trenutka dodavanja).
+        val effRate = effectiveRate(entity)
+        val effPitch = effectivePitch(entity)
 
         fun applyCombinedVoicesIfAny() {
             if (combined != null) {
@@ -355,8 +360,8 @@ class ReaderActivity : AppCompatActivity() {
                 withContext(Dispatchers.Default) {
                     tts.loadText(parsedDoc.fullText)
                 }
-                tts.setSpeechRate(entity.speechRate)
-                tts.setPitch(entity.pitch)
+                tts.setSpeechRate(effRate)
+                tts.setPitch(effPitch)
                 tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                 tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
                 if (effectiveVoiceName != null) {
@@ -373,12 +378,12 @@ class ReaderActivity : AppCompatActivity() {
 
         val needsEngineSwitch = effectiveEngine != null && effectiveEngine != tts.currentEnginePackage
         if (needsEngineSwitch) {
-            tts.switchEngine(effectiveEngine, effectiveVoiceName, entity.speechRate) {
+            tts.switchEngine(effectiveEngine, effectiveVoiceName, effRate) {
                 lifecycleScope.launch {
                     withContext(Dispatchers.Default) {
                         tts.loadText(parsedDoc.fullText)
                     }
-                    tts.setPitch(entity.pitch)
+                    tts.setPitch(effPitch)
                     tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                     tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
                     if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
@@ -484,8 +489,23 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun minutesToChars(minutes: Int): Int {
-        val rate = doc?.speechRate ?: 1.0f
+        val rate = effectiveRate(doc)
         return (minutes * baseCharsPerMinute * rate.coerceAtLeast(0.3f)).toInt()
+    }
+
+    /** Brzina koju STVARNO treba koristiti - dokumentova sopstvena, ako je ikad eksplicitno
+     * postavljena (vrednost > 0), inače opšta (globalna). Isti obrazac kao kod glasa/jezika -
+     * bez ovoga, promena Brzine u Opštim podešavanjima ne bi uticala ni na jedan dokument
+     * koji je ikad otvoren (jer bi već imao "snimljenu" staru vrednost od trenutka dodavanja). */
+    private fun effectiveRate(entity: DocumentEntity?): Float {
+        val stored = entity?.speechRate ?: return settings.globalSpeechRate
+        return if (stored > 0f) stored else settings.globalSpeechRate
+    }
+
+    /** Isto kao [effectiveRate], samo za visinu glasa. */
+    private fun effectivePitch(entity: DocumentEntity?): Float {
+        val stored = entity?.pitch ?: return settings.globalPitch
+        return if (stored > 0f) stored else settings.globalPitch
     }
 
     private fun updateNavigationButtonLabels() {
@@ -772,7 +792,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun adjustSpeed(delta: Float) {
         val entity = doc ?: return
-        val newRate = (entity.speechRate + delta).coerceIn(0.3f, 3.0f)
+        val newRate = (effectiveRate(entity) + delta).coerceIn(0.3f, 3.0f)
         doc = entity.copy(speechRate = newRate)
         PlaybackController.ttsManager?.setSpeechRate(newRate)
         persistState()
@@ -784,7 +804,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun adjustPitch(delta: Float) {
         val entity = doc ?: return
-        val newPitch = (entity.pitch + delta).coerceIn(0.5f, 2.0f)
+        val newPitch = (effectivePitch(entity) + delta).coerceIn(0.5f, 2.0f)
         doc = entity.copy(pitch = newPitch)
         PlaybackController.ttsManager?.setPitch(newPitch)
         persistState()
@@ -868,7 +888,7 @@ class ReaderActivity : AppCompatActivity() {
             val tts = PlaybackController.ttsManager
             if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
                 ttsReady = false
-                tts.switchEngine(chosen.enginePackage, chosen.voice.name, doc?.speechRate ?: 1.0f) {
+                tts.switchEngine(chosen.enginePackage, chosen.voice.name, effectiveRate(doc)) {
                     parsed?.let { tts.loadText(it.fullText) }
                     markTtsReady()
                 }
@@ -1002,7 +1022,7 @@ class ReaderActivity : AppCompatActivity() {
             "$it  ($currentPage/${entity.totalPages})"
         }
 
-        val effectiveRate = max(0.3f, entity.speechRate)
+        val readingRate = max(0.3f, effectiveRate(entity))
         val consumedChars = entity.currentCharacterOffset.coerceIn(0, length)
 
         // Pauze između rečenica/pasusa dodaju stvarno vreme koje čisto računanje po broju
@@ -1015,11 +1035,11 @@ class ReaderActivity : AppCompatActivity() {
         val elapsedPauseMs = tts?.estimatedPauseMillis(0, currentChunkIdx, sentenceMs, paragraphMs) ?: 0L
         val remainingPauseMs = tts?.estimatedPauseMillis(currentChunkIdx, Int.MAX_VALUE, sentenceMs, paragraphMs) ?: 0L
 
-        val elapsedEstimateSeconds = (consumedChars / (baseCharsPerMinute * effectiveRate) * 60).toLong() + elapsedPauseMs / 1000
+        val elapsedEstimateSeconds = (consumedChars / (baseCharsPerMinute * readingRate) * 60).toLong() + elapsedPauseMs / 1000
         binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(elapsedEstimateSeconds))
 
         val remainingChars = max(0, length - entity.currentCharacterOffset)
-        val remainingSeconds = (remainingChars / (baseCharsPerMinute * effectiveRate) * 60).toLong() + remainingPauseMs / 1000
+        val remainingSeconds = (remainingChars / (baseCharsPerMinute * readingRate) * 60).toLong() + remainingPauseMs / 1000
         binding.textRemaining.text = getString(R.string.status_remaining, formatTime(remainingSeconds))
     }
 
