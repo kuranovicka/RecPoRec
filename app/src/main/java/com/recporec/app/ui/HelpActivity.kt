@@ -173,6 +173,7 @@ class HelpActivity : AppCompatActivity() {
         Izabereš broj minuta i potvrdiš.
         Tada se čitanje vrati unazad na odabrani broj minuta.
         Ovo je korisno kada se uspavaš.
+        Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
