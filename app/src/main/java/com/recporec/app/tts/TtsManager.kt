@@ -52,6 +52,9 @@ class TtsManager(private val appContext: Context) {
 
     private var lastSpeechRate: Float = 1.0f
     private var lastPitch: Float = 1.0f
+    /** Jačina (0.0-1.0), primenjuje se preko TTS parametra za svaku izgovorenu rečenicu -
+     * NIJE vezano za sistemsku jačinu telefona, vezano je za ovaj dokument/opšte podešavanje. */
+    private var volume: Float = 1.0f
 
     // Automatska pauza kad neko drugi (npr. telefonski poziv) preuzme audio - standardan
     // Android mehanizam, ne zahteva nikakvu posebnu dozvolu. Kad poziv zavrsi, citanje se
@@ -344,6 +347,13 @@ class TtsManager(private val appContext: Context) {
         secondaryEngines.values.forEach { it.setPitch(pitch) }
     }
 
+    /** Jačina 0.0-1.0. Za razliku od brzine/visine (koje se postavljaju jednom na motor),
+     * jačina se šalje uz SVAKI izgovor (TTS parametar), pa ne treba posebno primenjivati na
+     * sekundarne motore - primenjuje se automatski čim god koji od njih izgovori sledeći deo. */
+    fun setVolume(vol: Float) {
+        volume = vol.coerceIn(0f, 1f)
+    }
+
     /** Učitava puni tekst i deli ga na rečenice radi praćenja pozicije.
      *
      * Kraj rečenice prepoznaje tačku, upitnik i uzvičnik, uz dozvoljene zatvarajuće
@@ -495,7 +505,10 @@ class TtsManager(private val appContext: Context) {
         }
         onPositionChanged?.invoke(chunkOffsets.getOrElse(currentChunkIndex) { 0 })
         val speaker = activeInstance ?: tts
-        speaker?.speak(chunk, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString())
+        val params = android.os.Bundle().apply {
+            putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume)
+        }
+        speaker?.speak(chunk, TextToSpeech.QUEUE_FLUSH, params, UUID.randomUUID().toString())
     }
 
     fun shutdown() {

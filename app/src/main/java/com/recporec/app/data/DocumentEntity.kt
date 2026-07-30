@@ -19,7 +19,9 @@ data class DocumentEntity(
     /** Brzina čitanja za ovaj dokument. -1 znači "nije posebno postavljeno" - koristi se
      * opšta (globalna) vrednost, i to se osvežava ako se opšta vrednost kasnije promeni. */
     val speechRate: Float = -1f,
-    val volumePercent: Int = 100,
+    /** Jačina za ovaj dokument (0-100), vezano za TTS, NE za sistemsku jačinu telefona.
+     * -1 znači "nije posebno postavljeno" - koristi se opšta vrednost. */
+    val volumePercent: Int = -1,
     val voiceName: String? = null,
     val voiceEngine: String? = null,
     val languageTag: String? = null,

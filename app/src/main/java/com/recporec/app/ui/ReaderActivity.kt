@@ -44,7 +44,6 @@ class ReaderActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
 
-    private var audioManager: AudioManager? = null
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var toneGenerator: android.media.ToneGenerator? = null
     private var seekBarTouchTracking = false
@@ -70,8 +69,6 @@ class ReaderActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
         if (intent.getBooleanExtra(EXTRA_AUTOPLAY, false)) {
@@ -343,6 +340,7 @@ class ReaderActivity : AppCompatActivity() {
         // koji nemaju svoju (ranije je brzina/visina uvek bila "zamrznuta" od trenutka dodavanja).
         val effRate = effectiveRate(entity)
         val effPitch = effectivePitch(entity)
+        val effVolume = effectiveVolume(entity)
 
         fun applyCombinedVoicesIfAny() {
             if (combined != null) {
@@ -362,6 +360,7 @@ class ReaderActivity : AppCompatActivity() {
                 }
                 tts.setSpeechRate(effRate)
                 tts.setPitch(effPitch)
+                tts.setVolume(effVolume / 100f)
                 tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                 tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
                 if (effectiveVoiceName != null) {
@@ -384,6 +383,7 @@ class ReaderActivity : AppCompatActivity() {
                         tts.loadText(parsedDoc.fullText)
                     }
                     tts.setPitch(effPitch)
+                    tts.setVolume(effVolume / 100f)
                     tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
                     tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
                     if (effectiveVoiceName == null) tts.applyIndependentDefaultVoice()
@@ -506,6 +506,13 @@ class ReaderActivity : AppCompatActivity() {
     private fun effectivePitch(entity: DocumentEntity?): Float {
         val stored = entity?.pitch ?: return settings.globalPitch
         return if (stored > 0f) stored else settings.globalPitch
+    }
+
+    /** Isto kao [effectiveRate], samo za jačinu (0-100%). Jačina je vezana za TTS (ovu knjigu),
+     * NE za sistemsku jačinu telefona. */
+    private fun effectiveVolume(entity: DocumentEntity?): Int {
+        val stored = entity?.volumePercent ?: return settings.globalVolumePercent
+        return if (stored >= 0) stored else settings.globalVolumePercent
     }
 
     private fun updateNavigationButtonLabels() {
@@ -780,14 +787,12 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun adjustVolume(direction: Int) {
-        val am = audioManager ?: return
-        val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        val step = max(1, (maxVol * 0.05f).roundToInt())
-        val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-        val newVol = (current + direction * step).coerceIn(0, maxVol)
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
-        val percent = if (maxVol > 0) (newVol * 100 / maxVol) else 0
-        android.widget.Toast.makeText(this, "Jačina zvuka: $percent%", android.widget.Toast.LENGTH_SHORT).show()
+        val entity = doc ?: return
+        val newPercent = (effectiveVolume(entity) + direction * 5).coerceIn(0, 100)
+        doc = entity.copy(volumePercent = newPercent)
+        PlaybackController.ttsManager?.setVolume(newPercent / 100f)
+        persistState()
+        android.widget.Toast.makeText(this, "Jačina zvuka: $newPercent%", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun adjustSpeed(delta: Float) {
@@ -1097,6 +1102,11 @@ class ReaderActivity : AppCompatActivity() {
             } else {
                 tts.setCombinedVoices(emptyList(), 1)
             }
+            // Isto - ako je Brzina/Visina/Jačina promenjena u Opštim podešavanjima dok je ovaj
+            // dokument bio otvoren (nije imao svoju posebnu vrednost), primeni odmah.
+            tts.setSpeechRate(effectiveRate(doc))
+            tts.setPitch(effectivePitch(doc))
+            tts.setVolume(effectiveVolume(doc) / 100f)
         }
 
         PlaybackController.uiPositionListener = { offset ->

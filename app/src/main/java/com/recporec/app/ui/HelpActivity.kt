@@ -154,6 +154,7 @@ class HelpActivity : AppCompatActivity() {
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
+        Jačina je vezana za ovu knjigu, kao i brzina i visina - ne menja jačinu telefona.
 
         Četvrti red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.

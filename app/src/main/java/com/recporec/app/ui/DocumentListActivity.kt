@@ -182,7 +182,7 @@ class DocumentListActivity : AppCompatActivity() {
                     // brzinu/visinu (0 i naviše su ispravne vrednosti).
                     speechRate = -1f,
                     pitch = -1f,
-                    volumePercent = settings.globalVolumePercent,
+                    volumePercent = -1,
                     voiceName = null,
                     voiceEngine = null,
                     languageTag = null,

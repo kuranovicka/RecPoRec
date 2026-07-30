@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CombinedVoiceEntryEntity::class,
         CombinedVoiceSettingsEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -116,13 +116,26 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Brzina/visina/jacina sada dinamicki prate opsta podesavanja (kao jezik/glas) umesto
+         * fiksne vrednosti "zamrznute" pri dodavanju knjige - -1 znaci "nije posebno
+         * postavljeno". Postojece knjige vec imaju konkretne (stare) vrednosti za brzinu i
+         * visinu - te NE diramo, da ne izgubimo eventualno rucno prilagodjenje. Jacina
+         * (volumePercent) je, medjutim, do sada bila potpuno neiskoriscena (nikad se nigde
+         * nije primenjivala), pa je bezbedno da je za SVE knjige resetujemo na "prati opste" -
+         * nema stvarnog prilagodjavanja koje bi se time izgubilo. */
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("UPDATE documents SET volumePercent = -1")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
