@@ -424,6 +424,13 @@ class ReaderActivity : AppCompatActivity() {
             if (settings.backgroundEnabled) {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
+            // PRIVREMENA DIJAGNOSTIKA - da vidimo da li se audio fokus stvarno dobija
+            // (vezano za bag: citanje se ne pauzira pri pozivu/drugim zvukovima).
+            android.widget.Toast.makeText(
+                this,
+                if (tts.isAudioFocusGranted()) "Dijagnostika: audio fokus DOBIJEN." else "Dijagnostika: audio fokus NIJE dobijen.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
         }
     }
 

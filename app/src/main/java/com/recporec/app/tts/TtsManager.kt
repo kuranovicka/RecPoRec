@@ -84,6 +84,11 @@ class TtsManager(private val appContext: Context) {
         }
     }
 
+    private var audioFocusGranted = false
+
+    /** Za dijagnostiku - da li je poslednji zahtev za audio fokus stvarno prihvaćen. */
+    fun isAudioFocusGranted(): Boolean = audioFocusGranted
+
     private fun requestAudioFocus() {
         val am = audioManager ?: return
         if (audioFocusRequest == null) {
@@ -93,12 +98,16 @@ class TtsManager(private val appContext: Context) {
                 .build()
             audioFocusRequest = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN)
                 .setAudioAttributes(attrs)
-                .setOnAudioFocusChangeListener(focusChangeListener)
+                // Eksplicitno na glavnoj niti - da izbegnemo mogucnost da povratni poziv
+                // stigne na niti gde nesto (npr. pozivanje pause()) ne radi kako treba.
+                .setOnAudioFocusChangeListener(focusChangeListener, Handler(Looper.getMainLooper()))
                 .build()
         }
         try {
-            am.requestAudioFocus(audioFocusRequest!!)
+            val result = am.requestAudioFocus(audioFocusRequest!!)
+            audioFocusGranted = result == android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         } catch (_: Exception) {
+            audioFocusGranted = false
             // Bezopasno ako ne uspe - citanje samo nastavlja bez ove zastite.
         }
     }
