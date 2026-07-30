@@ -203,6 +203,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
+        btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
         btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
         btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
@@ -230,9 +231,11 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
+        btnPlayPause.setOnLongClickListener { repeatLastSentence(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
+        btnStepBack.setOnLongClickListener { repeatCurrentPage(); true }
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
@@ -826,6 +829,32 @@ class ReaderActivity : AppCompatActivity() {
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         val targetIdx = (idx + direction).coerceIn(0, chapters.size - 1)
         moveTo(chapters[targetIdx].startOffset)
+    }
+
+    /** Dug pritisak na Play/Pauza - ponavlja poslednju (trenutnu) rečenicu od početka.
+     * Korisno kad ti pažnja na trenutak odluta usred rečenice - ne treba da računaš minute
+     * unazad kao kod "Podseti me", samo se vrati na početak te iste rečenice. */
+    private fun repeatLastSentence() {
+        val tts = PlaybackController.ttsManager ?: return
+        moveTo(tts.currentOffset())
+    }
+
+    /** Dug pritisak na "Prethodna" (korak nazad) - ponavlja poslednju (trenutnu) stranicu
+     * od početka, bez obzira na izabranu Navigaciju (uvek stranica, ne minut/oznaka). */
+    private fun repeatCurrentPage() {
+        val current = doc?.currentCharacterOffset ?: 0
+        val pageStart = (current / charsPerPage) * charsPerPage
+        moveTo(pageStart)
+    }
+
+    /** Dug pritisak na "Prethodno poglavlje" - ponavlja poslednje (trenutno) poglavlje od
+     * početka, umesto da ide na poglavlje PRE njega. */
+    private fun repeatCurrentChapter() {
+        val chapters = parsed?.chapters ?: emptyList()
+        if (chapters.isEmpty()) return
+        val current = doc?.currentCharacterOffset ?: 0
+        val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
+        moveTo(chapters[idx].startOffset)
     }
 
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument

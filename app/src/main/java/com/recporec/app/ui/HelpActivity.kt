@@ -71,9 +71,9 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
         Kad ga uključiš, biraš jačinu drmanja: blago, srednje ili jako.
         Čitanje se samo pauzira kad stigne telefonski poziv, i samo nastavi kad se poziv završi.
-        Prvi put kad otvoriš dokument, aplikacija može da zatraži dodatnu dozvolu za upravljanje telefonom, radi pouzdanije pauze pri pozivu.
+        Prvi put kad otvoriš dokument, aplikacija može da zatraži dodatnu dozvolu za stanje telefona, radi pouzdanije pauze pri pozivu.
         Nije obavezno, ne moraš prihvatiti.
-        Program će i dalje čitanje pokušati da pauzira na uobičajen način.
+        Program će i dalje pokušati da pauzira čitanje na uobičajen način.
         Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
         Sada možeš napraviti pauzu između dve rečenice.
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
@@ -134,6 +134,7 @@ class HelpActivity : AppCompatActivity() {
         Prvo dugme smanjuje visinu glasa.
         Drugo dugme je "Prethodno poglavlje".
         Ono vraća na početak prethodnog poglavlja.
+        Dug pritisak na prethodno poglavlje, ponavlja poslednje poglavlje.
         Treće dugme je "Tajmer".
         Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
         Dugme "Postavi" postavlja tajmer na izabran broj minuta.
@@ -165,6 +166,7 @@ class HelpActivity : AppCompatActivity() {
         Četvrti red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
+        Dug pritisak na play dugme, ponavlja poslednju rečenicu.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
         Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na zadano.
@@ -177,6 +179,7 @@ class HelpActivity : AppCompatActivity() {
         Ako je izabrana stranica, ideš na prethodnu stranicu.
         Ako je izabran minut, ideš unazad za jedan, pet ili deset minuta.
         Ako je izabrana oznaka, ideš tačno na prethodnu oznaku, ne na fiksnu udaljenost.
+        Dug pritisak na navigaciono dugme za prethodni element, ponavlja poslednju stranicu.
         Drugo dugme je "Podseti me".
         Vraća vreme unazad za odabrani broj minuta.
         Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
