@@ -76,7 +76,7 @@ class HelpActivity : AppCompatActivity() {
         Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
         Kad ga uključiš, pojavljuje se klizač.
         Biraš trajanje od 0 do 1000 milisekundi.
-        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa (odlomka).
+        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa odlomka .
         Kad ga uključiš, pojavljuje se klizač.
         Biraš trajanje od 0 do 1000 milisekundi.
         Ako je uključena i pauza između rečenica i pauza između pasusa, na kraju pasusa se čuje samo pauza za pasus, ne obe zaredom.
@@ -160,7 +160,8 @@ class HelpActivity : AppCompatActivity() {
         Drugo dugme pušta ili pauzira čitanje.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
-        Ako imaš slušalice ili tastaturu sa medijskim tasterima (plej, pauza, premotavanje), oni takođe rade - premotavanje radi isto kao dugmad za prethodnu/sledeću naznaku iz petog reda.
+        Ako imaš slušalice ili tastaturu sa medijskim tasterima plej, pauza, premotavanje , oni takođe rade.
+        Premotavanje radi isto kao dugmad za prethodnu/sledeću stavku iz petog reda.
 
         Peti red ima tri dugmeta.
         Prvo dugme pomera unazad.

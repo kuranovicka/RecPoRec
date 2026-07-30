@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.recporec.app.R
+import com.recporec.app.util.requestAccessibilityFocusNow
 import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.AppSettings
 import com.recporec.app.databinding.ActivityGlobalVoiceSettingsBinding
@@ -47,6 +48,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         // Brzina: klizač 0..270 predstavlja stopu 0.30x .. 3.00x (korak 0.01)
         binding.seekSpeed.max = 270
         binding.seekSpeed.progress = ((settings.globalSpeechRate * 100).roundToInt() - 30).coerceIn(0, 270)
+        binding.seekSpeed.requestAccessibilityFocusNow()
         binding.seekSpeed.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (!fromUser) return

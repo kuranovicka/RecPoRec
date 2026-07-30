@@ -19,6 +19,7 @@ import com.recporec.app.parser.DocumentParser
 import com.recporec.app.parser.ParsedDocument
 import com.recporec.app.service.ReadingService
 import com.recporec.app.tts.PlaybackController
+import com.recporec.app.util.requestAccessibilityFocusNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -905,6 +906,7 @@ class ReaderActivity : AppCompatActivity() {
             .setNeutralButton("Isključi") { _, _ -> setTimer(0) }
             .setPositiveButton("Postavi") { _, _ -> setTimer(minutesFor(seek.progress)) }
             .show()
+        seek.requestAccessibilityFocusNow()
     }
 
     private fun setTimer(minutes: Int) {
@@ -958,6 +960,7 @@ class ReaderActivity : AppCompatActivity() {
                 ).show()
             }
             .show()
+        seek.requestAccessibilityFocusNow()
     }
 
     private fun updateTimerStatusText() {

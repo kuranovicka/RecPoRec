@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.recporec.app.data.AppSettings
 import com.recporec.app.databinding.ActivitySettingsBinding
+import com.recporec.app.util.requestAccessibilityFocusNow
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -51,6 +52,7 @@ class SettingsActivity : AppCompatActivity() {
             settings.sentencePauseEnabled = checked
             binding.groupSentencePauseMs.visibility =
                 if (checked) android.view.View.VISIBLE else android.view.View.GONE
+            if (checked) binding.seekSentencePause.requestAccessibilityFocusNow()
         }
         binding.seekSentencePause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -65,6 +67,7 @@ class SettingsActivity : AppCompatActivity() {
             settings.paragraphPauseEnabled = checked
             binding.groupParagraphPauseMs.visibility =
                 if (checked) android.view.View.VISIBLE else android.view.View.GONE
+            if (checked) binding.seekParagraphPause.requestAccessibilityFocusNow()
         }
         binding.seekParagraphPause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
