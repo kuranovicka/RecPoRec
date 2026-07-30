@@ -13,7 +13,7 @@
         android:textSize="20sp"
         android:textColor="@color/text_primary"
         android:accessibilityLiveRegion="polite"
-        android:text="30 minuta" />
+        android:text="15 minuta" />
 
     <SeekBar
         android:id="@+id/seekRemindMinutes"
@@ -22,7 +22,7 @@
         android:layout_marginTop="10dp"
         android:contentDescription="Broj minuta za podsetnik, od 5 do 120"
         android:max="23"
-        android:progress="5"
+        android:progress="2"
         android:progressTint="@color/btn_timer"
         android:thumbTint="@color/btn_timer" />
 
