@@ -83,7 +83,7 @@ class HelpActivity : AppCompatActivity() {
         Ono vraća sve prekidače i navigaciju na ovom ekranu na podrazumevano stanje.
         Treća stavka je "Pomoć".
         Sada idemo u sam dokument.
-        Tastatura ima osamnaest dugmića.
+        Tastatura ima devetnaest dugmića.
         Podseća na numeričku tastaturu na računaru.
         Na samom vrhu tastature su tri dugmeta.
         Prvo dugme je "Oznake".
@@ -121,17 +121,9 @@ class HelpActivity : AppCompatActivity() {
         Ono vraća na početak prethodnog poglavlja.
         Treće dugme je "Tajmer".
         Ono otvara meni sa više stavki.
-        Prve stavke su: petnaest, trideset, četrdeset pet, šezdeset, sedamdeset pet i devedeset minuta.
+        Stavke su: petnaest, trideset, četrdeset pet, šezdeset, sedamdeset pet i devedeset minuta, i "Isključeno".
         Dodirneš broj minuta da postaviš tajmer.
-        Sledeća stavka je "Vrati se na poslednji tajmer".
-        Ona te vraća na mesto gde je počeo poslednji tajmer koji si postavila.
-        Kaže ti koliko je minuta taj tajmer odbrojavao.
-        Upišeš minut na koji želiš da odeš, ili ostaviš prazno da odeš na sam početak.
-        Ovo je korisno ako zaspiš dok tajmer odbrojava.
-        Sledeća stavka je "Zaboravi tajmer".
-        Ona odmah, bez potvrde, briše pamćenje poslednjeg tajmera.
-        Poslednja stavka je "Isključeno" - zaustavlja tajmer, ali ga ne zaboravlja.
-        Kad tajmer istekne, čitanje se pauzira samo.
+        Kad tajmer istekne, čitanje se pauzira samo, i tajmer se isključi.
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
         Četvrto dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
@@ -149,10 +141,14 @@ class HelpActivity : AppCompatActivity() {
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
-        Treći red ima tri dugmeta.
+        Treći red ima četiri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
-        Treće dugme povećava brzinu čitanja.
+        Treće dugme je "Podseti me".
+        Ono otvara meni sa istim brojevima minuta kao Tajmer.
+        Dodirneš broj minuta - posle tog vremena, čitanje se pauzira i vrati na mesto na kome si dodirnula "Podseti me".
+        Ovo je korisno kad ne znaš koliko dugo ćeš ostati budna.
+        Četvrto dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
         Četvrti red ima dva dugmeta.
         Prvo dugme pomera unazad.

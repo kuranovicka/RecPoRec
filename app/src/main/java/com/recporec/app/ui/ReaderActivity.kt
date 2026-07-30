@@ -190,6 +190,7 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
+        btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
@@ -880,31 +881,17 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showTimerMenu() {
         val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
-        val labels = minuteOptions.map { "$it minuta" } +
-            listOf("Vrati se na poslednji tajmer", "Zaboravi tajmer", "Isključeno")
+        val labels = minuteOptions.map { "$it minuta" } + listOf("Isključeno")
         AlertDialog.Builder(this)
             .setTitle("Tajmer")
             .setItems(labels.toTypedArray()) { _, which ->
-                when {
-                    which < minuteOptions.size -> setTimer(minuteOptions[which])
-                    which == minuteOptions.size -> showReturnToLastTimerDialog()
-                    which == minuteOptions.size + 1 -> forgetLastTimer()
-                    else -> setTimer(0)
-                }
+                if (which < minuteOptions.size) setTimer(minuteOptions[which]) else setTimer(0)
             }
             .show()
     }
 
     private fun setTimer(minutes: Int) {
-        doc = if (minutes > 0) {
-            // Novi tajmer - pamti gde je pocelo OVO odbrojavanje i na koliko minuta je
-            // postavljeno, brise prethodno pamcenje.
-            doc?.copy(timerMinutes = minutes, lastTimerStartOffset = doc?.currentCharacterOffset, lastTimerMinutes = minutes)
-        } else {
-            // Iskljuceno - zaustavlja odbrojavanje, ali NE brise pamcenje poslednjeg tajmera
-            // (za slucaj da korisnica zaspi i posle zeli da se vrati na tu poziciju).
-            doc?.copy(timerMinutes = 0)
-        }
+        doc = doc?.copy(timerMinutes = minutes)
         persistState()
         PlaybackController.setTimerMinutes(minutes)
 
@@ -918,42 +905,24 @@ class ReaderActivity : AppCompatActivity() {
         updateTimerStatusText()
     }
 
-    /** Vraća na mesto gde je počeo poslednji tajmer - korisno kad korisnica zaspi uz knjigu
-     * i ne zna tačno dokle je stigla dok je tajmer odbrojavao. */
-    private fun showReturnToLastTimerDialog() {
-        val startOffset = doc?.lastTimerStartOffset
-        if (startOffset == null) {
-            android.widget.Toast.makeText(this, "Nema prethodnog tajmera.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        val lastMinutes = doc?.lastTimerMinutes
-        val message = if (lastMinutes != null) {
-            "Poslednji tajmer je odbrojavao $lastMinutes minuta."
-        } else {
-            "Postoji prethodni tajmer."
-        }
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.hint = "Upiši minut na koji želiš da odeš"
-        input.contentDescription = "Upiši minut na koji želiš da odeš"
+    /** "Podseti me": posle izabranog broja minuta, čitanje se pauzira i vrati na mesto
+     * odakle je aktivirano - korisno kad nisi sigurna koliko dugo ćeš ostati budna. */
+    private fun showRemindMeMenu() {
+        val minuteOptions = intArrayOf(15, 30, 45, 60, 75, 90)
+        val labels = minuteOptions.map { "$it minuta" }
         AlertDialog.Builder(this)
-            .setTitle("Vrati se na poslednji tajmer")
-            .setMessage(message)
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val extraMinutes = input.text.toString().trim().toIntOrNull() ?: 0
-                val target = startOffset + (if (extraMinutes > 0) minutesToChars(extraMinutes) else 0)
-                moveTo(target)
+            .setTitle("Podseti me")
+            .setItems(labels.toTypedArray()) { _, which ->
+                val minutes = minuteOptions[which]
+                val startOffset = doc?.currentCharacterOffset ?: 0
+                PlaybackController.setReminder(minutes, startOffset)
+                android.widget.Toast.makeText(
+                    this,
+                    "Podsetnik za $minutes minuta - knjiga će se vratiti na ovo mesto.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
             }
-            .setNegativeButton(R.string.cancel, null)
             .show()
-    }
-
-    /** Briše SVE pamćenje poslednjeg tajmera, bez potvrde - vraća se odmah u knjigu. */
-    private fun forgetLastTimer() {
-        doc = doc?.copy(lastTimerStartOffset = null, lastTimerMinutes = null)
-        persistState()
-        android.widget.Toast.makeText(this, "Tajmer zaboravljen.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun updateTimerStatusText() {
@@ -1092,6 +1061,16 @@ class ReaderActivity : AppCompatActivity() {
                 updateTimerStatusText()
             }
         }
+        PlaybackController.uiReminderFiredListener = { backOffset ->
+            runOnUiThread {
+                doc = doc?.copy(currentCharacterOffset = backOffset)
+                updateStatusTexts()
+                updateSeekBar()
+                android.widget.Toast.makeText(
+                    this, "Podsetnik: vraćeno na mesto gde si aktivirala podsetnik.", android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         // Napomena: drmanje za pauzu/nastavak se sada osluškuje u ReadingService, ne ovde -
         // tako radi i dok je čitanje u pozadini, van ovog ekrana (vidi ReadingService.kt).
@@ -1102,6 +1081,7 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
+        PlaybackController.uiReminderFiredListener = null
         persistState()
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
