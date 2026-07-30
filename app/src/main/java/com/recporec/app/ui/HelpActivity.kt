@@ -141,23 +141,23 @@ class HelpActivity : AppCompatActivity() {
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Peto dugme pojačava jačinu zvuka.
-        Treći red ima četiri dugmeta.
+        Treći red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
-        Treće dugme je "Podseti me".
+        Treće dugme povećava brzinu čitanja.
+        Brzina se menja bez promene visine glasa.
+        Četvrti red ima tri dugmeta.
+        Prvo dugme pomera unazad.
+        Šta tačno radi, zavisi od podešavanja "Navigacije".
+        Ako je izabrana stranica, ideš na prethodnu stranicu.
+        Ako je izabran minut, ideš unazad za jedan, pet ili deset minuta.
+        Ako je izabrana oznaka, ideš tačno na prethodnu oznaku, ne na fiksnu udaljenost.
+        Drugo dugme je "Podseti me".
         Ono otvara klizač od pet do sto dvadeset minuta, po pet minuta.
         Izabereš broj minuta i potvrdiš.
         Posle tog vremena, čitanje se pauzira i vrati na mesto na kome si dodirnula "Podseti me".
         Ovo je korisno kad ne znaš koliko dugo ćeš ostati budna.
-        Četvrto dugme povećava brzinu čitanja.
-        Brzina se menja bez promene visine glasa.
-        Četvrti red ima dva dugmeta.
-        Prvo dugme pomera unazad.
-        Drugo dugme pomera unapred.
-        Šta tačno rade, zavisi od podešavanja "Navigacije".
-        Ako je izabrana stranica, ideš na prethodnu ili na sledeću stranicu.
-        Ako je izabran minut, ideš jedan, pet ili deset minuta unapred-unazad.
-        Ako je izabrana oznaka, ideš tačno na prethodnu ili sledeću oznaku, ne na fiksnu udaljenost.
+        Treće dugme pomera unapred, na isti način kao prvo, samo u drugom smeru.
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.
         Možeš ga i prevući prstom do drugog mesta.

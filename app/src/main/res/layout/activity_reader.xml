@@ -176,12 +176,6 @@
                 android:contentDescription="@string/btn_play_pause"
                 android:text="▶ / ⏸" />
 
-            <Button android:id="@+id/btnRemindMe" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_timer"
-                android:contentDescription="Podseti me - vraća čitanje na ovo mesto posle izabranog broja minuta"
-                android:textSize="14sp"
-                android:text="⏰ Podseti" />
-
             <Button android:id="@+id/btnSpeedUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_speed"
                 android:contentDescription="@string/btn_speed_up"
@@ -200,6 +194,12 @@
                 android:backgroundTint="@color/btn_page_nav"
                 android:contentDescription="@string/slider_back"
                 android:text="◀ 5%" />
+
+            <Button android:id="@+id/btnRemindMe" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_timer"
+                android:contentDescription="Podseti me - vraća čitanje na ovo mesto posle izabranog broja minuta"
+                android:textSize="14sp"
+                android:text="⏰ Podseti" />
 
             <Button android:id="@+id/btnStepForward" style="@style/KeyButton"
                 android:layout_weight="2"
