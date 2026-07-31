@@ -131,6 +131,8 @@ class HelpActivity : AppCompatActivity() {
         Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
         Dodirneš rezultat da odeš tačno na to mesto.
         Ako ništa nije pronađeno, piše "Nema rezultata".
+        Dug pritisak na Pretragu, ponovo pokreće poslednju pretragu, sa istim spiskom rezultata kao i pre.
+        Samo ne moraš ponovo da kucaš već pretraženi tekst.
 
         Drugi red ima pet dugmadi.
         Prvo dugme smanjuje visinu glasa.

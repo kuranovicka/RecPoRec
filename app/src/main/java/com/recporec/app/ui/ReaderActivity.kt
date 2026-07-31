@@ -201,7 +201,7 @@ class ReaderActivity : AppCompatActivity() {
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
         btnGoTo.setOnLongClickListener { goToDocumentStart(); true }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
-        btnSearchText.setOnLongClickListener { resetAllDocumentVoiceSettings(); true }
+        btnSearchText.setOnLongClickListener { repeatLastSearch(); true }
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
@@ -660,6 +660,8 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /** Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu. */
+    private var lastSearchQuery: String? = null
+
     private fun showSearchTextDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
@@ -670,10 +672,25 @@ class ReaderActivity : AppCompatActivity() {
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val query = input.text.toString().trim()
-                if (query.isNotEmpty()) performTextSearch(query)
+                if (query.isNotEmpty()) {
+                    lastSearchQuery = query
+                    performTextSearch(query)
+                }
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    /** Dug pritisak na "Pretraga" - ponovo pokreće POSLEDNJU pretragu, sa istim spiskom
+     * rezultata kao i pre, bez ponovnog kucanja već traženog teksta. */
+    private fun repeatLastSearch() {
+        val query = lastSearchQuery
+        if (query == null) {
+            android.widget.Toast.makeText(this, "Nema prethodne pretrage.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        android.widget.Toast.makeText(this, "Ponovo pretražujem.", android.widget.Toast.LENGTH_SHORT).show()
+        performTextSearch(query)
     }
 
     private fun performTextSearch(query: String) {
@@ -927,21 +944,6 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
      * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
      * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
-    /** Dug pritisak na "Pretraga" - vraća SVA podešavanja glasa ovog dokumenta na opšta:
-     * jačinu, visinu, brzinu i glas (uključujući kombinovane glasove). Isti mehanizam kao
-     * "Koristi opšti glas", samo primenjen na sve odjednom umesto pojedinačno. */
-    private fun resetAllDocumentVoiceSettings() {
-        doc = doc?.copy(voiceName = null, voiceEngine = null, speechRate = -1f, pitch = -1f, volumePercent = -1)
-        persistState()
-        lifecycleScope.launch {
-            db.combinedVoiceDao().clearScope(documentId)
-            loadDocument()
-        }
-        android.widget.Toast.makeText(
-            this, "Jačina, visina, brzina i glas vraćeni na opšta podešavanja.", android.widget.Toast.LENGTH_LONG
-        ).show()
-    }
-
     private fun resetToGlobal(what: String) {
         val entity = doc ?: return
         val tts = PlaybackController.ttsManager

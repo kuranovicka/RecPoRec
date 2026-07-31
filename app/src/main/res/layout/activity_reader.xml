@@ -82,7 +82,7 @@
 
             <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: vrati jačinu, visinu, brzinu i glas ovog dokumenta na opšta."
+                android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: ponovi poslednju pretragu."
                 android:textSize="16sp"
                 android:text="🔍 Pretraga" />
         </LinearLayout>
