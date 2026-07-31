@@ -72,17 +72,17 @@
 
             <Button android:id="@+id/btnBookmarks" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Oznake - dodaj, ukloni ili ukloni sve oznake u ovom dokumentu"
+                android:contentDescription="Oznake - dodaj, ukloni ili ukloni sve oznake u ovom dokumentu. Dug pritisak: brzo dodaj oznaku."
                 android:text="🔖 Oznake" />
 
             <Button android:id="@+id/btnGoTo" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Idi na stranicu, minut ili oznaku"
+                android:contentDescription="Idi na stranicu, minut ili oznaku. Dug pritisak: idi na početak dokumenta."
                 android:text="➜ Idi na" />
 
             <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Pretraži tekst dokumenta"
+                android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: vrati jačinu, visinu, brzinu i glas ovog dokumenta na opšta."
                 android:textSize="16sp"
                 android:text="🔍 Pretraga" />
         </LinearLayout>
@@ -96,7 +96,7 @@
 
             <Button android:id="@+id/btnPitchDown" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_pitch"
-                android:contentDescription="Smanji visinu glasa"
+                android:contentDescription="Smanji visinu glasa. Dug pritisak: vrati visinu na opštu."
                 android:textSize="16sp"
                 android:text="🎵− Visina" />
 
@@ -119,7 +119,7 @@
 
             <Button android:id="@+id/btnPitchUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_pitch"
-                android:contentDescription="Povećaj visinu glasa"
+                android:contentDescription="Povećaj visinu glasa. Dug pritisak: vrati visinu na opštu."
                 android:textSize="16sp"
                 android:text="Visina 🎵+" />
         </LinearLayout>
@@ -197,7 +197,7 @@
 
             <Button android:id="@+id/btnRemindMe" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_timer"
-                android:contentDescription="Podseti me - vraća čitanje na ovo mesto posle izabranog broja minuta"
+                android:contentDescription="Podseti me - vraća čitanje na ovo mesto posle izabranog broja minuta. Dug pritisak: ponovi poslednji podsetnik."
                 android:textSize="14sp"
                 android:text="⏰ Podseti" />
 

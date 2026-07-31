@@ -131,6 +131,7 @@ class HelpActivity : AppCompatActivity() {
         Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
         Dodirneš rezultat da odeš tačno na to mesto.
         Ako ništa nije pronađeno, piše "Nema rezultata".
+        Dug pritisak na dugme Pretraga, vraća sva podešavanja dokumenta na zadano: jačinu, visinu, brzinu i glas.
 
         Drugi red ima pet dugmadi.
         Prvo dugme smanjuje visinu glasa.
