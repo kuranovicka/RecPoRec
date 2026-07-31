@@ -199,12 +199,9 @@ class ReaderActivity : AppCompatActivity() {
         btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
         btnBookmarks.setOnLongClickListener { quickAddBookmark(); true }
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
-        btnGoTo.setOnLongClickListener {
-            moveTo(0)
-            android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
-            true
-        }
+        btnGoTo.setOnLongClickListener { goToDocumentStart(); true }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
+        btnSearchText.setOnLongClickListener { resetAllDocumentVoiceSettings(); true }
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
@@ -611,6 +608,12 @@ class ReaderActivity : AppCompatActivity() {
      * predaleko, bez računanja koliko unazad. */
     private var positionBeforeLastJump: Int? = null
 
+    /** Dug pritisak na "Idi na" - vraća na sam početak dokumenta. */
+    private fun goToDocumentStart() {
+        moveTo(0)
+        android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     private fun moveTo(offset: Int) {
         if (doc == null || parsed == null) {
             android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
@@ -924,6 +927,21 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
      * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
      * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
+    /** Dug pritisak na "Pretraga" - vraća SVA podešavanja glasa ovog dokumenta na opšta:
+     * jačinu, visinu, brzinu i glas (uključujući kombinovane glasove). Isti mehanizam kao
+     * "Koristi opšti glas", samo primenjen na sve odjednom umesto pojedinačno. */
+    private fun resetAllDocumentVoiceSettings() {
+        doc = doc?.copy(voiceName = null, voiceEngine = null, speechRate = -1f, pitch = -1f, volumePercent = -1)
+        persistState()
+        lifecycleScope.launch {
+            db.combinedVoiceDao().clearScope(documentId)
+            loadDocument()
+        }
+        android.widget.Toast.makeText(
+            this, "Jačina, visina, brzina i glas vraćeni na opšta podešavanja.", android.widget.Toast.LENGTH_LONG
+        ).show()
+    }
+
     private fun resetToGlobal(what: String) {
         val entity = doc ?: return
         val tts = PlaybackController.ttsManager
