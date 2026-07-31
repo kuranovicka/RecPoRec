@@ -64,23 +64,55 @@ object PlaybackController {
         private set
     private var lastRestMinutes: Int = 0
     private var restAlarmTone: android.media.ToneGenerator? = null
+    private var restWakeLock: android.os.PowerManager.WakeLock? = null
 
     private fun stopRestAlarm() {
         restAlarmTone?.release()
         restAlarmTone = null
     }
 
+    /** Dok knjiga aktivno čita, telefon prirodno ostaje "budan" zbog same reprodukcije zvuka.
+     * Ali TOKOM odmora se ništa ne čuje (čitanje je pauzirano) - bez ovog "wake lock-a",
+     * telefon bi mogao da utone u dubok san (Doze) čim se ekran zaključa, AKO "Čitanje bez
+     * prekida" nije uključeno u Podešavanjima - i tad bi se ceo brojač odmora zaustavio,
+     * jer procesor prosto ne bi radio. Ovo drži procesor budnim SAMO tokom odmora, bez obzira
+     * na to opšte podešavanje - odmor bi trebalo da radi pouzdano uvek. */
+    private fun acquireRestWakeLock() {
+        val ctx = appContext ?: return
+        try {
+            releaseRestWakeLock()
+            val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            val wl = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "RecPoRec:Rest")
+            wl.setReferenceCounted(false)
+            wl.acquire(5 * 60 * 60 * 1000L) // najviše 5h zaštita (najduži odmor je 4h)
+            restWakeLock = wl
+        } catch (_: Exception) { }
+    }
+
+    private fun releaseRestWakeLock() {
+        try {
+            restWakeLock?.let { if (it.isHeld) it.release() }
+        } catch (_: Exception) { }
+        restWakeLock = null
+    }
+
     fun startRest(minutes: Int) {
         ttsManager?.pause()
         stopRestAlarm()
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
-        if (minutes > 0) lastRestMinutes = minutes
+        if (minutes > 0) {
+            lastRestMinutes = minutes
+            acquireRestWakeLock()
+        } else {
+            releaseRestWakeLock()
+        }
         notifyPlaybackStateChanged()
     }
 
     fun cancelRest() {
         restRemainingSeconds = 0
         stopRestAlarm()
+        releaseRestWakeLock()
     }
 
     /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
@@ -298,6 +330,7 @@ object PlaybackController {
                     if (restRemainingSeconds <= 0) {
                         restRemainingSeconds = 0
                         stopRestAlarm()
+                        releaseRestWakeLock()
                         ttsManager?.resume()
                         notifyPlaybackStateChanged()
                     }
@@ -401,6 +434,9 @@ object PlaybackController {
         parsedDocument = null
         elapsedSeconds = 0
         timerRemainingSeconds = 0
+        restRemainingSeconds = 0
+        stopRestAlarm()
+        releaseRestWakeLock()
         uiPositionListener = null
         uiFinishedListener = null
         uiTimerExpiredListener = null
