@@ -197,7 +197,7 @@
 
             <Button android:id="@+id/btnRemindMe" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_timer"
-                android:contentDescription="Podseti me - vraća čitanje na ovo mesto posle izabranog broja minuta. Dug pritisak: ponovi poslednji podsetnik."
+                android:contentDescription="Podsetnik, vraća dokument unazad. Dug pritisak: ponovi poslednji podsetnik."
                 android:textSize="14sp"
                 android:text="⏰ Podseti" />
 
