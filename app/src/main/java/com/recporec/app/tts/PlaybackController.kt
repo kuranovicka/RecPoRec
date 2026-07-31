@@ -362,7 +362,10 @@ object PlaybackController {
                 if (restRemainingSeconds > 0) {
                     val remainingMillis = restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime()
                     restRemainingSeconds = (remainingMillis / 1000).toInt().coerceAtLeast(0)
-                    if (restRemainingSeconds in 1..60) {
+                    // "Probudi me u" zvoni tri minuta pre cilja (kao pravi budilnik) - odmor
+                    // preko klizaca i dalje zvoni samo poslednji minut.
+                    val alarmWindowSeconds = if (restIsWakeTime) 180 else 60
+                    if (restRemainingSeconds in 1..alarmWindowSeconds) {
                         // Poslednji minut pre isteka odmora - pocinje da zvoni alarm, sve dok
                         // odmor ne istekne ili ga korisnica sama ne prekine (cancelRest).
                         if (restAlarmTone == null) {
