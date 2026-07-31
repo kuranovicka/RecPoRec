@@ -859,7 +859,10 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun jumpChapter(direction: Int) {
         val chapters = parsed?.chapters ?: emptyList()
-        if (chapters.isEmpty()) return
+        if (chapters.isEmpty()) {
+            android.widget.Toast.makeText(this, "Ovaj dokument nema prepoznata poglavlja.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         val current = doc?.currentCharacterOffset ?: 0
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         val targetIdx = (idx + direction).coerceIn(0, chapters.size - 1)
@@ -879,7 +882,10 @@ class ReaderActivity : AppCompatActivity() {
      * početka, umesto da ide na poglavlje PRE njega. */
     private fun repeatCurrentChapter() {
         val chapters = parsed?.chapters ?: emptyList()
-        if (chapters.isEmpty()) return
+        if (chapters.isEmpty()) {
+            android.widget.Toast.makeText(this, "Ovaj dokument nema prepoznata poglavlja.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         val current = doc?.currentCharacterOffset ?: 0
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         moveTo(chapters[idx].startOffset)
