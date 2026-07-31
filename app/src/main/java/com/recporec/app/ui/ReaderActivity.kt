@@ -1182,11 +1182,13 @@ class ReaderActivity : AppCompatActivity() {
 
         fun minutesFor(progress: Int) = 10 + progress * 10
 
+        var sliderTouchedByUser = false
         seek.max = 23 // (240 - 10) / 10
         seek.progress = 0 // 10 min podrazumevano
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) sliderTouchedByUser = true
                 textStatus.text = "${minutesFor(progress)} minuta"
             }
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
@@ -1204,7 +1206,15 @@ class ReaderActivity : AppCompatActivity() {
             }
             .setPositiveButton("Postavi") { _, _ ->
                 val wakeInput = editWakeTime.text.toString().trim()
-                if (wakeInput.isNotEmpty()) {
+                if (sliderTouchedByUser && wakeInput.isNotEmpty()) {
+                    // Oboje popunjeno - ne znamo koje je korisnica stvarno htela, ne biramo
+                    // umesto nje.
+                    android.widget.Toast.makeText(
+                        this,
+                        "Odmor nije započeo. Odluči se između kraćeg odmora i dužeg spavanja.",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                } else if (wakeInput.isNotEmpty()) {
                     // "Probudi me u" popunjeno - koristi TO, klizač se u tom slučaju ignoriše.
                     val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
                     if (seconds == null) {

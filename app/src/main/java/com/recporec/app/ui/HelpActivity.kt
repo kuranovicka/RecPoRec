@@ -170,6 +170,8 @@ class HelpActivity : AppCompatActivity() {
         Ta stavka uklanja i kombinovane glasove ovog dokumenta, ako ih ima.
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Dug pritisak: Odmori.
+        Možeš izabrati odmor na određeni broj minuta, ili buđenje u određeno vreme.
+        Ne možeš izabrati oba.
         Možeš odabrati odmor od 10 minuta do četiri sata.
         Zadana vrednost odmora je 10 minuta.
         Zatim imaš opciju "Probudi me u".
