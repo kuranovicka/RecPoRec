@@ -323,9 +323,9 @@ object PlaybackController {
                         // Poslednji minut pre isteka odmora - pocinje da zvoni alarm, sve dok
                         // odmor ne istekne ili ga korisnica sama ne prekine (cancelRest).
                         if (restAlarmTone == null) {
-                            restAlarmTone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 90)
+                            restAlarmTone = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
                         }
-                        restAlarmTone?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP2, 400)
+                        restAlarmTone?.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 600)
                     }
                     if (restRemainingSeconds <= 0) {
                         restRemainingSeconds = 0

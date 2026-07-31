@@ -182,6 +182,7 @@ class HelpActivity : AppCompatActivity() {
         Minut pre isteka odmora, kreće da zvoni alarm.
         Zvono se zaustavlja ako ranije pustiš knjigu.
         Pri vrhu ekrana uvek piše koliko je odmoru ostalo, ili da nije aktivan.
+        Ako želiš da funkcija odmora radi stabilno, u podešavanjima programa uključi neprekidno čitanje.
         Peto dugme pojačava jačinu zvuka.
         Jačina je vezana samo za trenutni dokument.
         Ne menja stvarnu jačinu zvuka telefona.
