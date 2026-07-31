@@ -45,29 +45,18 @@ class DocumentListActivity : AppCompatActivity() {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-    /** Otvara sistemski birač fajlova, sa pokušajem da ga usmeri na Disk ili na telefon. */
-    private fun launchPicker(driveHint: Boolean) {
+    /** Otvara standardni sistemski birač fajlova. NAMERNO bez "prečice" na tačno određenu
+     * lokaciju (npr. direktno na Google Disk) - takve prečice su ranije koristile skrivenu,
+     * nedokumentovanu adresu koja je prestala da radi kad ju je Google promenio. Standardni
+     * birač bez toga sam po sebi prikazuje SVE instalirane izvore (Google Disk, Dropbox,
+     * OneDrive, sam telefon...) kroz svoj meni sa strane - pouzdanije i radi sa više izvora. */
+    private fun launchPicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
             putExtra(Intent.EXTRA_MIME_TYPES, docMimeTypes)
         }
-        try {
-            val initialUri = if (driveHint) {
-                Uri.parse("content://com.google.android.apps.docs.storage/root/root")
-            } else {
-                Uri.parse("content://com.android.externalstorage.documents/root/primary")
-            }
-            intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri)
-        } catch (_: Exception) { /* ako ne uspe, otvara se obican birac bez pocetne lokacije */ }
-
-        try {
-            pickFileLauncher.launch(intent)
-        } catch (_: Exception) {
-            // Nema aplikacije koja moze da obradi zahtev - probaj bez pocetne lokacije
-            intent.removeExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI)
-            pickFileLauncher.launch(intent)
-        }
+        pickFileLauncher.launch(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,12 +73,7 @@ class DocumentListActivity : AppCompatActivity() {
         binding.recyclerDocuments.adapter = adapter
 
         binding.btnAddDocument.setOnClickListener {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Odakle dodaješ dokument?")
-                .setItems(arrayOf("Dodaj sa Google diska", "Dodaj iz telefona")) { _, which ->
-                    if (which == 0) launchPicker(driveHint = true) else launchPicker(driveHint = false)
-                }
-                .show()
+            launchPicker()
         }
 
         binding.btnExit.setOnClickListener {
