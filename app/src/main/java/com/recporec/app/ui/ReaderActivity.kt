@@ -1156,10 +1156,10 @@ class ReaderActivity : AppCompatActivity() {
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
         val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRemindMinutes)
 
-        fun minutesFor(progress: Int) = 5 + progress * 5
+        fun minutesFor(progress: Int) = 10 + progress * 10
 
-        seek.max = 23 // (120 - 5) / 5
-        seek.progress = 2 // 15 min podrazumevano
+        seek.max = 23 // (240 - 10) / 10
+        seek.progress = 2 // 30 min podrazumevano
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
