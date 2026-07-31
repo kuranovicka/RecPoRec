@@ -1161,7 +1161,7 @@ class ReaderActivity : AppCompatActivity() {
         fun minutesFor(progress: Int) = 10 + progress * 10
 
         seek.max = 23 // (240 - 10) / 10
-        seek.progress = 2 // 30 min podrazumevano
+        seek.progress = 0 // 10 min podrazumevano
         seek.contentDescription = "Broj minuta za odmor, od 10 do 240"
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {

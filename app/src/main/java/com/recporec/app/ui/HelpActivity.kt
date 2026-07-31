@@ -171,6 +171,7 @@ class HelpActivity : AppCompatActivity() {
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
         Dug pritisak: Odmori.
         Možeš odabrati odmor od 10 minuta do četiri sata.
+        Zadana vrednost odmora je 10 minuta.
         Ako u bilo kom trenutku odmora pustiš knjigu, odmor se prekida.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak: Produži odmor.
