@@ -199,7 +199,11 @@ class ReaderActivity : AppCompatActivity() {
         btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
         btnBookmarks.setOnLongClickListener { quickAddBookmark(); true }
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
-        btnGoTo.setOnLongClickListener { moveTo(0); true }
+        btnGoTo.setOnLongClickListener {
+            moveTo(0)
+            android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
+            true
+        }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
