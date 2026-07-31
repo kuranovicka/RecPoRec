@@ -197,7 +197,9 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         btnBookmarks.setOnClickListener(clickSound { showBookmarksMenu() })
+        btnBookmarks.setOnLongClickListener { quickAddBookmark(); true }
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
+        btnGoTo.setOnLongClickListener { moveTo(0); true }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
@@ -713,6 +715,27 @@ class ReaderActivity : AppCompatActivity() {
                 }
             }
             .show()
+    }
+
+    /** Dug pritisak na "Oznake" - odmah dodaje oznaku na trenutnu poziciju, bez otvaranja
+     * menija/dijaloga (uvek dobija broj, kao kad se ostavi prazno ime u običnom dodavanju). */
+    private fun quickAddBookmark() {
+        val currentDocId = documentId
+        val offset = doc?.currentCharacterOffset ?: 0
+        lifecycleScope.launch {
+            val count = db.bookmarkDao().countForDocument(currentDocId)
+            val name = (count + 1).toString()
+            db.bookmarkDao().insert(
+                com.recporec.app.data.BookmarkEntity(
+                    documentId = currentDocId,
+                    name = name,
+                    characterOffset = offset
+                )
+            )
+            android.widget.Toast.makeText(
+                this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     /** Meni "Oznake": dodaj, ukloni jednu ili ukloni sve. */

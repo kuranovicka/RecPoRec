@@ -112,6 +112,7 @@ class HelpActivity : AppCompatActivity() {
         Ako nemaš nijednu oznaku, piše "Nema oznaka".
         Treća stavka je "Ukloni sve oznake".
         Tu samo potvrdiš, nema polja za unos.
+        Dug pritisak na ovo dugme dodaje oznaku na trenutnu poziciju u dokumentu.
         Drugo dugme je "Idi na".
         Ono otvara meni sa tri stavke.
         Prva stavka je "Idi na stranicu".
@@ -122,6 +123,7 @@ class HelpActivity : AppCompatActivity() {
         Ona prikazuje listu tvojih oznaka za ovaj dokument.
         Dodirneš oznaku sa liste da odeš na nju.
         Ako nemaš nijednu oznaku, piše "Nema oznaka".
+        Dug pritisak na ovo dugme te vraća na početak dokumenta.
         Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
         Pored njih je i dugme "Pretraga".
         Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu.
