@@ -191,6 +191,9 @@ class HelpActivity : AppCompatActivity() {
         Izabereš broj minuta i potvrdiš.
         Čitanje se odmah vrati unazad na odabrani broj minuta.
         Ovo je korisno kada se uspavaš.
+        Dug pritisak na dugme Podseti me, ponovo aktivira poslednji podsetnik.
+        Npr, ako premotaš knjigu za dva sata unazad, možeš je premotati za još dva sata.
+        Posebno korisno za ljude koji prespavaju ostatak knjige.
         Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
         Dug pritisak na treće dugme, vraća tačno na mesto pre poslednjeg skoka, koji god da je bio.
 

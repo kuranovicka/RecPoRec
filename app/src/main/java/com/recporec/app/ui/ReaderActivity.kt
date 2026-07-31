@@ -237,6 +237,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
+        btnRemindMe.setOnLongClickListener { reactivateLastReminder(); true }
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
         btnStepBack.setOnLongClickListener { repeatCurrentPage(); true }
@@ -1124,6 +1125,32 @@ class ReaderActivity : AppCompatActivity() {
 
     /** "Podseti me": vraća čitanje UNAZAD za izabrani broj minuta, odmah čim potvrdiš -
      * korisno kad se probudiš i ne znaš tačno dokle si čula dok si zaspala. */
+    /** Pamti poslednji korišćen broj minuta za "Podseti me" (samo za ovu sesiju čitanja) -
+     * da dug pritisak na dugme može ponovo da ga aktivira bez otvaranja klizača. */
+    private var lastRemindMinutes: Int? = null
+
+    /** Sama radnja premotavanja unazad za dati broj minuta - deli je i klizač i dug pritisak. */
+    private fun applyRemind(minutes: Int) {
+        val current = doc?.currentCharacterOffset ?: 0
+        val target = (current - minutesToChars(minutes)).coerceAtLeast(0)
+        moveTo(target)
+        lastRemindMinutes = minutes
+        android.widget.Toast.makeText(
+            this, "Vraćeno $minutes minuta unazad.", android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    /** Dug pritisak na "Podseti me" - ponovo aktivira POSLEDNJI korišćeni broj minuta, bez
+     * otvaranja klizača. Korisno kad prespavaš i deo posle prvog "Podseti me". */
+    private fun reactivateLastReminder() {
+        val minutes = lastRemindMinutes
+        if (minutes == null) {
+            android.widget.Toast.makeText(this, "Nema prethodnog podsetnika.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        applyRemind(minutes)
+    }
+
     private fun showRemindMeMenu() {
         val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
@@ -1146,17 +1173,7 @@ class ReaderActivity : AppCompatActivity() {
             .setTitle("Podseti me")
             .setView(view)
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val minutes = minutesFor(seek.progress)
-                val current = doc?.currentCharacterOffset ?: 0
-                val target = (current - minutesToChars(minutes)).coerceAtLeast(0)
-                moveTo(target)
-                android.widget.Toast.makeText(
-                    this,
-                    "Vraćeno $minutes minuta unazad.",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> applyRemind(minutesFor(seek.progress)) }
             .show()
         seek.requestAccessibilityFocusNow()
     }
