@@ -334,6 +334,7 @@ class ReaderActivity : AppCompatActivity() {
             updateDocLanguageButtonText()
             updateNavigationButtonLabels()
             updateTimerStatusText()
+            updateRestStatusText()
         }
     }
 
@@ -470,6 +471,7 @@ class ReaderActivity : AppCompatActivity() {
         } else {
             if (PlaybackController.restRemainingSeconds > 0) {
                 PlaybackController.cancelRest()
+                updateRestStatusText()
                 android.widget.Toast.makeText(this, "Odmor prekinut.", android.widget.Toast.LENGTH_SHORT).show()
             }
             val startOffset = doc?.currentCharacterOffset ?: 0
@@ -1160,6 +1162,7 @@ class ReaderActivity : AppCompatActivity() {
 
         seek.max = 23 // (240 - 10) / 10
         seek.progress = 2 // 30 min podrazumevano
+        seek.contentDescription = "Broj minuta za odmor, od 10 do 240"
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -1175,11 +1178,13 @@ class ReaderActivity : AppCompatActivity() {
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton("Isključi") { _, _ ->
                 PlaybackController.cancelRest()
+                updateRestStatusText()
                 android.widget.Toast.makeText(this, "Odmor isključen.", android.widget.Toast.LENGTH_SHORT).show()
             }
             .setPositiveButton("Postavi") { _, _ ->
                 val minutes = minutesFor(seek.progress)
                 PlaybackController.startRest(minutes)
+                updateRestStatusText()
                 android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
             }
             .show()
@@ -1196,6 +1201,7 @@ class ReaderActivity : AppCompatActivity() {
         val minutes = PlaybackController.lastRestMinutesUsed()
         if (minutes <= 0) return
         PlaybackController.extendRest()
+        updateRestStatusText()
         android.widget.Toast.makeText(this, "Odmor je produžen.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
@@ -1292,6 +1298,15 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateRestStatusText() {
+        val remaining = PlaybackController.restRemainingSeconds
+        if (remaining <= 0) {
+            binding.textRestStatus.text = "Odmor nije aktivan."
+        } else {
+            binding.textRestStatus.text = "Do kraja odmora preostalo ${formatTime(remaining.toLong())}."
+        }
+    }
+
     private fun startTicker() {
         tickerRunnable = object : Runnable {
             override fun run() {
@@ -1307,6 +1322,7 @@ class ReaderActivity : AppCompatActivity() {
                 if (PlaybackController.timerRemainingSeconds > 0) {
                     updateTimerStatusText()
                 }
+                updateRestStatusText()
                 handler.postDelayed(this, 1000)
             }
         }
@@ -1329,6 +1345,10 @@ class ReaderActivity : AppCompatActivity() {
         val timerRemaining = PlaybackController.timerRemainingSeconds
         if (timerRemaining > 0) {
             parts.add("Tajmer: preostalo ${formatTime(timerRemaining.toLong())}.")
+        }
+        val restRemaining = PlaybackController.restRemainingSeconds
+        if (restRemaining > 0) {
+            parts.add("Do kraja odmora preostalo ${formatTime(restRemaining.toLong())}.")
         }
         android.widget.Toast.makeText(this, parts.joinToString(" "), android.widget.Toast.LENGTH_LONG).show()
     }
@@ -1398,6 +1418,7 @@ class ReaderActivity : AppCompatActivity() {
             updateSeekBar()
         }
         updateTimerStatusText()
+        updateRestStatusText()
         updateNavigationButtonLabels()
 
         // Osveži kombinovane glasove - ako su dodati/uklonjeni dok si bila na ekranu

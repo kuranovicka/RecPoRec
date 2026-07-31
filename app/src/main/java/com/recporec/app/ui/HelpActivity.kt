@@ -180,6 +180,7 @@ class HelpActivity : AppCompatActivity() {
         Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
         Minut pre isteka odmora, kreće da zvoni alarm.
         Zvono se zaustavlja ako ranije pustiš knjigu.
+        Pri vrhu ekrana uvek piše koliko je odmoru ostalo, ili da nije aktivan.
         Peto dugme pojačava jačinu zvuka.
         Jačina je vezana samo za trenutni dokument.
         Ne menja stvarnu jačinu zvuka telefona.
@@ -188,7 +189,7 @@ class HelpActivity : AppCompatActivity() {
         Četvrti red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
-        Dug pritisak na play dugme, kaže naglas trenutni status - stranicu, poglavlje ako postoji, proteklo i preostalo vreme, i tajmer ako je aktivan.
+        Dug pritisak na play dugme, kaže naglas trenutni status - stranicu, poglavlje ako postoji, proteklo i preostalo vreme, tajmer ako je aktivan, i odmor ako je aktivan.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
         Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na zadano.

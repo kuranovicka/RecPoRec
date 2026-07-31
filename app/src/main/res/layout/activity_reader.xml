@@ -53,6 +53,14 @@
             android:textSize="20sp"
             android:textColor="@color/text_primary"
             android:text="Tajmer nije aktivan." />
+
+        <TextView
+            android:id="@+id/textRestStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:text="Odmor nije aktivan." />
     </LinearLayout>
 
     <!-- Numerička tastatura, 4 reda x 3 kolone, fiksna, ravna -->
