@@ -210,6 +210,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
+        btnTimer.setOnLongClickListener { extendTimer(); true }
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
         btnCombinedVoices.setOnClickListener(clickSound {
@@ -1082,6 +1083,20 @@ class ReaderActivity : AppCompatActivity() {
             ).show()
         }
         updateTimerStatusText()
+    }
+
+    /** Dug pritisak na "Tajmer" - produžava VEĆ AKTIVAN tajmer za tačno onoliko minuta
+     * koliko je poslednji put postavljen, bez ponovnog otvaranja klizača. Radi sve dok
+     * tajmer ne istekne, čak i u poslednjem minutu. */
+    private fun extendTimer() {
+        val minutes = doc?.timerMinutes ?: 0
+        if (PlaybackController.timerRemainingSeconds <= 0 || minutes <= 0) {
+            android.widget.Toast.makeText(this, "Nema tajmera.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        PlaybackController.extendTimerMinutes(minutes)
+        updateTimerStatusText()
+        android.widget.Toast.makeText(this, "Tajmer produžen za $minutes minuta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** "Podseti me": vraća čitanje UNAZAD za izabrani broj minuta, odmah čim potvrdiš -

@@ -141,9 +141,13 @@ class HelpActivity : AppCompatActivity() {
         Dugme "Isključi" zaustavlja tajmer.
         Kad tajmer istekne, čitanje se pauzira samo, i tajmer se isključi.
         Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
+        Dug pritisak na tajmer produžava vreme odbrojavanja za tačno onoliko koliko postaviš.
+        Npr, ako tajmer postaviš na 20 minuta, pa dugo pritisneš ovo dugme, biće produžen za 20 minuta.
+        Ako to isto probaš kada tajmer istekne, dobićeš obaveštenje da nema tajmera.
         Četvrto dugme je "Sledeće poglavlje".
         Ono ide na početak sledećeg poglavlja.
-        Dug pritisak na sledeće poglavlje, otvara spisak svih poglavlja - dodirneš neko da odeš direktno na njega.
+        Dug pritisak na sledeće poglavlje, otvara spisak svih poglavlja.
+        Tu ti se izlistaju sva poglavlja, pa odabereš ono na koje želiš da odeš.
         Poglavlja rade samo ako ih program prepozna u dokumentu.
         Peto dugme povećava visinu glasa.
         Dug pritisak na bilo koje od ova dva dugmeta vraća visinu ovog dokumenta na zadano.
@@ -171,8 +175,6 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
         Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na zadano.
-        Ako imaš slušalice ili tastaturu sa medijskim tasterima plej, pauza, premotavanje , oni takođe rade.
-        Premotavanje radi isto kao dugmad za prethodnu/sledeću stavku iz petog reda.
 
         Peti red ima tri dugmeta.
         Prvo dugme pomera unazad.

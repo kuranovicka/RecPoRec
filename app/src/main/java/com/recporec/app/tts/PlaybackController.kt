@@ -50,6 +50,13 @@ object PlaybackController {
         timerRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
     }
 
+    /** Produžava VEĆ AKTIVAN tajmer za dati broj minuta, bez resetovanja - ako tajmer nije
+     * aktivan (0), ne radi ništa (poziva se samo ako je caller već proverio da je aktivan). */
+    fun extendTimerMinutes(minutes: Int) {
+        if (timerRemainingSeconds <= 0) return
+        timerRemainingSeconds += minutes * 60
+    }
+
     /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
     var uiPositionListener: ((Int) -> Unit)? = null
     var uiFinishedListener: (() -> Unit)? = null
