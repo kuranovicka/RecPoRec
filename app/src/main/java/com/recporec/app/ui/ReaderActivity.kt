@@ -569,36 +569,38 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode
+        val backHint = " Dug pritisak: ponovi trenutnu stranicu."
+        val forwardHint = " Dug pritisak: vrati se pre poslednjeg skoka."
         when (mode) {
             "min1" -> {
                 binding.btnStepBack.text = "◀ 1 min"
-                binding.btnStepBack.contentDescription = "1 minut unazad"
+                binding.btnStepBack.contentDescription = "1 minut unazad.$backHint"
                 binding.btnStepForward.text = "1 min ▶"
-                binding.btnStepForward.contentDescription = "1 minut unapred"
+                binding.btnStepForward.contentDescription = "1 minut unapred.$forwardHint"
             }
             "min5" -> {
                 binding.btnStepBack.text = "◀ 5 min"
-                binding.btnStepBack.contentDescription = "5 minuta unazad"
+                binding.btnStepBack.contentDescription = "5 minuta unazad.$backHint"
                 binding.btnStepForward.text = "5 min ▶"
-                binding.btnStepForward.contentDescription = "5 minuta unapred"
+                binding.btnStepForward.contentDescription = "5 minuta unapred.$forwardHint"
             }
             "min10" -> {
                 binding.btnStepBack.text = "◀ 10 min"
-                binding.btnStepBack.contentDescription = "10 minuta unazad"
+                binding.btnStepBack.contentDescription = "10 minuta unazad.$backHint"
                 binding.btnStepForward.text = "10 min ▶"
-                binding.btnStepForward.contentDescription = "10 minuta unapred"
+                binding.btnStepForward.contentDescription = "10 minuta unapred.$forwardHint"
             }
             "bookmark" -> {
                 binding.btnStepBack.text = "◀ Ozn."
-                binding.btnStepBack.contentDescription = "Prethodna oznaka"
+                binding.btnStepBack.contentDescription = "Prethodna oznaka.$backHint"
                 binding.btnStepForward.text = "Ozn. ▶"
-                binding.btnStepForward.contentDescription = "Sledeća oznaka"
+                binding.btnStepForward.contentDescription = "Sledeća oznaka.$forwardHint"
             }
             else -> {
                 binding.btnStepBack.text = "◀ Str."
-                binding.btnStepBack.contentDescription = "Prethodna stranica"
+                binding.btnStepBack.contentDescription = "Prethodna stranica.$backHint"
                 binding.btnStepForward.text = "Str. ▶"
-                binding.btnStepForward.contentDescription = "Sledeća stranica"
+                binding.btnStepForward.contentDescription = "Sledeća stranica.$forwardHint"
             }
         }
     }
