@@ -43,7 +43,7 @@ class ReadingService : Service() {
         setupCallStateListener()
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
             setCallback(object : MediaSessionCompat.Callback() {
-                override fun onPlay() { PlaybackController.ttsManager?.resume() }
+                override fun onPlay() { PlaybackController.resumeCancelingRestIfNeeded() }
                 override fun onPause() { PlaybackController.ttsManager?.pause() }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
                 // Android mehanizam za medijske tastere, isto kao play/pauza iznad. Nije
@@ -73,7 +73,11 @@ class ReadingService : Service() {
                 shakeDetector = ShakeDetector(shakeThreshold = threshold) {
                     val tts = PlaybackController.ttsManager
                     if (tts != null) {
-                        if (tts.isSpeaking) tts.pause() else tts.resume()
+                        if (tts.isSpeaking) {
+                            tts.pause()
+                        } else {
+                            PlaybackController.resumeCancelingRestIfNeeded()
+                        }
                         refreshNotification()
                     }
                 }

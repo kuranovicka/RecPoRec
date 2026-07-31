@@ -97,6 +97,11 @@ object PlaybackController {
     }
 
     private var restIsWakeTime = false
+    /** Apsolutan trenutak (SystemClock.elapsedRealtime) kad odmor treba da se završi -
+     * koristi se da se preostalo vreme računa SVAKI PUT iznova prema pravom satu, umesto da
+     * se prosto oduzima "jedan" svake sekunde (što bi se s vremenom nakupilo u kašnjenje ako
+     * bilo koja petlja potraje i malo duže od tačno jedne sekunde). */
+    private var restTargetElapsedMillis: Long = 0L
 
     fun startRest(minutes: Int) {
         ttsManager?.pause()
@@ -105,6 +110,7 @@ object PlaybackController {
         restIsWakeTime = false
         if (minutes > 0) {
             lastRestMinutes = minutes
+            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
         } else {
             releaseRestWakeLock()
@@ -122,6 +128,7 @@ object PlaybackController {
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
         if (totalSeconds > 0) {
+            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
         } else {
             releaseRestWakeLock()
@@ -136,12 +143,23 @@ object PlaybackController {
         releaseRestWakeLock()
     }
 
+    /** Nastavlja čitanje, i AKO je odmor trenutno aktivan, prvo ga prekida (isključi alarm,
+     * oslobodi wake lock) - koristi se SVUDA gde čitanje može ručno da se nastavi (dugme,
+     * drmanje...), da bi ponašanje bilo dosledno bez obzira kojim putem korisnica nastavi. */
+    fun resumeCancelingRestIfNeeded(): Boolean {
+        val wasResting = restRemainingSeconds > 0
+        if (wasResting) cancelRest()
+        ttsManager?.resume()
+        return wasResting
+    }
+
     /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
      * ne radi nista ako odmor nije aktivan, ili ako je TRENUTNI odmor postavljen preko
      * "Probudi me u" (restIsWakeTime) - namerno se ne produžava tako postavljen odmor. */
     fun extendRest() {
         if (restRemainingSeconds <= 0 || restIsWakeTime || lastRestMinutes <= 0) return
         restRemainingSeconds += lastRestMinutes * 60
+        restTargetElapsedMillis += lastRestMinutes * 60 * 1000L
         if (restRemainingSeconds > 60) stopRestAlarm()
     }
 
@@ -338,8 +356,12 @@ object PlaybackController {
 
                 // "Odmori" broji STVARNO proteklo vreme, ne vreme dok knjiga aktivno cita -
                 // suprotno je od tajmera po prirodi, jer knjiga bas TOKOM odmora ne cita.
+                // Racuna se iz APSOLUTNOG cilja (ne oduzimanjem "jedan" svake sekunde) - da se
+                // ne bi nakupilo kasnjenje ako neka petlja potraje i malo duze od tacno jedne
+                // sekunde (primetljivo tek posle vise sati, ali baš to je i prijavljeno).
                 if (restRemainingSeconds > 0) {
-                    restRemainingSeconds -= 1
+                    val remainingMillis = restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime()
+                    restRemainingSeconds = (remainingMillis / 1000).toInt().coerceAtLeast(0)
                     if (restRemainingSeconds in 1..60) {
                         // Poslednji minut pre isteka odmora - pocinje da zvoni alarm, sve dok
                         // odmor ne istekne ili ga korisnica sama ne prekine (cancelRest).
