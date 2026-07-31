@@ -24,7 +24,8 @@ class HelpActivity : AppCompatActivity() {
         Dodirni dokument da ga otvoriš i čitaš.
 
         Dugme "Dodaj dokument" je desno, na sredini ekrana.
-        Dodirni ga da otvoriš birač fajlova, gde biraš dokument sa telefona, Google Diska, Dropbox-a, OneDrive-a ili bilo kog drugog izvora koji imaš instaliran.
+        Prvo ti se otvara mogućnost dodavanja sa Google diska.
+        Ako želiš da izabereš neki drugi izvor: Telefon, Dropbox, OneDrive, u gornjem levom uglu aktiviraj dugme: Prikaži korene, ili Prikaži osnovne direktorijume.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
         Novi dokument se dodaje na kraj liste.
 
