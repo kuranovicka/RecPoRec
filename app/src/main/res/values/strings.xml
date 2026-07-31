@@ -18,7 +18,7 @@
     <string name="btn_timer">Tajmer za automatsku pauzu. Dug pritisak: produži aktivan tajmer.</string>
     <string name="btn_vol_down">Smanji jačinu zvuka. Dug pritisak: vrati jačinu na opštu.</string>
     <string name="btn_vol_up">Pojačaj zvuk. Dug pritisak: vrati jačinu na opštu.</string>
-    <string name="btn_voice">Izbor glasa</string>
+    <string name="btn_voice">Izbor glasa. Dug pritisak: Odmori.</string>
     <string name="btn_speed_down">Smanji brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>
     <string name="btn_play_pause">Pusti ili pauziraj čitanje. Dug pritisak: reci trenutni status.</string>
     <string name="btn_speed_up">Povećaj brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>

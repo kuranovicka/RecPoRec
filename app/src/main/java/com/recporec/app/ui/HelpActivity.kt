@@ -169,7 +169,15 @@ class HelpActivity : AppCompatActivity() {
         U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
         Ta stavka uklanja i kombinovane glasove ovog dokumenta, ako ih ima.
         Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
+        Dug pritisak: Odmori.
+        Možeš odabrati odmor od 5 minuta do dva sata.
+        Ako u bilo kom trenutku odmora pustiš knjigu, odmor se prekida.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
+        Dug pritisak: Produži odmor.
+        Odmor produžavaš tačno za ono vreme na koje je odmor podešen.
+        Ako si podesio-la 20 minuta, odmaraćeš 40 minuta.
+        Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
+        Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
         Peto dugme pojačava jačinu zvuka.
         Jačina je vezana samo za trenutni dokument.
         Ne menja stvarnu jačinu zvuka telefona.

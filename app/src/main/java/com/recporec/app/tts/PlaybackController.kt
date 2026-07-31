@@ -57,6 +57,33 @@ object PlaybackController {
         timerRemainingSeconds += minutes * 60
     }
 
+    /** "Odmori" - suprotno od Tajmera: PAUZIRA čitanje ODMAH, i SAMO NASTAVLJA posle
+     * izabranog broja minuta, bez ikakve akcije korisnice. Korisno kad radiš nešto drugo
+     * (npr. kućne poslove) i ne želiš da se zamaraš ručnim pauziranjem/nastavljanjem. */
+    var restRemainingSeconds: Int = 0
+        private set
+    private var lastRestMinutes: Int = 0
+
+    fun startRest(minutes: Int) {
+        ttsManager?.pause()
+        restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
+        if (minutes > 0) lastRestMinutes = minutes
+        notifyPlaybackStateChanged()
+    }
+
+    fun cancelRest() {
+        restRemainingSeconds = 0
+    }
+
+    /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
+     * ne radi nista ako odmor nije aktivan. */
+    fun extendRest() {
+        if (restRemainingSeconds <= 0 || lastRestMinutes <= 0) return
+        restRemainingSeconds += lastRestMinutes * 60
+    }
+
+    fun lastRestMinutesUsed(): Int = lastRestMinutes
+
     /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
     var uiPositionListener: ((Int) -> Unit)? = null
     var uiFinishedListener: (() -> Unit)? = null
@@ -245,6 +272,17 @@ object PlaybackController {
             var tick = 0
             while (true) {
                 delay(1000)
+
+                // "Odmori" broji STVARNO proteklo vreme, ne vreme dok knjiga aktivno cita -
+                // suprotno je od tajmera po prirodi, jer knjiga bas TOKOM odmora ne cita.
+                if (restRemainingSeconds > 0) {
+                    restRemainingSeconds -= 1
+                    if (restRemainingSeconds <= 0) {
+                        restRemainingSeconds = 0
+                        ttsManager?.resume()
+                        notifyPlaybackStateChanged()
+                    }
+                }
 
                 if (ttsManager?.isSpeaking == true) {
                     elapsedSeconds += 1

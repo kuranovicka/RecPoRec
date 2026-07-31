@@ -226,11 +226,13 @@ class ReaderActivity : AppCompatActivity() {
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
             )
         })
+        btnCombinedVoices.setOnLongClickListener { extendRest(); true }
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
         btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
         btnVolUp.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
+        btnVoice.setOnLongClickListener { showRestMenu(); true }
 
         btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
@@ -466,6 +468,10 @@ class ReaderActivity : AppCompatActivity() {
         if (tts.isSpeaking) {
             tts.pause()
         } else {
+            if (PlaybackController.restRemainingSeconds > 0) {
+                PlaybackController.cancelRest()
+                android.widget.Toast.makeText(this, "Odmor prekinut.", android.widget.Toast.LENGTH_SHORT).show()
+            }
             val startOffset = doc?.currentCharacterOffset ?: 0
             tts.startFromOffset(startOffset)
             if (settings.backgroundEnabled) {
@@ -1139,6 +1145,59 @@ class ReaderActivity : AppCompatActivity() {
             .setPositiveButton("Postavi") { _, _ -> setTimer(minutesFor(seek.progress)) }
             .show()
         seek.requestAccessibilityFocusNow()
+    }
+
+    /** Dug pritisak na "Glas" - "Odmori": SUPROTNO od Tajmera. Pauzira čitanje ODMAH, i
+     * SAMO NASTAVLJA posle izabranog broja minuta, bez ikakve dalje akcije. Korisno kad
+     * radiš nešto drugo (npr. kućne poslove) i ne želiš da se zamaraš ručnim pauziranjem i
+     * nastavljanjem čitanja. Ako u međuvremenu sama pustiš knjigu, odmor se prekida. */
+    private fun showRestMenu() {
+        val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
+        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
+        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRemindMinutes)
+
+        fun minutesFor(progress: Int) = 5 + progress * 5
+
+        seek.max = 23 // (120 - 5) / 5
+        seek.progress = 2 // 15 min podrazumevano
+        textStatus.text = "${minutesFor(seek.progress)} minuta"
+        seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                textStatus.text = "${minutesFor(progress)} minuta"
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
+        AlertDialog.Builder(this)
+            .setTitle("Odmori")
+            .setView(view)
+            .setNegativeButton(R.string.cancel, null)
+            .setNeutralButton("Isključi") { _, _ ->
+                PlaybackController.cancelRest()
+                android.widget.Toast.makeText(this, "Odmor isključen.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            .setPositiveButton("Postavi") { _, _ ->
+                val minutes = minutesFor(seek.progress)
+                PlaybackController.startRest(minutes)
+                android.widget.Toast.makeText(
+                    this, "Odmor: čitanje nastavlja samo za $minutes minuta.", android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+            .show()
+        seek.requestAccessibilityFocusNow()
+    }
+
+    /** Dug pritisak na "Kombinovani glasovi" - "Produži odmor": produžava VEĆ AKTIVAN odmor
+     * za onoliko minuta na koliko je poslednji put postavljen (isti obrazac kao Tajmer). */
+    private fun extendRest() {
+        if (PlaybackController.restRemainingSeconds <= 0) {
+            android.widget.Toast.makeText(this, "Nema aktivnog odmora.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val minutes = PlaybackController.lastRestMinutesUsed()
+        PlaybackController.extendRest()
+        android.widget.Toast.makeText(this, "Odmor produžen za $minutes minuta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun setTimer(minutes: Int) {
