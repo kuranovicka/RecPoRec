@@ -205,6 +205,7 @@ class ReaderActivity : AppCompatActivity() {
             true
         }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
+        btnSearchText.setOnLongClickListener { resetAllDocumentVoiceSettings(); true }
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
@@ -924,6 +925,21 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
      * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
      * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
+    /** Dug pritisak na "Pretraga" - vraća SVA podešavanja glasa ovog dokumenta na opšta:
+     * jačinu, visinu, brzinu i glas (uključujući kombinovane glasove). Isti mehanizam kao
+     * "Koristi opšti glas", samo primenjen na sve odjednom umesto pojedinačno. */
+    private fun resetAllDocumentVoiceSettings() {
+        doc = doc?.copy(voiceName = null, voiceEngine = null, speechRate = -1f, pitch = -1f, volumePercent = -1)
+        persistState()
+        lifecycleScope.launch {
+            db.combinedVoiceDao().clearScope(documentId)
+            loadDocument()
+        }
+        android.widget.Toast.makeText(
+            this, "Jačina, visina, brzina i glas vraćeni na opšta podešavanja.", android.widget.Toast.LENGTH_LONG
+        ).show()
+    }
+
     private fun resetToGlobal(what: String) {
         val entity = doc ?: return
         val tts = PlaybackController.ttsManager
