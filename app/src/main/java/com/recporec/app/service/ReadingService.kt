@@ -166,8 +166,13 @@ class ReadingService : Service() {
             nm.createNotificationChannel(channel)
         }
 
+        val currentId = PlaybackController.currentDocument?.id ?: -1L
         val contentIntent = PendingIntent.getActivity(
-            this, 0, Intent(this, ReaderActivity::class.java),
+            this, 0,
+            Intent(this, ReaderActivity::class.java).apply {
+                putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, currentId)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

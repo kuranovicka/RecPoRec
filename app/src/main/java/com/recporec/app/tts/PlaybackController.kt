@@ -119,14 +119,123 @@ object PlaybackController {
             }
             val tone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
             tone.startTone(android.media.ToneGenerator.TONE_PROP_ACK, 200)
-            val intent = android.content.Intent(ctx, com.recporec.app.ui.ReaderActivity::class.java).apply {
-                putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_DOCUMENT_ID, next.id)
-                putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_AUTOPLAY, true)
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+            // Android 10+ NE dozvoljava pokretanje novog ekrana iz pozadine (bez otvorenog
+            // ekrana ove app) - taj pokusaj bi tiho promasio kad je citanje u pozadini, van
+            // otvorene app. Zato citanje sledeceg dokumenta pokrecemo OVDE, direktno, bez
+            // ikakvog ekrana - a ako korisnica kasnije otvori app, ReaderActivity ce prepoznati
+            // da je citanje vec u toku i samo se prikaci na njega.
+            loadAndPlayDocumentInBackground(ctx, next.id)
+
+            // I dalje pokusavamo da otvorimo ekran, za slucaj da app JESTE u prvom planu kad
+            // ovo stigne (npr. korisnica gleda listu dokumenata) - ako sistem to blokira jer
+            // je app stvarno u pozadini, ovo se bezbedno preskace (citanje je vec pokrenuto
+            // gore, bez obzira na ovo).
+            try {
+                val intent = android.content.Intent(ctx, com.recporec.app.ui.ReaderActivity::class.java).apply {
+                    putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_DOCUMENT_ID, next.id)
+                    putExtra(com.recporec.app.ui.ReaderActivity.EXTRA_AUTOPLAY, true)
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+                ctx.startActivity(intent)
+            } catch (_: Exception) {
+                // Ocekivano kad je app u pozadini - citanje je vec pokrenuto gore bez obzira.
             }
-            ctx.startActivity(intent)
             tone.release()
         }
+    }
+
+    /** Ucitava dokument i pokrece citanje BEZ potrebe za ikakvim otvorenim ekranom - koristi
+     * se za automatski prelazak na sledeci dokument dok je citanje u pozadini. Namerno je
+     * odvojena od ReaderActivity.loadDocument()/setupTts() (ne deli kod sa njima) da bi
+     * ostala potpuno nezavisna od Activity zivotnog ciklusa, i da eventualna izmena ovde ne
+     * rizikuje da pokvari dobro isprobanu putanju kad korisnica sama otvori knjigu. */
+    private suspend fun loadAndPlayDocumentInBackground(context: Context, documentId: Long) {
+        val db = AppDatabase.getInstance(context)
+        val entity = withContext(Dispatchers.IO) { db.documentDao().getById(documentId) } ?: return
+        val settings = com.recporec.app.data.AppSettings(context)
+
+        val parsedDoc = try {
+            withContext(Dispatchers.IO) {
+                com.recporec.app.parser.DocumentParser.parse(context, android.net.Uri.parse(entity.uri), entity.format)
+            }
+        } catch (_: Exception) {
+            return // ne mozemo da ucitamo - citanje ostaje na starom dokumentu, korisnica ce videti kad otvori app
+        }
+
+        val charsPerPage = 1800
+        val totalPages = kotlin.math.max(1, (parsedDoc.length + charsPerPage - 1) / charsPerPage)
+        val finalEntity = if (entity.totalPages != totalPages) {
+            val updated = entity.copy(totalPages = totalPages)
+            withContext(Dispatchers.IO) { db.documentDao().update(updated) }
+            updated
+        } else entity
+
+        parsedDocument = parsedDoc
+        currentDocument = finalEntity
+        elapsedSeconds = finalEntity.elapsedSeconds
+
+        val tts = ttsManager ?: return
+
+        val combined = resolveCombinedVoiceConfigInBackground(
+            db, finalEntity.id,
+            finalEntity.voiceName ?: settings.globalVoiceName,
+            finalEntity.voiceEngine ?: settings.globalVoiceEngine
+        )
+        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (finalEntity.voiceName ?: settings.globalVoiceName)
+        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (finalEntity.voiceEngine ?: settings.globalVoiceEngine)
+        val effRate = finalEntity.speechRate.let { if (it > 0f) it else settings.globalSpeechRate }
+        val effPitch = finalEntity.pitch.let { if (it > 0f) it else settings.globalPitch }
+        val effVolume = finalEntity.volumePercent.let { if (it >= 0) it else settings.globalVolumePercent }
+
+        suspend fun applyVoiceTextAndPlay() {
+            withContext(Dispatchers.Default) { tts.loadText(parsedDoc.fullText) }
+            tts.setSpeechRate(effRate)
+            tts.setPitch(effPitch)
+            tts.setVolume(effVolume / 100f)
+            tts.sentencePauseMs = if (settings.sentencePauseEnabled) settings.sentencePauseMs.toLong() else 0L
+            tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
+            if (effectiveVoiceName != null) tts.setVoiceByName(effectiveVoiceName) else tts.applyIndependentDefaultVoice()
+            if (combined != null) tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice) else tts.setCombinedVoices(emptyList(), 1)
+            tts.startFromOffset(finalEntity.currentCharacterOffset)
+        }
+
+        if (effectiveEngine != null && effectiveEngine != tts.currentEnginePackage) {
+            val done = kotlinx.coroutines.CompletableDeferred<Unit>()
+            tts.switchEngine(effectiveEngine, effectiveVoiceName, effRate) {
+                scope.launch { applyVoiceTextAndPlay(); done.complete(Unit) }
+            }
+            done.await()
+        } else if (tts.isEngineReady) {
+            applyVoiceTextAndPlay()
+        } else {
+            val done = kotlinx.coroutines.CompletableDeferred<Unit>()
+            tts.onReady = { scope.launch { applyVoiceTextAndPlay(); done.complete(Unit) } }
+            done.await()
+        }
+    }
+
+    private data class BgCombinedVoiceConfig(val voices: List<com.recporec.app.tts.CombinedVoiceRef>, val sentencesPerVoice: Int)
+
+    /** Isto kao ReaderActivity.resolveCombinedVoiceConfig, samo bez zavisnosti od Activity-ja -
+     * kombinovani glasovi za dokument imaju prednost nad opštim. */
+    private suspend fun resolveCombinedVoiceConfigInBackground(
+        db: AppDatabase, docId: Long, regularVoiceName: String?, regularEngine: String?
+    ): BgCombinedVoiceConfig? {
+        val dao = db.combinedVoiceDao()
+        suspend fun resolveForScope(scopeId: Long): BgCombinedVoiceConfig? {
+            val explicit = dao.getVoices(scopeId)
+            if (explicit.isEmpty()) return null
+            val refs = mutableListOf<com.recporec.app.tts.CombinedVoiceRef>()
+            if (regularVoiceName != null && regularEngine != null && explicit.none { it.voiceName == regularVoiceName }) {
+                refs.add(com.recporec.app.tts.CombinedVoiceRef(regularEngine, regularVoiceName))
+            }
+            refs.addAll(explicit.map { com.recporec.app.tts.CombinedVoiceRef(it.voiceEngine, it.voiceName) })
+            if (refs.size < 2) return null
+            val count = dao.getSettings(scopeId)?.sentencesPerVoice ?: 1
+            return BgCombinedVoiceConfig(refs, count)
+        }
+        return resolveForScope(docId) ?: resolveForScope(0L)
     }
 
     private fun startTickerIfNeeded() {
