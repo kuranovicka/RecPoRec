@@ -178,6 +178,8 @@ class HelpActivity : AppCompatActivity() {
         Ako si podesio-la 20 minuta, odmaraćeš 40 minuta.
         Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
         Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
+        Minut pre isteka odmora, kreće da zvoni alarm.
+        Zvono se zaustavlja ako ranije pustiš knjigu.
         Peto dugme pojačava jačinu zvuka.
         Jačina je vezana samo za trenutni dokument.
         Ne menja stvarnu jačinu zvuka telefona.

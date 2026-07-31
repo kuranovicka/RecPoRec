@@ -63,9 +63,16 @@ object PlaybackController {
     var restRemainingSeconds: Int = 0
         private set
     private var lastRestMinutes: Int = 0
+    private var restAlarmTone: android.media.ToneGenerator? = null
+
+    private fun stopRestAlarm() {
+        restAlarmTone?.release()
+        restAlarmTone = null
+    }
 
     fun startRest(minutes: Int) {
         ttsManager?.pause()
+        stopRestAlarm()
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
         if (minutes > 0) lastRestMinutes = minutes
         notifyPlaybackStateChanged()
@@ -73,13 +80,16 @@ object PlaybackController {
 
     fun cancelRest() {
         restRemainingSeconds = 0
+        stopRestAlarm()
     }
 
     /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
-     * ne radi nista ako odmor nije aktivan. */
+     * ne radi nista ako odmor nije aktivan. Ako je alarm vec poceo da zvoni (poslednji
+     * minut), zaustavlja ga - opet ima vise od minut vremena do isteka. */
     fun extendRest() {
         if (restRemainingSeconds <= 0 || lastRestMinutes <= 0) return
         restRemainingSeconds += lastRestMinutes * 60
+        if (restRemainingSeconds > 60) stopRestAlarm()
     }
 
     fun lastRestMinutesUsed(): Int = lastRestMinutes
@@ -277,8 +287,17 @@ object PlaybackController {
                 // suprotno je od tajmera po prirodi, jer knjiga bas TOKOM odmora ne cita.
                 if (restRemainingSeconds > 0) {
                     restRemainingSeconds -= 1
+                    if (restRemainingSeconds in 1..60) {
+                        // Poslednji minut pre isteka odmora - pocinje da zvoni alarm, sve dok
+                        // odmor ne istekne ili ga korisnica sama ne prekine (cancelRest).
+                        if (restAlarmTone == null) {
+                            restAlarmTone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 90)
+                        }
+                        restAlarmTone?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP2, 400)
+                    }
                     if (restRemainingSeconds <= 0) {
                         restRemainingSeconds = 0
+                        stopRestAlarm()
                         ttsManager?.resume()
                         notifyPlaybackStateChanged()
                     }

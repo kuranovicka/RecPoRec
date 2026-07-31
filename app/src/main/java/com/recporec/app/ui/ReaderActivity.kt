@@ -1180,9 +1180,7 @@ class ReaderActivity : AppCompatActivity() {
             .setPositiveButton("Postavi") { _, _ ->
                 val minutes = minutesFor(seek.progress)
                 PlaybackController.startRest(minutes)
-                android.widget.Toast.makeText(
-                    this, "Odmor: čitanje nastavlja samo za $minutes minuta.", android.widget.Toast.LENGTH_LONG
-                ).show()
+                android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
             }
             .show()
         seek.requestAccessibilityFocusNow()
@@ -1196,8 +1194,9 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         val minutes = PlaybackController.lastRestMinutesUsed()
+        if (minutes <= 0) return
         PlaybackController.extendRest()
-        android.widget.Toast.makeText(this, "Odmor produžen za $minutes minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(this, "Odmor je produžen.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun setTimer(minutes: Int) {
