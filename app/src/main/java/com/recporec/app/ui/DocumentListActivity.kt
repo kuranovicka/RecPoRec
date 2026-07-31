@@ -32,29 +32,40 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
-    /** Otvara standardni sistemski birač fajlova, sa pokušajem da se odmah otvori na samom
-     * telefonu (lakše snalaženje, umesto da se prvo mora traziti kroz meni birača). NAMERNO
-     * bez ogranicenja na tipove fajlova (MIME tipovi) - lokalni fajlovi na telefonu (posebno
-     * .mobi/.fb2/.azw) cesto imaju "pogresno" ili generickog prijavljen tip fajla kod
-     * razlicitih provajdera, pa bi filter sakrio ispravne fajlove iz birača. Prepoznavanje
-     * formata radi sama app, po nastavku imena fajla (vidi DocumentParser.detectFormat) -
-     * filter ovde nije ni potreban.
+    /** Otvara standardni sistemski birač fajlova, sa pokušajem da se odmah otvori na tačno
+     * određenom izvoru. NAMERNO bez ogranicenja na tipove fajlova (MIME tipovi) - lokalni
+     * fajlovi na telefonu (posebno .mobi/.fb2/.azw) cesto imaju "pogresno" ili genericki
+     * prijavljen tip fajla kod razlicitih provajdera, pa bi filter sakrio ispravne fajlove iz
+     * birača. Prepoznavanje formata radi sama app, po nastavku imena fajla (vidi
+     * DocumentParser.detectFormat) - filter ovde nije ni potreban.
      *
-     * Za razliku od RANIJE ugradjene adrese ka Google Disku (koja je koristila skrivenu,
-     * nedokumentovanu strukturu tudje aplikacije i prestala da radi kad ju je Google promenio),
-     * adresa ka SAMOM TELEFONU je deo standardnog, stabilnog Android sistema
-     * (ExternalStorageProvider), pa je mnogo manji rizik da se pokvari na isti nacin. Ako se
-     * ipak ne uspe, birac se bezbedno otvara bez pocetne lokacije (try/catch). */
-    private fun launchPicker() {
+     * Adresa ka SAMOM TELEFONU je deo standardnog, stabilnog Android sistema
+     * (ExternalStorageProvider) - siguran, glavni put. Adresa ka Google Disku koristi
+     * nedokumentovanu strukturu tudje aplikacije, i JEDNOM se već pokvarila kad ju je Google
+     * promenio - ali je vraćena kao poseban prečac jer je otkriveno da je meni za PROMENU
+     * izvora unutar sistemskog birača tesko dostupan preko TalkBack-a (korisnica ga nije
+     * mogla pronaći) - bez ovog prečaca, do Diska se ne bi moglo stići pouzdano uopšte. */
+    private fun launchPicker(driveHint: Boolean) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
         }
         try {
-            val phoneUri = Uri.parse("content://com.android.externalstorage.documents/root/primary")
-            intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, phoneUri)
+            val initialUri = if (driveHint) {
+                Uri.parse("content://com.google.android.apps.docs.storage/root/root")
+            } else {
+                Uri.parse("content://com.android.externalstorage.documents/root/primary")
+            }
+            intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri)
         } catch (_: Exception) { /* bezbedno - birac se otvara bez pocetne lokacije */ }
-        pickFileLauncher.launch(intent)
+        try {
+            pickFileLauncher.launch(intent)
+        } catch (_: Exception) {
+            // Ako pocetna lokacija izazove problem (npr. Disk adresa vise ne postoji),
+            // probaj ponovo bez nje - bolje da se birac otvori negde nego nigde.
+            intent.removeExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI)
+            pickFileLauncher.launch(intent)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +82,12 @@ class DocumentListActivity : AppCompatActivity() {
         binding.recyclerDocuments.adapter = adapter
 
         binding.btnAddDocument.setOnClickListener {
-            launchPicker()
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Odakle dodaješ dokument?")
+                .setItems(arrayOf("Dodaj sa Google diska", "Dodaj iz telefona")) { _, which ->
+                    if (which == 0) launchPicker(driveHint = true) else launchPicker(driveHint = false)
+                }
+                .show()
         }
 
         binding.btnExit.setOnClickListener {
