@@ -13,21 +13,21 @@
     <string name="cancel">Otkaži</string>
 
     <!-- Čitač - dugmad -->
-    <string name="btn_prev_chapter">Prethodno poglavlje. Dug pritisak: ponovi trenutno poglavlje.</string>
-    <string name="btn_next_chapter">Sledeće poglavlje. Dug pritisak: spisak svih poglavlja.</string>
-    <string name="btn_timer">Tajmer za automatsku pauzu. Dug pritisak: produži aktivan tajmer.</string>
-    <string name="btn_vol_down">Smanji jačinu zvuka. Dug pritisak: vrati jačinu na opštu.</string>
-    <string name="btn_vol_up">Pojačaj zvuk. Dug pritisak: vrati jačinu na opštu.</string>
+    <string name="btn_prev_chapter">Prethodno poglavlje</string>
+    <string name="btn_next_chapter">Sledeće poglavlje</string>
+    <string name="btn_timer">Tajmer za automatsku pauzu</string>
+    <string name="btn_vol_down">Smanji jačinu zvuka</string>
+    <string name="btn_vol_up">Pojačaj zvuk</string>
     <string name="btn_voice">Izbor glasa</string>
-    <string name="btn_speed_down">Smanji brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>
-    <string name="btn_play_pause">Pusti ili pauziraj čitanje. Dug pritisak: reci trenutni status.</string>
-    <string name="btn_speed_up">Povećaj brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>
+    <string name="btn_speed_down">Smanji brzinu čitanja</string>
+    <string name="btn_play_pause">Pusti ili pauziraj čitanje</string>
+    <string name="btn_speed_up">Povećaj brzinu čitanja</string>
     <string name="btn_prev_page">Jedna stranica unazad</string>
     <string name="btn_goto_page">Idi na stranicu</string>
     <string name="btn_next_page">Jedna stranica unapred</string>
     <string name="slider_position">Klizač za pomeranje kroz knjigu, pet posto po koraku</string>
-    <string name="slider_back">Pomeri pet posto unazad. Dug pritisak: ponovi trenutnu stranicu.</string>
-    <string name="slider_forward">Pomeri pet posto unapred. Dug pritisak: vrati se pre poslednjeg skoka.</string>
+    <string name="slider_back">Pomeri pet posto unazad</string>
+    <string name="slider_forward">Pomeri pet posto unapred</string>
 
     <!-- Statusna traka -->
     <string name="status_pages">Ukupno stranica: %1$d</string>
