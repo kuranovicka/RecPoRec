@@ -138,7 +138,7 @@
 
             <Button android:id="@+id/btnDocLanguage" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Jezik za ovaj dokument"
+                android:contentDescription="Jezik za ovaj dokument. Dug pritisak: poništi sve prethodne radnje."
                 android:textSize="16sp"
                 android:text="Jezik" />
 

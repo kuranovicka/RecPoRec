@@ -27,7 +27,7 @@
     <string name="btn_next_page">Jedna stranica unapred</string>
     <string name="slider_position">Klizač za pomeranje kroz knjigu, pet posto po koraku</string>
     <string name="slider_back">Pomeri pet posto unazad. Dug pritisak: ponovi trenutnu stranicu.</string>
-    <string name="slider_forward">Pomeri pet posto unapred. Dug pritisak: vrati se pre poslednjeg skoka.</string>
+    <string name="slider_forward">Pomeri pet posto unapred. Dug pritisak: poništi poslednju radnju.</string>
 
     <!-- Statusna traka -->
     <string name="status_pages">Ukupno stranica: %1$d</string>

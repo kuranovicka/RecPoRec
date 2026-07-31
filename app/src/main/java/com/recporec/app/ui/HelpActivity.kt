@@ -162,6 +162,8 @@ class HelpActivity : AppCompatActivity() {
         Drugo dugme je "Jezik".
         Ono menja jezik samo za ovaj dokument.
         U toj listi je i stavka "Koristi opšti jezik", koja uklanja poseban izbor za ovaj dokument.
+        Dug pritisak na Jezik, poništava sve prethodne radnje odjednom, i vraća na mesto pre prve od njih.
+        Npr, ako si otišla dva sata unapred, pa dva sata unazad, pa na neku stranicu, ovo te vraća tačno tamo gde si bila pre svega toga.
         Treće dugme je "Glas".
         Ono menja glas samo za ovaj dokument.
         U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
@@ -198,7 +200,7 @@ class HelpActivity : AppCompatActivity() {
         Npr, ako premotaš knjigu za dva sata unazad, možeš je premotati za još dva sata.
         Posebno korisno za ljude koji prespavaju ostatak knjige.
         Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
-        Dug pritisak na treće dugme, vraća tačno na mesto pre poslednjeg skoka, koji god da je bio.
+        Dug pritisak na treće dugme, poništava poslednju radnju, koja god da je bila.
 
         Ispod tastature je malo veći klizač, radi lakšeg dodira.
         On pokazuje gde si trenutno u knjizi.

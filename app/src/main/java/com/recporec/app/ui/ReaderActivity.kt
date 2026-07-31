@@ -216,6 +216,7 @@ class ReaderActivity : AppCompatActivity() {
         btnTimer.setOnLongClickListener { extendTimer(); true }
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
+        btnDocLanguage.setOnLongClickListener { undoAllJumps(); true }
         btnCombinedVoices.setOnClickListener(clickSound {
             startActivity(
                 android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
@@ -570,7 +571,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode
         val backHint = " Dug pritisak: ponovi trenutnu stranicu."
-        val forwardHint = " Dug pritisak: vrati se pre poslednjeg skoka."
+        val forwardHint = " Dug pritisak: poništi poslednju radnju."
         when (mode) {
             "min1" -> {
                 binding.btnStepBack.text = "◀ 1 min"
@@ -605,10 +606,10 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    /** Pamti gde si bila TAČNO PRE poslednjeg skoka (bilo koje dugme za navigaciju) - da bi
-     * dug pritisak na "Sledeći element" mogao da vrati tačno tamo ako se slučajno preskoči
-     * predaleko, bez računanja koliko unazad. */
-    private var positionBeforeLastJump: Int? = null
+    /** Pamti istoriju pozicija PRE svakog skoka (bilo koje dugme za navigaciju - korak,
+     * poglavlje, oznaka, Podseti me, pretraga, Idi na...) - da "Sledeći element" može da
+     * poništi POSLEDNJU radnju, a "Jezik" SVE radnje odjednom, bez računanja koliko unazad. */
+    private val jumpHistory = mutableListOf<Int>()
 
     /** Dug pritisak na "Idi na" - vraća na sam početak dokumenta. */
     private fun goToDocumentStart() {
@@ -616,12 +617,18 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    private fun moveTo(offset: Int) {
+    /** recordHistory=false koriste SAMO funkcije za poništavanje - da ne bi same sebe
+     * "zapisivale" u istoriju i pravile beskonačnu petlju napred-nazad umesto pravog
+     * povratka kroz stvarne, ranije radnje. */
+    private fun moveTo(offset: Int, recordHistory: Boolean = true) {
         if (doc == null || parsed == null) {
             android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
-        positionBeforeLastJump = doc?.currentCharacterOffset
+        if (recordHistory) {
+            doc?.currentCharacterOffset?.let { jumpHistory.add(it) }
+            if (jumpHistory.size > 50) jumpHistory.removeAt(0) // ogranici velicinu
+        }
         doc = doc?.copy(currentCharacterOffset = offset)
         updateStatusTexts()
         updateSeekBar()
@@ -634,16 +641,30 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    /** Dug pritisak na "Sledeći element" (korak napred) - vraća tačno na mesto gde si bila
-     * PRE poslednjeg skoka, koji god da je bio (korak, poglavlje, oznaka, Podseti me...). */
+    /** Dug pritisak na "Sledeći element" (korak napred) - poništava POSLEDNJU radnju (bilo
+     * koji skok), vraćajući tačno na mesto pre nje. */
     private fun undoLastJump() {
-        val target = positionBeforeLastJump
-        if (target == null) {
-            android.widget.Toast.makeText(this, "Nema prethodnog skoka.", android.widget.Toast.LENGTH_SHORT).show()
+        if (jumpHistory.isEmpty()) {
+            android.widget.Toast.makeText(this, "Nema prethodne radnje.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
-        moveTo(target)
-        android.widget.Toast.makeText(this, "Vraćam se na preskočeno.", android.widget.Toast.LENGTH_SHORT).show()
+        val target = jumpHistory.removeAt(jumpHistory.size - 1)
+        moveTo(target, recordHistory = false)
+        android.widget.Toast.makeText(this, "Poništena poslednja radnja.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    /** Dug pritisak na "Jezik" - poništava SVE prethodne radnje odjednom, vraćajući na mesto
+     * od PRE prve od njih (npr. skočila si 2 sata napred, pa nazad, pa na oznaku, pa na
+     * nasumičnu stranicu - ovo te vraća tačno tamo gde si bila pre svega toga). */
+    private fun undoAllJumps() {
+        if (jumpHistory.isEmpty()) {
+            android.widget.Toast.makeText(this, "Nema prethodnih radnji.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val target = jumpHistory.first()
+        jumpHistory.clear()
+        moveTo(target, recordHistory = false)
+        android.widget.Toast.makeText(this, "Poništene sve prethodne radnje.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na "Sledeće poglavlje" - spisak SVIH poglavlja, dodirneš da odeš direktno
