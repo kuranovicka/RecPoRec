@@ -172,11 +172,17 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak: Odmori.
         Možeš odabrati odmor od 10 minuta do četiri sata.
         Zadana vrednost odmora je 10 minuta.
+        Zatim imaš opciju "Probudi me u".
+        Upišeš vreme u formi, npr: 5:20.
+        Kada ga postaviš, knjiga te budi u zadato vreme.
+        Isto je alarm minut ranije.
+        Ako popuniš ovo polje, klizač se ne koristi.
         Ako u bilo kom trenutku odmora pustiš knjigu, odmor se prekida.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak: Produži odmor.
         Odmor produžavaš tačno za ono vreme na koje je odmor podešen.
         Ako si podesio-la 20 minuta, odmaraćeš 40 minuta.
+        Ovo radi samo za odmor postavljen preko klizača, ne i za "Probudi me u".
         Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
         Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
         Minut pre isteka odmora, kreće da zvoni alarm.

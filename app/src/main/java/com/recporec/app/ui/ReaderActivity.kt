@@ -1153,16 +1153,37 @@ class ReaderActivity : AppCompatActivity() {
      * SAMO NASTAVLJA posle izabranog broja minuta, bez ikakve dalje akcije. Korisno kad
      * radiš nešto drugo (npr. kućne poslove) i ne želiš da se zamaraš ručnim pauziranjem i
      * nastavljanjem čitanja. Ako u međuvremenu sama pustiš knjigu, odmor se prekida. */
+    /** Parsira uneto vreme u formi "sat:minut" (npr. "5:20") i vraća broj sekundi od SADA do
+     * sledećeg nastupanja tog vremena (danas ako još nije prošlo, inače sutra). Vraća null
+     * ako format nije ispravan. */
+    private fun parseWakeTimeToSecondsFromNow(input: String): Int? {
+        val parts = input.trim().split(":")
+        if (parts.size != 2) return null
+        val hour = parts[0].trim().toIntOrNull() ?: return null
+        val minute = parts[1].trim().toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+        val now = java.util.Calendar.getInstance()
+        val target = java.util.Calendar.getInstance()
+        target.set(java.util.Calendar.HOUR_OF_DAY, hour)
+        target.set(java.util.Calendar.MINUTE, minute)
+        target.set(java.util.Calendar.SECOND, 0)
+        target.set(java.util.Calendar.MILLISECOND, 0)
+        if (target.timeInMillis <= now.timeInMillis) {
+            target.add(java.util.Calendar.DAY_OF_MONTH, 1)
+        }
+        return ((target.timeInMillis - now.timeInMillis) / 1000).toInt()
+    }
+
     private fun showRestMenu() {
-        val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
-        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
-        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRemindMinutes)
+        val view = layoutInflater.inflate(R.layout.dialog_rest, null)
+        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRestMinutesStatus)
+        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRestMinutes)
+        val editWakeTime = view.findViewById<EditText>(R.id.editWakeTime)
 
         fun minutesFor(progress: Int) = 10 + progress * 10
 
         seek.max = 23 // (240 - 10) / 10
         seek.progress = 0 // 10 min podrazumevano
-        seek.contentDescription = "Broj minuta za odmor, od 10 do 240"
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -1182,10 +1203,25 @@ class ReaderActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this, "Odmor isključen.", android.widget.Toast.LENGTH_SHORT).show()
             }
             .setPositiveButton("Postavi") { _, _ ->
-                val minutes = minutesFor(seek.progress)
-                PlaybackController.startRest(minutes)
-                updateRestStatusText()
-                android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
+                val wakeInput = editWakeTime.text.toString().trim()
+                if (wakeInput.isNotEmpty()) {
+                    // "Probudi me u" popunjeno - koristi TO, klizač se u tom slučaju ignoriše.
+                    val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
+                    if (seconds == null) {
+                        android.widget.Toast.makeText(
+                            this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        PlaybackController.startRestUntil(seconds)
+                        updateRestStatusText()
+                        android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    val minutes = minutesFor(seek.progress)
+                    PlaybackController.startRest(minutes)
+                    updateRestStatusText()
+                    android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
             .show()
         seek.requestAccessibilityFocusNow()

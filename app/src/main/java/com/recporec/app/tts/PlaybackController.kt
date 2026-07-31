@@ -84,7 +84,7 @@ object PlaybackController {
             val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
             val wl = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "RecPoRec:Rest")
             wl.setReferenceCounted(false)
-            wl.acquire(5 * 60 * 60 * 1000L) // najviše 5h zaštita (najduži odmor je 4h)
+            wl.acquire(25 * 60 * 60 * 1000L) // najviše 25h zaštita (odmor klizačem je do 4h, ali "Probudi me u" moze biti i skoro ceo dan unapred)
             restWakeLock = wl
         } catch (_: Exception) { }
     }
@@ -96,10 +96,13 @@ object PlaybackController {
         restWakeLock = null
     }
 
+    private var restIsWakeTime = false
+
     fun startRest(minutes: Int) {
         ttsManager?.pause()
         stopRestAlarm()
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
+        restIsWakeTime = false
         if (minutes > 0) {
             lastRestMinutes = minutes
             acquireRestWakeLock()
@@ -109,17 +112,35 @@ object PlaybackController {
         notifyPlaybackStateChanged()
     }
 
+    /** "Probudi me u" - odmor do TAČNO određenog vremena (umesto broja minuta preko klizača).
+     * NAMERNO ne dira lastRestMinutes, i postavlja restIsWakeTime - "Produži odmor" se odnosi
+     * samo na odmor postavljen preko klizača, ne na buđenje u tačno vreme (čak i ako je
+     * ranije postojao neki stariji, "ustajali" lastRestMinutes od prethodnog odmora). */
+    fun startRestUntil(totalSeconds: Int) {
+        ttsManager?.pause()
+        stopRestAlarm()
+        restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
+        restIsWakeTime = totalSeconds > 0
+        if (totalSeconds > 0) {
+            acquireRestWakeLock()
+        } else {
+            releaseRestWakeLock()
+        }
+        notifyPlaybackStateChanged()
+    }
+
     fun cancelRest() {
         restRemainingSeconds = 0
+        restIsWakeTime = false
         stopRestAlarm()
         releaseRestWakeLock()
     }
 
     /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
-     * ne radi nista ako odmor nije aktivan. Ako je alarm vec poceo da zvoni (poslednji
-     * minut), zaustavlja ga - opet ima vise od minut vremena do isteka. */
+     * ne radi nista ako odmor nije aktivan, ili ako je TRENUTNI odmor postavljen preko
+     * "Probudi me u" (restIsWakeTime) - namerno se ne produžava tako postavljen odmor. */
     fun extendRest() {
-        if (restRemainingSeconds <= 0 || lastRestMinutes <= 0) return
+        if (restRemainingSeconds <= 0 || restIsWakeTime || lastRestMinutes <= 0) return
         restRemainingSeconds += lastRestMinutes * 60
         if (restRemainingSeconds > 60) stopRestAlarm()
     }
