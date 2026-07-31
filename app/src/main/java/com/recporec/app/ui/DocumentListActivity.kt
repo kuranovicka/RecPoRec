@@ -32,29 +32,15 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
-    private val docMimeTypes = arrayOf(
-        "text/plain",
-        "text/html",
-        "text/rtf",
-        "application/rtf",
-        "application/pdf",
-        "application/epub+zip",
-        "application/x-fictionbook+xml",
-        "application/x-mobipocket-ebook",
-        "application/vnd.amazon.ebook",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-
-    /** Otvara standardni sistemski birač fajlova. NAMERNO bez "prečice" na tačno određenu
-     * lokaciju (npr. direktno na Google Disk) - takve prečice su ranije koristile skrivenu,
-     * nedokumentovanu adresu koja je prestala da radi kad ju je Google promenio. Standardni
-     * birač bez toga sam po sebi prikazuje SVE instalirane izvore (Google Disk, Dropbox,
-     * OneDrive, sam telefon...) kroz svoj meni sa strane - pouzdanije i radi sa više izvora. */
+    /** Otvara standardni sistemski birač fajlova. NAMERNO bez ogranicenja na tipove fajlova
+     * (MIME tipovi) - lokalni fajlovi na telefonu (posebno .mobi/.fb2/.azw) cesto imaju
+     * "pogresno" ili generickog prijavljen tip fajla kod razlicitih provajdera, pa bi filter
+     * sakrio ispravne fajlove iz birača. Prepoznavanje formata radi sama app, po nastavku
+     * imena fajla (vidi DocumentParser.detectFormat) - filter ovde nije ni potreban. */
     private fun launchPicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
-            putExtra(Intent.EXTRA_MIME_TYPES, docMimeTypes)
         }
         pickFileLauncher.launch(intent)
     }
