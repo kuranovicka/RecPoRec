@@ -232,6 +232,7 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
+        btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
@@ -629,6 +630,7 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         moveTo(target)
+        android.widget.Toast.makeText(this, "Vraćam se na preskočeno.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na "Sledeće poglavlje" - spisak SVIH poglavlja, dodirneš da odeš direktno
@@ -870,6 +872,7 @@ class ReaderActivity : AppCompatActivity() {
         val current = doc?.currentCharacterOffset ?: 0
         val pageStart = (current / charsPerPage) * charsPerPage
         moveTo(pageStart)
+        android.widget.Toast.makeText(this, "Ponavljam stranicu.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na "Prethodno poglavlje" - ponavlja poslednje (trenutno) poglavlje od
@@ -880,6 +883,7 @@ class ReaderActivity : AppCompatActivity() {
         val current = doc?.currentCharacterOffset ?: 0
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         moveTo(chapters[idx].startOffset)
+        android.widget.Toast.makeText(this, "Ponavljam poglavlje.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
@@ -1141,6 +1145,26 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         handler.postDelayed(tickerRunnable!!, 1000)
+    }
+
+    /** Dug pritisak na Play/Pauza - naglas (Toast koji TalkBack pročita) kaže trenutni status:
+     * stranicu, poglavlje (ako postoji), proteklo/preostalo vreme, i tajmer (ako je aktivan).
+     * Isti podaci koji već stoje pri vrhu ekrana, samo bez potrebe da ih prstom tražiš. */
+    private fun announceStatus() {
+        val entity = doc ?: return
+        val chapters = parsed?.chapters ?: emptyList()
+        val currentChapterTitle = chapters.lastOrNull { it.startOffset <= entity.currentCharacterOffset }?.title
+
+        val parts = mutableListOf<String>()
+        parts.add(binding.textPages.text.toString())
+        if (currentChapterTitle != null) parts.add("Poglavlje: $currentChapterTitle.")
+        parts.add(binding.textElapsed.text.toString())
+        parts.add(binding.textRemaining.text.toString())
+        val timerRemaining = PlaybackController.timerRemainingSeconds
+        if (timerRemaining > 0) {
+            parts.add("Tajmer: preostalo ${formatTime(timerRemaining.toLong())}.")
+        }
+        android.widget.Toast.makeText(this, parts.joinToString(" "), android.widget.Toast.LENGTH_LONG).show()
     }
 
     private fun updateStatusTexts() {
