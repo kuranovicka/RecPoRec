@@ -232,7 +232,6 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
-        btnPlayPause.setOnLongClickListener { repeatLastSentence(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
@@ -863,14 +862,6 @@ class ReaderActivity : AppCompatActivity() {
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         val targetIdx = (idx + direction).coerceIn(0, chapters.size - 1)
         moveTo(chapters[targetIdx].startOffset)
-    }
-
-    /** Dug pritisak na Play/Pauza - ponavlja poslednju (trenutnu) rečenicu od početka.
-     * Korisno kad ti pažnja na trenutak odluta usred rečenice - ne treba da računaš minute
-     * unazad kao kod "Podseti me", samo se vrati na početak te iste rečenice. */
-    private fun repeatLastSentence() {
-        val tts = PlaybackController.ttsManager ?: return
-        moveTo(tts.currentOffset())
     }
 
     /** Dug pritisak na "Prethodna" (korak nazad) - ponavlja poslednju (trenutnu) stranicu

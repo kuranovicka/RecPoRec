@@ -167,7 +167,6 @@ class HelpActivity : AppCompatActivity() {
         Četvrti red ima tri dugmeta.
         Prvo dugme smanjuje brzinu čitanja.
         Drugo dugme pušta ili pauzira čitanje.
-        Dug pritisak na play dugme, ponavlja poslednju rečenicu.
         Treće dugme povećava brzinu čitanja.
         Brzina se menja bez promene visine glasa.
         Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na zadano.
