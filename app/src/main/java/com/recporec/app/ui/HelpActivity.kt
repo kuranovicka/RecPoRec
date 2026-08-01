@@ -80,6 +80,10 @@ class HelpActivity : AppCompatActivity() {
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak isključuje tajmer.
         Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
+        Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
+        Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
+        Ponovno pokretanje pamti samo gde nastavljaš knjigu.
+        Ako baš izađeš iz aplikacije, nema šta da te probudi.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
         Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.

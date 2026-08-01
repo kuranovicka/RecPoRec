@@ -668,8 +668,19 @@ object PlaybackController {
         elapsedSeconds = 0
         timerRemainingSeconds = 0
         restRemainingSeconds = 0
+        restIsWakeTime = false
+        restSuppressAlarm = false
+        restAlarmActive = false
+        restSnoozeCount = 0
         stopRestAlarm()
         releaseRestWakeLock()
+        // Ako se app potpuno zatvori (dugme Izlaz) dok je budjenje/zakazano citanje aktivno,
+        // otkazujemo i sistemski alarm - bez ovoga bi ostao "zaboravljen" alarm koji bi
+        // kasnije zazvonio u prazno (procesor bi se probudio, ali app vise ne postoji da
+        // bilo sta uradi sa tim). Iskreno: ovo znaci da BUDJENJE NE PREZIVLJAVA potpuno
+        // zatvaranje app-e - namerna, bezbednija odluka, umesto rizicnog pokusaja da se cela
+        // sesija ponovo sastavi iz niceg kad telefon sam probudi vec ugasenu app.
+        cancelWakeAlarm()
         uiPositionListener = null
         uiFinishedListener = null
         uiTimerExpiredListener = null
