@@ -238,7 +238,16 @@ object PlaybackController {
     fun resumeCancelingRestIfNeeded(): Boolean {
         val wasResting = restRemainingSeconds > 0 || restAlarmActive
         if (wasResting) cancelRest()
-        ttsManager?.resume()
+        // Eksplicitno kreni od SAČUVANE pozicije (kao dugme Play/Pauza u čitaču), umesto da
+        // se osloni na unutrašnji indeks rečenice u TtsManager-u - pouzdanije, posebno posle
+        // duže pauze (odmor/buđenje) kad taj indeks moze da se razidje sa stvarno sacuvanom
+        // pozicijom.
+        val offset = currentDocument?.currentCharacterOffset
+        if (offset != null) {
+            ttsManager?.startFromOffset(offset)
+        } else {
+            ttsManager?.resume()
+        }
         return wasResting
     }
 
