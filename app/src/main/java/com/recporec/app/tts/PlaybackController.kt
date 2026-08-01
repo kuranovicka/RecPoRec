@@ -432,6 +432,16 @@ object PlaybackController {
 
                     if (timerRemainingSeconds > 0) {
                         timerRemainingSeconds -= 1
+                        if (timerRemainingSeconds == 60) {
+                            // Minut pre isteka - kratko, DVOSTRUKO upozorenje (ne razvuceno kao
+                            // pravi alarm kod Odmori, samo dovoljno da se primeti dok se cita).
+                            val warnTone = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
+                            warnTone.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+                            delay(400)
+                            warnTone.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+                            delay(300)
+                            warnTone.release()
+                        }
                         if (timerRemainingSeconds <= 0) {
                             timerRemainingSeconds = 0
                             ttsManager?.pause()

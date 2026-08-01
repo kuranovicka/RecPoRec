@@ -55,6 +55,7 @@ class HelpActivity : AppCompatActivity() {
         Ide na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
         Treće dugme je Tajmer.
         Otvara klizač od pet do sto dvadeset minuta za automatsku pauzu, a dug pritisak produžava već aktivan tajmer.
+        Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
         Četvrto dugme je Sledeće poglavlje.
         Ide na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
         U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.
