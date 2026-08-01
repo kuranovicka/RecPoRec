@@ -18,218 +18,75 @@ class HelpActivity : AppCompatActivity() {
 
     private val helpText = """
         Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
-
         Prvi ekran je lista dokumenata.
-        Tu vidiš sve knjige koje dodaš.
-        Dodirni dokument da ga otvoriš i čitaš.
-
-        Dugme "Dodaj dokument" je desno, na sredini ekrana.
-        Prvo ti se otvara mogućnost dodavanja sa Google diska.
-        Ako želiš da izabereš neki drugi izvor: Telefon, Dropbox, OneDrive, u gornjem levom uglu aktiviraj dugme: Prikaži korene, ili Prikaži osnovne direktorijume.
-        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i azw.
-        Novi dokument se dodaje na kraj liste.
-
-        Ispod tog dugmeta je dugme "Izlaz".
-        Dodirni ga da potpuno zatvoriš aplikaciju.
-        Tada se prekida i čitanje u pozadini.
-
-        Pored svakog dokumenta je dugme "Radnje".
-        Meni radnje ti omogućava da premeštaš i brišeš dokumente.
-        Unutra su tri stavke: "Premesti nagore", "Premesti nadole" i "Obriši".
-        "Obriši" trajno briše taj dokument i sav napredak čitanja.
-
-        Gore desno je dugme "Opcije".
-        Tu se nalaze tri stavke.
-
-        Prva stavka je "Opšta podešavanja glasa".
-        Tu biraš jezik, glas, brzinu, jačinu i visinu za sve nove dokumente.
-        Prvo izaberi jezik.
-        Onda izaberi glas.
-        Dodirom na stavku na listi odmah se i bira i potvrđuje.
-        Nema posebnog dugmeta za potvrdu.
-        Ako dodirneš glas na listi, čućeš kratak primer teksta izgovoren tim glasom.
-        Tako lakše prepoznaš koji glas ti se sviđa.
-
-        Posle glasa je dugme "Kombinovani glasovi".
-        Tu kombinuješ glasove za naizmenično čitanje.
-        Dugme "Dodaj jezik" dodaje jezik za dodatne glasove.
-        Može se dodati samo jedan dodatni jezik.
-        Dugme "Dodaj glas" dodaje glas iz dodatih ili već odabranog jezika.
-        Može se dodati samo jedan dodatni glas.
-        Dugme "Ukloni jezik" i dugme "Ukloni glas," uklanjaju dodatni glas i jezik.
-        Dugme "Broj rečenica po glasu" bira posle koliko rečenica se menja glas.
-        Ako polje ostane prazno, svaki glas čita po jednu rečenicu.
-        Isto dugme postoji i u svakom dokumentu, samo za taj dokument.
-        Glasovi mogu biti i iz različitih govornih mehanizama, na primer Google i AlfaNum.
-        Na dnu ovog ekrana je dugme "Vrati na zadano".
-        Ono vraća jezik, glas, brzinu, jačinu, visinu i kombinovane glasove na podrazumevano stanje.
-        Ne dira podešavanja pojedinačnih dokumenata.
-
-        Druga stavka je "Podešavanja".
-        Tu su prekidači i jedno dugme.
-        Prekidač "Rad u pozadini" znači da čitanje ne prestaje kad umanjiš aplikaciju na početni ekran.
-        Prekidač "Čitanje bez prekida" znači da čitanje ne prestaje ni kad se ekran ugasi.
-        Prekidač "Prodrmaj telefon za pauzu i nastavak" znači da drmanje telefona pauzira ili nastavlja čitanje.
-        Kad ga uključiš, biraš jačinu drmanja: blago, srednje ili jako.
-        Čitanje se samo pauzira kad stigne telefonski poziv, i samo nastavi kad se poziv završi.
-        Prvi put kad otvoriš dokument, aplikacija može da zatraži dodatnu dozvolu za stanje telefona, radi pouzdanije pauze pri pozivu.
-        Nije obavezno, ne moraš prihvatiti.
-        Program će i dalje pokušati da pauzira čitanje na uobičajen način.
-        Prekidač "Zvuk" znači da čuješ tihi beep kad dodirneš dugmad.
-        Sada možeš napraviti pauzu između dve rečenice.
-        Prekidač "Pauza između rečenica" dodaje kratak predah između svake rečenice dok čita.
-        Kad ga uključiš, pojavljuje se klizač.
-        Biraš trajanje od 0 do 1000 milisekundi.
-        Prekidač "Pauza između pasusa" dodaje duži predah na kraju svakog pasusa odlomka .
-        Kad ga uključiš, pojavljuje se klizač.
-        Biraš trajanje od 0 do 1000 milisekundi.
-        Ako je uključena i pauza između rečenica i pauza između pasusa, na kraju pasusa se čuje samo pauza za pasus, ne obe zaredom.
-        Obe pauze prepoznaju kraj rečenice pametno - tačka posle godine, na primer 1958., se ne računa kao kraj rečenice.
-        Opcija "Pređi automatski na čitanje sledećeg dokumenta" ti omogućava da bez dodatnog klika pokreneš čitanje nove knjige ili dokumenta, čim čitanje prethodnog dokumenta bude završeno.
-        Pre nego što novo čitanje počne, sačekaš kratko i čuješ zvučni signal.
-        Dugme "Navigacija" bira šta rade dugmad za pomeranje unazad i unapred u dokumentu.
-        Možeš izabrati: stranicu, jedan minut, pet minuta, deset minuta ili oznaku.
-        Sva podešavanja se pamte za ceo program.
-        Mesto gde staneš, brzina, jačina i glas ostaju zapamćeni za svaki dokument.
-        Na dnu ovog ekrana je dugme "Vrati na zadano".
-        Ono vraća sve prekidače i navigaciju na ovom ekranu na podrazumevano stanje.
-
-        Treća stavka je "Pomoć".
-
+        Tu vidiš sve tvoje knjige.
+        Dugme Dodaj dokument je desno, na sredini ekrana.
+        Njime dodaješ knjigu sa telefona ili sa interneta.
+        Dugme Izlaz je ispod njega.
+        Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
+        Pored svakog dokumenta je dugme Radnje.
+        Njime pomeraš dokument gore ili dole na listi, ili ga brišeš.
+        Gore desno je dugme Opcije.
+        Tu su tri stavke: Opšta podešavanja glasa, Podešavanja, i Pomoć.
+        Prva stavka je Opšta podešavanja glasa.
+        Tu biraš jezik i glas za sve nove dokumente, i čuješ kratak primer svakog glasa kad ga dodirneš.
+        Tu je i dugme Kombinovani glasovi.
+        Njime biraš dva glasa koja se smenjuju dok čitaš.
+        Na dnu tog ekrana je dugme Vrati na zadano.
+        Vraća jezik, glas, brzinu, jačinu i visinu na početne vrednosti.
+        Druga stavka je Podešavanja.
+        Tu su prekidači za rad u pozadini, čitanje bez prekida, drmanje telefona za pauzu, zvuk dugmadi, pauze između rečenica i pasusa, i automatski prelazak na sledeći dokument.
+        Prvi put kad otvoriš dokument, aplikacija može tražiti dodatnu dozvolu za stanje telefona.
+        Nije obavezno, čitanje radi i bez toga.
+        Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
+        Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
+        Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima devetnaest dugmića.
-        Podseća na numeričku tastaturu na računaru.
-
-        Prvi red čine tri dugmeta.
-        Prvo dugme je "Oznake".
-        Ono otvara meni sa tri stavke.
-        Prva stavka je "Dodaj oznaku".
-        Ona postavlja oznaku na mesto na kome se trenutno nalaziš.
-        Možeš upisati naziv oznake.
-        Ako ne upišeš naziv, oznaka dobija broj, počevši od jedan.
-        Druga stavka je "Ukloni oznaku".
-        Ona prikazuje listu tvojih oznaka za ovaj dokument.
-        Dodirneš oznaku sa liste, pa potvrdiš da je želiš obrisati.
-        Ako nemaš nijednu oznaku, piše "Nema oznaka".
-        Treća stavka je "Ukloni sve oznake".
-        Tu samo potvrdiš, nema polja za unos.
-        Dug pritisak na ovo dugme dodaje oznaku na trenutnu poziciju u dokumentu.
-        Drugo dugme je "Idi na".
-        Ono otvara meni sa tri stavke.
-        Prva stavka je "Idi na stranicu".
-        Upišeš broj stranice.
-        Druga stavka je "Idi na minut".
-        Upišeš broj minuta od početka dokumenta.
-        Treća stavka je "Idi na oznaku".
-        Ona prikazuje listu tvojih oznaka za ovaj dokument.
-        Dodirneš oznaku sa liste da odeš na nju.
-        Ako nemaš nijednu oznaku, piše "Nema oznaka".
-        Dug pritisak na ovo dugme te vraća na početak dokumenta.
-        Ova dugmad su tu, jer aplikacija pamti gde staneš, pa tako lako osvežiš čitanje.
-        Pored njih je i dugme "Pretraga".
-        Pretraga teksta ti omogućava da pronađeš neki pojam u dokumentu.
-        Upišeš pojam koji tražiš.
-        Dobijaš listu rezultata, svaki sa malo teksta oko pronađene reči.
-        Dodirneš rezultat da odeš tačno na to mesto.
-        Ako ništa nije pronađeno, piše "Nema rezultata".
-        Dug pritisak na Pretragu, ponovo pokreće poslednju pretragu, sa istim spiskom rezultata kao i pre.
-        Samo ne moraš ponovo da kucaš već pretraženi tekst.
-
-        Drugi red ima pet dugmadi.
-        Prvo dugme smanjuje visinu glasa.
-        Drugo dugme je "Prethodno poglavlje".
-        Ono vraća na početak prethodnog poglavlja.
-        Dug pritisak na prethodno poglavlje, ponavlja poslednje poglavlje.
-        Treće dugme je "Tajmer".
-        Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
-        Dugme "Postavi" postavlja tajmer na izabran broj minuta.
-        Dugme "Isključi" zaustavlja tajmer.
-        Kad tajmer istekne, čitanje se pauzira samo, i tajmer se isključi.
-        Pri vrhu ekrana uvek piše koliko je tajmeru ostalo, ili da nije aktivan.
-        Dug pritisak na tajmer produžava vreme odbrojavanja za tačno onoliko koliko postaviš.
-        Npr, ako tajmer postaviš na 20 minuta, pa dugo pritisneš ovo dugme, biće produžen za 20 minuta.
-        Ako to isto probaš kada tajmer istekne, dobićeš obaveštenje da nema tajmera.
-        Četvrto dugme je "Sledeće poglavlje".
-        Ono ide na početak sledećeg poglavlja.
-        Dug pritisak na sledeće poglavlje, otvara spisak svih poglavlja.
-        Tu ti se izlistaju sva poglavlja, pa odabereš ono na koje želiš da odeš.
-        Poglavlja rade samo ako ih program prepozna u dokumentu.
-        Peto dugme povećava visinu glasa.
-        Dug pritisak na bilo koje od ova dva dugmeta vraća visinu ovog dokumenta na zadano.
-
-        Treći red ima pet dugmadi.
-        Prvo dugme smanjuje jačinu zvuka.
-        Drugo dugme je "Jezik".
-        Ono menja jezik samo za ovaj dokument.
-        U toj listi je i stavka "Koristi opšti jezik", koja uklanja poseban izbor za ovaj dokument.
-        Dug pritisak na Jezik, poništava sve prethodne radnje odjednom, i vraća na mesto pre prve od njih.
-        Npr, ako si otišla dva sata unapred, pa dva sata unazad, pa na neku stranicu, ovo te vraća tačno tamo gde si bila pre svega toga.
-        Treće dugme je "Glas".
-        Ono menja glas samo za ovaj dokument.
-        U toj listi je i stavka "Koristi opšti glas", koja uklanja poseban izbor za ovaj dokument.
-        Ta stavka uklanja i kombinovane glasove ovog dokumenta, ako ih ima.
-        Dokument se posle toga u potpunosti oslanja na opšta podešavanja.
-        Dug pritisak: Odmori.
-        Možeš izabrati odmor na određeni broj minuta, ili buđenje u određeno vreme.
-        Ne možeš izabrati oba.
-        Možeš odabrati odmor od 10 minuta do četiri sata.
-        Zadana vrednost odmora je 10 minuta.
-        Zatim imaš opciju "Probudi me u".
-        Upišeš vreme u formi, npr: 5:20.
-        Kada ga postaviš, knjiga te budi u zadato vreme.
-        Ako popuniš ovo polje, klizač se ne koristi.
-        Ako u bilo kom trenutku odmora pustiš knjigu, odmor se prekida.
-        Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
-        Dug pritisak: Produži odmor.
-        Odmor produžavaš tačno za ono vreme na koje je odmor podešen.
-        Ako si podesio-la 20 minuta, odmaraćeš 40 minuta.
-        Ovo radi samo za odmor postavljen preko klizača, ne i za "Probudi me u".
-        Ako pet minuta nakon prvog pokušaja buđenja aktiviraš dugme za produžetak odmora, odmor će biti produžen za deset minuta.
-        Alarm će se oglasiti tri minuta pre ponovnog puštanja knjige, kao i obično.
-        Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
-        Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
-        Tri minuta pre isteka odmora, kreće da zvoni alarm.
-        Zvono se zaustavlja ako ranije pustiš knjigu, ili samo prestane kad odmor istekne, i knjiga tad nastavlja.
-        Pri vrhu ekrana uvek piše koliko je odmoru ostalo, ili da nije aktivan.
-        Ako želiš da funkcija odmora radi stabilno, u podešavanjima programa uključi neprekidno čitanje.
-        Peto dugme pojačava jačinu zvuka.
-        Jačina je vezana samo za trenutni dokument.
-        Ne menja stvarnu jačinu zvuka telefona.
-        Dug pritisak na bilo koje od ova dva dugmeta vraća jačinu ovog dokumenta na zadano.
-
-        Četvrti red ima tri dugmeta.
-        Prvo dugme smanjuje brzinu čitanja.
+        Tastatura ima devetnaest dugmića, raspoređenih u pet redova.
+        Prvo dugme je Oznake.
+        Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
+        Drugo dugme je Idi na.
+        Njime ideš na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
+        Treće dugme je Pretraga.
+        Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
+        U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
+        Dug pritisak na bilo koje od njih vraća visinu na opštu vrednost.
+        Drugo dugme je Prethodno poglavlje.
+        Ide na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
+        Treće dugme je Tajmer.
+        Otvara klizač od pet do sto dvadeset minuta za automatsku pauzu, a dug pritisak produžava već aktivan tajmer.
+        Četvrto dugme je Sledeće poglavlje.
+        Ide na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
+        U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.
+        Jačina i dug pritisak, koji je vraća na opštu vrednost, važe samo za ovaj dokument, ne za sam telefon.
+        Drugo dugme je Jezik.
+        Menja jezik za ovaj dokument, a dug pritisak poništava sve tvoje radnje.
+        Npr: vraćanje unazad, odlazak na stranicu.
+        Treće dugme je Glas.
+        Menja glas za ovaj dokument, a dug pritisak otvara Odmori.
+        Odmori pauzira čitanje odmah, i samo ga nastavlja posle izabranog vremena.
+        Možeš izabrati broj minuta na klizaču, ili tačno vreme buđenja u polju Probudi me u, ali ne oba odjednom.
+        Klizač ide od deset minuta do četiri sata.
+        Polje Probudi me u: se upisuje u obliku sat i minut, na primer 5:20.
+        Tri minuta pre kraja odmora, počinje da zvoni alarm.
+        Ako u međuvremenu drmneš telefon ili nastaviš čitanje dugmetom, odmor i alarm se odmah prekidaju.
+        Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
+        Dug pritisak na njega, produžava aktivan odmor, ili ga na kratko odlaže posle buđenja, najviše pet puta zaredom.
+        Ako i tada pustiš knjigu pre produžetka, odmor je završen.
+        Funkcija odmora radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
+        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
+        Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
-        Dug pritisak na play dugme, kaže naglas trenutni status - stranicu, poglavlje ako postoji, proteklo i preostalo vreme, tajmer ako je aktivan, i odmor ako je aktivan.
-        Treće dugme povećava brzinu čitanja.
-        Brzina se menja bez promene visine glasa.
-        Dug pritisak na bilo koje od dugmadi za brzinu vraća brzinu ovog dokumenta na zadano.
-
-        Peti red ima tri dugmeta.
-        Prvo dugme pomera unazad.
-        Šta tačno radi, zavisi od podešavanja "Navigacije".
-        Ako je izabrana stranica, ideš na prethodnu stranicu.
-        Ako je izabran minut, ideš unazad za jedan, pet ili deset minuta.
-        Ako je izabrana oznaka, ideš tačno na prethodnu oznaku, ne na fiksnu udaljenost.
-        Dug pritisak na navigaciono dugme za prethodni element, ponavlja poslednju stranicu.
-        Drugo dugme je "Podseti me".
-        Vraća vreme unazad za odabrani broj minuta.
-        Otvara klizač od pet do sto dvadeset minuta, po pet minuta.
-        Izabereš broj minuta i potvrdiš.
-        Čitanje se odmah vrati unazad na odabrani broj minuta.
-        Ovo je korisno kada se uspavaš.
-        Dug pritisak na dugme Podseti me, ponovo aktivira poslednji podsetnik.
-        Npr, ako premotaš knjigu za dva sata unazad, možeš je premotati za još dva sata.
-        Posebno korisno za ljude koji prespavaju ostatak knjige.
-        Treće dugme pomera dokument unapred, u zavisnosti od tipa navigacije: stranica, minuti, oznake.
-        Dug pritisak na treće dugme, poništava poslednju radnju, koja god da je bila.
-
-        Ispod tastature je malo veći klizač, radi lakšeg dodira.
-        On pokazuje gde si trenutno u knjizi.
-        Možeš ga i prevući prstom do drugog mesta.
-
-        Pri vrhu ekrana piše: koliko ukupno ima stranica, koliko je vremena prošlo i koliko je vremena preostalo do kraja knjige ili tajmera.
-
+        Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, tajmer i odmor.
+        U petom redu, prvo dugme ide na prethodni element, stranicu, minut ili oznaku, zavisno od Navigacije.
+        Dug pritisak ponavlja trenutnu stranicu od početka.
+        Drugo dugme je Podseti me.
+        Vraća čitanje unazad za broj minuta koji izabereš na klizaču, a dug pritisak ponavlja poslednje korišćeno vreme.
+        Treće dugme ide na sledeći element.
+        Dug pritisak poništava tvoju poslednju radnju, koja god da je bila.
+        Ispod tastature je veći klizač za lakši dodir.
+        Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
+        Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
 

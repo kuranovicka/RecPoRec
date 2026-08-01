@@ -111,6 +111,12 @@ object PlaybackController {
     private var restGraceWindowEndMillis: Long = 0L
     private val SNOOZE_SECONDS = 10 * 60
     private val GRACE_WINDOW_MILLIS = 5 * 60 * 1000L
+    /** Koliko puta je odmor ODLOŽEN zaredom (bez novog, ručno postavljenog odmora između) -
+     * kad stigne do MAX_SNOOZE_COUNT, dalje odlaganje se ne dozvoljava, čitanje samo
+     * nastavlja. Vraća se na nulu čim se odmor iznova postavi (startRest/startRestUntil), ili
+     * čim se ručno prekine (cancelRest, npr. preko dugmeta ili drmanja). */
+    private var restSnoozeCount = 0
+    private val MAX_SNOOZE_COUNT = 5
 
     fun startRest(minutes: Int) {
         ttsManager?.pause()
@@ -118,6 +124,7 @@ object PlaybackController {
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
         restIsWakeTime = false
         restGraceWindowEndMillis = 0L
+        restSnoozeCount = 0
         if (minutes > 0) {
             lastRestMinutes = minutes
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
@@ -138,6 +145,7 @@ object PlaybackController {
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
         restGraceWindowEndMillis = 0L
+        restSnoozeCount = 0
         if (totalSeconds > 0) {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
@@ -151,6 +159,7 @@ object PlaybackController {
         restRemainingSeconds = 0
         restIsWakeTime = false
         restGraceWindowEndMillis = 0L
+        restSnoozeCount = 0
         stopRestAlarm()
         releaseRestWakeLock()
     }
@@ -161,18 +170,22 @@ object PlaybackController {
     fun resumeCancelingRestIfNeeded(): Boolean {
         val wasResting = restRemainingSeconds > 0
         if (wasResting) cancelRest()
+        restGraceWindowEndMillis = 0L
+        restSnoozeCount = 0
         ttsManager?.resume()
         return wasResting
     }
 
     fun isSnoozeAvailable(): Boolean =
-        restRemainingSeconds <= 0 && android.os.SystemClock.elapsedRealtime() < restGraceWindowEndMillis
+        restRemainingSeconds <= 0 &&
+            android.os.SystemClock.elapsedRealtime() < restGraceWindowEndMillis &&
+            restSnoozeCount < MAX_SNOOZE_COUNT
 
     /** Dug pritisak na "Kombinovani glasovi": ili produžava VEĆ AKTIVAN odmor za POSLEDNJI
      * korišćen broj minuta (klizač), ILI, ako je odmor UPRAVO završio (buđenje ili prethodno
-     * odlaganje) i još smo u "petominutnom" prozoru, "odlaže" (snooze) za tačno 10 minuta.
-     * Vraća true ako je nešto urađeno, false ako nema šta (caller prikazuje odgovarajuću
-     * poruku prema ovome). */
+     * odlaganje) i još smo u "petominutnom" prozoru (i nismo dostigli MAX_SNOOZE_COUNT),
+     * "odlaže" (snooze) za tačno 10 minuta. Vraća true ako je nešto urađeno, false ako nema
+     * šta (caller prikazuje odgovarajuću poruku prema ovome). */
     fun extendRest(): Boolean {
         if (restRemainingSeconds <= 0) {
             if (!isSnoozeAvailable()) return false
@@ -182,6 +195,7 @@ object PlaybackController {
             restIsWakeTime = true // da bi i OVAJ odmor, kad zavrsi, ponovo otvorio prozor za odlaganje
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             restGraceWindowEndMillis = 0L
+            restSnoozeCount += 1
             acquireRestWakeLock()
             notifyPlaybackStateChanged()
             return true
