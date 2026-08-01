@@ -36,8 +36,6 @@ class HelpActivity : AppCompatActivity() {
         Vraća jezik, glas, brzinu, jačinu i visinu na početne vrednosti.
         Druga stavka je Podešavanja.
         Tu su prekidači za rad u pozadini, čitanje bez prekida, drmanje telefona za pauzu-nastavak, zvuk dugmadi, pauze između rečenica i pasusa, i automatski prelazak na sledeći dokument.
-        Prvi put kad otvoriš dokument, aplikacija može tražiti dodatnu dozvolu za stanje telefona.
-        Nije obavezno, čitanje radi i bez toga.
         Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
@@ -97,6 +95,8 @@ class HelpActivity : AppCompatActivity() {
         Ispod tastature je veći klizač za lakši dodir.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
+        Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
+        Svaka od njih se traži tek kad zatreba, ne unapred.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
 
