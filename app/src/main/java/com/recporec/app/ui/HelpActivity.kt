@@ -72,6 +72,7 @@ class HelpActivity : AppCompatActivity() {
         Ako u međuvremenu drmneš telefon ili nastaviš čitanje dugmetom, odmor i alarm se odmah prekidaju.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak na njega, produžava aktivan odmor, ili ga na kratko odlaže posle buđenja, najviše pet puta zaredom.
+        Ako pritisneš dok alarm zvoni, alarm odmah prestaje, i knjiga se ne pušta.
         Ako i tada pustiš knjigu pre produžetka, odmor je završen.
         Funkcija odmora radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
