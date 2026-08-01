@@ -417,11 +417,20 @@ object PlaybackController {
                     restAlarmTone?.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 600)
                     restAlarmSecondsLeft -= 1
                     if (restAlarmSecondsLeft <= 0) {
-                        restAlarmActive = false
-                        stopRestAlarm()
-                        releaseRestWakeLock()
-                        ttsManager?.resume()
-                        notifyPlaybackStateChanged()
+                        if (restIsWakeTime && restSnoozeCount < MAX_SNOOZE_COUNT) {
+                            // Budjenje bez reakcije - program pretpostavlja da korisnica jos
+                            // spava, i SAM ponavlja alarm (bez potrebe da iko pritisne dugme),
+                            // do najvise MAX_SNOOZE_COUNT puta. Deli isti brojac sa rucnim
+                            // "Produzi odmor" - koji god nacin da se koristi, isti budzet.
+                            restSnoozeCount += 1
+                            restAlarmSecondsLeft = ALARM_RING_SECONDS_WAKE
+                        } else {
+                            restAlarmActive = false
+                            stopRestAlarm()
+                            releaseRestWakeLock()
+                            ttsManager?.resume()
+                            notifyPlaybackStateChanged()
+                        }
                     }
                 }
 

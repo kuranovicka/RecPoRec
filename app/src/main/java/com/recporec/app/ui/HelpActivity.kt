@@ -71,6 +71,9 @@ class HelpActivity : AppCompatActivity() {
         Polje Probudi me u: se upisuje u obliku sat i minut, na primer 5:20.
         Kad odmor istekne, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
         Kod buđenja u tačno vreme, alarm zvoni dva minuta umesto jedan.
+        Ako tokom buđenja ne zaustaviš alarm ručnim puštanjem knjige, program pretpostavlja da ti se još spava, i knjigu ne pušta.
+        Umesto toga, buđenje ponavlja, najviše pet puta.
+        Tek posle petog ponovljenog buđenja bez reakcije, knjiga se nastavlja.
         Ako u međuvremenu drmneš telefon ili nastaviš čitanje dugmetom, odmor i alarm se odmah prekidaju.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak na njega, produžava aktivan odmor, ili ga na kratko odlaže posle buđenja, najviše pet puta zaredom.
