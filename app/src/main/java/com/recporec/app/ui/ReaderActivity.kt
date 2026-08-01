@@ -234,7 +234,7 @@ class ReaderActivity : AppCompatActivity() {
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
         btnVolUp.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
-        btnVoice.setOnLongClickListener { showRestMenu(); true }
+        btnVoice.setOnLongClickListener { showScheduleReadingDialog(); true }
 
         btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
@@ -1219,41 +1219,37 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun showRestMenu() {
-        val view = layoutInflater.inflate(R.layout.dialog_rest, null)
-        val textStatus = view.findViewById<android.widget.TextView>(R.id.textRestMinutesStatus)
-        val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRestMinutes)
-
-        fun minutesFor(progress: Int) = 10 + progress * 10
-
-        seek.max = 23 // (240 - 10) / 10
-        seek.progress = 0 // 10 min podrazumevano
-        textStatus.text = "${minutesFor(seek.progress)} minuta"
-        seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                textStatus.text = "${minutesFor(progress)} minuta"
-            }
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        })
-
+    /** Dug pritisak na "Glas" - "Zakaži čitanje": upišeš tačno vreme, npr. 5:20, i čitanje
+     * TIHO krene tada, bez ikakvog alarma ili punog ekrana - kao da si sama pritisla Play.
+     * Za buđenje SA alarmom, koristi dugme "Probudi". */
+    private fun showScheduleReadingDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "npr. 5:20"
+        input.contentDescription = "Zakaži čitanje u - upiši vreme u formi sat:minut, na primer 5:20"
         AlertDialog.Builder(this)
-            .setTitle("Odmori")
-            .setView(view)
+            .setTitle("Zakaži čitanje")
+            .setView(input)
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton("Isključi") { _, _ ->
                 PlaybackController.cancelRest()
                 updateRestStatusText()
-                android.widget.Toast.makeText(this, "Odmor isključen.", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "Zakazano čitanje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
             }
             .setPositiveButton("Postavi") { _, _ ->
-                val minutes = minutesFor(seek.progress)
-                PlaybackController.startRest(minutes)
-                updateRestStatusText()
-                android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
+                val timeInput = input.text.toString().trim()
+                val seconds = parseWakeTimeToSecondsFromNow(timeInput)
+                if (seconds == null) {
+                    android.widget.Toast.makeText(
+                        this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    PlaybackController.startScheduledReading(seconds)
+                    updateRestStatusText()
+                    android.widget.Toast.makeText(this, "Čitanje je zakazano.", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
             .show()
-        seek.requestAccessibilityFocusNow()
     }
 
     /** Dug pritisak na "Probudi" - "Probudi me u": upišeš tačno vreme, npr. 5:20. Potpuno

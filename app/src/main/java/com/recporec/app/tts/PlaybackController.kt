@@ -58,12 +58,10 @@ object PlaybackController {
         timerRemainingSeconds += minutes * 60
     }
 
-    /** "Odmori" - suprotno od Tajmera: PAUZIRA čitanje ODMAH, i SAMO NASTAVLJA posle
-     * izabranog broja minuta, bez ikakve akcije korisnice. Korisno kad radiš nešto drugo
-     * (npr. kućne poslove) i ne želiš da se zamaraš ručnim pauziranjem/nastavljanjem. */
+    /** "Probudi"/"Zakaži čitanje" - PAUZIRA čitanje ODMAH, i SAMO NASTAVLJA u tačno
+     * određeno vreme, bez ikakve akcije korisnice. */
     var restRemainingSeconds: Int = 0
         private set
-    private var lastRestMinutes: Int = 0
     private var restAlarmTone: android.media.ToneGenerator? = null
     private var restWakeLock: android.os.PowerManager.WakeLock? = null
 
@@ -85,7 +83,7 @@ object PlaybackController {
             val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
             val wl = pm.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "RecPoRec:Rest")
             wl.setReferenceCounted(false)
-            wl.acquire(25 * 60 * 60 * 1000L) // najviše 25h zaštita (odmor klizačem je do 4h, ali "Probudi me u" moze biti i skoro ceo dan unapred)
+            wl.acquire(25 * 60 * 60 * 1000L) // najviše 25h zaštita - buđenje/zakazivanje moze biti i skoro ceo dan unapred
             restWakeLock = wl
         } catch (_: Exception) { }
     }
@@ -98,6 +96,9 @@ object PlaybackController {
     }
 
     private var restIsWakeTime = false
+    /** "Zakaži čitanje" - kao Probudi, ali BEZ ikakvog alarma/punog ekrana - čitanje prosto
+     * tiho krene u zakazano vreme, kao da si sama pritisla Play. */
+    private var restSuppressAlarm = false
     /** Apsolutan trenutak (SystemClock.elapsedRealtime) kad odmor treba da se završi -
      * koristi se da se preostalo vreme računa SVAKI PUT iznova prema pravom satu, umesto da
      * se prosto oduzima "jedan" svake sekunde (što bi se s vremenom nakupilo u kašnjenje ako
@@ -107,7 +108,7 @@ object PlaybackController {
     private const val WAKE_ALARM_REQUEST_CODE = 4271
 
     /** Zakazuje PRAVI, sistemski alarm (AlarmManager.setAlarmClock) tacno u trenutak kad
-     * "Probudi me u" treba da zazvoni - IZUZET od Doze/uspavljivanja u pozadini, isti
+     * "Probudi" treba da zazvoni - IZUZET od Doze/uspavljivanja u pozadini, isti
      * mehanizam koji koriste prave budilnik aplikacije. Nas unutrasnji ticker/wake lock i
      * dalje rade normalno, ovo je REZERVNI, pouzdaniji nacin da se garantuje da ce puni
      * ekran stvarno iskociti, cak i ako telefon (npr. pojedini Samsung modeli) agresivno
@@ -156,11 +157,21 @@ object PlaybackController {
     fun onWakeAlarmFired(context: Context) {
         if (appContext == null) appContext = context.applicationContext
         if (restRemainingSeconds <= 0 && !restAlarmActive) {
-            ttsManager?.pause()
-            restAlarmActive = true
-            restAlarmSecondsLeft = ALARM_RING_SECONDS
-            acquireRestWakeLock()
-            notifyPlaybackStateChanged()
+            if (restSuppressAlarm) {
+                // "Zakaži čitanje" - bez alarma, samo tiho krece.
+                stopRestAlarm()
+                releaseRestWakeLock()
+                cancelWakeAlarm()
+                val offset = currentDocument?.currentCharacterOffset
+                if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                notifyPlaybackStateChanged()
+            } else {
+                ttsManager?.pause()
+                restAlarmActive = true
+                restAlarmSecondsLeft = ALARM_RING_SECONDS
+                acquireRestWakeLock()
+                notifyPlaybackStateChanged()
+            }
         }
     }
 
@@ -175,39 +186,42 @@ object PlaybackController {
     private val SNOOZE_SECONDS = 10 * 60
     /** Koliko puta je odmor ODLOŽEN zaredom (bez novog, ručno postavljenog odmora između) -
      * kad stigne do MAX_SNOOZE_COUNT, dalje odlaganje se ne dozvoljava, čitanje samo
-     * nastavlja. Vraća se na nulu čim se odmor iznova postavi (startRest/startRestUntil), ili
-     * čim se ručno prekine (cancelRest, npr. preko dugmeta ili drmanja). */
+     * nastavlja. Vraća se na nulu čim se odmor iznova postavi, ili čim se ručno prekine
+     * (cancelRest, npr. preko dugmeta ili drmanja). */
     private var restSnoozeCount = 0
     private val MAX_SNOOZE_COUNT = 5
 
-    fun startRest(minutes: Int) {
-        ttsManager?.pause()
-        stopRestAlarm()
-        cancelWakeAlarm()
-        restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
-        restIsWakeTime = false
-        restAlarmActive = false
-        restSnoozeCount = 0
-        if (minutes > 0) {
-            lastRestMinutes = minutes
-            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
-            acquireRestWakeLock()
-            scheduleWakeAlarm(restTargetElapsedMillis)
-        } else {
-            releaseRestWakeLock()
-        }
-        notifyPlaybackStateChanged()
-    }
-
-    /** "Probudi me u" - odmor do TAČNO određenog vremena (umesto broja minuta preko klizača).
-     * NAMERNO ne dira lastRestMinutes, i postavlja restIsWakeTime - "Produži odmor" se odnosi
-     * samo na odmor postavljen preko klizača, ne na buđenje u tačno vreme (čak i ako je
-     * ranije postojao neki stariji, "ustajali" lastRestMinutes od prethodnog odmora). */
+    /** "Probudi" - odmor do TAČNO određenog vremena, SA alarmom (ponavlja se ako se ne
+     * prekine, do pet puta) - namenjeno za buđenje. */
     fun startRestUntil(totalSeconds: Int) {
         ttsManager?.pause()
         stopRestAlarm()
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
+        restSuppressAlarm = false
+        restAlarmActive = false
+        restSnoozeCount = 0
+        if (totalSeconds > 0) {
+            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
+            acquireRestWakeLock()
+            scheduleWakeAlarm(restTargetElapsedMillis)
+        } else {
+            releaseRestWakeLock()
+            cancelWakeAlarm()
+        }
+        notifyPlaybackStateChanged()
+    }
+
+    /** "Zakaži čitanje" - kao Probudi, ALI bez ikakvog alarma - čitanje tiho krene u
+     * zakazano vreme, kao da si sama pritisla Play. Koristi isti pouzdan sistemski alarm za
+     * BUĐENJE PROCESA (da se garantovano pokrene čak i uz Doze/pozadinsko throttlovanje),
+     * samo bez zvuka i punog ekrana kad taj trenutak stigne. */
+    fun startScheduledReading(totalSeconds: Int) {
+        ttsManager?.pause()
+        stopRestAlarm()
+        restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
+        restIsWakeTime = false
+        restSuppressAlarm = totalSeconds > 0
         restAlarmActive = false
         restSnoozeCount = 0
         if (totalSeconds > 0) {
@@ -224,6 +238,7 @@ object PlaybackController {
     fun cancelRest() {
         restRemainingSeconds = 0
         restIsWakeTime = false
+        restSuppressAlarm = false
         restAlarmActive = false
         restSnoozeCount = 0
         stopRestAlarm()
@@ -294,14 +309,8 @@ object PlaybackController {
     }
 
     fun extendRest(): Boolean {
-        if (restAlarmActive) {
-            if (!isSnoozeAvailable()) return false
-            snoozeInternal()
-            return true
-        }
-        if (restIsWakeTime || lastRestMinutes <= 0) return false
-        restRemainingSeconds += lastRestMinutes * 60
-        restTargetElapsedMillis += lastRestMinutes * 60 * 1000L
+        if (!restAlarmActive || !isSnoozeAvailable()) return false
+        snoozeInternal()
         return true
     }
 
@@ -503,12 +512,23 @@ object PlaybackController {
                     val remainingMillis = restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime()
                     restRemainingSeconds = (remainingMillis / 1000).toInt().coerceAtLeast(0)
                     if (restRemainingSeconds <= 0) {
-                        // Odbrojavanje je isteklo - NE nastavlja citanje odmah, prvo pun minut
-                        // zvoni alarm (kao pravi budilnik), a tek posle toga knjiga krece.
                         restRemainingSeconds = 0
-                        restAlarmActive = true
-                        restAlarmSecondsLeft = ALARM_RING_SECONDS
-                        notifyPlaybackStateChanged()
+                        if (restSuppressAlarm) {
+                            // "Zakaži čitanje" - bez alarma, tiho krece.
+                            stopRestAlarm()
+                            releaseRestWakeLock()
+                            cancelWakeAlarm()
+                            val offset = currentDocument?.currentCharacterOffset
+                            if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                            notifyPlaybackStateChanged()
+                        } else {
+                            // Odbrojavanje je isteklo - NE nastavlja citanje odmah, prvo pun
+                            // minut zvoni alarm (kao pravi budilnik), a tek posle toga knjiga
+                            // krece.
+                            restAlarmActive = true
+                            restAlarmSecondsLeft = ALARM_RING_SECONDS
+                            notifyPlaybackStateChanged()
+                        }
                     }
                 } else if (restAlarmActive) {
                     if (restAlarmTone == null) {

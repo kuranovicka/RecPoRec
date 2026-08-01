@@ -73,17 +73,13 @@ class HelpActivity : AppCompatActivity() {
         Menja jezik za ovaj dokument, a dug pritisak poništava sve tvoje radnje.
         Npr: vraćanje unazad, odlazak na stranicu.
         Treće dugme je Glas.
-        Menja glas za ovaj dokument, a dug pritisak otvara Odmori.
-        Odmori pauzira čitanje odmah, i samo ga nastavlja posle izabranog broja minuta.
-        Klizač ide od deset minuta do četiri sata.
-        Ako pustiš knjigu ranije, odmor se prekida.
-        Kad odmor istekne, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
-        Ako ne reaguješ, program otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik, sa dugmetom da odložiš ili da prekineš odmor.
+        Menja glas za ovaj dokument, a dug pritisak otvara Zakaži čitanje.
+        Upišeš tačno vreme, na primer 5:20, i čitanje tada tiho krene, bez alarma i bez punog ekrana, kao da si sama pritisla Play.
+        Ako pustiš knjigu ranije, zakazano čitanje se prekida.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
-        Dug pritisak produžava aktivan odmor za isto toliko vremena koliko je i postavljen.
-        Isto dugme, dok alarm zvoni (bilo od odmora ili od buđenja), odlaže ga za deset minuta, umesto da ga produžava.
+        Dug pritisak, dok alarm od buđenja zvoni, odlaže ga za deset minuta, umesto da knjiga krene.
         Ovo odlaganje ide najviše pet puta zaredom.
-        Funkcija odmora radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
+        Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
         Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
