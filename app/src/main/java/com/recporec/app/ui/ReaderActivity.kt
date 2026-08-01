@@ -1174,6 +1174,35 @@ class ReaderActivity : AppCompatActivity() {
         return ((target.timeInMillis - now.timeInMillis) / 1000).toInt()
     }
 
+    /** Od Android 14 na dalje, pun ekran preko zaključanog ekrana (za pouzdano "Probudi me
+     * u") može biti onemogućen dok korisnica to ručno ne dozvoli - ista dozvola koju imaju
+     * i prave budilnik/poziv aplikacije. Ovo samo proverava i, ako nedostaje, jasno uputi
+     * gde da se to uključi. */
+    private fun checkFullScreenIntentPermission() {
+        if (android.os.Build.VERSION.SDK_INT < 34) return
+        val nm = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+        if (!nm.canUseFullScreenIntent()) {
+            AlertDialog.Builder(this)
+                .setTitle("Dozvola za buđenje preko zaključanog ekrana")
+                .setMessage(
+                    "Da bi \"Probudi me u\" moglo pouzdano da otvori ceo ekran i kad je telefon zaključan, " +
+                        "potrebno je ručno da dozvoliš to u podešavanjima telefona, na sledećem ekranu."
+                )
+                .setNegativeButton("Ne sada", null)
+                .setPositiveButton("Otvori podešavanja") { _, _ ->
+                    try {
+                        val intent = android.content.Intent(
+                            android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                            android.net.Uri.parse("package:$packageName")
+                        )
+                        startActivity(intent)
+                    } catch (_: Exception) {
+                    }
+                }
+                .show()
+        }
+    }
+
     private fun showRestMenu() {
         val view = layoutInflater.inflate(R.layout.dialog_rest, null)
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRestMinutesStatus)
@@ -1225,6 +1254,7 @@ class ReaderActivity : AppCompatActivity() {
                         PlaybackController.startRestUntil(seconds)
                         updateRestStatusText()
                         android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
+                        checkFullScreenIntentPermission()
                     }
                 } else {
                     val minutes = minutesFor(seek.progress)
