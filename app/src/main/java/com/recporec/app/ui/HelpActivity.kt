@@ -45,14 +45,15 @@ class HelpActivity : AppCompatActivity() {
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
         Njime ideš na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
-        Treće dugme je Probudi.
+        Treće dugme je Probudi me u tačno vreme.
         Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
         Statusna linija pri vrhu ekrana tada pokazuje koliko je do buđenja ostalo, u satima i minutima.
-        Kad vreme dođe, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
-        Ako ne reaguješ, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
-        Program tada otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik, sa dugmetom Spavaj još malo i dugmetom da prekineš buđenje.
-        Ako u međuvremenu drmneš telefon ili pritisneš dugme za nastavak, alarm se odmah prekida i knjiga kreće.
-        Dug pritisak na Probudi, isključuje buđenje.
+        Kad dođe vreme za buđenje, alarm zvoni jedan minut.
+        Na zaključanom ekranu se tada pojave dva dugmeta.
+        Knjiga se nastavlja samo ako aktiviraš dugme: Prekini buđenje.
+        Ako ne reaguješ, ili aktiviraš dugme Spavaj još malo, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
+        Ako u međuvremenu drmneš telefon ili pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
+        Dug pritisak na Probudi me u tačno vreme, isključuje buđenje.
         Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
@@ -81,9 +82,8 @@ class HelpActivity : AppCompatActivity() {
         Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
         Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
         Ponovno pokretanje pamti samo gde nastavljaš knjigu.
-        Ako baš izađeš iz aplikacije, nema šta da te probudi.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
-        Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
+        Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, tajmer, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element, stranicu, minut ili oznaku, zavisno od Navigacije.
