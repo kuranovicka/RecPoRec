@@ -26,22 +26,4 @@
         android:accessibilityLiveRegion="polite"
         android:text="30 minuta" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:textSize="18sp"
-        android:textColor="@color/text_primary"
-        android:text="Ili, umesto klizača, upiši tačno vreme buđenja:" />
-
-    <EditText
-        android:id="@+id/editWakeTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:inputType="text"
-        android:hint="npr. 5:20"
-        android:contentDescription="Probudi me u - upiši vreme u formi sat:minut, na primer 5:20. Ako popuniš ovo polje, klizač se ne koristi."
-        android:textSize="20sp" />
-
 </LinearLayout>

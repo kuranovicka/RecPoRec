@@ -13,6 +13,7 @@
     <color name="btn_play">#D84315</color>           <!-- 8: play/pauza - narandžasta -->
     <color name="btn_goto_page">#5D4037</color>       <!-- 0: idi na stranicu - braon -->
     <color name="btn_pitch">#283593</color>           <!-- visina glasa - indigo -->
+    <color name="btn_wakeup">#C62828</color>          <!-- Probudi me - crvena -->
     <color name="slider_track">#555555</color>
     <color name="button_text">#FFFFFF</color>
 </resources>

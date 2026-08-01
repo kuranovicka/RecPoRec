@@ -200,6 +200,8 @@ class ReaderActivity : AppCompatActivity() {
         btnBookmarks.setOnLongClickListener { quickAddBookmark(); true }
         btnGoTo.setOnClickListener(clickSound { showGoToMenu() })
         btnGoTo.setOnLongClickListener { goToDocumentStart(); true }
+        btnWakeUp.setOnClickListener(clickSound { showWakeUpDialog() })
+        btnWakeUp.setOnLongClickListener { cancelWakeUp(); true }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
         btnSearchText.setOnLongClickListener { repeatLastSearch(); true }
 
@@ -1207,17 +1209,14 @@ class ReaderActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_rest, null)
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRestMinutesStatus)
         val seek = view.findViewById<android.widget.SeekBar>(R.id.seekRestMinutes)
-        val editWakeTime = view.findViewById<EditText>(R.id.editWakeTime)
 
         fun minutesFor(progress: Int) = 10 + progress * 10
 
-        var sliderTouchedByUser = false
         seek.max = 23 // (240 - 10) / 10
         seek.progress = 0 // 10 min podrazumevano
         textStatus.text = "${minutesFor(seek.progress)} minuta"
         seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) sliderTouchedByUser = true
                 textStatus.text = "${minutesFor(progress)} minuta"
             }
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
@@ -1234,37 +1233,53 @@ class ReaderActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this, "Odmor isključen.", android.widget.Toast.LENGTH_SHORT).show()
             }
             .setPositiveButton("Postavi") { _, _ ->
-                val wakeInput = editWakeTime.text.toString().trim()
-                if (sliderTouchedByUser && wakeInput.isNotEmpty()) {
-                    // Oboje popunjeno - ne znamo koje je korisnica stvarno htela, ne biramo
-                    // umesto nje.
-                    android.widget.Toast.makeText(
-                        this,
-                        "Odmor nije započeo. Odluči se između kraćeg odmora i dužeg spavanja.",
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
-                } else if (wakeInput.isNotEmpty()) {
-                    // "Probudi me u" popunjeno - koristi TO, klizač se u tom slučaju ignoriše.
-                    val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
-                    if (seconds == null) {
-                        android.widget.Toast.makeText(
-                            this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
-                        ).show()
-                    } else {
-                        PlaybackController.startRestUntil(seconds)
-                        updateRestStatusText()
-                        android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
-                        checkFullScreenIntentPermission()
-                    }
-                } else {
-                    val minutes = minutesFor(seek.progress)
-                    PlaybackController.startRest(minutes)
-                    updateRestStatusText()
-                    android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
-                }
+                val minutes = minutesFor(seek.progress)
+                PlaybackController.startRest(minutes)
+                updateRestStatusText()
+                android.widget.Toast.makeText(this, "Odmor je započeo.", android.widget.Toast.LENGTH_LONG).show()
             }
             .show()
         seek.requestAccessibilityFocusNow()
+    }
+
+    /** Dug pritisak na "Probudi" - "Probudi me u": upišeš tačno vreme, npr. 5:20. Potpuno
+     * odvojeno od "Odmori" (samo trajanje), da ne bi bilo pomešano u istom meniju. */
+    private fun showWakeUpDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "npr. 5:20"
+        input.contentDescription = "Probudi me u - upiši vreme u formi sat:minut, na primer 5:20"
+        AlertDialog.Builder(this)
+            .setTitle("Probudi me")
+            .setView(input)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val wakeInput = input.text.toString().trim()
+                val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
+                if (seconds == null) {
+                    android.widget.Toast.makeText(
+                        this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    PlaybackController.startRestUntil(seconds)
+                    updateRestStatusText()
+                    android.widget.Toast.makeText(this, "Buđenje je postavljeno.", android.widget.Toast.LENGTH_LONG).show()
+                    checkFullScreenIntentPermission()
+                }
+            }
+            .show()
+    }
+
+    /** Dug pritisak na "Probudi" - "Isključi buđenje": prekida SAMO buđenje ("Probudi me u"),
+     * ne dira klasičan odmor (klizač) ako je taj aktivan umesto njega. */
+    private fun cancelWakeUp() {
+        if (!PlaybackController.isWakeUpActive()) {
+            android.widget.Toast.makeText(this, "Nema aktivnog buđenja.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        PlaybackController.cancelRest()
+        updateRestStatusText()
+        android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na "Kombinovani glasovi" - "Produži odmor": produžava VEĆ AKTIVAN odmor

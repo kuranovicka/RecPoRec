@@ -42,12 +42,19 @@ class HelpActivity : AppCompatActivity() {
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima devetnaest dugmića, raspoređenih u pet redova.
+        Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
         Prvo dugme je Oznake.
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
         Njime ideš na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
-        Treće dugme je Pretraga.
+        Treće dugme je Probudi.
+        Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
+        Kad vreme dođe, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
+        Ako ne reaguješ, alarm se ponavlja, najviše pet puta.
+        Program tada otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik.
+        Ako u međuvremenu drmneš telefon ili pritisneš dugme za nastavak, alarm se odmah prekida i knjiga kreće.
+        Dug pritisak na Probudi, isključuje buđenje.
+        Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
         Dug pritisak na bilo koje od njih vraća visinu na opštu vrednost.
@@ -65,20 +72,14 @@ class HelpActivity : AppCompatActivity() {
         Npr: vraćanje unazad, odlazak na stranicu.
         Treće dugme je Glas.
         Menja glas za ovaj dokument, a dug pritisak otvara Odmori.
-        Odmori pauzira čitanje odmah, i samo ga nastavlja posle izabranog vremena.
-        Možeš izabrati broj minuta na klizaču, ili tačno vreme buđenja u polju Probudi me u, ali ne oba odjednom.
+        Odmori pauzira čitanje odmah, i samo ga nastavlja posle izabranog broja minuta.
         Klizač ide od deset minuta do četiri sata.
-        Polje Probudi me u: se upisuje u obliku sat i minut, na primer 5:20.
+        Ako pustiš knjigu ranije, odmor se prekida.
         Kad odmor istekne, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
-        Ako tokom buđenja ne zaustaviš alarm ručnim puštanjem knjige, program pretpostavlja da ti se još spava, i knjigu ne pušta.
-        Kod buđenja u tačno vreme, program otvara ceo ekran preko zaključanog ekrana, sa velikim dugmetom za zaustavljanje, kao pravi budilnik.
-        Umesto toga, buđenje ponavlja, najviše pet puta.
-        Tek posle petog ponovljenog buđenja bez reakcije, knjiga se nastavlja.
-        Ako u međuvremenu drmneš telefon ili nastaviš čitanje dugmetom, odmor i alarm se odmah prekidaju.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
-        Dug pritisak na njega, produžava aktivan odmor, ili ga na kratko odlaže posle buđenja, najviše pet puta zaredom.
-        Ako pritisneš dok alarm zvoni, alarm odmah prestaje, i knjiga se ne pušta.
-        Ako i tada pustiš knjigu pre produžetka, odmor je završen.
+        Dug pritisak produžava aktivan odmor za isto toliko vremena koliko je i postavljen.
+        Isto dugme, dok alarm zvoni (bilo od odmora ili od buđenja), odlaže ga za deset minuta, umesto da ga produžava.
+        Ovo odlaganje ide najviše pet puta zaredom.
         Funkcija odmora radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
         Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.

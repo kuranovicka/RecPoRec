@@ -88,6 +88,12 @@
                 android:contentDescription="Idi na stranicu, minut ili oznaku. Dug pritisak: idi na početak dokumenta."
                 android:text="➜ Idi na" />
 
+            <Button android:id="@+id/btnWakeUp" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_wakeup"
+                android:contentDescription="Probudi me u tačno vreme. Dug pritisak: isključi buđenje."
+                android:textSize="16sp"
+                android:text="⏰ Probudi" />
+
             <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: ponovi poslednju pretragu."

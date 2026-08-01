@@ -246,6 +246,11 @@ object PlaybackController {
 
     fun isRestAlarmRinging(): Boolean = restAlarmActive
 
+    /** Da li je TRENUTNO aktivan odmor bas "buđenje" (Probudi me u, ili odlaganje koje je iz
+     * njega nastalo) - koristi ga dugme "Isključi buđenje", da ne bi slučajno prekinulo
+     * klasičan odmor postavljen preko klizača umesto buđenja. */
+    fun isWakeUpActive(): Boolean = (restRemainingSeconds > 0 || restAlarmActive) && restIsWakeTime
+
     /** Dug pritisak na "Kombinovani glasovi": ili produžava VEĆ AKTIVAN odmor za POSLEDNJI
      * korišćen broj minuta (klizač), ILI, ako alarm TRENUTNO zvoni (odmor upravo istekao) i
      * nismo dostigli MAX_SNOOZE_COUNT, "odlaže" (snooze) za tačno 10 minuta, umesto da knjiga
