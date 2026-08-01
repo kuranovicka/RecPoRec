@@ -171,5 +171,34 @@ class SettingsActivity : AppCompatActivity() {
             // ne može programski da otvori - tada korisnik mora ručno da ih pronađe u
             // podešavanjima telefona (obično "Baterija" -> ime aplikacije -> "Bez ograničenja").
         }
+        showManufacturerSpecificBatteryHint()
+    }
+
+    /** Standardna Android dozvola (iznad) NE pokriva dodatni sloj štednje baterije koji imaju
+     * pojedini proizvođači (Samsung, Xiaomi, Huawei...) - za njega ne postoji nikakav
+     * programski nacin da app sama zatrazi izuzece, cak ni sami programeri tih telefona to
+     * ne mogu. Jedino sto mozemo je da JASNO uputimo korisnicu gde rucno da to pronadje. */
+    private fun showManufacturerSpecificBatteryHint() {
+        val manufacturer = android.os.Build.MANUFACTURER?.lowercase() ?: ""
+        val message = when {
+            manufacturer.contains("samsung") ->
+                "Samsung telefoni imaju i DODATNU, posebnu listu \"uspavanih\" aplikacija, van gornjeg podešavanja. " +
+                    "Idi u: Podešavanja telefona, Baterija i nega uređaja, Baterija, Ograničenja u pozadini. " +
+                    "Dodaj Reč po reč na listu \"Nikad ne uspavljuj\", i proveri da nije na listi \"Uspavane\" ili \"Duboko uspavane\" aplikacije."
+            manufacturer.contains("xiaomi") ->
+                "Xiaomi telefoni imaju i dodatno podešavanje za automatsko pokretanje. " +
+                    "Idi u: Podešavanja telefona, Aplikacije, Reč po reč, i uključi \"Automatsko pokretanje\"."
+            manufacturer.contains("huawei") ->
+                "Huawei telefoni imaju i dodatno podešavanje za pokretanje aplikacija. " +
+                    "Idi u: Podešavanja telefona, Baterija, Pokretanje aplikacija, Reč po reč, i podesi ručno (uključi sve tri opcije)."
+            else -> null
+        }
+        if (message != null) {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Dodatno podešavanje baterije")
+                .setMessage(message)
+                .setPositiveButton("Razumem", null)
+                .show()
+        }
     }
 }
