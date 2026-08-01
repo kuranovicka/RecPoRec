@@ -93,34 +93,34 @@ class WakeAlarmActivity : AppCompatActivity() {
         }
         root.addView(docTitle)
 
-        val stopButton = Button(this).apply {
-            text = "▶ Zaustavi alarm i pusti knjigu"
-            textSize = 22f
-            setPadding(24, 64, 24, 64)
-            contentDescription = "Zaustavi alarm i pusti knjigu"
-            setOnClickListener {
-                PlaybackController.resumeCancelingRestIfNeeded()
-                finish()
-            }
-        }
-        root.addView(stopButton)
-
-        val spacer = android.view.View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 48)
-        }
-        root.addView(spacer)
-
         val snoozeButton = Button(this).apply {
-            text = "⏰ Odloži 10 minuta"
+            text = "⏰ Produži odmor za deset minuta"
             textSize = 22f
             setPadding(24, 64, 24, 64)
-            contentDescription = "Odloži deset minuta"
+            contentDescription = "Produži odmor za deset minuta"
             setOnClickListener {
                 PlaybackController.extendRest()
                 finish()
             }
         }
         root.addView(snoozeButton)
+
+        val spacer = android.view.View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 48)
+        }
+        root.addView(spacer)
+
+        val stopButton = Button(this).apply {
+            text = "▶ Prekini odmor"
+            textSize = 22f
+            setPadding(24, 64, 24, 64)
+            contentDescription = "Prekini odmor i pusti knjigu"
+            setOnClickListener {
+                PlaybackController.resumeCancelingRestIfNeeded()
+                finish()
+            }
+        }
+        root.addView(stopButton)
 
         setContentView(root)
     }

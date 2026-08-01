@@ -50,8 +50,8 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme je Probudi.
         Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
         Kad vreme dođe, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
-        Ako ne reaguješ, alarm se ponavlja, najviše pet puta.
-        Program tada otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik.
+        Ako ne reaguješ, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
+        Program tada otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik, sa dugmetom da odložiš ili da prekineš odmor.
         Ako u međuvremenu drmneš telefon ili pritisneš dugme za nastavak, alarm se odmah prekida i knjiga kreće.
         Dug pritisak na Probudi, isključuje buđenje.
         Ako alarm još nije zazvonio, čitanje ostaje pauzirano, kao da buđenje nisi ni postavila.
@@ -78,6 +78,7 @@ class HelpActivity : AppCompatActivity() {
         Klizač ide od deset minuta do četiri sata.
         Ako pustiš knjigu ranije, odmor se prekida.
         Kad odmor istekne, jedan minut zvoni alarm, i tek tada se knjiga nastavlja.
+        Ako ne reaguješ, program otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik, sa dugmetom da odložiš ili da prekineš odmor.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak produžava aktivan odmor za isto toliko vremena koliko je i postavljen.
         Isto dugme, dok alarm zvoni (bilo od odmora ili od buđenja), odlaže ga za deset minuta, umesto da ga produžava.

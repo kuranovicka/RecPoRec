@@ -155,10 +155,10 @@ object PlaybackController {
      * unutrasnju logiku ako iz nekog razloga jos nije sama preskocila u fazu zvonjenja. */
     fun onWakeAlarmFired(context: Context) {
         if (appContext == null) appContext = context.applicationContext
-        if (restIsWakeTime && restRemainingSeconds <= 0 && !restAlarmActive) {
+        if (restRemainingSeconds <= 0 && !restAlarmActive) {
             ttsManager?.pause()
             restAlarmActive = true
-            restAlarmSecondsLeft = ALARM_RING_SECONDS_WAKE
+            restAlarmSecondsLeft = ALARM_RING_SECONDS
             acquireRestWakeLock()
             notifyPlaybackStateChanged()
         }
@@ -172,7 +172,6 @@ object PlaybackController {
     private var restAlarmActive = false
     private var restAlarmSecondsLeft = 0
     private const val ALARM_RING_SECONDS = 60
-    private const val ALARM_RING_SECONDS_WAKE = 60
     private val SNOOZE_SECONDS = 10 * 60
     /** Koliko puta je odmor ODLOŽEN zaredom (bez novog, ručno postavljenog odmora između) -
      * kad stigne do MAX_SNOOZE_COUNT, dalje odlaganje se ne dozvoljava, čitanje samo
@@ -193,6 +192,7 @@ object PlaybackController {
             lastRestMinutes = minutes
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
+            scheduleWakeAlarm(restTargetElapsedMillis)
         } else {
             releaseRestWakeLock()
         }
@@ -248,6 +248,21 @@ object PlaybackController {
         } else {
             ttsManager?.resume()
         }
+        // VAŽNO: kad se čitanje nastavlja OVDE (drmanje, medijski taster, buđenje/odmor),
+        // umesto preko dugmeta u čitaču - dugme SAMO takođe (ponovo) pokreće ReadingService,
+        // koji drži drmanje (i wake lock za rad u pozadini) aktivnim. Bez ovoga, ako servis
+        // iz bilo kog razloga nije radio, drmanje ostaje "gluvo" dok se ručno ne otvori app i
+        // pritisne dugme (što baš to radi) - primećeno posle buđenja/odmora.
+        val ctx = appContext
+        if (ctx != null) {
+            try {
+                val settings = com.recporec.app.data.AppSettings(ctx)
+                if (settings.backgroundEnabled) {
+                    com.recporec.app.service.ReadingService.start(ctx, settings.uninterruptedEnabled)
+                }
+            } catch (_: Exception) {
+            }
+        }
         return wasResting
     }
 
@@ -265,18 +280,23 @@ object PlaybackController {
      * nismo dostigli MAX_SNOOZE_COUNT, "odlaže" (snooze) za tačno 10 minuta, umesto da knjiga
      * uopšte krene. Vraća true ako je nešto urađeno, false ako nema šta (caller prikazuje
      * odgovarajuću poruku prema ovome). */
+    /** Deljena logika za "odlaganje" (snooze) - deset minuta tišine pre sledećeg pokušaja,
+     * koristi je i ručno "Produži odmor" i automatsko ponavljanje kad se alarm ne prekine. */
+    private fun snoozeInternal() {
+        stopRestAlarm()
+        restAlarmActive = false
+        restRemainingSeconds = SNOOZE_SECONDS
+        restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
+        restSnoozeCount += 1
+        acquireRestWakeLock()
+        scheduleWakeAlarm(restTargetElapsedMillis)
+        notifyPlaybackStateChanged()
+    }
+
     fun extendRest(): Boolean {
         if (restAlarmActive) {
             if (!isSnoozeAvailable()) return false
-            stopRestAlarm()
-            restAlarmActive = false
-            restRemainingSeconds = SNOOZE_SECONDS
-            restIsWakeTime = true // da bi i OVAJ odmor, kad zavrsi, ponovo pustio alarm/prozor za odlaganje
-            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
-            restSnoozeCount += 1
-            acquireRestWakeLock()
-            scheduleWakeAlarm(restTargetElapsedMillis)
-            notifyPlaybackStateChanged()
+            snoozeInternal()
             return true
         }
         if (restIsWakeTime || lastRestMinutes <= 0) return false
@@ -487,7 +507,7 @@ object PlaybackController {
                         // zvoni alarm (kao pravi budilnik), a tek posle toga knjiga krece.
                         restRemainingSeconds = 0
                         restAlarmActive = true
-                        restAlarmSecondsLeft = if (restIsWakeTime) ALARM_RING_SECONDS_WAKE else ALARM_RING_SECONDS
+                        restAlarmSecondsLeft = ALARM_RING_SECONDS
                         notifyPlaybackStateChanged()
                     }
                 } else if (restAlarmActive) {
@@ -497,14 +517,12 @@ object PlaybackController {
                     restAlarmTone?.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 600)
                     restAlarmSecondsLeft -= 1
                     if (restAlarmSecondsLeft <= 0) {
-                        if (restIsWakeTime && restSnoozeCount < MAX_SNOOZE_COUNT) {
-                            // Budjenje bez reakcije - program pretpostavlja da korisnica jos
-                            // spava, i SAM ponavlja alarm (bez potrebe da iko pritisne dugme),
-                            // do najvise MAX_SNOOZE_COUNT puta. Deli isti brojac sa rucnim
-                            // "Produzi odmor" - koji god nacin da se koristi, isti budzet.
-                            restSnoozeCount += 1
-                            restAlarmSecondsLeft = ALARM_RING_SECONDS_WAKE
-                            scheduleWakeAlarm(android.os.SystemClock.elapsedRealtime() + ALARM_RING_SECONDS_WAKE * 1000L)
+                        if (restSnoozeCount < MAX_SNOOZE_COUNT) {
+                            // Bez reakcije - program pretpostavlja da se jos spava, i SAM
+                            // odlaze za deset minuta (isto kao rucno "Produzi odmor"), do
+                            // najvise MAX_SNOOZE_COUNT puta - isti budzet, isto ponasanje,
+                            // bilo automatski ili rucno.
+                            snoozeInternal()
                         } else {
                             restAlarmActive = false
                             stopRestAlarm()
