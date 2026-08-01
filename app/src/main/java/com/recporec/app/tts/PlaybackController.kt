@@ -111,6 +111,7 @@ object PlaybackController {
     private var restAlarmActive = false
     private var restAlarmSecondsLeft = 0
     private const val ALARM_RING_SECONDS = 60
+    private const val ALARM_RING_SECONDS_WAKE = 120
     private val SNOOZE_SECONDS = 10 * 60
     /** Koliko puta je odmor ODLOŽEN zaredom (bez novog, ručno postavljenog odmora između) -
      * kad stigne do MAX_SNOOZE_COUNT, dalje odlaganje se ne dozvoljava, čitanje samo
@@ -406,7 +407,7 @@ object PlaybackController {
                         // zvoni alarm (kao pravi budilnik), a tek posle toga knjiga krece.
                         restRemainingSeconds = 0
                         restAlarmActive = true
-                        restAlarmSecondsLeft = ALARM_RING_SECONDS
+                        restAlarmSecondsLeft = if (restIsWakeTime) ALARM_RING_SECONDS_WAKE else ALARM_RING_SECONDS
                         notifyPlaybackStateChanged()
                     }
                 } else if (restAlarmActive) {
