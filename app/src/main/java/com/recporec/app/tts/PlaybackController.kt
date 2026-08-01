@@ -4,6 +4,7 @@ import android.content.Context
 import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.parser.ParsedDocument
+import com.recporec.app.service.WakeAlarmReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -103,6 +104,66 @@ object PlaybackController {
      * bilo koja petlja potraje i malo duže od tačno jedne sekunde). */
     private var restTargetElapsedMillis: Long = 0L
 
+    private const val WAKE_ALARM_REQUEST_CODE = 4271
+
+    /** Zakazuje PRAVI, sistemski alarm (AlarmManager.setAlarmClock) tacno u trenutak kad
+     * "Probudi me u" treba da zazvoni - IZUZET od Doze/uspavljivanja u pozadini, isti
+     * mehanizam koji koriste prave budilnik aplikacije. Nas unutrasnji ticker/wake lock i
+     * dalje rade normalno, ovo je REZERVNI, pouzdaniji nacin da se garantuje da ce puni
+     * ekran stvarno iskociti, cak i ako telefon (npr. pojedini Samsung modeli) agresivno
+     * throttle-uje obicne senzore/dugmad u pozadini. */
+    private fun scheduleWakeAlarm(targetElapsedMillis: Long) {
+        val ctx = appContext ?: return
+        try {
+            val am = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            val nowElapsed = android.os.SystemClock.elapsedRealtime()
+            val triggerWallTime = System.currentTimeMillis() + (targetElapsedMillis - nowElapsed)
+            val receiverIntent = android.content.Intent(ctx, WakeAlarmReceiver::class.java)
+            val receiverPendingIntent = android.app.PendingIntent.getBroadcast(
+                ctx, WAKE_ALARM_REQUEST_CODE, receiverIntent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            val showIntent = android.app.PendingIntent.getActivity(
+                ctx, WAKE_ALARM_REQUEST_CODE,
+                android.content.Intent(ctx, com.recporec.app.ui.WakeAlarmActivity::class.java),
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            am.setAlarmClock(
+                android.app.AlarmManager.AlarmClockInfo(triggerWallTime, showIntent),
+                receiverPendingIntent
+            )
+        } catch (_: Exception) {
+            // Bezbedno ako ne uspe - unutrasnji ticker i dalje pokusava normalno.
+        }
+    }
+
+    private fun cancelWakeAlarm() {
+        val ctx = appContext ?: return
+        try {
+            val am = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            val receiverIntent = android.content.Intent(ctx, WakeAlarmReceiver::class.java)
+            val receiverPendingIntent = android.app.PendingIntent.getBroadcast(
+                ctx, WAKE_ALARM_REQUEST_CODE, receiverIntent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            am.cancel(receiverPendingIntent)
+        } catch (_: Exception) {
+        }
+    }
+
+    /** Poziva ga WakeAlarmReceiver kad sistemski alarm stvarno zazvoni - "budi" nasu
+     * unutrasnju logiku ako iz nekog razloga jos nije sama preskocila u fazu zvonjenja. */
+    fun onWakeAlarmFired(context: Context) {
+        if (appContext == null) appContext = context.applicationContext
+        if (restIsWakeTime && restRemainingSeconds <= 0 && !restAlarmActive) {
+            ttsManager?.pause()
+            restAlarmActive = true
+            restAlarmSecondsLeft = ALARM_RING_SECONDS_WAKE
+            acquireRestWakeLock()
+            notifyPlaybackStateChanged()
+        }
+    }
+
     /** Redosled: prvo odbrojavanje (restRemainingSeconds), pa kad stigne do nule, alarm
      * ZVONI PUN MINUT (restAlarmActive), a citanje JOS UVEK ne pocinje. Tek kad alarm
      * prestane (istekne minut, ili se rucno prekine drmanjem/dugmetom), citanje krece. Dok
@@ -123,6 +184,7 @@ object PlaybackController {
     fun startRest(minutes: Int) {
         ttsManager?.pause()
         stopRestAlarm()
+        cancelWakeAlarm()
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
         restIsWakeTime = false
         restAlarmActive = false
@@ -151,8 +213,10 @@ object PlaybackController {
         if (totalSeconds > 0) {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
+            scheduleWakeAlarm(restTargetElapsedMillis)
         } else {
             releaseRestWakeLock()
+            cancelWakeAlarm()
         }
         notifyPlaybackStateChanged()
     }
@@ -164,6 +228,7 @@ object PlaybackController {
         restSnoozeCount = 0
         stopRestAlarm()
         releaseRestWakeLock()
+        cancelWakeAlarm()
     }
 
     /** Nastavlja čitanje, i AKO je odmor (ili alarm koji zvoni posle njega) trenutno aktivan,
@@ -196,6 +261,7 @@ object PlaybackController {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             restSnoozeCount += 1
             acquireRestWakeLock()
+            scheduleWakeAlarm(restTargetElapsedMillis)
             notifyPlaybackStateChanged()
             return true
         }
@@ -424,10 +490,12 @@ object PlaybackController {
                             // "Produzi odmor" - koji god nacin da se koristi, isti budzet.
                             restSnoozeCount += 1
                             restAlarmSecondsLeft = ALARM_RING_SECONDS_WAKE
+                            scheduleWakeAlarm(android.os.SystemClock.elapsedRealtime() + ALARM_RING_SECONDS_WAKE * 1000L)
                         } else {
                             restAlarmActive = false
                             stopRestAlarm()
                             releaseRestWakeLock()
+                            cancelWakeAlarm()
                             ttsManager?.resume()
                             notifyPlaybackStateChanged()
                         }

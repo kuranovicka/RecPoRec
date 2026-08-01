@@ -21,6 +21,15 @@
          audio fokus, koji se na nekim uredjajima pokazao nepouzdanim). Ako korisnik odbije
          ovu dozvolu, app i dalje radi normalno, samo se oslanja samo na audio fokus. -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- Za pouzdano "Probudi me u" - isti mehanizam koji koriste prave budilnik aplikacije,
+         da bi alarm sigurno dosao do korisnice cak i kad Android/proizvodjac agresivno
+         ogranicava rad u pozadini (potvrdjeno da isti problem ima i Spotify na Samsung
+         uredjajima). setAlarmClock() ne trazi posebnu dozvolu za sam alarm, ali prikaz
+         preko zakljucanog ekrana trazi ovu dozvolu (od Android 14 rezervisano bas za
+         pozive i budilnike, sto nase "Probudi me u" i jeste). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
         android:name=".RecPoRecApp"
@@ -89,6 +98,21 @@
 
         <activity
             android:name=".ui.HelpActivity"
+            android:exported="false" />
+
+        <!-- Puni ekran preko zakljucanog ekrana kad "Probudi me u" treba da zazvoni - isti
+             mehanizam koji koriste prave budilnik aplikacije, da bi radilo cak i kad je
+             ekran zakljucan i telefon "u snu". -->
+        <activity
+            android:name=".ui.WakeAlarmActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" />
+
+        <receiver
+            android:name=".service.WakeAlarmReceiver"
             android:exported="false" />
 
         <service
