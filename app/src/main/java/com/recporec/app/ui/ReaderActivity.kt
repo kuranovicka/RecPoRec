@@ -322,15 +322,29 @@ class ReaderActivity : AppCompatActivity() {
             PlaybackController.currentDocument = finalEntity
             PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
 
-            setupTts(
-                parsedDoc,
-                finalEntity,
-                resolveCombinedVoiceConfig(
-                    finalEntity.id,
-                    finalEntity.voiceName ?: settings.globalVoiceName,
-                    finalEntity.voiceEngine ?: settings.globalVoiceEngine
+            // Ako je PlaybackController VEĆ imao ovaj TAČAN dokument spreman i motor već
+            // radi (npr. čitanje je pokrenuto automatski - buđenje, odmor, ili prelazak na
+            // sledeći dokument dok ovaj ekran nije bio otvoren), NE ponavljamo celu pripremu
+            // glasa - to bi prekinulo VEĆ AKTIVNO čitanje usred rečenice (setupTts ponovo
+            // učitava tekst i glas), i privremeno bi ostavilo ttsReady=false dok se ne
+            // završi, što bi u tom prozoru pogrešno prikazalo "Glas se priprema" na svaki
+            // dodir dugmadi, čak i dok se knjiga već čuje.
+            val sessionAlreadyActive = cachedParsed != null &&
+                PlaybackController.currentDocument?.id == finalEntity.id &&
+                PlaybackController.ttsManager?.isEngineReady == true
+            if (sessionAlreadyActive) {
+                ttsReady = true
+            } else {
+                setupTts(
+                    parsedDoc,
+                    finalEntity,
+                    resolveCombinedVoiceConfig(
+                        finalEntity.id,
+                        finalEntity.voiceName ?: settings.globalVoiceName,
+                        finalEntity.voiceEngine ?: settings.globalVoiceEngine
+                    )
                 )
-            )
+            }
             updateStatusTexts()
             updateSeekBar()
             updateDocLanguageButtonText()
