@@ -30,6 +30,13 @@ class WakeAlarmActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Notifikacija sa punim ekranom je vec odradila svoje (dovela nas ovde) - uklanjamo
+        // je da ne ostane da "visi" u traci obavestenja.
+        try {
+            (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(4271)
+        } catch (_: Exception) {
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
