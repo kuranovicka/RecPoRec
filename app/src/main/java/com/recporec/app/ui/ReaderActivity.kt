@@ -1240,15 +1240,18 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na "Kombinovani glasovi" - "Produži odmor": produžava VEĆ AKTIVAN odmor
      * za onoliko minuta na koliko je poslednji put postavljen (isti obrazac kao Tajmer). */
     private fun extendRest() {
-        if (PlaybackController.restRemainingSeconds <= 0) {
+        val wasSnoozeAttempt = PlaybackController.restRemainingSeconds <= 0
+        val didSomething = PlaybackController.extendRest()
+        if (!didSomething) {
             android.widget.Toast.makeText(this, "Nema aktivnog odmora.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
-        val minutes = PlaybackController.lastRestMinutesUsed()
-        if (minutes <= 0) return
-        PlaybackController.extendRest()
         updateRestStatusText()
-        android.widget.Toast.makeText(this, "Odmor je produžen.", android.widget.Toast.LENGTH_SHORT).show()
+        if (wasSnoozeAttempt) {
+            android.widget.Toast.makeText(this, "Odmor je odložen za 10 minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            android.widget.Toast.makeText(this, "Odmor je produžen.", android.widget.Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setTimer(minutes: Int) {

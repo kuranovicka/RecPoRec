@@ -103,11 +103,21 @@ object PlaybackController {
      * bilo koja petlja potraje i malo duže od tačno jedne sekunde). */
     private var restTargetElapsedMillis: Long = 0L
 
+    /** "Odloži" (kao kod pravih budilnika) - posle "Probudi me u" (ili posle samog odlaganja),
+     * pet minuta se dug pritisak na "Produži odmor" ponaša drugačije: umesto normalnog
+     * produžavanja aktivnog odmora, PONOVO pauzira čitanje i postavlja nov, kratak (10 min)
+     * odmor - za slučaj da se korisnica nije dovoljno probudila. Posle tih pet minuta,
+     * prilika prolazi (dugme opet ne radi ništa, dok se ne postavi nov odmor). */
+    private var restGraceWindowEndMillis: Long = 0L
+    private val SNOOZE_SECONDS = 10 * 60
+    private val GRACE_WINDOW_MILLIS = 5 * 60 * 1000L
+
     fun startRest(minutes: Int) {
         ttsManager?.pause()
         stopRestAlarm()
         restRemainingSeconds = if (minutes <= 0) 0 else minutes * 60
         restIsWakeTime = false
+        restGraceWindowEndMillis = 0L
         if (minutes > 0) {
             lastRestMinutes = minutes
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
@@ -127,6 +137,7 @@ object PlaybackController {
         stopRestAlarm()
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
+        restGraceWindowEndMillis = 0L
         if (totalSeconds > 0) {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
@@ -139,6 +150,7 @@ object PlaybackController {
     fun cancelRest() {
         restRemainingSeconds = 0
         restIsWakeTime = false
+        restGraceWindowEndMillis = 0L
         stopRestAlarm()
         releaseRestWakeLock()
     }
@@ -153,17 +165,33 @@ object PlaybackController {
         return wasResting
     }
 
-    /** Produžava VEĆ AKTIVAN odmor za POSLEDNJI korišćen broj minuta (isto kao kod tajmera) -
-     * ne radi nista ako odmor nije aktivan, ili ako je TRENUTNI odmor postavljen preko
-     * "Probudi me u" (restIsWakeTime) - namerno se ne produžava tako postavljen odmor. */
-    fun extendRest() {
-        if (restRemainingSeconds <= 0 || restIsWakeTime || lastRestMinutes <= 0) return
+    fun isSnoozeAvailable(): Boolean =
+        restRemainingSeconds <= 0 && android.os.SystemClock.elapsedRealtime() < restGraceWindowEndMillis
+
+    /** Dug pritisak na "Kombinovani glasovi": ili produžava VEĆ AKTIVAN odmor za POSLEDNJI
+     * korišćen broj minuta (klizač), ILI, ako je odmor UPRAVO završio (buđenje ili prethodno
+     * odlaganje) i još smo u "petominutnom" prozoru, "odlaže" (snooze) za tačno 10 minuta.
+     * Vraća true ako je nešto urađeno, false ako nema šta (caller prikazuje odgovarajuću
+     * poruku prema ovome). */
+    fun extendRest(): Boolean {
+        if (restRemainingSeconds <= 0) {
+            if (!isSnoozeAvailable()) return false
+            ttsManager?.pause()
+            stopRestAlarm()
+            restRemainingSeconds = SNOOZE_SECONDS
+            restIsWakeTime = true // da bi i OVAJ odmor, kad zavrsi, ponovo otvorio prozor za odlaganje
+            restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
+            restGraceWindowEndMillis = 0L
+            acquireRestWakeLock()
+            notifyPlaybackStateChanged()
+            return true
+        }
+        if (restIsWakeTime || lastRestMinutes <= 0) return false
         restRemainingSeconds += lastRestMinutes * 60
         restTargetElapsedMillis += lastRestMinutes * 60 * 1000L
         if (restRemainingSeconds > 180) stopRestAlarm()
+        return true
     }
-
-    fun lastRestMinutesUsed(): Int = lastRestMinutes
 
     /** UI (ReaderActivity) se ovde prikači dok je vidljiva, da dobija živo ažuriranje. */
     var uiPositionListener: ((Int) -> Unit)? = null
@@ -377,6 +405,11 @@ object PlaybackController {
                         stopRestAlarm()
                         releaseRestWakeLock()
                         ttsManager?.resume()
+                        if (restIsWakeTime) {
+                            // "Probudi me u" (ili prethodno odlaganje) je upravo isteklo -
+                            // otvara se petominutni prozor za "odlaganje" preko Produzi odmor.
+                            restGraceWindowEndMillis = android.os.SystemClock.elapsedRealtime() + GRACE_WINDOW_MILLIS
+                        }
                         notifyPlaybackStateChanged()
                     }
                 }

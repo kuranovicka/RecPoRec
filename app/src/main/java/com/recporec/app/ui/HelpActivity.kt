@@ -184,6 +184,8 @@ class HelpActivity : AppCompatActivity() {
         Odmor produžavaš tačno za ono vreme na koje je odmor podešen.
         Ako si podesio-la 20 minuta, odmaraćeš 40 minuta.
         Ovo radi samo za odmor postavljen preko klizača, ne i za "Probudi me u".
+        Ako pet minuta nakon prvog pokušaja buđenja aktiviraš dugme za produžetak odmora, odmor će biti produžen za deset minuta.
+        Alarm će se oglasiti tri minuta pre ponovnog puštanja knjige, kao i obično.
         Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
         Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
         Tri minuta pre isteka odmora, kreće da zvoni alarm.
