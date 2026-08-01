@@ -1277,7 +1277,15 @@ class ReaderActivity : AppCompatActivity() {
             android.widget.Toast.makeText(this, "Nema aktivnog buđenja.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
-        PlaybackController.cancelRest()
+        if (PlaybackController.isRestAlarmRinging()) {
+            // Alarm VEC zvoni - iskljuciti ga znaci "probudila sam se", pa knjiga krece,
+            // bas kao pravi budilnik uz knjigu.
+            PlaybackController.resumeCancelingRestIfNeeded()
+        } else {
+            // Jos samo odbrojava, alarm jos nije ni zazvonio - obicno otkazivanje, bez
+            // pokretanja knjige (kao da nikad nisi ni postavila buđenje).
+            PlaybackController.cancelRest()
+        }
         updateRestStatusText()
         android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
     }

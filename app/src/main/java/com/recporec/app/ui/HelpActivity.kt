@@ -54,6 +54,8 @@ class HelpActivity : AppCompatActivity() {
         Program tada otvara ceo ekran preko zaključanog ekrana, kao pravi budilnik.
         Ako u međuvremenu drmneš telefon ili pritisneš dugme za nastavak, alarm se odmah prekida i knjiga kreće.
         Dug pritisak na Probudi, isključuje buđenje.
+        Ako alarm još nije zazvonio, čitanje ostaje pauzirano, kao da buđenje nisi ni postavila.
+        Ako alarm već zvoni, isključivanje ga zaustavlja i knjiga odmah kreće, kao pravi budilnik uz knjigu.
         Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
