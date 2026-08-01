@@ -81,7 +81,7 @@ class ReadingService : Service() {
                         refreshNotification()
                     }
                 }
-                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_UI)
+                sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_GAME)
             }
         }
     }

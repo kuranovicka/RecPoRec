@@ -68,7 +68,7 @@ class HelpActivity : AppCompatActivity() {
         Možeš izabrati broj minuta na klizaču, ili tačno vreme buđenja u polju Probudi me u, ali ne oba odjednom.
         Klizač ide od deset minuta do četiri sata.
         Polje Probudi me u: se upisuje u obliku sat i minut, na primer 5:20.
-        Tri minuta pre kraja odmora, počinje da zvoni alarm.
+        Kad odmor istekne, jedan minut zvoni alarm, i tek posle toga knjiga nastavlja.
         Ako u međuvremenu drmneš telefon ili nastaviš čitanje dugmetom, odmor i alarm se odmah prekidaju.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak na njega, produžava aktivan odmor, ili ga na kratko odlaže posle buđenja, najviše pet puta zaredom.

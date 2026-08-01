@@ -1349,10 +1349,10 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun updateRestStatusText() {
         val remaining = PlaybackController.restRemainingSeconds
-        if (remaining <= 0) {
-            binding.textRestStatus.text = "Odmor nije aktivan."
-        } else {
-            binding.textRestStatus.text = "Do kraja odmora preostalo ${formatTime(remaining.toLong())}."
+        binding.textRestStatus.text = when {
+            PlaybackController.isRestAlarmRinging() -> "Odmor je istekao, alarm zvoni."
+            remaining <= 0 -> "Odmor nije aktivan."
+            else -> "Do kraja odmora preostalo ${formatTime(remaining.toLong())}."
         }
     }
 
@@ -1396,7 +1396,9 @@ class ReaderActivity : AppCompatActivity() {
             parts.add("Tajmer: preostalo ${formatTime(timerRemaining.toLong())}.")
         }
         val restRemaining = PlaybackController.restRemainingSeconds
-        if (restRemaining > 0) {
+        if (PlaybackController.isRestAlarmRinging()) {
+            parts.add("Odmor je istekao, alarm zvoni.")
+        } else if (restRemaining > 0) {
             parts.add("Do kraja odmora preostalo ${formatTime(restRemaining.toLong())}.")
         }
         android.widget.Toast.makeText(this, parts.joinToString(" "), android.widget.Toast.LENGTH_LONG).show()
