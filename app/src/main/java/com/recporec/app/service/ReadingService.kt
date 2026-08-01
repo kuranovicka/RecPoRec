@@ -134,7 +134,13 @@ class ReadingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val uninterrupted = intent?.getBooleanExtra(EXTRA_UNINTERRUPTED, false) ?: false
+        // NAMERNO ne citamo iz intent extra-a ovde - ako sistem ubije servis (npr. zbog
+        // nedostatka memorije dok je app dugo u pozadini) i kasnije ga sam ponovo pokrene,
+        // Android zove onStartCommand() sa PRAZNIM (null) intentom, i tako bi se izgubila
+        // informacija da li je "Citanje bez prekida" bilo ukljuceno - wake lock bi se
+        // pogresno oslobodio bas kad je najpotrebniji. Citamo direktno iz trajno sacuvanog
+        // podesavanja, koje ne zavisi od toga da li je intent sacuvan ili ne.
+        val uninterrupted = AppSettings(this).uninterruptedEnabled
         startForeground(NOTIFICATION_ID, buildNotification())
         setupShakeDetector()
 
