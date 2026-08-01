@@ -228,7 +228,7 @@ class ReaderActivity : AppCompatActivity() {
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
             )
         })
-        btnCombinedVoices.setOnLongClickListener { extendRest(); true }
+        btnCombinedVoices.setOnLongClickListener { turnOffTimer(); true }
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
         btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
@@ -1300,21 +1300,10 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    /** Dug pritisak na "Kombinovani glasovi" - "Produži odmor": produžava VEĆ AKTIVAN odmor
-     * za onoliko minuta na koliko je poslednji put postavljen (isti obrazac kao Tajmer). */
-    private fun extendRest() {
-        val wasSnoozeAttempt = PlaybackController.restRemainingSeconds <= 0
-        val didSomething = PlaybackController.extendRest()
-        if (!didSomething) {
-            android.widget.Toast.makeText(this, "Nema aktivnog odmora.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        updateRestStatusText()
-        if (wasSnoozeAttempt) {
-            android.widget.Toast.makeText(this, "Odmor je odložen za 10 minuta.", android.widget.Toast.LENGTH_SHORT).show()
-        } else {
-            android.widget.Toast.makeText(this, "Odmor je produžen.", android.widget.Toast.LENGTH_SHORT).show()
-        }
+    /** Dug pritisak na "Kombinovani glasovi" - isključuje tajmer, bez potrebe da se otvara
+     * ceo meni za Tajmer. */
+    private fun turnOffTimer() {
+        setTimer(0)
     }
 
     private fun setTimer(minutes: Int) {
@@ -1413,9 +1402,10 @@ class ReaderActivity : AppCompatActivity() {
     private fun updateRestStatusText() {
         val remaining = PlaybackController.restRemainingSeconds
         binding.textRestStatus.text = when {
-            PlaybackController.isRestAlarmRinging() -> "Odmor je istekao, alarm zvoni."
-            remaining <= 0 -> "Odmor nije aktivan."
-            else -> "Do kraja odmora preostalo ${formatTime(remaining.toLong())}."
+            PlaybackController.isRestAlarmRinging() -> "Buđenje: alarm zvoni."
+            PlaybackController.isScheduledReadingActive() -> "Čitanje zakazano za ${formatHoursMinutes(remaining)}."
+            remaining > 0 -> "Do buđenja ostalo još ${formatHoursMinutes(remaining)}."
+            else -> "Nije ništa zakazano."
         }
     }
 
@@ -1460,9 +1450,11 @@ class ReaderActivity : AppCompatActivity() {
         }
         val restRemaining = PlaybackController.restRemainingSeconds
         if (PlaybackController.isRestAlarmRinging()) {
-            parts.add("Odmor je istekao, alarm zvoni.")
+            parts.add("Buđenje: alarm zvoni.")
+        } else if (PlaybackController.isScheduledReadingActive()) {
+            parts.add("Čitanje zakazano za ${formatHoursMinutes(restRemaining)}.")
         } else if (restRemaining > 0) {
-            parts.add("Do kraja odmora preostalo ${formatTime(restRemaining.toLong())}.")
+            parts.add("Do buđenja ostalo još ${formatHoursMinutes(restRemaining)}.")
         }
         android.widget.Toast.makeText(this, parts.joinToString(" "), android.widget.Toast.LENGTH_LONG).show()
     }
@@ -1512,6 +1504,35 @@ class ReaderActivity : AppCompatActivity() {
             h > 0 -> "%d sati %d min".format(h, m)
             m > 0 -> "%d min %d sek".format(m, s)
             else -> "%d sek".format(s)
+        }
+    }
+
+    /** Bira ispravan oblik srpske reči prema broju, po standardnom pravilu: 1 -> jednina,
+     * 2-4 -> "malo" množina, ostalo -> "veliko" množina - osim 11-14, koji su uvek "veliko"
+     * množina bez obzira na poslednju cifru (npr. "jedanaest sati", ne "jedanaest sat"). */
+    private fun serbianPlural(n: Int, one: String, few: String, many: String): String {
+        val mod100 = n % 100
+        val mod10 = n % 10
+        return when {
+            mod100 in 11..14 -> many
+            mod10 == 1 -> one
+            mod10 in 2..4 -> few
+            else -> many
+        }
+    }
+
+    /** "Do buđenja ostalo još..." / "Čitanje zakazano za...": X sati i Y minuta, po
+     * pravilima srpske gramatike. Bez sekundi - nepotrebna preciznost za ovaj kontekst. */
+    private fun formatHoursMinutes(totalSeconds: Int): String {
+        val totalMinutes = (totalSeconds + 59) / 60 // zaokruzi NAGORE - "jos malo" ne sme da pokaze 0
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        val hourWord = serbianPlural(hours, "sat", "sata", "sati")
+        val minuteWord = serbianPlural(minutes, "minut", "minuta", "minuta")
+        return if (hours > 0) {
+            "$hours $hourWord i $minutes $minuteWord"
+        } else {
+            "$minutes $minuteWord"
         }
     }
 

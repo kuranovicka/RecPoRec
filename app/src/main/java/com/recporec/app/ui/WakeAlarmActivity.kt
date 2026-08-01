@@ -94,10 +94,10 @@ class WakeAlarmActivity : AppCompatActivity() {
         root.addView(docTitle)
 
         val snoozeButton = Button(this).apply {
-            text = "⏰ Produži odmor za deset minuta"
+            text = "😴 Spavaj još malo"
             textSize = 22f
             setPadding(24, 64, 24, 64)
-            contentDescription = "Produži odmor za deset minuta"
+            contentDescription = "Spavaj još malo"
             setOnClickListener {
                 PlaybackController.extendRest()
                 finish()
@@ -111,10 +111,10 @@ class WakeAlarmActivity : AppCompatActivity() {
         root.addView(spacer)
 
         val stopButton = Button(this).apply {
-            text = "▶ Prekini odmor"
+            text = "▶ Prekini buđenje"
             textSize = 22f
             setPadding(24, 64, 24, 64)
-            contentDescription = "Prekini odmor i pusti knjigu"
+            contentDescription = "Prekini buđenje i pusti knjigu"
             setOnClickListener {
                 PlaybackController.resumeCancelingRestIfNeeded()
                 finish()

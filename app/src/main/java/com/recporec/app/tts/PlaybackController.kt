@@ -290,13 +290,18 @@ object PlaybackController {
      * klasičan odmor postavljen preko klizača umesto buđenja. */
     fun isWakeUpActive(): Boolean = (restRemainingSeconds > 0 || restAlarmActive) && restIsWakeTime
 
+    /** Da li je TRENUTNO aktivno "Zakaži čitanje" (bez alarma) - koristi ga statusna linija
+     * da razlikuje ovo od buđenja, koje ima drugačiju poruku. */
+    fun isScheduledReadingActive(): Boolean = restRemainingSeconds > 0 && restSuppressAlarm
+
     /** Dug pritisak na "Kombinovani glasovi": ili produžava VEĆ AKTIVAN odmor za POSLEDNJI
      * korišćen broj minuta (klizač), ILI, ako alarm TRENUTNO zvoni (odmor upravo istekao) i
      * nismo dostigli MAX_SNOOZE_COUNT, "odlaže" (snooze) za tačno 10 minuta, umesto da knjiga
      * uopšte krene. Vraća true ako je nešto urađeno, false ako nema šta (caller prikazuje
      * odgovarajuću poruku prema ovome). */
     /** Deljena logika za "odlaganje" (snooze) - deset minuta tišine pre sledećeg pokušaja,
-     * koristi je i ručno "Produži odmor" i automatsko ponavljanje kad se alarm ne prekine. */
+     * koristi je i ručno "Spavaj još malo" (WakeAlarmActivity) i automatsko ponavljanje kad
+     * se alarm ne prekine. */
     private fun snoozeInternal() {
         stopRestAlarm()
         restAlarmActive = false
