@@ -177,8 +177,6 @@ class HelpActivity : AppCompatActivity() {
         Zatim imaš opciju "Probudi me u".
         Upišeš vreme u formi, npr: 5:20.
         Kada ga postaviš, knjiga te budi u zadato vreme.
-        Kod ovog načina, alarm počinje da zvoni tri minuta pre zadatog vremena, ne jedan.
-        Ako ga ne zaustaviš, sam se prekine posle ta tri minuta, i knjiga nastavlja.
         Ako popuniš ovo polje, klizač se ne koristi.
         Ako u bilo kom trenutku odmora pustiš knjigu, odmor se prekida.
         Četvrto dugme je "Kombinovani glasovi", isto kao u Opštim podešavanjima, samo za ovaj dokument.
@@ -188,8 +186,8 @@ class HelpActivity : AppCompatActivity() {
         Ovo radi samo za odmor postavljen preko klizača, ne i za "Probudi me u".
         Funkcije za odmor rade samo ako je program otvoren, ili ako radi u pozadini.
         Korisno kada radiš kućne poslove, a ne želiš mnogo da se zamaraš pauziranjem i nastavljanjem čitanja.
-        Minut pre isteka odmora, kreće da zvoni alarm.
-        Zvono se zaustavlja ako ranije pustiš knjigu.
+        Tri minuta pre isteka odmora, kreće da zvoni alarm.
+        Zvono se zaustavlja ako ranije pustiš knjigu, ili samo prestane kad odmor istekne, i knjiga tad nastavlja.
         Pri vrhu ekrana uvek piše koliko je odmoru ostalo, ili da nije aktivan.
         Ako želiš da funkcija odmora radi stabilno, u podešavanjima programa uključi neprekidno čitanje.
         Peto dugme pojačava jačinu zvuka.
