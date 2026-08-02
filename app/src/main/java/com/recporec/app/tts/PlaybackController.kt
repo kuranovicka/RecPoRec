@@ -543,6 +543,22 @@ object PlaybackController {
             } ?: return@launch
             // Ako je taj dokument u medjuvremenu zavrsen, ne pokrecemo ga ponovo automatski.
             if (entity.totalCharacters > 0 && entity.currentCharacterOffset >= entity.totalCharacters) return@launch
+            // VAZNO: ako je BAS TAJ dokument VEC pripremljen (motor spreman, isti id) - NE
+            // ponavljamo pripremu iznova. Ovaj ekran (DocumentListActivity) se vraca u prvi
+            // plan cesto (svaki put kad se korisnica vrati na spisak, ne samo pri pravom
+            // otvaranju app-e), i bez ove provere bi svaki takav povratak IZNOVA ucitavao
+            // tekst u motor - sto je moglo da prekine/pomeri VEC pripremljeno, pauzirano
+            // stanje i ostavi drmanje "gluvim" dok se ponovni pokusaj priprema ne zavrsi.
+            if (activeId == entity.id && ttsManager?.isEngineReady == true) {
+                try {
+                    val settings = com.recporec.app.data.AppSettings(context)
+                    if (settings.backgroundEnabled) {
+                        com.recporec.app.service.ReadingService.start(context, settings.uninterruptedEnabled)
+                    }
+                } catch (_: Exception) {
+                }
+                return@launch
+            }
             // Ako je korisnica U MEDJUVREMENU vec rucno otvorila neki dokument (npr. odmah
             // pri otvaranju app-e dodirnula knjigu pre nego sto je ovo stiglo da zavrsi),
             // tiho odustajemo - njen rucni izbor uvek pobedjuje.
