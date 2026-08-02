@@ -15,6 +15,18 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE id = :id")
     suspend fun getById(id: Long): DocumentEntity?
 
+    /** "Poslednji aktivni dokument" za automatsko čitanje - već započet (ima napredak),
+     * ali još nije završen, poslednji otvoren. */
+    @Query(
+        "SELECT * FROM documents WHERE currentCharacterOffset > 0 " +
+            "AND totalCharacters > 0 AND currentCharacterOffset < totalCharacters " +
+            "ORDER BY lastOpenedTimestamp DESC LIMIT 1"
+    )
+    suspend fun getLastActiveDocument(): DocumentEntity?
+
+    @Query("UPDATE documents SET lastOpenedTimestamp = :timestamp WHERE id = :id")
+    suspend fun updateLastOpenedTimestamp(id: Long, timestamp: Long)
+
     @Query("SELECT MIN(sortOrder) FROM documents")
     suspend fun minSortOrder(): Int?
 
@@ -32,4 +44,7 @@ interface DocumentDao {
 
     @Query("DELETE FROM documents WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM documents WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 }

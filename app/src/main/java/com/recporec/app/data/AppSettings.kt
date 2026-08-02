@@ -17,6 +17,17 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
+    /** "Automatski čitaj poslednji dokument" - glavni prekidač. */
+    var autoReadEnabled: Boolean
+        get() = prefs.getBoolean(KEY_AUTO_READ_ENABLED, false)
+        set(value) = prefs.edit().putBoolean(KEY_AUTO_READ_ENABLED, value).apply()
+
+    /** "app" = pri otvaranju aplikacije (poslednji aktivni dokument), "document" = pri
+     * otvaranju BILO KOG dokumenta (onaj koji je upravo otvoren). */
+    var autoReadTrigger: String
+        get() = prefs.getString(KEY_AUTO_READ_TRIGGER, "app") ?: "app"
+        set(value) = prefs.edit().putString(KEY_AUTO_READ_TRIGGER, value).apply()
+
     /** Da li je ikad zatraženo dozvola za stanje telefona (rezervni mehanizam za pozive) -
      * pitamo samo JEDNOM, čak i ako korisnik odbije, da ne dosađujemo pri svakom otvaranju. */
     var phoneStatePermissionAsked: Boolean
@@ -116,6 +127,8 @@ class AppSettings(context: Context) {
             .remove(KEY_PARAGRAPH_PAUSE_ENABLED)
             .remove(KEY_PARAGRAPH_PAUSE_MS)
             .remove(KEY_AUTO_NEXT)
+            .remove(KEY_AUTO_READ_ENABLED)
+            .remove(KEY_AUTO_READ_TRIGGER)
             .apply()
     }
 
@@ -138,5 +151,7 @@ class AppSettings(context: Context) {
         private const val KEY_G_RATE = "global_speech_rate"
         private const val KEY_G_VOLUME = "global_volume_percent"
         private const val KEY_G_PITCH = "global_pitch"
+        private const val KEY_AUTO_READ_ENABLED = "auto_read_enabled"
+        private const val KEY_AUTO_READ_TRIGGER = "auto_read_trigger"
     }
 }

@@ -183,6 +183,13 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
+            com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
+        }
+    }
+
     private fun queryFileName(uri: Uri): String? {
         try {
             contentResolver.query(uri, null, null, null, null)?.use { cursor ->

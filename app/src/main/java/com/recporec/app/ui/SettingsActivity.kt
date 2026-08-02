@@ -81,6 +81,17 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
             settings.autoNextDocumentEnabled = checked
         }
+        binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
+            settings.autoReadEnabled = checked
+            binding.groupAutoReadTrigger.visibility =
+                if (checked) android.view.View.VISIBLE else android.view.View.GONE
+        }
+        binding.groupAutoReadTrigger.setOnCheckedChangeListener { _, checkedId ->
+            settings.autoReadTrigger = when (checkedId) {
+                binding.radioAutoReadDocument.id -> "document"
+                else -> "app"
+            }
+        }
 
         binding.btnNavigationMode.setOnClickListener {
             val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
@@ -93,7 +104,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnResetGeneralDefaults.setOnClickListener {
             android.app.AlertDialog.Builder(this)
                 .setTitle("Vrati na zadano")
-                .setMessage("Vraća sva podešavanja na ovom ekranu (rad u pozadini, drmanje, zvuk, pauza između rečenica, automatski nastavak, navigacija) na podrazumevano stanje.")
+                .setMessage("Vraća sva podešavanja na ovom ekranu (rad u pozadini, drmanje, zvuk, pauza između rečenica, automatski nastavak, automatsko čitanje, navigacija) na podrazumevano stanje.")
                 .setNegativeButton(com.recporec.app.R.string.cancel, null)
                 .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
                     settings.resetGeneralSettingsToDefaults()
@@ -123,6 +134,14 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
         binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
+        binding.switchAutoRead.isChecked = settings.autoReadEnabled
+        binding.groupAutoReadTrigger.visibility =
+            if (settings.autoReadEnabled) android.view.View.VISIBLE else android.view.View.GONE
+        if (settings.autoReadTrigger == "document") {
+            binding.radioAutoReadDocument.isChecked = true
+        } else {
+            binding.radioAutoReadApp.isChecked = true
+        }
 
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE

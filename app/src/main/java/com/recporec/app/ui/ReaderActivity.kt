@@ -321,6 +321,9 @@ class ReaderActivity : AppCompatActivity() {
             doc = finalEntity
             PlaybackController.currentDocument = finalEntity
             PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
+            withContext(Dispatchers.IO) {
+                db.documentDao().updateLastOpenedTimestamp(finalEntity.id, System.currentTimeMillis())
+            }
 
             // Ako je PlaybackController VEĆ imao ovaj TAČAN dokument spreman i motor već
             // radi (npr. čitanje je pokrenuto automatski - buđenje, odmor, ili prelazak na
@@ -332,8 +335,19 @@ class ReaderActivity : AppCompatActivity() {
             val sessionAlreadyActive = cachedParsed != null &&
                 PlaybackController.currentDocument?.id == finalEntity.id &&
                 PlaybackController.ttsManager?.isEngineReady == true
+            val alreadySpeaking = PlaybackController.ttsManager?.isSpeaking == true
+            // "Automatski čitaj poslednji dokument" - "Pri otvaranju dokumenta": čim se OVAJ
+            // dokument otvori, samo krene da čita, bez potrebe da se pritisne Play. Koristi
+            // isti mehanizam kao "nastavi čim glas bude spreman" (pendingPlayAfterReady).
+            if (settings.autoReadEnabled && settings.autoReadTrigger == "document" && !alreadySpeaking) {
+                pendingPlayAfterReady = true
+            }
             if (sessionAlreadyActive) {
                 ttsReady = true
+                if (pendingPlayAfterReady) {
+                    pendingPlayAfterReady = false
+                    togglePlayPause()
+                }
             } else {
                 setupTts(
                     parsedDoc,

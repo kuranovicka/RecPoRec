@@ -39,5 +39,9 @@ data class DocumentEntity(
     val lastTimerStartOffset: Int? = null,
     /** Na koliko minuta je bio postavljen poslednji tajmer - koristi se da se korisniku
      * javi na koji tajmer se tačno vraća (npr. "Poslednji tajmer je odbrojavao 30 minuta"). */
-    val lastTimerMinutes: Int? = null
+    val lastTimerMinutes: Int? = null,
+    /** Kad je dokument poslednji put otvoren (System.currentTimeMillis()) - koristi se da
+     * se pronađe "poslednji aktivni dokument" za automatsko čitanje pri otvaranju
+     * aplikacije. 0 znači nikad otvoren (ili otvoren pre nego što je ovo polje uvedeno). */
+    val lastOpenedTimestamp: Long = 0
 )

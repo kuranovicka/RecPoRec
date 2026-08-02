@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CombinedVoiceEntryEntity::class,
         CombinedVoiceSettingsEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -129,13 +129,24 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Novo polje za "Automatski čitaj poslednji dokument" - pamti kad je svaki
+         * dokument POSLEDNJI PUT otvoren, da bi se moglo pronaći koji je "poslednji
+         * aktivni". Postojeći dokumenti dobijaju dateAdded kao razuman početni datum
+         * (bolje nego 0, koje bi ih sve gurnulo na "nikad otvoreno"). */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE documents ADD COLUMN lastOpenedTimestamp INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("UPDATE documents SET lastOpenedTimestamp = dateAdded")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
