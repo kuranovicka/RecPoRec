@@ -288,10 +288,16 @@ class ReaderActivity : AppCompatActivity() {
         // cemo to prepoznati ispod i tiho odustati, umesto da "pregazimo" njegovo, novije
         // stanje.
         val loadToken = PlaybackController.beginLoadRequest()
+        // Da li je NESTO DRUGO vec aktivno citalo kad smo poceli da otvaramo OVAJ dokument -
+        // ako jeste, citanje treba da se "prenese" na ovaj dokument automatski (nastavlja se
+        // tok), umesto da stane i ceka rucni pritisak na Play, cak i ako "Automatski citaj
+        // pri otvaranju dokumenta" nije ukljuceno.
+        val wasSpeakingBeforeSwitch =
+            PlaybackController.currentDocument?.id != documentId && PlaybackController.ttsManager?.isSpeaking == true
         // Ako TRENUTNO neki DRUGI dokument aktivno cita (ne ovaj koji upravo otvaramo),
         // eksplicitno ga zaustavi PRE nego sto pocnemo bilo sta drugo - jasnije i pouzdanije
         // nego osloniti se da ce novo ucitavanje samo nekako "preklopiti" staro.
-        if (PlaybackController.currentDocument?.id != documentId && PlaybackController.ttsManager?.isSpeaking == true) {
+        if (wasSpeakingBeforeSwitch) {
             PlaybackController.ttsManager?.pause()
         }
         lifecycleScope.launch {
@@ -368,7 +374,10 @@ class ReaderActivity : AppCompatActivity() {
             // "Automatski čitaj poslednji dokument" - "Pri otvaranju dokumenta": čim se OVAJ
             // dokument otvori, samo krene da čita, bez potrebe da se pritisne Play. Koristi
             // isti mehanizam kao "nastavi čim glas bude spreman" (pendingPlayAfterReady).
-            if (settings.autoReadEnabled && settings.autoReadTrigger == "document" && !alreadySpeaking) {
+            // ISTO se desava i ako je NESTO DRUGO vec citalo kad smo poceli da otvaramo ovaj
+            // dokument (bez obzira na ovo podesavanje) - citanje se "prenosi" na novi
+            // dokument, ne prekida se tok koji je vec bio u toku.
+            if ((settings.autoReadEnabled && settings.autoReadTrigger == "document" || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
                 pendingPlayAfterReady = true
             }
             if (sessionAlreadyActive) {
