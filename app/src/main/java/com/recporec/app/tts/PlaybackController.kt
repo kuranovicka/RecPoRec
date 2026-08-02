@@ -409,6 +409,21 @@ object PlaybackController {
     /** Kad se dokument do kraja pročita i uključeno je "Pređi automatski na sledeći",
      * nakon kratke pauze (i zvučnog signala) prelazi na sledeći dokument u listi. Živi ovde
      * (ne u ReaderActivity) da bi radilo i kad je čitanje u pozadini, van otvorenog ekrana. */
+    /** Kratak "bip" (isti kao za dodir dugmadi) koji najavljuje automatski prelazak na novi
+     * dokument, PRE nego sto citanje pocne - koristi se svugde gde se citanje automatski
+     * prebacuje sa jednog dokumenta na drugi (auto-prelazak, automatsko citanje pri
+     * otvaranju app-e/dokumenta, nastavak toka pri rucnom prebacivanju). Postuje isti
+     * prekidac "Zvuk" iz Podesavanja kao i dugmad. */
+    fun playTransitionSound(context: Context) {
+        try {
+            if (!com.recporec.app.data.AppSettings(context).soundFeedbackEnabled) return
+            val tone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+            tone.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ tone.release() }, 200)
+        } catch (_: Exception) {
+        }
+    }
+
     private fun handleAutoAdvance() {
         val ctx = appContext ?: return
         val settings = com.recporec.app.data.AppSettings(ctx)
@@ -427,8 +442,7 @@ object PlaybackController {
                 ).show()
                 return@launch
             }
-            val tone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
-            tone.startTone(android.media.ToneGenerator.TONE_PROP_ACK, 200)
+            playTransitionSound(ctx)
 
             // Android 10+ NE dozvoljava pokretanje novog ekrana iz pozadine (bez otvorenog
             // ekrana ove app) - taj pokusaj bi tiho promasio kad je citanje u pozadini, van
@@ -451,7 +465,6 @@ object PlaybackController {
             } catch (_: Exception) {
                 // Ocekivano kad je app u pozadini - citanje je vec pokrenuto gore bez obzira.
             }
-            tone.release()
         }
     }
 
@@ -488,6 +501,7 @@ object PlaybackController {
             // pri otvaranju app-e dodirnula knjigu pre nego sto je ovo stiglo da zavrsi),
             // tiho odustajemo - njen rucni izbor uvek pobedjuje.
             if (!isLoadRequestCurrent(loadToken)) return@launch
+            playTransitionSound(context)
             ensureInitialized(context)
             loadAndPlayDocumentInBackground(context, entity.id, loadToken)
             // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema

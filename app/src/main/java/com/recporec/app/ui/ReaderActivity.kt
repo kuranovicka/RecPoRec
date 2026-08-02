@@ -387,6 +387,7 @@ class ReaderActivity : AppCompatActivity() {
             // dokument, ne prekida se tok koji je vec bio u toku.
             if (((settings.autoReadEnabled && settings.autoReadTrigger == "document" && !settings.userManuallyPaused) || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
                 pendingPlayAfterReady = true
+                PlaybackController.playTransitionSound(this@ReaderActivity)
             }
             if (sessionAlreadyActive) {
                 ttsReady = true
