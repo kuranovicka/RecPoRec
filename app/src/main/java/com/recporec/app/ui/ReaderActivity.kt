@@ -288,6 +288,12 @@ class ReaderActivity : AppCompatActivity() {
         // cemo to prepoznati ispod i tiho odustati, umesto da "pregazimo" njegovo, novije
         // stanje.
         val loadToken = PlaybackController.beginLoadRequest()
+        // Ako TRENUTNO neki DRUGI dokument aktivno cita (ne ovaj koji upravo otvaramo),
+        // eksplicitno ga zaustavi PRE nego sto pocnemo bilo sta drugo - jasnije i pouzdanije
+        // nego osloniti se da ce novo ucitavanje samo nekako "preklopiti" staro.
+        if (PlaybackController.currentDocument?.id != documentId && PlaybackController.ttsManager?.isSpeaking == true) {
+            PlaybackController.ttsManager?.pause()
+        }
         lifecycleScope.launch {
             val entity = db.documentDao().getById(documentId) ?: return@launch
             binding.textDocTitle.text = entity.title
