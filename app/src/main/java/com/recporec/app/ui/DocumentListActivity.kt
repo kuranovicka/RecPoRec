@@ -255,6 +255,7 @@ class DocumentListActivity : AppCompatActivity() {
                         1 -> {
                             adapter.cancelSelection()
                             updateGeneralActionsLabel(0)
+                            android.widget.Toast.makeText(this, "Izbor otkazan.", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -264,7 +265,9 @@ class DocumentListActivity : AppCompatActivity() {
                 .setTitle("Opšte radnje")
                 .setItems(arrayOf("Odaberi sve")) { _, _ ->
                     adapter.selectAll()
-                    updateGeneralActionsLabel(adapter.getSelectedIds().size)
+                    val count = adapter.getSelectedIds().size
+                    updateGeneralActionsLabel(count)
+                    android.widget.Toast.makeText(this, "Odabrano $count dokumenata.", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }
