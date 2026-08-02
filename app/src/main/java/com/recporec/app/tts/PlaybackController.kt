@@ -297,6 +297,23 @@ object PlaybackController {
         // Play/Pauza) - resetuje se ista zastavica, da automatsko citanje kasnije ispravno
         // zna da korisnica VISE nije "pauzirala i ostavila to tako".
         appContext?.let { com.recporec.app.data.AppSettings(it).userManuallyPaused = false }
+        // Ako motor JOS UVEK nije spreman (npr. drmanje odmah posle PRAVOG hladnog pokretanja,
+        // dok se dokument tek "priprema" u pozadini - Pri otvaranju dokumenta rezim) -
+        // pokusaj tiho ne bi uradio nista (chunks prazni). Umesto da samo odustanemo,
+        // sacekamo kratko i pokusamo ponovo, do par puta - dovoljno da priprema stigne da
+        // zavrsi, bez potrebe da korisnica sama shvati da treba da drmne opet.
+        if (ttsManager?.isEngineReady != true || currentDocument == null) {
+            scope.launch {
+                repeat(10) {
+                    delay(300)
+                    if (ttsManager?.isEngineReady == true && currentDocument != null) {
+                        resumeCancelingRestIfNeeded()
+                        return@launch
+                    }
+                }
+            }
+            return false
+        }
         // Eksplicitno kreni od SAČUVANE pozicije (kao dugme Play/Pauza u čitaču), umesto da
         // se osloni na unutrašnji indeks rečenice u TtsManager-u - pouzdanije, posebno posle
         // duže pauze (odmor/buđenje) kad taj indeks moze da se razidje sa stvarno sacuvanom
