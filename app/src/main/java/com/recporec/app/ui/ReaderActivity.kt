@@ -283,6 +283,11 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun loadDocument() {
+        // Zabelezi OVAJ zahtev za otvaranje kao najnoviji - ako neki DRUGI ekran (npr. za
+        // dokument koji je otvoren POSLE ovog) zavrsi svoje asinhrono ucitavanje pre nas, mi
+        // cemo to prepoznati ispod i tiho odustati, umesto da "pregazimo" njegovo, novije
+        // stanje.
+        val loadToken = PlaybackController.beginLoadRequest()
         lifecycleScope.launch {
             val entity = db.documentDao().getById(documentId) ?: return@launch
             binding.textDocTitle.text = entity.title
@@ -305,6 +310,14 @@ class ReaderActivity : AppCompatActivity() {
                     return@launch
                 }
             }
+
+            // KLJUCNA PROVERA: ako je u medjuvremenu neki DRUGI, NOVIJI dokument pocet da se
+            // otvara (npr. korisnica je vec presla na sledecu knjigu dok je ovo asinhrono
+            // ucitavanje jos trajalo), tiho odustajemo OVDE - PRE nego sto bilo sta upisemo u
+            // deljeno PlaybackController stanje. Bez ovoga, "sporiji" (ali stariji) zahtev bi
+            // mogao da zavrsi POSLE novijeg i pogresno preuzme kontrolu.
+            if (!PlaybackController.isLoadRequestCurrent(loadToken)) return@launch
+
             parsed = parsedDoc
             PlaybackController.parsedDocument = parsedDoc
 
@@ -317,6 +330,10 @@ class ReaderActivity : AppCompatActivity() {
                 db.documentDao().update(updated)
                 updated
             } else entity
+
+            // Druga provera, na slucaj da je NOVIJI zahtev stigao BAS dok smo cekali gornji
+            // upis u bazu.
+            if (!PlaybackController.isLoadRequestCurrent(loadToken)) return@launch
 
             doc = finalEntity
             PlaybackController.currentDocument = finalEntity

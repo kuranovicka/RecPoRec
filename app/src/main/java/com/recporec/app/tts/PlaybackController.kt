@@ -28,6 +28,27 @@ object PlaybackController {
         private set
 
     var currentDocument: DocumentEntity? = null
+
+    /** "Generacija" zahteva za otvaranje dokumenta - raste svaki put kad se BILO KOJI
+     * dokument POCNE da se otvara (ReaderActivity.onCreate). Koristi se da se sprece "stare",
+     * nadmasene ucitane sesije da pobede - ako je npr. Pera otvoren, pa Marko odmah zatim
+     * (Pera-in ekran ostaje "ziv" u pozadini dok se otvara Marko), a Perino asinhrono
+     * ucitavanje se iz nekog razloga zavrsi POSLE Markovog, Pera NE SME da "pregazi" Markovo
+     * vec postavljeno stanje - pobeduje uvek NAJNOVIJI zahtev, bez obzira koji redom zavrsi. */
+    private var latestLoadRequestId: Long = 0L
+
+    /** Poziva SVAKI put kad se neki ekran za citanje TEK POCINJE da otvara dokument (pre bilo
+     * kakvog asinhronog rada) - vraca "token" koji treba proslediti u commitLoadIfCurrent() na
+     * kraju, da se zna da li je taj konkretan zahtev jos uvek najnoviji. */
+    fun beginLoadRequest(): Long {
+        latestLoadRequestId += 1
+        return latestLoadRequestId
+    }
+
+    /** Da li je dati token JOS UVEK najnoviji zahtev za otvaranje - false znaci da je u
+     * medjuvremenu neki DRUGI (noviji) dokument pocet da se otvara, i da ovaj (stariji)
+     * poziv treba tiho da odustane bez upisivanja bilo cega u deljeno stanje. */
+    fun isLoadRequestCurrent(token: Long): Boolean = token == latestLoadRequestId
     var parsedDocument: ParsedDocument? = null
     var elapsedSeconds: Long = 0
 
@@ -396,7 +417,7 @@ object PlaybackController {
             // otvorene app. Zato citanje sledeceg dokumenta pokrecemo OVDE, direktno, bez
             // ikakvog ekrana - a ako korisnica kasnije otvori app, ReaderActivity ce prepoznati
             // da je citanje vec u toku i samo se prikaci na njega.
-            loadAndPlayDocumentInBackground(ctx, next.id)
+            loadAndPlayDocumentInBackground(ctx, next.id, beginLoadRequest())
 
             // I dalje pokusavamo da otvorimo ekran, za slucaj da app JESTE u prvom planu kad
             // ovo stigne (npr. korisnica gleda listu dokumenata) - ako sistem to blokira jer
@@ -425,6 +446,7 @@ object PlaybackController {
      * poslednji aktivni (već započet, ali nezavršen) dokument i pokreće ga u pozadini, BEZ
      * ulaska u čitač - korisnica ostaje na spisku dokumenata dok čitanje počne da se čuje. */
     fun autoResumeLastActiveDocument(context: Context) {
+        val loadToken = beginLoadRequest()
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
             val db = AppDatabase.getInstance(context)
@@ -441,8 +463,12 @@ object PlaybackController {
             } ?: return@launch
             // Ako je taj dokument u medjuvremenu zavrsen, ne pokrecemo ga ponovo automatski.
             if (entity.totalCharacters > 0 && entity.currentCharacterOffset >= entity.totalCharacters) return@launch
+            // Ako je korisnica U MEDJUVREMENU vec rucno otvorila neki dokument (npr. odmah
+            // pri otvaranju app-e dodirnula knjigu pre nego sto je ovo stiglo da zavrsi),
+            // tiho odustajemo - njen rucni izbor uvek pobedjuje.
+            if (!isLoadRequestCurrent(loadToken)) return@launch
             ensureInitialized(context)
-            loadAndPlayDocumentInBackground(context, entity.id)
+            loadAndPlayDocumentInBackground(context, entity.id, loadToken)
             // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema
             // razlog da drzi pozadinski rad zivim bez foreground servisa, koji svaki drugi
             // put kad se citanje pokrene (dugme, drmanje, budjenje...) vec biva pokrenut.
@@ -456,7 +482,7 @@ object PlaybackController {
         }
     }
 
-    private suspend fun loadAndPlayDocumentInBackground(context: Context, documentId: Long) {
+    private suspend fun loadAndPlayDocumentInBackground(context: Context, documentId: Long, loadToken: Long? = null) {
         val db = AppDatabase.getInstance(context)
         val entity = withContext(Dispatchers.IO) { db.documentDao().getById(documentId) } ?: return
         val settings = com.recporec.app.data.AppSettings(context)
@@ -476,6 +502,11 @@ object PlaybackController {
             withContext(Dispatchers.IO) { db.documentDao().update(updated) }
             updated
         } else entity
+
+        // Ako je u medjuvremenu neki NOVIJI zahtev za otvaranje pocet (npr. korisnica je
+        // rucno otvorila drugu knjigu dok je ovo jos trajalo), odustajemo PRE upisa u
+        // deljeno stanje - noviji zahtev uvek pobedjuje.
+        if (loadToken != null && !isLoadRequestCurrent(loadToken)) return
 
         parsedDocument = parsedDoc
         currentDocument = finalEntity
