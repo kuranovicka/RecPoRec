@@ -351,6 +351,15 @@ object PlaybackController {
             }
         }
         tts.onFinished = {
+            // Poslednja recenica ne pomera poziciju do STVARNOG kraja teksta (samo do
+            // pocetka te poslednje recenice) - bez ovoga, kartica "Procitane" nikad ne bi
+            // prepoznala knjigu kao zavrsenu, jer bi currentCharacterOffset uvek ostajao
+            // malo ISPOD totalCharacters.
+            val totalLen = parsedDocument?.length
+            if (totalLen != null && totalLen > 0) {
+                currentDocument = currentDocument?.copy(currentCharacterOffset = totalLen)
+                persistCurrentDocument()
+            }
             scope.launch { uiFinishedListener?.invoke() }
             handleAutoAdvance()
         }
@@ -419,7 +428,19 @@ object PlaybackController {
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
             val db = AppDatabase.getInstance(context)
-            val entity = withContext(Dispatchers.IO) { db.documentDao().getLastActiveDocument() } ?: return@launch
+            // Preferiraj dokument koji je STVARNO aktivan u ovoj sesiji (ono sto je
+            // korisnica poslednje otvorila/citala) - pouzdanije od pretrage po vremenu u
+            // bazi, koje je moglo da "zaostane" na stariji dokument u nekim slucajevima.
+            // Tek ako trenutno NEMA nikakvog aktivnog dokumenta (npr. svez pokrenut proces),
+            // potrazi u bazi poslednji aktivni.
+            val activeId = currentDocument?.id
+            val entity = if (activeId != null) {
+                withContext(Dispatchers.IO) { db.documentDao().getById(activeId) }
+            } else {
+                withContext(Dispatchers.IO) { db.documentDao().getLastActiveDocument() }
+            } ?: return@launch
+            // Ako je taj dokument u medjuvremenu zavrsen, ne pokrecemo ga ponovo automatski.
+            if (entity.totalCharacters > 0 && entity.currentCharacterOffset >= entity.totalCharacters) return@launch
             ensureInitialized(context)
             loadAndPlayDocumentInBackground(context, entity.id)
             // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema

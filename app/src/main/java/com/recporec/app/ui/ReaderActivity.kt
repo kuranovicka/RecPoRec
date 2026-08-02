@@ -346,7 +346,14 @@ class ReaderActivity : AppCompatActivity() {
                 ttsReady = true
                 if (pendingPlayAfterReady) {
                     pendingPlayAfterReady = false
-                    togglePlayPause()
+                    // VAZNO: ako je sesija VEC aktivna I VEC cita (npr. automatski prelazak
+                    // na sledeci dokument, koji je vec pokrenuo citanje pre nego sto se ovaj
+                    // ekran uopste otvorio), togglePlayPause() bi je POGRESNO pauzirao umesto
+                    // pokrenuo (otud "procita rec dve i stane"). Pokrecemo SAMO ako stvarno
+                    // JOS UVEK nista ne cita.
+                    if (PlaybackController.ttsManager?.isSpeaking != true) {
+                        togglePlayPause()
+                    }
                 }
             } else {
                 setupTts(
