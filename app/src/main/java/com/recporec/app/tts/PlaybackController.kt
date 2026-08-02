@@ -303,13 +303,21 @@ object PlaybackController {
         // sacekamo kratko i pokusamo ponovo, do par puta - dovoljno da priprema stigne da
         // zavrsi, bez potrebe da korisnica sama shvati da treba da drmne opet.
         if (ttsManager?.isEngineReady != true || currentDocument == null) {
-            scope.launch {
-                repeat(10) {
-                    delay(300)
-                    if (ttsManager?.isEngineReady == true && currentDocument != null) {
-                        resumeCancelingRestIfNeeded()
-                        return@launch
+            // Sprecava da svako naredno drmanje (dok jos nije spremno) pokrene JOS JEDAN,
+            // preklapajuci pokusaj cekanja - vise takvih istovremeno moglo je da izazove
+            // nepredvidivo ponasanje (npr. dupli pokusaji nastavka u istom trenutku).
+            if (!isRetryingShakeResume) {
+                isRetryingShakeResume = true
+                scope.launch {
+                    repeat(10) {
+                        delay(300)
+                        if (ttsManager?.isEngineReady == true && currentDocument != null) {
+                            isRetryingShakeResume = false
+                            resumeCancelingRestIfNeeded()
+                            return@launch
+                        }
                     }
+                    isRetryingShakeResume = false
                 }
             }
             return false
@@ -387,6 +395,7 @@ object PlaybackController {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var appContext: Context? = null
     private var tickerStarted = false
+    private var isRetryingShakeResume = false
 
     // Iste vrednosti kao u ReaderActivity - drzi korak navigacije dosledan bez obzira da li
     // je pokrenut sa dugmeta u citacu ili sa medijskog tastera.
