@@ -299,8 +299,16 @@ class ReaderActivity : AppCompatActivity() {
             binding.textDocTitle.text = entity.title
 
             val cachedParsed = PlaybackController.parsedDocument
-            val parsedDoc = if (cachedParsed != null && PlaybackController.currentDocument?.id == entity.id) {
-                cachedParsed
+            // VAZNO: ovo se mora izracunati OVDE, PRE nego sto bilo sta nize promeni
+            // PlaybackController.currentDocument - u suprotnom bi provera kasnije (posle
+            // vec izvrsenog PlaybackController.currentDocument = finalEntity) bila GOTOVO
+            // UVEK tacna za NOVI dokument (jer bismo poredili currentDocument sa samim sobom,
+            // netom postavljenim), sto je i BIO pravi uzrok "cita pogresnu (prethodnu)
+            // knjigu" - setupTts() bi se pogresno PRESKOCIO za potpuno nov dokument, cija
+            // sadrzina zapravo NIKAD nije ucitana u TTS motor.
+            val usingCachedParse = cachedParsed != null && PlaybackController.currentDocument?.id == entity.id
+            val parsedDoc = if (usingCachedParse) {
+                cachedParsed!!
             } else {
                 try {
                     withContext(Dispatchers.IO) {
@@ -355,9 +363,7 @@ class ReaderActivity : AppCompatActivity() {
             // učitava tekst i glas), i privremeno bi ostavilo ttsReady=false dok se ne
             // završi, što bi u tom prozoru pogrešno prikazalo "Glas se priprema" na svaki
             // dodir dugmadi, čak i dok se knjiga već čuje.
-            val sessionAlreadyActive = cachedParsed != null &&
-                PlaybackController.currentDocument?.id == finalEntity.id &&
-                PlaybackController.ttsManager?.isEngineReady == true
+            val sessionAlreadyActive = usingCachedParse && PlaybackController.ttsManager?.isEngineReady == true
             val alreadySpeaking = PlaybackController.ttsManager?.isSpeaking == true
             // "Automatski čitaj poslednji dokument" - "Pri otvaranju dokumenta": čim se OVAJ
             // dokument otvori, samo krene da čita, bez potrebe da se pritisne Play. Koristi
