@@ -422,6 +422,16 @@ object PlaybackController {
             val entity = withContext(Dispatchers.IO) { db.documentDao().getLastActiveDocument() } ?: return@launch
             ensureInitialized(context)
             loadAndPlayDocumentInBackground(context, entity.id)
+            // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema
+            // razlog da drzi pozadinski rad zivim bez foreground servisa, koji svaki drugi
+            // put kad se citanje pokrene (dugme, drmanje, budjenje...) vec biva pokrenut.
+            try {
+                val settings = com.recporec.app.data.AppSettings(context)
+                if (settings.backgroundEnabled) {
+                    com.recporec.app.service.ReadingService.start(context, settings.uninterruptedEnabled)
+                }
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -440,8 +450,8 @@ object PlaybackController {
 
         val charsPerPage = 1800
         val totalPages = kotlin.math.max(1, (parsedDoc.length + charsPerPage - 1) / charsPerPage)
-        val finalEntity = if (entity.totalPages != totalPages) {
-            val updated = entity.copy(totalPages = totalPages)
+        val finalEntity = if (entity.totalPages != totalPages || entity.totalCharacters != parsedDoc.length) {
+            val updated = entity.copy(totalPages = totalPages, totalCharacters = parsedDoc.length)
             withContext(Dispatchers.IO) { db.documentDao().update(updated) }
             updated
         } else entity

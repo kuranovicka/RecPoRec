@@ -312,8 +312,8 @@ class ReaderActivity : AppCompatActivity() {
             // ostatku ekrana - da ne postoji prozor u kom je doc "napola gotov" i neko dugme
             // (idi na, itd) radi sa nepotpunim podacima (npr. brojem stranica 0).
             val totalPages = max(1, (parsedDoc.length + charsPerPage - 1) / charsPerPage)
-            val finalEntity = if (entity.totalPages != totalPages) {
-                val updated = entity.copy(totalPages = totalPages)
+            val finalEntity = if (entity.totalPages != totalPages || entity.totalCharacters != parsedDoc.length) {
+                val updated = entity.copy(totalPages = totalPages, totalCharacters = parsedDoc.length)
                 db.documentDao().update(updated)
                 updated
             } else entity

@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CombinedVoiceEntryEntity::class,
         CombinedVoiceSettingsEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -140,13 +140,27 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Polje totalCharacters je postojalo od pocetka, ali se NIKAD nije stvarno
+         * upisivalo (uvek ostajalo 0) - zbog toga kartice "Zapocete"/"Procitane" nisu
+         * prikazivale nista, i "Automatski citaj poslednji dokument" nije mogao ispravno
+         * da pronadje poslednji aktivni dokument. Sad se totalCharacters upisuje pri svakom
+         * otvaranju dokumenta (tacna vrednost) - ova migracija samo POPUNI postojece
+         * dokumente PROCENOM (broj stranica * 1800 karaktera po stranici, ista konstanta
+         * koja se vec koristi svugde u kodu) - dovoljno tacno za svrhu (zapoceto/zavrseno),
+         * a tacna vrednost ce se ionako upisati cim se dokument sledeci put otvori. */
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("UPDATE documents SET totalCharacters = totalPages * 1800 WHERE totalCharacters = 0 AND totalPages > 0")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
