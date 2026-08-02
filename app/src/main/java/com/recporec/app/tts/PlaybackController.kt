@@ -195,6 +195,43 @@ object PlaybackController {
      * unutrasnju logiku ako iz nekog razloga jos nije sama preskocila u fazu zvonjenja. */
     fun onWakeAlarmFired(context: Context) {
         if (appContext == null) appContext = context.applicationContext
+        // Ako je proces u medjuvremenu ubijen (npr. budjenje zakazano daleko unapred, pa je
+        // Android sam ugasio app dok je cekala) - AlarmManager ce ipak probuditi proces i
+        // pozvati OVU funkciju, ali ttsManager (i sve sto uz njega ide) ce biti PRAZNO. Bez
+        // ovoga bi budjenje TIHO ne uradilo nista - startFromOffset() na null motoru je no-op.
+        ensureInitialized(context)
+        if (currentDocument == null) {
+            // "Sastavi nazad" iz sacuvanog stanja (prezivelo je gasenje procesa, za razliku
+            // od obicnih in-memory polja) - retko se desava (samo ako je Android STVARNO
+            // ubio proces dok se cekalo, npr. preko cele noci), pa asinhrona rekonstrukcija
+            // ovde ne smeta.
+            val settings = com.recporec.app.data.AppSettings(context)
+            val docId = settings.pendingWakeDocumentId
+            if (docId > 0) {
+                restIsWakeTime = settings.pendingWakeIsWakeTime
+                restSuppressAlarm = settings.pendingWakeSuppressAlarm
+                restRemainingSeconds = 0
+                restAlarmActive = false
+                scope.launch {
+                    val db = AppDatabase.getInstance(context)
+                    val entity = withContext(Dispatchers.IO) { db.documentDao().getById(docId) } ?: return@launch
+                    val parsedDoc = try {
+                        withContext(Dispatchers.IO) {
+                            com.recporec.app.parser.DocumentParser.parse(context, android.net.Uri.parse(entity.uri), entity.format)
+                        }
+                    } catch (_: Exception) {
+                        return@launch
+                    }
+                    parsedDocument = parsedDoc
+                    currentDocument = entity
+                    val tts = ttsManager ?: return@launch
+                    withContext(Dispatchers.Default) { tts.loadText(parsedDoc.fullText) }
+                    tts.syncPositionOnly(entity.currentCharacterOffset)
+                    onWakeAlarmFired(context) // sad kad je currentDocument popunjen, nastavi normalno ispod
+                }
+                return
+            }
+        }
         if (restRemainingSeconds <= 0 && !restAlarmActive) {
             if (restSuppressAlarm) {
                 // "Zakaži čitanje" - bez alarma, samo tiho krece.
@@ -245,9 +282,11 @@ object PlaybackController {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
             scheduleWakeAlarm(restTargetElapsedMillis)
+            persistPendingWake(true, false)
         } else {
             releaseRestWakeLock()
             cancelWakeAlarm()
+            appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
         }
         notifyPlaybackStateChanged()
     }
@@ -268,11 +307,27 @@ object PlaybackController {
             restTargetElapsedMillis = android.os.SystemClock.elapsedRealtime() + restRemainingSeconds * 1000L
             acquireRestWakeLock()
             scheduleWakeAlarm(restTargetElapsedMillis)
+            persistPendingWake(false, true)
         } else {
             releaseRestWakeLock()
             cancelWakeAlarm()
+            appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
         }
         notifyPlaybackStateChanged()
+    }
+
+    /** Cuva dovoljno podataka da se budjenje/zakazano citanje moze "sastaviti nazad" cak i
+     * ako Android u medjuvremenu ubije ceo proces dok se ceka (npr. preko noci) - obicna
+     * in-memory polja (restRemainingSeconds i slicna) bi se u tom slucaju izgubila zajedno sa
+     * procesom, iako AlarmManager i dalje pouzdano budi novi proces na vreme. */
+    private fun persistPendingWake(isWakeTime: Boolean, suppressAlarm: Boolean) {
+        val ctx = appContext ?: return
+        val docId = currentDocument?.id ?: return
+        val settings = com.recporec.app.data.AppSettings(ctx)
+        settings.pendingWakeDocumentId = docId
+        settings.pendingWakeTargetElapsedMillis = restTargetElapsedMillis
+        settings.pendingWakeIsWakeTime = isWakeTime
+        settings.pendingWakeSuppressAlarm = suppressAlarm
     }
 
     fun cancelRest() {
@@ -284,6 +339,7 @@ object PlaybackController {
         stopRestAlarm()
         releaseRestWakeLock()
         cancelWakeAlarm()
+        appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
     }
 
     /** Nastavlja čitanje, i AKO je odmor (ili alarm koji zvoni posle njega) trenutno aktivan,
@@ -379,6 +435,15 @@ object PlaybackController {
         restSnoozeCount += 1
         acquireRestWakeLock()
         scheduleWakeAlarm(restTargetElapsedMillis)
+        // Azuriraj i sacuvano vreme (koje "prezivljava" gasenje procesa) - u suprotnom bi
+        // rekonstrukcija posle eventualnog gasenja procesa TOKOM odlaganja koristila STARO,
+        // vec proslo vreme.
+        appContext?.let {
+            val settings = com.recporec.app.data.AppSettings(it)
+            if (settings.pendingWakeDocumentId > 0) {
+                settings.pendingWakeTargetElapsedMillis = restTargetElapsedMillis
+            }
+        }
         notifyPlaybackStateChanged()
     }
 
@@ -530,6 +595,13 @@ object PlaybackController {
         val loadToken = beginLoadRequest()
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
+            // KRITICNO: ako je BUDJENJE ili ZAKAZANO CITANJE trenutno aktivno (odbrojava, ili
+            // alarm vec zvoni), NIKAKO ne diramo nista ovde - ta funkcija ima SVOJ, odvojen
+            // tok upravljanja (AlarmManager, WakeAlarmActivity...), i ako bismo ovde pripremili
+            // ili pustili dokument, to bi prekinulo/pomerilo tu vec aktivnu, casovnikom
+            // vodjenu sekvencu (npr. korisnica bi ocekivala da je citanje jos uvek "cekanje na
+            // budjenje", a mi bismo ga preranije pokrenuli ili pomerili poziciju).
+            if (restRemainingSeconds > 0 || restAlarmActive) return@launch
             // VAZNO: rucna pauza NIKAD ne sme da spreci PRIPREMU (ucitavanje teksta/pozicije u
             // motor) - samo GLASNO automatsko pustanje. Ranije je ovo bio raniji "return@launch"
             // koji je PRESKACAO CELU pripremu kad je autoPlay=true i korisnica rucno pauzirala -
@@ -887,6 +959,7 @@ object PlaybackController {
         // zatvaranje app-e - namerna, bezbednija odluka, umesto rizicnog pokusaja da se cela
         // sesija ponovo sastavi iz niceg kad telefon sam probudi vec ugasenu app.
         cancelWakeAlarm()
+        appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
         uiPositionListener = null
         uiFinishedListener = null
         uiTimerExpiredListener = null

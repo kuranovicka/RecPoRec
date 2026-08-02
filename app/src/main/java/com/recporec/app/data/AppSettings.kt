@@ -35,6 +35,41 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_USER_MANUALLY_PAUSED, false)
         set(value) = prefs.edit().putBoolean(KEY_USER_MANUALLY_PAUSED, value).apply()
 
+    /** Ova cetiri polja "preziveljavaju" i gasenje procesa dok se ceka na budjenje/zakazano
+     * citanje (za razliku od odgovarajucih polja u PlaybackController, koja su SAMO u
+     * memoriji i nestaju ako Android u medjuvremenu ubije app - npr. tokom cele noci dok
+     * ceka jutarnje budjenje). AlarmManager i dalje pouzdano budi PROCES na vreme, ali bez
+     * ovoga ne bi bilo nacina da se zna KOJI dokument i KOJA vrsta budjenja je bila u pitanju
+     * kad se ttsManager/currentDocument izgube zajedno sa ubijenim procesom. -1 = nista
+     * zakazano. */
+    var pendingWakeDocumentId: Long
+        get() = prefs.getLong(KEY_PENDING_WAKE_DOC_ID, -1L)
+        set(value) = prefs.edit().putLong(KEY_PENDING_WAKE_DOC_ID, value).apply()
+
+    var pendingWakeTargetElapsedMillis: Long
+        get() = prefs.getLong(KEY_PENDING_WAKE_TARGET_ELAPSED, 0L)
+        set(value) = prefs.edit().putLong(KEY_PENDING_WAKE_TARGET_ELAPSED, value).apply()
+
+    var pendingWakeIsWakeTime: Boolean
+        get() = prefs.getBoolean(KEY_PENDING_WAKE_IS_WAKE_TIME, false)
+        set(value) = prefs.edit().putBoolean(KEY_PENDING_WAKE_IS_WAKE_TIME, value).apply()
+
+    var pendingWakeSuppressAlarm: Boolean
+        get() = prefs.getBoolean(KEY_PENDING_WAKE_SUPPRESS_ALARM, false)
+        set(value) = prefs.edit().putBoolean(KEY_PENDING_WAKE_SUPPRESS_ALARM, value).apply()
+
+    /** Brise sacuvano stanje budjenja - poziva se cim se budjenje/zakazano citanje otkaze ili
+     * uspesno okine, da "zaboravljeno" stanje ne bi kasnije pogresno "oziveo" neki naredni,
+     * nepovezani AlarmManager dogadjaj. */
+    fun clearPendingWake() {
+        prefs.edit()
+            .remove(KEY_PENDING_WAKE_DOC_ID)
+            .remove(KEY_PENDING_WAKE_TARGET_ELAPSED)
+            .remove(KEY_PENDING_WAKE_IS_WAKE_TIME)
+            .remove(KEY_PENDING_WAKE_SUPPRESS_ALARM)
+            .apply()
+    }
+
     /** Da li je ikad zatraženo dozvola za stanje telefona (rezervni mehanizam za pozive) -
      * pitamo samo JEDNOM, čak i ako korisnik odbije, da ne dosađujemo pri svakom otvaranju. */
     var phoneStatePermissionAsked: Boolean
@@ -161,5 +196,9 @@ class AppSettings(context: Context) {
         private const val KEY_AUTO_READ_ENABLED = "auto_read_enabled"
         private const val KEY_AUTO_READ_TRIGGER = "auto_read_trigger"
         private const val KEY_USER_MANUALLY_PAUSED = "user_manually_paused"
+        private const val KEY_PENDING_WAKE_DOC_ID = "pending_wake_doc_id"
+        private const val KEY_PENDING_WAKE_TARGET_ELAPSED = "pending_wake_target_elapsed"
+        private const val KEY_PENDING_WAKE_IS_WAKE_TIME = "pending_wake_is_wake_time"
+        private const val KEY_PENDING_WAKE_SUPPRESS_ALARM = "pending_wake_suppress_alarm"
     }
 }
