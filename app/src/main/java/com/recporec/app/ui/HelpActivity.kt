@@ -46,7 +46,6 @@ class HelpActivity : AppCompatActivity() {
         "Pri otvaranju aplikacije" ili "Pri otvaranju dokumenta".
         Prva opcija automatski nastavlja čitanje poslednjeg započetog dokumenta, čim otvoriš aplikaciju.
         Druga opcija započinje čitanje čim otvoriš bilo koji dokument.
-        Ako preko play dugmeta pauziraš čitanje, ono neće biti nastavljeno sve dok ga ručno ne nastaviš.
         Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.

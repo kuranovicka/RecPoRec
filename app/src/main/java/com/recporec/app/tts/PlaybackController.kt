@@ -521,9 +521,14 @@ object PlaybackController {
         val loadToken = beginLoadRequest()
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
-            // Rucna pauza blokira samo GLASNO automatsko nastavljanje - priprema (da drmanje
-            // bude spremno) sme da se desi bez obzira na to.
-            if (autoPlay && com.recporec.app.data.AppSettings(context).userManuallyPaused) return@launch
+            // VAZNO: rucna pauza NIKAD ne sme da spreci PRIPREMU (ucitavanje teksta/pozicije u
+            // motor) - samo GLASNO automatsko pustanje. Ranije je ovo bio raniji "return@launch"
+            // koji je PRESKACAO CELU pripremu kad je autoPlay=true i korisnica rucno pauzirala -
+            // posledica je bila da NISTA nije bilo ucitano u motor, pa drmanje NIJE imalo sta
+            // da nastavi (ostajalo "gluvo") dok korisnica sama rucno ne otvori neki dokument.
+            // Drmanje MORA uvek da radi, bez obzira na rucnu pauzu ili nacin na koji je citanje
+            // poslednji put zaustavljeno.
+            val effectiveAutoPlay = autoPlay && !com.recporec.app.data.AppSettings(context).userManuallyPaused
             val db = AppDatabase.getInstance(context)
             // Preferiraj dokument koji je STVARNO aktivan u ovoj sesiji (ono sto je
             // korisnica poslednje otvorila/citala) - pouzdanije od pretrage po vremenu u
@@ -542,14 +547,14 @@ object PlaybackController {
             // pri otvaranju app-e dodirnula knjigu pre nego sto je ovo stiglo da zavrsi),
             // tiho odustajemo - njen rucni izbor uvek pobedjuje.
             if (!isLoadRequestCurrent(loadToken)) return@launch
-            if (autoPlay) playTransitionSound(context)
+            if (effectiveAutoPlay) playTransitionSound(context)
             ensureInitialized(context)
-            loadAndPlayDocumentInBackground(context, entity.id, loadToken, autoPlay)
+            loadAndPlayDocumentInBackground(context, entity.id, loadToken, effectiveAutoPlay)
             // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema
             // razlog da drzi pozadinski rad zivim bez foreground servisa, koji svaki drugi
             // put kad se citanje pokrene (dugme, drmanje, budjenje...) vec biva pokrenut.
-            // Servis se pokrece bez obzira na autoPlay - drmanje treba da bude spremno u oba
-            // slucaja.
+            // Servis se pokrece UVEK (ne samo kad je effectiveAutoPlay) - drmanje treba da
+            // bude spremno u svakom slucaju.
             try {
                 val settings = com.recporec.app.data.AppSettings(context)
                 if (settings.backgroundEnabled) {

@@ -385,7 +385,7 @@ class ReaderActivity : AppCompatActivity() {
             // ISTO se desava i ako je NESTO DRUGO vec citalo kad smo poceli da otvaramo ovaj
             // dokument (bez obzira na ovo podesavanje) - citanje se "prenosi" na novi
             // dokument, ne prekida se tok koji je vec bio u toku.
-            if (((settings.autoReadEnabled && settings.autoReadTrigger == "document" && !settings.userManuallyPaused) || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
+            if ((settings.autoReadEnabled && settings.autoReadTrigger == "document" || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
                 pendingPlayAfterReady = true
                 PlaybackController.playTransitionSound(this@ReaderActivity)
                 // Odbrambeno: pokreni pozadinski servis (drzi drmanje aktivnim) VEC OVDE, cim
