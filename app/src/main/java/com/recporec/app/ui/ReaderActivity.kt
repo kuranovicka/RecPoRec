@@ -288,10 +288,12 @@ class ReaderActivity : AppCompatActivity() {
         // cemo to prepoznati ispod i tiho odustati, umesto da "pregazimo" njegovo, novije
         // stanje.
         val loadToken = PlaybackController.beginLoadRequest()
-        // NAMERNO se ovde NE pauzira prethodni dokument samo zato sto se OVAJ ekran otvorio -
-        // pauza treba da se desi tek kad OVAJ dokument STVARNO pocne da cita (dugme Play, ili
-        // automatsko citanje), ne cim njegov ekran postane vidljiv. Prirodna zamena teksta u
-        // TTS motoru (speak sa QUEUE_FLUSH) se vec pobrine za to tacno u tom trenutku.
+        // Ako TRENUTNO neki DRUGI dokument aktivno cita (ne ovaj koji upravo otvaramo),
+        // eksplicitno ga zaustavi PRE nego sto pocnemo bilo sta drugo - jasnije i pouzdanije
+        // nego osloniti se da ce novo ucitavanje samo nekako "preklopiti" staro.
+        if (PlaybackController.currentDocument?.id != documentId && PlaybackController.ttsManager?.isSpeaking == true) {
+            PlaybackController.ttsManager?.pause()
+        }
         lifecycleScope.launch {
             val entity = db.documentDao().getById(documentId) ?: return@launch
             binding.textDocTitle.text = entity.title
