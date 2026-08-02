@@ -123,6 +123,16 @@ class DocumentListActivity : AppCompatActivity() {
 
         // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)
         handleIncomingIntent(intent)
+
+        // "Automatski citaj poslednji dokument" - "Pri otvaranju aplikacije": NAMERNO ovde
+        // (onCreate, koji se izvrsi SAMO jednom kad se ovaj ekran stvarno TEK otvori), ne u
+        // onResume() (koji bi se ponavljao SVAKI put kad se korisnica samo vrati na ovaj
+        // spisak - npr. posle otvaranja DRUGOG dokumenta rucno) - inace bi ova funkcija
+        // "otimala" citanje nazad na stari dokument svaki put kad se spisak ponovo pojavi,
+        // cak i posle svesnog izbora da se cita nesto drugo.
+        if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
+            com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -194,13 +204,6 @@ class DocumentListActivity : AppCompatActivity() {
             Uri.fromFile(destFile)
         } catch (e: Exception) {
             null
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
-            com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
         }
     }
 
