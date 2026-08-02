@@ -99,4 +99,44 @@
 
     </LinearLayout>
 
+    <RadioGroup
+        android:id="@+id/groupLibraryTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#1A1A1A"
+        android:padding="8dp">
+
+        <RadioButton
+            android:id="@+id/tabAllBooks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/btn_chapter"
+            android:checked="true"
+            android:text="Sve knjige" />
+
+        <RadioButton
+            android:id="@+id/tabStartedBooks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/btn_chapter"
+            android:text="Započete" />
+
+        <RadioButton
+            android:id="@+id/tabFinishedBooks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/btn_chapter"
+            android:text="Pročitane" />
+    </RadioGroup>
+
 </LinearLayout>

@@ -23,6 +23,8 @@ class DocumentListActivity : AppCompatActivity() {
     private val db by lazy { AppDatabase.getInstance(this) }
     private val settings by lazy { com.recporec.app.data.AppSettings(this) }
     private var currentList: List<DocumentEntity> = emptyList()
+    /** "all" / "started" / "finished" - koja kartica je trenutno aktivna. */
+    private var currentTab: String = "all"
 
     private val pickFileLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -106,10 +108,17 @@ class DocumentListActivity : AppCompatActivity() {
         lifecycleScope.launch {
             db.documentDao().observeAll().collect { list ->
                 currentList = list
-                adapter.submitList(list)
-                binding.emptyView.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-                binding.recyclerDocuments.visibility = if (list.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+                applyTabFilter()
             }
+        }
+
+        binding.groupLibraryTabs.setOnCheckedChangeListener { _, checkedId ->
+            currentTab = when (checkedId) {
+                binding.tabStartedBooks.id -> "started"
+                binding.tabFinishedBooks.id -> "finished"
+                else -> "all"
+            }
+            applyTabFilter()
         }
 
         // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)
@@ -192,6 +201,26 @@ class DocumentListActivity : AppCompatActivity() {
         super.onResume()
         if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
             com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
+        }
+    }
+
+    /** Primenjuje trenutno odabranu karticu (Sve/Započete/Pročitane) na PUNU listu iz baze
+     * (currentList) i prikazuje samo odgovarajući podskup - currentList i dalje ostaje
+     * kompletna, necu neophodno za pomeranje gore/dole koje mora da radi sa PRAVIM
+     * susedima u punom redosledu, ne samo unutar filtrirane kartice. */
+    private fun applyTabFilter() {
+        val filtered = when (currentTab) {
+            "started" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset in 1 until it.totalCharacters }
+            "finished" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset >= it.totalCharacters }
+            else -> currentList
+        }
+        adapter.submitList(filtered)
+        binding.emptyView.visibility = if (filtered.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        binding.recyclerDocuments.visibility = if (filtered.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+        binding.emptyView.text = when (currentTab) {
+            "started" -> "Nema započetih knjiga."
+            "finished" -> "Nema pročitanih knjiga."
+            else -> getString(com.recporec.app.R.string.no_documents)
         }
     }
 
