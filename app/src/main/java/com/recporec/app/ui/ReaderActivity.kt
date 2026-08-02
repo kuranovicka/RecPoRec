@@ -355,11 +355,19 @@ class ReaderActivity : AppCompatActivity() {
             // upis u bazu.
             if (!PlaybackController.isLoadRequestCurrent(loadToken)) return@launch
 
-            doc = finalEntity
-            PlaybackController.currentDocument = finalEntity
-            PlaybackController.elapsedSeconds = finalEntity.elapsedSeconds
+            // VAZNO: doc/currentDocument moraju odmah da nose OVO, sveze upisano vreme, ne
+            // ono staro sa kojim je entity ucitan iz baze - u suprotnom bi SVAKO kasnije
+            // periodicno cuvanje pozicije (persistCurrentDocument, koje upisuje CEO entitet)
+            // tiho VRATILO lastOpenedTimestamp nazad na staru vrednost, i "aktivni dokument"
+            // bi se pogresno birao po davno zastareloj, "zamrznutoj" vrednosti umesto stvarno
+            // poslednjeg otvaranja.
+            val now = System.currentTimeMillis()
+            val finalEntityWithTimestamp = finalEntity.copy(lastOpenedTimestamp = now)
+            doc = finalEntityWithTimestamp
+            PlaybackController.currentDocument = finalEntityWithTimestamp
+            PlaybackController.elapsedSeconds = finalEntityWithTimestamp.elapsedSeconds
             withContext(Dispatchers.IO) {
-                db.documentDao().updateLastOpenedTimestamp(finalEntity.id, System.currentTimeMillis())
+                db.documentDao().updateLastOpenedTimestamp(finalEntityWithTimestamp.id, now)
             }
 
             // Ako je PlaybackController VEĆ imao ovaj TAČAN dokument spreman i motor već
@@ -396,11 +404,11 @@ class ReaderActivity : AppCompatActivity() {
             } else {
                 setupTts(
                     parsedDoc,
-                    finalEntity,
+                    finalEntityWithTimestamp,
                     resolveCombinedVoiceConfig(
-                        finalEntity.id,
-                        finalEntity.voiceName ?: settings.globalVoiceName,
-                        finalEntity.voiceEngine ?: settings.globalVoiceEngine
+                        finalEntityWithTimestamp.id,
+                        finalEntityWithTimestamp.voiceName ?: settings.globalVoiceName,
+                        finalEntityWithTimestamp.voiceEngine ?: settings.globalVoiceEngine
                     )
                 )
             }

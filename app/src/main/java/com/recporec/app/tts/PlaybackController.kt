@@ -518,11 +518,16 @@ object PlaybackController {
 
         val charsPerPage = 1800
         val totalPages = kotlin.math.max(1, (parsedDoc.length + charsPerPage - 1) / charsPerPage)
-        val finalEntity = if (entity.totalPages != totalPages || entity.totalCharacters != parsedDoc.length) {
-            val updated = entity.copy(totalPages = totalPages, totalCharacters = parsedDoc.length)
-            withContext(Dispatchers.IO) { db.documentDao().update(updated) }
-            updated
-        } else entity
+        // Azuriramo i lastOpenedTimestamp OVDE, i to VEC "upeceno" u finalEntity (ne samo u
+        // bazi) - isti razlog kao u ReaderActivity.loadDocument(): kasnije periodicno cuvanje
+        // pozicije upisuje CEO entitet, i bez ovoga bi vratilo staru vrednost nazad.
+        val now = System.currentTimeMillis()
+        val finalEntity = (if (entity.totalPages != totalPages || entity.totalCharacters != parsedDoc.length) {
+            entity.copy(totalPages = totalPages, totalCharacters = parsedDoc.length)
+        } else entity).copy(lastOpenedTimestamp = now)
+        withContext(Dispatchers.IO) {
+            db.documentDao().update(finalEntity)
+        }
 
         // Ako je u medjuvremenu neki NOVIJI zahtev za otvaranje pocet (npr. korisnica je
         // rucno otvorila drugu knjigu dok je ovo jos trajalo), odustajemo PRE upisa u
