@@ -253,8 +253,8 @@
             android:textColor="@color/text_primary"
             android:thumbTint="@color/btn_wakeup"
             android:trackTint="@color/btn_wakeup"
-            android:text="Automatski čitaj poslednji dokument"
-            android:contentDescription="Automatski čitaj poslednji dokument" />
+            android:text="Automatski čitaj aktivni dokument"
+            android:contentDescription="Automatski čitaj aktivni dokument" />
 
         <!-- Vidljivo samo kad je automatsko čitanje uključeno -->
         <RadioGroup

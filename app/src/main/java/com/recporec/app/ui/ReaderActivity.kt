@@ -371,7 +371,7 @@ class ReaderActivity : AppCompatActivity() {
             // dodir dugmadi, čak i dok se knjiga već čuje.
             val sessionAlreadyActive = usingCachedParse && PlaybackController.ttsManager?.isEngineReady == true
             val alreadySpeaking = PlaybackController.ttsManager?.isSpeaking == true
-            // "Automatski čitaj poslednji dokument" - "Pri otvaranju dokumenta": čim se OVAJ
+            // "Automatski čitaj aktivni dokument" - "Pri otvaranju dokumenta": čim se OVAJ
             // dokument otvori, samo krene da čita, bez potrebe da se pritisne Play. Koristi
             // isti mehanizam kao "nastavi čim glas bude spreman" (pendingPlayAfterReady).
             // ISTO se desava i ako je NESTO DRUGO vec citalo kad smo poceli da otvaramo ovaj

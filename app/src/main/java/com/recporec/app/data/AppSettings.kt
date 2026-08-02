@@ -17,7 +17,7 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
-    /** "Automatski čitaj poslednji dokument" - glavni prekidač. */
+    /** "Automatski čitaj aktivni dokument" - glavni prekidač. */
     var autoReadEnabled: Boolean
         get() = prefs.getBoolean(KEY_AUTO_READ_ENABLED, false)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_READ_ENABLED, value).apply()

@@ -40,7 +40,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća jezik, glas, brzinu, jačinu i visinu na početne vrednosti.
         Druga stavka je Podešavanja.
         Tu su prekidači za rad u pozadini, čitanje bez prekida, drmanje telefona za pauzu-nastavak, zvuk dugmadi, pauze između rečenica i pasusa, i automatski prelazak na sledeći dokument.
-        Tu je i prekidač "Automatski čitaj poslednji dokument".
+        Tu je i prekidač "Automatski čitaj aktivni dokument".
         Kad ga uključiš, biraš jedno od dvoje: "Pri otvaranju aplikacije" ili "Pri otvaranju dokumenta".
         Prva opcija sama nastavlja poslednji započeti dokument čim otvoriš aplikaciju, u pozadini, bez ulaska u čitač.
         Druga opcija sama počne da čita čim otvoriš bilo koji dokument.

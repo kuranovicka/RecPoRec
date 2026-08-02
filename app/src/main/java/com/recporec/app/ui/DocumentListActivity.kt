@@ -124,7 +124,7 @@ class DocumentListActivity : AppCompatActivity() {
         // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)
         handleIncomingIntent(intent)
 
-        // "Automatski citaj poslednji dokument" - "Pri otvaranju aplikacije": NAMERNO ovde
+        // "Automatski citaj aktivni dokument" - "Pri otvaranju aplikacije": NAMERNO ovde
         // (onCreate, koji se izvrsi SAMO jednom kad se ovaj ekran stvarno TEK otvori), ne u
         // onResume() (koji bi se ponavljao SVAKI put kad se korisnica samo vrati na ovaj
         // spisak - npr. posle otvaranja DRUGOG dokumenta rucno) - inace bi ova funkcija
@@ -255,7 +255,7 @@ class DocumentListActivity : AppCompatActivity() {
                         1 -> {
                             adapter.cancelSelection()
                             updateGeneralActionsLabel(0)
-                            android.widget.Toast.makeText(this, "Izbor otkazan.", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(this, "Odabir je opozvan.", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -267,7 +267,7 @@ class DocumentListActivity : AppCompatActivity() {
                     adapter.selectAll()
                     val count = adapter.getSelectedIds().size
                     updateGeneralActionsLabel(count)
-                    android.widget.Toast.makeText(this, "Odabrano $count dokumenata.", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, "Odabrane su sve stavke.", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }

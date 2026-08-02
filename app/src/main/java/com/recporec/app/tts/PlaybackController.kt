@@ -460,7 +460,7 @@ object PlaybackController {
      * odvojena od ReaderActivity.loadDocument()/setupTts() (ne deli kod sa njima) da bi
      * ostala potpuno nezavisna od Activity zivotnog ciklusa, i da eventualna izmena ovde ne
      * rizikuje da pokvari dobro isprobanu putanju kad korisnica sama otvori knjigu. */
-    /** "Automatski čitaj poslednji dokument", opcija "Pri otvaranju aplikacije" - pronalazi
+    /** "Automatski čitaj aktivni dokument", opcija "Pri otvaranju aplikacije" - pronalazi
      * poslednji aktivni (već započet, ali nezavršen) dokument i pokreće ga u pozadini, BEZ
      * ulaska u čitač - korisnica ostaje na spisku dokumenata dok čitanje počne da se čuje. */
     fun autoResumeLastActiveDocument(context: Context) {

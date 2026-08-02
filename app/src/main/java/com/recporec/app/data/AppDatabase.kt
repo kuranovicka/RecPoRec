@@ -129,7 +129,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        /** Novo polje za "Automatski čitaj poslednji dokument" - pamti kad je svaki
+        /** Novo polje za "Automatski čitaj aktivni dokument" - pamti kad je svaki
          * dokument POSLEDNJI PUT otvoren, da bi se moglo pronaći koji je "poslednji
          * aktivni". Postojeći dokumenti dobijaju dateAdded kao razuman početni datum
          * (bolje nego 0, koje bi ih sve gurnulo na "nikad otvoreno"). */
@@ -142,7 +142,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         /** Polje totalCharacters je postojalo od pocetka, ali se NIKAD nije stvarno
          * upisivalo (uvek ostajalo 0) - zbog toga kartice "Zapocete"/"Procitane" nisu
-         * prikazivale nista, i "Automatski citaj poslednji dokument" nije mogao ispravno
+         * prikazivale nista, i "Automatski citaj aktivni dokument" nije mogao ispravno
          * da pronadje poslednji aktivni dokument. Sad se totalCharacters upisuje pri svakom
          * otvaranju dokumenta (tacna vrednost) - ova migracija samo POPUNI postojece
          * dokumente PROCENOM (broj stranica * 1800 karaktera po stranici, ista konstanta
