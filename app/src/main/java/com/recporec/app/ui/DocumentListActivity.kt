@@ -60,13 +60,18 @@ class DocumentListActivity : AppCompatActivity() {
 
         adapter = DocumentListAdapter(
             onOpen = { doc -> openDocument(doc) },
-            onActions = { doc -> showActionsMenu(doc) }
+            onLongPress = { doc -> showActionsMenu(doc) },
+            onSelectionChanged = { count -> updateGeneralActionsLabel(count) }
         )
         binding.recyclerDocuments.layoutManager = LinearLayoutManager(this)
         binding.recyclerDocuments.adapter = adapter
 
         binding.btnAddDocument.setOnClickListener {
             launchPicker()
+        }
+
+        binding.btnGeneralActions.setOnClickListener {
+            showGeneralActionsMenu()
         }
 
         binding.btnExit.setOnClickListener {
@@ -204,6 +209,71 @@ class DocumentListActivity : AppCompatActivity() {
         val intent = Intent(this, ReaderActivity::class.java)
         intent.putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, doc.id)
         startActivity(intent)
+    }
+
+    /** "Opšte radnje" dugme - van režima biranja nudi "Odaberi sve", unutar režima nudi
+     * "Obriši odabrano" i "Otkaži izbor". */
+    private fun showGeneralActionsMenu() {
+        if (adapter.isSelectionMode()) {
+            AlertDialog.Builder(this)
+                .setTitle("Opšte radnje")
+                .setItems(arrayOf("Obriši odabrano", "Otkaži izbor")) { _, which ->
+                    when (which) {
+                        0 -> confirmDeleteSelected()
+                        1 -> {
+                            adapter.cancelSelection()
+                            updateGeneralActionsLabel(0)
+                        }
+                    }
+                }
+                .show()
+        } else {
+            AlertDialog.Builder(this)
+                .setTitle("Opšte radnje")
+                .setItems(arrayOf("Odaberi sve")) { _, _ ->
+                    adapter.selectAll()
+                    updateGeneralActionsLabel(adapter.getSelectedIds().size)
+                }
+                .show()
+        }
+    }
+
+    private fun updateGeneralActionsLabel(selectedCount: Int) {
+        binding.btnGeneralActions.text = if (adapter.isSelectionMode()) {
+            "Odabrano: $selectedCount"
+        } else {
+            "Opšte radnje"
+        }
+    }
+
+    private fun confirmDeleteSelected() {
+        val ids = adapter.getSelectedIds()
+        if (ids.isEmpty()) {
+            android.widget.Toast.makeText(this, "Ništa nije odabrano.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(getString(com.recporec.app.R.string.confirm_delete_title))
+            .setMessage("Obrisati ${ids.size} odabranih dokumenata? Ova radnja se ne može poništiti.")
+            .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
+            .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
+                lifecycleScope.launch {
+                    // Ako je medju odabranim i dokument koji trenutno cita (npr. u pozadini),
+                    // zaustavi citanje pre brisanja - ista bezbednosna provera kao za
+                    // pojedinacno brisanje.
+                    if (com.recporec.app.tts.PlaybackController.currentDocument?.id in ids) {
+                        com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
+                        com.recporec.app.tts.PlaybackController.release()
+                    }
+                    db.documentDao().deleteByIds(ids.toList())
+                    adapter.cancelSelection()
+                    updateGeneralActionsLabel(0)
+                    android.widget.Toast.makeText(
+                        this@DocumentListActivity, "Obrisano.", android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            .show()
     }
 
     private fun showActionsMenu(doc: DocumentEntity) {

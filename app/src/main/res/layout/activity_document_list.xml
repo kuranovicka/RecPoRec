@@ -73,6 +73,18 @@
                 android:text="@string/add_document" />
 
             <Button
+                android:id="@+id/btnGeneralActions"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="16dp"
+                android:textSize="18sp"
+                android:backgroundTint="@color/btn_combined"
+                android:textColor="@color/button_text"
+                android:background="@drawable/key_button_shape"
+                android:contentDescription="Opšte radnje: odaberi sve, obriši odabrano"
+                android:text="Opšte radnje" />
+
+            <Button
                 android:id="@+id/btnExit"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
