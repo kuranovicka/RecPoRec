@@ -21,17 +21,18 @@ class HelpActivity : AppCompatActivity() {
         Prvi ekran je lista dokumenata.
         Tu vidiš sve tvoje knjige.
         Na dnu ekrana su tri kartice: Sve knjige, Započete, Pročitane.
-        Biraju koje knjige se prikazuju na listi.
+        Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Njime dodaješ knjigu sa telefona ili sa Google diska, OneDrive-a, Dropboxa i slično.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf i mobi.
         Ispod njega je dugme Opšte radnje.
-        Otvara "Odaberi sve", koje bira sve knjige na listi.
-        Kad je nešto odabrano, isto dugme nudi "Obriši odabrano" i "Otkaži izbor".
+        Otvara sledeće opcije:
+        Odaberi sve, obriši odabrano, ili opozovi izbor ako se predomisliš.
         Dugme Izlaz je ispod toga.
         Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
         Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, ili obriši.
         Gore desno je dugme Opcije.
-        Tu su tri stavke: Opšta podešavanja glasa, Podešavanja, i Pomoć.
+        Tu su tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Prva stavka je Opšta podešavanja glasa.
         Tu biraš jezik i glas za sve nove dokumente, i čuješ kratak primer svakog glasa kad ga dodirneš.
         Tu je i dugme Kombinovani glasovi.
@@ -41,9 +42,11 @@ class HelpActivity : AppCompatActivity() {
         Druga stavka je Podešavanja.
         Tu su prekidači za rad u pozadini, čitanje bez prekida, drmanje telefona za pauzu-nastavak, zvuk dugmadi, pauze između rečenica i pasusa, i automatski prelazak na sledeći dokument.
         Tu je i prekidač "Automatski čitaj aktivni dokument".
-        Kad ga uključiš, biraš jedno od dvoje: "Pri otvaranju aplikacije" ili "Pri otvaranju dokumenta".
-        Prva opcija sama nastavlja poslednji započeti dokument čim otvoriš aplikaciju, u pozadini, bez ulaska u čitač.
-        Druga opcija sama počne da čita čim otvoriš bilo koji dokument.
+        Kad ga uključiš, biraš jednu od dve mogućnosti:
+        "Pri otvaranju aplikacije" ili "Pri otvaranju dokumenta".
+        Prva opcija automatski nastavlja čitanje poslednjeg započetog dokumenta, čim otvoriš aplikaciju.
+        Druga opcija započinje čitanje čim otvoriš bilo koji dokument.
+        Ako preko play dugmeta pauziraš čitanje, ono neće biti nastavljeno sve dok ga ručno ne nastaviš.
         Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
@@ -104,7 +107,7 @@ class HelpActivity : AppCompatActivity() {
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
-        Svaka od njih se traži tek kad zatreba, ne unapred.
+        Svaka od njih će biti zatražena tek kad zatreba, ne unapred.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
 
