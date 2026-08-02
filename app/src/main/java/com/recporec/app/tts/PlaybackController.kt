@@ -841,6 +841,12 @@ object PlaybackController {
         currentDocument = null
         parsedDocument = null
         elapsedSeconds = 0
+        // Ako se ostavi "zaglavljena" na true (npr. korisnica pauzirala pa NIKAD nije uspesno
+        // nastavila drmanjem/dugmetom pre Izlaza), ova zastavica bi TRAJNO (SharedPreferences
+        // preziveljava restart) blokirala "Pri otvaranju aplikacije" u SVIM buducim sesijama,
+        // cak i danima kasnije. Svez pokusaj (nova sesija posle Izlaza) zasluzuje svez pokusaj
+        // automatskog nastavka.
+        appContext?.let { com.recporec.app.data.AppSettings(it).userManuallyPaused = false }
         timerRemainingSeconds = 0
         restRemainingSeconds = 0
         restIsWakeTime = false
