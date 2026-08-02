@@ -388,6 +388,13 @@ class ReaderActivity : AppCompatActivity() {
             if (((settings.autoReadEnabled && settings.autoReadTrigger == "document" && !settings.userManuallyPaused) || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
                 pendingPlayAfterReady = true
                 PlaybackController.playTransitionSound(this@ReaderActivity)
+                // Odbrambeno: pokreni pozadinski servis (drzi drmanje aktivnim) VEC OVDE, cim
+                // znamo da ce citanje samo pocenti - ne cekamo da to uradi tek kasniji
+                // togglePlayPause() poziv, da ne bi ostao ni najmanji razmak u kom servis jos
+                // ne radi.
+                if (settings.backgroundEnabled) {
+                    ReadingService.start(this@ReaderActivity, settings.uninterruptedEnabled)
+                }
             }
             if (sessionAlreadyActive) {
                 ttsReady = true

@@ -44,7 +44,10 @@ class ReadingService : Service() {
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() { PlaybackController.resumeCancelingRestIfNeeded() }
-                override fun onPause() { PlaybackController.ttsManager?.pause() }
+                override fun onPause() {
+                    PlaybackController.ttsManager?.pause()
+                    AppSettings(this@ReadingService).userManuallyPaused = true
+                }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
                 // Android mehanizam za medijske tastere, isto kao play/pauza iznad. Nije
                 // vezano za dodir ekrana pa ne remeti TalkBack, isto kao i drmanje.
@@ -75,6 +78,7 @@ class ReadingService : Service() {
                     if (tts != null) {
                         if (tts.isSpeaking) {
                             tts.pause()
+                            AppSettings(this).userManuallyPaused = true
                         } else {
                             PlaybackController.resumeCancelingRestIfNeeded()
                         }

@@ -203,6 +203,7 @@ object PlaybackController {
                 cancelWakeAlarm()
                 val offset = currentDocument?.currentCharacterOffset
                 if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                ensureBackgroundServiceRunning()
                 notifyPlaybackStateChanged()
             } else {
                 ttsManager?.pause()
@@ -292,6 +293,10 @@ object PlaybackController {
     fun resumeCancelingRestIfNeeded(): Boolean {
         val wasResting = restRemainingSeconds > 0 || restAlarmActive
         if (wasResting) cancelRest()
+        // Drmanje i medijski taster su TAKODJE svesna, rucna radnja korisnice (kao i dugme
+        // Play/Pauza) - resetuje se ista zastavica, da automatsko citanje kasnije ispravno
+        // zna da korisnica VISE nije "pauzirala i ostavila to tako".
+        appContext?.let { com.recporec.app.data.AppSettings(it).userManuallyPaused = false }
         // Eksplicitno kreni od SAČUVANE pozicije (kao dugme Play/Pauza u čitaču), umesto da
         // se osloni na unutrašnji indeks rečenice u TtsManager-u - pouzdanije, posebno posle
         // duže pauze (odmor/buđenje) kad taj indeks moze da se razidje sa stvarno sacuvanom
@@ -414,6 +419,21 @@ object PlaybackController {
      * prebacuje sa jednog dokumenta na drugi (auto-prelazak, automatsko citanje pri
      * otvaranju app-e/dokumenta, nastavak toka pri rucnom prebacivanju). Postuje isti
      * prekidac "Zvuk" iz Podesavanja kao i dugmad. */
+    /** Osigurava da pozadinski servis (drzi drmanje i medijski taster aktivnim) radi - koristi
+     * se SVUDA gde citanje moze automatski da krene/nastavi (budjenje, zakazano citanje,
+     * odmor...), da drmanje ne bi ostalo "gluvo" ako servis iz bilo kog razloga nije vec
+     * pokrenut u tom trenutku. */
+    private fun ensureBackgroundServiceRunning() {
+        val ctx = appContext ?: return
+        try {
+            val settings = com.recporec.app.data.AppSettings(ctx)
+            if (settings.backgroundEnabled) {
+                com.recporec.app.service.ReadingService.start(ctx, settings.uninterruptedEnabled)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     fun playTransitionSound(context: Context) {
         try {
             if (!com.recporec.app.data.AppSettings(context).soundFeedbackEnabled) return
@@ -640,6 +660,7 @@ object PlaybackController {
                             cancelWakeAlarm()
                             val offset = currentDocument?.currentCharacterOffset
                             if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                            ensureBackgroundServiceRunning()
                             notifyPlaybackStateChanged()
                         } else {
                             // Odbrojavanje je isteklo - NE nastavlja citanje odmah, prvo pun
@@ -669,6 +690,7 @@ object PlaybackController {
                             releaseRestWakeLock()
                             cancelWakeAlarm()
                             ttsManager?.resume()
+                            ensureBackgroundServiceRunning()
                             notifyPlaybackStateChanged()
                         }
                     }
