@@ -496,13 +496,17 @@ object PlaybackController {
     /** "Automatski čitaj aktivni dokument", opcija "Pri otvaranju aplikacije" - pronalazi
      * poslednji aktivni (već započet, ali nezavršen) dokument i pokreće ga u pozadini, BEZ
      * ulaska u čitač - korisnica ostaje na spisku dokumenata dok čitanje počne da se čuje. */
-    fun autoResumeLastActiveDocument(context: Context) {
+    /** @param autoPlay Ako je false, dokument se samo UCITA i pozicija uskladi (spreman za
+     * drmanje/dugme), ali se NE cuje odmah - koristi se za "Pri otvaranju dokumenta" rezim,
+     * gde citanje treba da bude SPREMNO cim se app otvori, ali ne treba samo da pocne da
+     * cita (to je posao DRUGOG rezima, "Pri otvaranju aplikacije"). */
+    fun autoResumeLastActiveDocument(context: Context, autoPlay: Boolean = true) {
         val loadToken = beginLoadRequest()
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
-            // Ako je korisnica POSLEDNJI put SAMA, svesno pauzirala citanje, ne nastavljamo
-            // umesto nje - u SVIM slucajevima, i ovde.
-            if (com.recporec.app.data.AppSettings(context).userManuallyPaused) return@launch
+            // Rucna pauza blokira samo GLASNO automatsko nastavljanje - priprema (da drmanje
+            // bude spremno) sme da se desi bez obzira na to.
+            if (autoPlay && com.recporec.app.data.AppSettings(context).userManuallyPaused) return@launch
             val db = AppDatabase.getInstance(context)
             // Preferiraj dokument koji je STVARNO aktivan u ovoj sesiji (ono sto je
             // korisnica poslednje otvorila/citala) - pouzdanije od pretrage po vremenu u
@@ -521,12 +525,14 @@ object PlaybackController {
             // pri otvaranju app-e dodirnula knjigu pre nego sto je ovo stiglo da zavrsi),
             // tiho odustajemo - njen rucni izbor uvek pobedjuje.
             if (!isLoadRequestCurrent(loadToken)) return@launch
-            playTransitionSound(context)
+            if (autoPlay) playTransitionSound(context)
             ensureInitialized(context)
-            loadAndPlayDocumentInBackground(context, entity.id, loadToken)
+            loadAndPlayDocumentInBackground(context, entity.id, loadToken, autoPlay)
             // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema
             // razlog da drzi pozadinski rad zivim bez foreground servisa, koji svaki drugi
             // put kad se citanje pokrene (dugme, drmanje, budjenje...) vec biva pokrenut.
+            // Servis se pokrece bez obzira na autoPlay - drmanje treba da bude spremno u oba
+            // slucaja.
             try {
                 val settings = com.recporec.app.data.AppSettings(context)
                 if (settings.backgroundEnabled) {
@@ -537,7 +543,9 @@ object PlaybackController {
         }
     }
 
-    private suspend fun loadAndPlayDocumentInBackground(context: Context, documentId: Long, loadToken: Long? = null) {
+    private suspend fun loadAndPlayDocumentInBackground(
+        context: Context, documentId: Long, loadToken: Long? = null, autoPlay: Boolean = true
+    ) {
         val db = AppDatabase.getInstance(context)
         val entity = withContext(Dispatchers.IO) { db.documentDao().getById(documentId) } ?: return
         val settings = com.recporec.app.data.AppSettings(context)
@@ -594,7 +602,15 @@ object PlaybackController {
             tts.paragraphPauseMs = if (settings.paragraphPauseEnabled) settings.paragraphPauseMs.toLong() else 0L
             if (effectiveVoiceName != null) tts.setVoiceByName(effectiveVoiceName) else tts.applyIndependentDefaultVoice()
             if (combined != null) tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice) else tts.setCombinedVoices(emptyList(), 1)
-            tts.startFromOffset(finalEntity.currentCharacterOffset)
+            if (autoPlay) {
+                tts.startFromOffset(finalEntity.currentCharacterOffset)
+            } else {
+                // Samo "pripremi" dokument (ucitaj tekst/glas, uskladi poziciju) BEZ da
+                // pocne da cita - koristi se kad "Pri otvaranju dokumenta" nema da automatski
+                // pusti zvuk, ali app i dalje treba da bude SPREMNA da nastavi na drmanje bez
+                // potrebe da korisnica prvo rucno otvori taj dokument.
+                tts.syncPositionOnly(finalEntity.currentCharacterOffset)
+            }
         }
 
         if (effectiveEngine != null && effectiveEngine != tts.currentEnginePackage) {

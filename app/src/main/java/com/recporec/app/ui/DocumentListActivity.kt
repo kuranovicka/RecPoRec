@@ -127,15 +127,16 @@ class DocumentListActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // "Automatski čitaj aktivni dokument" - "Pri otvaranju aplikacije": OVDE (onResume),
-        // da bi radilo i kad se app samo vrati iz pozadine, ne samo pri potpunom restartu.
-        // Ranije je ovo bilo u onCreate() bas zato sto je ovde POVREMENO "otimalo" citanje
-        // nazad na stari dokument - sad kad su ti temeljni bagovi popravljeni (currentDocument
-        // pouzdano prati STVARNO aktivan dokument, a autoResumeLastActiveDocument() vec
-        // proverava da li nesto VEC cita pre nego sto bilo sta radi), bezbedno je da radi i
-        // ovde.
-        if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
-            com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
+        // "Automatski čitaj aktivni dokument": u OBA rezima pripremamo poslednji aktivni
+        // dokument OVDE (onResume, radi i kad se app samo vrati iz pozadine ili posle
+        // potpunog izlaska) - da bi drmanje/medijski taster bili SPREMNI odmah, bez obzira na
+        // rezim. Razlika je samo da li se citanje TAKODJE odmah cuje:
+        // "Pri otvaranju aplikacije" -> da (autoPlay = true).
+        // "Pri otvaranju dokumenta" -> ne, samo priprema (autoPlay = false) - citanje
+        // pocinje kad korisnica RUCNO otvori neki dokument, ne pri samom pokretanju app-e.
+        if (settings.autoReadEnabled) {
+            val autoPlay = settings.autoReadTrigger == "app"
+            com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this, autoPlay)
         }
     }
 
