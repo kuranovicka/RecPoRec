@@ -123,13 +123,17 @@ class DocumentListActivity : AppCompatActivity() {
 
         // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)
         handleIncomingIntent(intent)
+    }
 
-        // "Automatski citaj aktivni dokument" - "Pri otvaranju aplikacije": NAMERNO ovde
-        // (onCreate, koji se izvrsi SAMO jednom kad se ovaj ekran stvarno TEK otvori), ne u
-        // onResume() (koji bi se ponavljao SVAKI put kad se korisnica samo vrati na ovaj
-        // spisak - npr. posle otvaranja DRUGOG dokumenta rucno) - inace bi ova funkcija
-        // "otimala" citanje nazad na stari dokument svaki put kad se spisak ponovo pojavi,
-        // cak i posle svesnog izbora da se cita nesto drugo.
+    override fun onResume() {
+        super.onResume()
+        // "Automatski čitaj aktivni dokument" - "Pri otvaranju aplikacije": OVDE (onResume),
+        // da bi radilo i kad se app samo vrati iz pozadine, ne samo pri potpunom restartu.
+        // Ranije je ovo bilo u onCreate() bas zato sto je ovde POVREMENO "otimalo" citanje
+        // nazad na stari dokument - sad kad su ti temeljni bagovi popravljeni (currentDocument
+        // pouzdano prati STVARNO aktivan dokument, a autoResumeLastActiveDocument() vec
+        // proverava da li nesto VEC cita pre nego sto bilo sta radi), bezbedno je da radi i
+        // ovde.
         if (settings.autoReadEnabled && settings.autoReadTrigger == "app") {
             com.recporec.app.tts.PlaybackController.autoResumeLastActiveDocument(this)
         }
