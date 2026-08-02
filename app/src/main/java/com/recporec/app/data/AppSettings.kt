@@ -28,6 +28,13 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_AUTO_READ_TRIGGER, "app") ?: "app"
         set(value) = prefs.edit().putString(KEY_AUTO_READ_TRIGGER, value).apply()
 
+    /** Da li je korisnica POSLEDNJI put SAMA, svesno pauzirala čitanje (dugmetom, drmanjem...)
+     * - ako jeste, automatsko čitanje (bilo koje vrste) NE treba samo da nastavi umesto nje,
+     * u svim slučajevima. Vraća se na false čim ONA sama ponovo pokrene čitanje. */
+    var userManuallyPaused: Boolean
+        get() = prefs.getBoolean(KEY_USER_MANUALLY_PAUSED, false)
+        set(value) = prefs.edit().putBoolean(KEY_USER_MANUALLY_PAUSED, value).apply()
+
     /** Da li je ikad zatraženo dozvola za stanje telefona (rezervni mehanizam za pozive) -
      * pitamo samo JEDNOM, čak i ako korisnik odbije, da ne dosađujemo pri svakom otvaranju. */
     var phoneStatePermissionAsked: Boolean
@@ -153,5 +160,6 @@ class AppSettings(context: Context) {
         private const val KEY_G_PITCH = "global_pitch"
         private const val KEY_AUTO_READ_ENABLED = "auto_read_enabled"
         private const val KEY_AUTO_READ_TRIGGER = "auto_read_trigger"
+        private const val KEY_USER_MANUALLY_PAUSED = "user_manually_paused"
     }
 }

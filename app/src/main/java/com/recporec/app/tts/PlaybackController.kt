@@ -467,6 +467,9 @@ object PlaybackController {
         val loadToken = beginLoadRequest()
         scope.launch {
             if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
+            // Ako je korisnica POSLEDNJI put SAMA, svesno pauzirala citanje, ne nastavljamo
+            // umesto nje - u SVIM slucajevima, i ovde.
+            if (com.recporec.app.data.AppSettings(context).userManuallyPaused) return@launch
             val db = AppDatabase.getInstance(context)
             // Preferiraj dokument koji je STVARNO aktivan u ovoj sesiji (ono sto je
             // korisnica poslednje otvorila/citala) - pouzdanije od pretrage po vremenu u

@@ -377,7 +377,7 @@ class ReaderActivity : AppCompatActivity() {
             // ISTO se desava i ako je NESTO DRUGO vec citalo kad smo poceli da otvaramo ovaj
             // dokument (bez obzira na ovo podesavanje) - citanje se "prenosi" na novi
             // dokument, ne prekida se tok koji je vec bio u toku.
-            if ((settings.autoReadEnabled && settings.autoReadTrigger == "document" || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
+            if (((settings.autoReadEnabled && settings.autoReadTrigger == "document" && !settings.userManuallyPaused) || wasSpeakingBeforeSwitch) && !alreadySpeaking) {
                 pendingPlayAfterReady = true
             }
             if (sessionAlreadyActive) {
@@ -390,7 +390,7 @@ class ReaderActivity : AppCompatActivity() {
                     // pokrenuo (otud "procita rec dve i stane"). Pokrecemo SAMO ako stvarno
                     // JOS UVEK nista ne cita.
                     if (PlaybackController.ttsManager?.isSpeaking != true) {
-                        togglePlayPause()
+                        togglePlayPause(manual = false)
                     }
                 }
             } else {
@@ -452,7 +452,7 @@ class ReaderActivity : AppCompatActivity() {
         ttsReady = true
         if (pendingPlayAfterReady) {
             pendingPlayAfterReady = false
-            togglePlayPause()
+            togglePlayPause(manual = false)
         }
     }
 
@@ -534,7 +534,7 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun togglePlayPause() {
+    private fun togglePlayPause(manual: Boolean = true) {
         val tts = PlaybackController.ttsManager ?: return
         if (!ttsReady) {
             pendingPlayAfterReady = true
@@ -543,7 +543,9 @@ class ReaderActivity : AppCompatActivity() {
         }
         if (tts.isSpeaking) {
             tts.pause()
+            if (manual) settings.userManuallyPaused = true
         } else {
+            if (manual) settings.userManuallyPaused = false
             if (PlaybackController.restRemainingSeconds > 0) {
                 PlaybackController.cancelRest()
                 updateRestStatusText()
