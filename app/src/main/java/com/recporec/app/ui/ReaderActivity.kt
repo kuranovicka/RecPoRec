@@ -1629,6 +1629,17 @@ class ReaderActivity : AppCompatActivity() {
             runOnUiThread {
                 binding.btnPlayPause.text = "▶ / ⏸"
                 android.widget.Toast.makeText(this, "Čitanje završeno.", android.widget.Toast.LENGTH_LONG).show()
+                // VAZNO: bez ovoga, lokalno "doc" na ovom ekranu ostaje na STAROJ poziciji (od
+                // pre kraja) - ako se posle toga bilo sta ovde sacuva (npr. izlazak sa ekrana
+                // pokrece persistState()), to bi PREPISALO tacnu, "zavrseno" poziciju nazad na
+                // stariju vrednost, i knjiga bi delovala kao da se "vratila unazad" umesto da
+                // ostane oznacena kao procitana.
+                val totalLen = parsed?.length
+                if (totalLen != null && totalLen > 0) {
+                    doc = doc?.copy(currentCharacterOffset = totalLen)
+                    updateStatusTexts()
+                    updateSeekBar()
+                }
             }
         }
         PlaybackController.uiTimerExpiredListener = {
