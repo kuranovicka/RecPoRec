@@ -27,25 +27,7 @@ object PlaybackController {
     var ttsManager: TtsManager? = null
         private set
 
-    private var _currentDocument: DocumentEntity? = null
-
-    /** Kad se ovo polje promeni na DRUGI dokument (razlicit id) DOK nesto trenutno cita,
-     * SAMO polje se pobrine da se stara reprodukcija zaustavi - bez obzira odakle je promena
-     * dosla (rucno otvaranje, automatsko citanje, auto-prelazak...). Ovo je centralizovana,
-     * pouzdanija zastita umesto da se ista provera ponavlja (i eventualno propusti) na svakom
-     * pojedinacnom mestu koje otvara dokument. Azuriranja POZICIJE (npr. currentDocument =
-     * currentDocument?.copy(currentCharacterOffset = x)) zadrzavaju ISTI id, pa ovo NIKAD ne
-     * remeti obicno, cesto azuriranje toka citanja. */
-    var currentDocument: DocumentEntity?
-        get() = _currentDocument
-        set(value) {
-            val oldId = _currentDocument?.id
-            val newId = value?.id
-            if (oldId != null && newId != null && oldId != newId && ttsManager?.isSpeaking == true) {
-                ttsManager?.pause()
-            }
-            _currentDocument = value
-        }
+    var currentDocument: DocumentEntity? = null
 
     /** "Generacija" zahteva za otvaranje dokumenta - raste svaki put kad se BILO KOJI
      * dokument POCNE da se otvara (ReaderActivity.onCreate). Koristi se da se sprece "stare",
