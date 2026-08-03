@@ -45,6 +45,31 @@ class ReaderActivity : AppCompatActivity() {
     private var tickerRunnable: Runnable? = null
 
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
+    private var voicesLoadJob: kotlinx.coroutines.Job? = null
+
+    /** Lenjo ucitavanje liste glasova - pravi PRIVREMENU instancu TTS motora za SVAKI
+     * instalirani motor na telefonu (Google, Samsung...), sto je primetno "tesko" i suvisno
+     * da se radi svaki put kad se otvori ekran za citanje (ranije je bilo u onCreate) - dok
+     * se pri tom istovremeno i GLAVNI motor za citanje priprema, oteze mu se start. Ucitava se
+     * samo kad korisnica STVARNO otvori meni za jezik/glas, jednom, pa se rezultat pamti. */
+    private fun loadVoicesIfNeeded(onReady: () -> Unit) {
+        if (allVoices.isNotEmpty()) {
+            onReady()
+            return
+        }
+        if (voicesLoadJob == null) {
+            voicesLoadJob = lifecycleScope.launch {
+                allVoices = try {
+                    com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                onReady()
+            }
+        } else {
+            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
     private var toneGenerator: android.media.ToneGenerator? = null
     private var seekBarTouchTracking = false
 
@@ -84,13 +109,6 @@ class ReaderActivity : AppCompatActivity() {
         setupButtons()
         loadDocument()
         startTicker()
-        lifecycleScope.launch {
-            allVoices = try {
-                com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
-            } catch (e: Exception) {
-                emptyList()
-            }
-        }
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(
@@ -1131,10 +1149,11 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showDocLanguagePicker() {
-        val voices = allVoices.ifEmpty {
-            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
+        loadVoicesIfNeeded { showDocLanguagePickerWithVoices() }
+    }
+
+    private fun showDocLanguagePickerWithVoices() {
+        val voices = allVoices.ifEmpty { return }
         val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
         val resetLabel = "Koristi opšti jezik (ukloni poseban izbor za ovaj dokument)"
         val labels = listOf(resetLabel) + languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
@@ -1167,10 +1186,11 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showVoiceDialog() {
-        val voices = allVoices.ifEmpty {
-            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
+        loadVoicesIfNeeded { showVoiceDialogWithVoices() }
+    }
+
+    private fun showVoiceDialogWithVoices() {
+        val voices = allVoices.ifEmpty { return }
         val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
         val filtered = if (languageFilter != null) {
             voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
