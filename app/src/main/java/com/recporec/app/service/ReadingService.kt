@@ -193,6 +193,23 @@ class ReadingService : Service() {
 
         val title = PlaybackController.currentDocument?.title ?: "RečPoReč"
         val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
+        // Notifikacija sad prikazuje i "Kratak predah"/"Zakazi citanje" pauzu, sa STVARNIM
+        // preostalim vremenom (ne fiksnim brojem) - dosledno statusnoj liniji i brzoj precici
+        // u citacu (koje isto odbrojavaju, bilo da je predah tek pocet ili produzen).
+        val contentText = when {
+            PlaybackController.isScheduledReadingActive() -> {
+                val minutes = (PlaybackController.restRemainingSeconds + 59) / 60
+                val minuteWord = when {
+                    minutes % 100 in 11..14 -> "minuta"
+                    minutes % 10 == 1 -> "minut"
+                    minutes % 10 in 2..4 -> "minuta"
+                    else -> "minuta"
+                }
+                "Čitanje pauzirano na $minutes $minuteWord."
+            }
+            isSpeaking -> "RečPoReč čita"
+            else -> "RečPoReč - pauzirano"
+        }
 
         val playPauseAction = if (isSpeaking) {
             NotificationCompat.Action(
@@ -208,7 +225,7 @@ class ReadingService : Service() {
 
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
-            .setContentText("RečPoReč čita")
+            .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentIntent(contentIntent)
             .addAction(playPauseAction)

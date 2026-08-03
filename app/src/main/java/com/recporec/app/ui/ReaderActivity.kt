@@ -317,7 +317,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun quickShortBreak() {
         PlaybackController.startScheduledReading(15 * 60)
         updateRestStatusText()
-        android.widget.Toast.makeText(this, "Nastavljam za 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(this, "Čitanje pauzirano na 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun loadDocument() {
@@ -1502,7 +1502,7 @@ class ReaderActivity : AppCompatActivity() {
         val remaining = PlaybackController.restRemainingSeconds
         binding.textRestStatus.text = when {
             PlaybackController.isRestAlarmRinging() -> "Buđenje: alarm zvoni."
-            PlaybackController.isScheduledReadingActive() -> "Nastavljam čitanje za ${formatHoursMinutes(remaining)}."
+            PlaybackController.isScheduledReadingActive() -> "Predah ističe za ${formatHoursMinutes(remaining)}."
             remaining > 0 -> "Do buđenja ostalo još ${formatHoursMinutes(remaining)}."
             else -> "Nije ništa zakazano."
         }
@@ -1551,7 +1551,7 @@ class ReaderActivity : AppCompatActivity() {
         if (PlaybackController.isRestAlarmRinging()) {
             parts.add("Buđenje: alarm zvoni.")
         } else if (PlaybackController.isScheduledReadingActive()) {
-            parts.add("Nastavljam čitanje za ${formatHoursMinutes(restRemaining)}.")
+            parts.add("Predah ističe za ${formatHoursMinutes(restRemaining)}.")
         } else if (restRemaining > 0) {
             parts.add("Do buđenja ostalo još ${formatHoursMinutes(restRemaining)}.")
         }
