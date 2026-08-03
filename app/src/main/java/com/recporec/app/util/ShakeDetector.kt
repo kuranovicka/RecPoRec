@@ -20,8 +20,11 @@ class ShakeDetector(
     // pojedinacno ocitavanje dok je iznad) unutar kratkog vremenskog prozora. Pravo drmanje
     // rukom PRIRODNO osciluje (gore-dole-gore-dole), pa ovo prati stvaran pokret mnogo bolje
     // nego "ostani iznad bez prekida", i nije osetljivo na tacan trenutak uzorkovanja senzora.
-    private val windowMs = 500L
-    private val requiredPeaksInWindow = 3
+    // 3 uspona za 500ms se pokazalo prestrogo (uz prag od 9-13 m/s^2, to trazi skoro 6
+    // oscilacija u sekundi - brze od prirodnog drmanja rukom). Spusteno na 2 uspona za 700ms -
+    // i dalje trazi bar dva "zamaha" (odbacuje pojedinacni slucajan udarac), ali dostizno.
+    private val windowMs = 700L
+    private val requiredPeaksInWindow = 2
     private val peakTimestamps = ArrayDeque<Long>()
     private var wasAboveThreshold = false
 
