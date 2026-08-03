@@ -227,7 +227,17 @@ object PlaybackController {
                     val tts = ttsManager ?: return@launch
                     withContext(Dispatchers.Default) { tts.loadText(parsedDoc.fullText) }
                     tts.syncPositionOnly(entity.currentCharacterOffset)
-                    onWakeAlarmFired(context) // sad kad je currentDocument popunjen, nastavi normalno ispod
+                    // KRITICNO: motor je OVDE tek napravljen (ensureInitialized iznad), pa je
+                    // skoro sigurno JOS UVEK asinhrono "u pripremi" (TextToSpeech.onInit jos
+                    // nije stigao) - poziv startFromOffset() pre toga bi TIHO ne izgovorio
+                    // nista (isti "tihi neuspeh" koji je citav ovaj commit trebalo da resi,
+                    // samo prebacen ovde). Isti obrazac kao svugde drugde u kodu: sacekaj
+                    // isEngineReady/onReady pre nego sto se nastavi.
+                    if (tts.isEngineReady) {
+                        onWakeAlarmFired(context) // sad kad je currentDocument popunjen, nastavi normalno ispod
+                    } else {
+                        tts.onReady = { onWakeAlarmFired(context) }
+                    }
                 }
                 return
             }
