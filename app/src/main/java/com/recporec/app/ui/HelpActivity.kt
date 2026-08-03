@@ -52,7 +52,7 @@ class HelpActivity : AppCompatActivity() {
         Sada idemo u sam dokument.
         Kada dugo pritisneš bilo koji dokument, dobijaš sledeće opcije:
         Premesti nagore,premesti nadole, preimenuj i obriši.
-        Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
+        Tastatura ima dvadeset jedan dugme, raspoređenih u pet redova.
         U prvom redu odozgo, prvo dugme je Oznake.
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
@@ -106,6 +106,10 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak poništava tvoju poslednju radnju, koja god da je bila.
         Ispod tastature je veći klizač za lakši dodir.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
+        Desno od klizača je dugme Prikaži-sakrij kontrole.
+        Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe i dugmeta Pokreni/Pauziraj čitanje - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
+        Ispod klizača je dugme Nazad.
+        Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Svaka od njih će biti zatražena tek kad zatreba, ne unapred.

@@ -8,6 +8,7 @@
 
     <!-- Traka statusa -->
     <LinearLayout
+        android:id="@+id/layoutStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -73,6 +74,7 @@
 
         <!-- Red: Oznake / Idi na -->
         <LinearLayout
+            android:id="@+id/layoutRow1"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -103,6 +105,7 @@
 
         <!-- Red: Visina- / Prethodno poglavlje / Tajmer / Sledeće poglavlje / Visina+ -->
         <LinearLayout
+            android:id="@+id/layoutRow2"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -140,6 +143,7 @@
 
         <!-- Red: jačina- / Jezik(dokument) / Glas / jačina+ -->
         <LinearLayout
+            android:id="@+id/layoutRow3"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -198,6 +202,7 @@
 
         <!-- Red: korak nazad / korak napred -->
         <LinearLayout
+            android:id="@+id/layoutRow5"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -224,23 +229,47 @@
 
     </LinearLayout>
 
-    <!-- Klizač napretka kroz knjigu - uvecan -->
-    <SeekBar
-        android:id="@+id/seekProgress"
+    <!-- Klizač napretka kroz knjigu - uvecan, i pored njega dugme za sakrivanje/prikazivanje
+    kontrola (predlog korisnika - "cist" ekran za citanje ocima, samo Kontrole i Play/Pauza
+    ostaju vidljivi kad se kontrole sakriju). -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
-        android:contentDescription="@string/slider_position"
-        android:max="100"
-        android:progressTint="@color/btn_voice"
-        android:thumbTint="@color/btn_voice" />
+        android:layout_marginBottom="16dp">
+
+        <SeekBar
+            android:id="@+id/seekProgress"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="56dp"
+            android:contentDescription="@string/slider_position"
+            android:max="100"
+            android:progressTint="@color/btn_voice"
+            android:thumbTint="@color/btn_voice" />
+
+        <Button
+            android:id="@+id/btnToggleControls"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_marginStart="10dp"
+            android:minWidth="0dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:textSize="14sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:contentDescription="Prikaži ili sakrij kontrole. Kada su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
+            android:text="👁 Kontrole" />
+    </LinearLayout>
 
     <!-- Namerno IZVAN gornje tastature od 20 dugmica (koja je pazljivo podesena, 5 redova x
     weight=1) - dodato ovde kao poseban, fiksni red da se ne dira postojeci raspored/proporcije
-    tih 20 dugmica. -->
+    tih 20 dugmica. Sakriva se zajedno sa ostalim kontrolama. -->
     <Button
         android:id="@+id/btnBack"
         android:layout_width="match_parent"

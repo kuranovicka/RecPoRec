@@ -44,6 +44,10 @@ class ReaderActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
 
+    // Namerno NE cuvano u AppSettings - resetuje se na "prikazano" svaki put kad se ekran
+    // otvori, kao kod slicnih "cist prikaz" prekidaca u drugim citacima/plejerima.
+    private var controlsHidden = false
+
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
     private var voicesLoadJob: kotlinx.coroutines.Job? = null
 
@@ -227,6 +231,8 @@ class ReaderActivity : AppCompatActivity() {
         // NE zaustavlja citanje ako je u toku u pozadini.
         btnBack.setOnClickListener(clickSound { finish() })
 
+        btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
+
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
@@ -301,6 +307,28 @@ class ReaderActivity : AppCompatActivity() {
                     v.parent?.requestDisallowInterceptTouchEvent(false)
             }
             false
+        }
+    }
+
+    /** Predlog korisnika: "cist" ekran za citanje ocima (za videce, ili kad kontrole smetaju) -
+     * sakriva SVE osim ovog dugmeta i Pokreni/Pauziraj citanje. Namerno se NE cuva izmedju
+     * otvaranja dokumenata - svaki put kad se ekran otvori, kontrole su ponovo prikazane. */
+    private fun toggleControlsVisibility() = with(binding) {
+        controlsHidden = !controlsHidden
+        val visibility = if (controlsHidden) android.view.View.GONE else android.view.View.VISIBLE
+        layoutStatus.visibility = visibility
+        layoutRow1.visibility = visibility
+        layoutRow2.visibility = visibility
+        layoutRow3.visibility = visibility
+        layoutRow5.visibility = visibility
+        btnSpeedDown.visibility = visibility
+        btnSpeedUp.visibility = visibility
+        seekProgress.visibility = visibility
+        btnBack.visibility = visibility
+        btnToggleControls.contentDescription = if (controlsHidden) {
+            "Prikaži kontrole. Trenutno su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
+        } else {
+            "Sakrij kontrole. Kada su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
         }
     }
 
