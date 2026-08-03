@@ -238,4 +238,20 @@
         android:progressTint="@color/btn_voice"
         android:thumbTint="@color/btn_voice" />
 
+    <!-- Namerno IZVAN gornje tastature od 20 dugmica (koja je pazljivo podesena, 5 redova x
+    weight=1) - dodato ovde kao poseban, fiksni red da se ne dira postojeci raspored/proporcije
+    tih 20 dugmica. -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="18sp"
+        android:backgroundTint="@color/btn_combined"
+        android:textColor="@color/button_text"
+        android:contentDescription="Nazad. Zatvara ovaj dokument i vraća na listu dokumenata."
+        android:text="Nazad" />
+
 </LinearLayout>

@@ -50,7 +50,7 @@ class HelpActivity : AppCompatActivity() {
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Kada duplo klikneš na bilo koji dokument sa zadrškom, dobijaš sledeće opcije:
+        Kada dugo pritisneš bilo koji dokument, dobijaš sledeće opcije:
         Premesti nagore,premesti nadole, preimenuj i obriši.
         Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
         U prvom redu odozgo, prvo dugme je Oznake.

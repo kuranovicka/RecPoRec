@@ -223,6 +223,10 @@ class ReaderActivity : AppCompatActivity() {
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
         btnSearchText.setOnLongClickListener { repeatLastSearch(); true }
 
+        // Van gornje tastature od 20 dugmica - samo zatvara ovaj ekran (kao sistemsko Nazad),
+        // NE zaustavlja citanje ako je u toku u pozadini.
+        btnBack.setOnClickListener(clickSound { finish() })
+
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
