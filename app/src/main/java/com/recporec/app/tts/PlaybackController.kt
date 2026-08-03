@@ -543,10 +543,30 @@ object PlaybackController {
         }
     }
 
+    /** Gasi pozadinski servis (i time wake lock/wifi lock, ako je "Citanje bez prekida"
+     * ukljuceno) kad citanje STVARNO nema sta vise da radi - knjiga zavrsena, i nema
+     * sledeceg dokumenta (ili je automatski nastavak iskljucen). Bez ovoga bi servis (i
+     * eventualni wake lock, do 12h) ostajao aktivan i posle kraja knjige bez ikakve svrhe.
+     * Bezbedno je zaustaviti servis ovde - dugme Play, drmanje i medijski taster ga svi
+     * ionako sami ponovo pokrecu pre nego sto krenu da citaju (vidi ensureBackgroundServiceRunning). */
+    private fun stopBackgroundServiceIfIdle() {
+        val ctx = appContext ?: return
+        // Bezbednosna provera - ne diramo ako je odmor/budjenje ipak nekako u toku (ne bi
+        // trebalo da se desi odmah po zavrsetku knjige, ali sigurnije je proveriti).
+        if (restRemainingSeconds > 0 || restAlarmActive) return
+        try {
+            com.recporec.app.service.ReadingService.stop(ctx)
+        } catch (_: Exception) {
+        }
+    }
+
     private fun handleAutoAdvance() {
         val ctx = appContext ?: return
         val settings = com.recporec.app.data.AppSettings(ctx)
-        if (!settings.autoNextDocumentEnabled) return
+        if (!settings.autoNextDocumentEnabled) {
+            stopBackgroundServiceIfIdle()
+            return
+        }
         val currentDocId = currentDocument?.id ?: return
         scope.launch {
             delay(1000)
@@ -559,6 +579,7 @@ object PlaybackController {
                 android.widget.Toast.makeText(
                     ctx, "Ovo je poslednji dokument u listi.", android.widget.Toast.LENGTH_LONG
                 ).show()
+                stopBackgroundServiceIfIdle()
                 return@launch
             }
             playTransitionSound(ctx)
