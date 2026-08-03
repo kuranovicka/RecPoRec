@@ -52,7 +52,7 @@ class HelpActivity : AppCompatActivity() {
         Sada idemo u sam dokument.
         Kada dugo pritisneš bilo koji dokument, dobijaš sledeće opcije:
         Premesti nagore,premesti nadole, preimenuj i obriši.
-        Tastatura ima dvadeset jedan dugme, raspoređenih u pet redova.
+        Tastatura ima dvadeset dugmića, raspoređenih u pet redova, i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
