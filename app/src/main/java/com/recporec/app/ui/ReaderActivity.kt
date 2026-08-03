@@ -311,13 +311,17 @@ class ReaderActivity : AppCompatActivity() {
      * već proveren mehanizam "Zakaži čitanje" (tiho pauzira, tiho nastavlja u zakazano vreme,
      * bez alarma) - isti pouzdan AlarmManager, ista zaštita od gašenja procesa i restarta
      * telefona koju smo već sredile za buđenje.
-     * PRODUŽAVANJE: ako se dugo pritisne OPET dok je predah već u toku, ovo prosto ponovo
-     * postavi "15 minuta od SADA" - automatski produžava (ne sabira sa ostatkom prethodnog),
-     * bez potrebe za posebnom granom koda. */
+     * PRODUŽAVANJE: kao kod Tajmera (extendTimer) - ako se dugo pritisne OPET dok predah VEĆ
+     * traje, SABIRA 15 novih minuta na PREOSTALO vreme (ne resetuje na svežih 15). */
     private fun quickShortBreak() {
-        PlaybackController.startScheduledReading(15 * 60)
+        if (PlaybackController.isScheduledReadingActive()) {
+            PlaybackController.extendScheduledReadingMinutes(15)
+            android.widget.Toast.makeText(this, "Predah produžen za 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            PlaybackController.startScheduledReading(15 * 60, isQuickBreak = true)
+            android.widget.Toast.makeText(this, "Čitanje pauzirano na 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        }
         updateRestStatusText()
-        android.widget.Toast.makeText(this, "Čitanje pauzirano na 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun loadDocument() {
@@ -606,6 +610,12 @@ class ReaderActivity : AppCompatActivity() {
                 PlaybackController.cancelRest()
                 updateRestStatusText()
                 android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
+            } else if (PlaybackController.restIsQuickBreak) {
+                // "Kratak predah" - za razliku od Probudi/Zakazi citanje, RUCNO nastavljanje
+                // OVDE znaci "gotova sam sa predahom" - to je i poenta kratke pauze, prekida
+                // se odmah, ne ceka svoj rok u pozadini.
+                PlaybackController.cancelRest()
+                updateRestStatusText()
             } else if (PlaybackController.restRemainingSeconds > 0) {
                 // Odbrojavanje JOS NIJE zazvonilo (npr. "Probudi me" za 6 ujutru, ali želiš da
                 // slušaš VEĆ sada, pre spavanja) - NE otkazujemo zakazano buđenje/čitanje, samo
@@ -1502,7 +1512,7 @@ class ReaderActivity : AppCompatActivity() {
         val remaining = PlaybackController.restRemainingSeconds
         binding.textRestStatus.text = when {
             PlaybackController.isRestAlarmRinging() -> "Buđenje: alarm zvoni."
-            PlaybackController.isScheduledReadingActive() -> "Predah ističe za ${formatHoursMinutes(remaining)}."
+            PlaybackController.isScheduledReadingActive() -> "Predah ističe za ${formatTime(remaining.toLong())}."
             remaining > 0 -> "Do buđenja ostalo još ${formatHoursMinutes(remaining)}."
             else -> "Nije ništa zakazano."
         }
@@ -1551,7 +1561,7 @@ class ReaderActivity : AppCompatActivity() {
         if (PlaybackController.isRestAlarmRinging()) {
             parts.add("Buđenje: alarm zvoni.")
         } else if (PlaybackController.isScheduledReadingActive()) {
-            parts.add("Predah ističe za ${formatHoursMinutes(restRemaining)}.")
+            parts.add("Predah ističe za ${formatTime(restRemaining.toLong())}.")
         } else if (restRemaining > 0) {
             parts.add("Do buđenja ostalo još ${formatHoursMinutes(restRemaining)}.")
         }

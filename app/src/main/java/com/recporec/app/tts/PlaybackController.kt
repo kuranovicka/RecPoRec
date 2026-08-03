@@ -138,6 +138,14 @@ object PlaybackController {
     /** "Zakaži čitanje" - kao Probudi, ali BEZ ikakvog alarma/punog ekrana - čitanje prosto
      * tiho krene u zakazano vreme, kao da si sama pritisla Play. */
     private var restSuppressAlarm = false
+    /** Razlikuje "Kratak predah" (dug pritisak na Kontrole) od običnog "Zakaži čitanje" -
+     * oba dele isti restSuppressAlarm mehanizam, ali se RAZLIČITO ponašaju na ručno
+     * nastavljanje (dugme/drmanje/medijski taster): Kratak predah se TIME prekida (to je i
+     * poenta kratke pauze - "gotova sam sa predahom"), dok "Zakaži čitanje"/"Probudi me"
+     * namerno ostaju aktivni i posle ručnog nastavka (drugi slučaj upotrebe - unapred
+     * zakazano vreme koje treba da važi bez obzira na to šta se dešava u međuvremenu). */
+    var restIsQuickBreak: Boolean = false
+        private set
     /** Apsolutan trenutak (SystemClock.elapsedRealtime) kad odmor treba da se završi -
      * koristi se da se preostalo vreme računa SVAKI PUT iznova prema pravom satu, umesto da
      * se prosto oduzima "jedan" svake sekunde (što bi se s vremenom nakupilo u kašnjenje ako
@@ -290,6 +298,7 @@ object PlaybackController {
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
         restSuppressAlarm = false
+        restIsQuickBreak = false
         restAlarmActive = false
         restSnoozeCount = 0
         if (totalSeconds > 0) {
@@ -309,12 +318,13 @@ object PlaybackController {
      * zakazano vreme, kao da si sama pritisla Play. Koristi isti pouzdan sistemski alarm za
      * BUĐENJE PROCESA (da se garantovano pokrene čak i uz Doze/pozadinsko throttlovanje),
      * samo bez zvuka i punog ekrana kad taj trenutak stigne. */
-    fun startScheduledReading(totalSeconds: Int) {
+    fun startScheduledReading(totalSeconds: Int, isQuickBreak: Boolean = false) {
         ttsManager?.pause()
         stopRestAlarm()
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = false
         restSuppressAlarm = totalSeconds > 0
+        restIsQuickBreak = totalSeconds > 0 && isQuickBreak
         restAlarmActive = false
         restSnoozeCount = 0
         if (totalSeconds > 0) {
@@ -327,6 +337,20 @@ object PlaybackController {
             cancelWakeAlarm()
             appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
         }
+        notifyPlaybackStateChanged()
+    }
+
+    /** Produžava VEĆ AKTIVAN predah/zakazano čitanje za DODATNIH N minuta na PREOSTALO vreme -
+     * isti obrazac kao extendTimerMinutes() za Tajmer (sabira, ne resetuje na svežih N). Za
+     * razliku od restRemainingSeconds (koje se svaki tick IZNOVA računa iz
+     * restTargetElapsedMillis), mora se pomeriti sam CILJ u budućnost - inače bi sledeći tick
+     * odmah "pojeo" ovo produženje. */
+    fun extendScheduledReadingMinutes(minutes: Int) {
+        if (restRemainingSeconds <= 0 || !restSuppressAlarm) return
+        restTargetElapsedMillis += minutes * 60 * 1000L
+        restRemainingSeconds += minutes * 60
+        scheduleWakeAlarm(restTargetElapsedMillis)
+        persistPendingWake(false, true)
         notifyPlaybackStateChanged()
     }
 
@@ -352,6 +376,7 @@ object PlaybackController {
         restRemainingSeconds = 0
         restIsWakeTime = false
         restSuppressAlarm = false
+        restIsQuickBreak = false
         restAlarmActive = false
         restSnoozeCount = 0
         stopRestAlarm()
@@ -367,10 +392,11 @@ object PlaybackController {
     fun resumeCancelingRestIfNeeded(): Boolean {
         // Kao i dugme Play/Pauza: dok odbrojavanje JOS NIJE zazvonilo, drmanje/medijski taster
         // ovde NE otkazuju zakazano budjenje/citanje - samo pokrecu citanje odmah, buđenje
-        // ostaje aktivno za svoje pravo vreme. Otkazuje se SAMO ako alarm VEC zvoni (tad ovo
-        // znaci "probudjena sam").
-        val wasRinging = restAlarmActive
-        if (wasRinging) cancelRest()
+        // ostaje aktivno za svoje pravo vreme. Otkazuje se ako alarm VEC zvoni ("probudjena
+        // sam"), ILI ako je u pitanju "Kratak predah" - tu rucno nastavljanje ZNACI "gotova
+        // sam sa predahom", za razliku od Probudi/Zakazi citanje.
+        val shouldCancel = restAlarmActive || restIsQuickBreak
+        if (shouldCancel) cancelRest()
         // Drmanje i medijski taster su TAKODJE svesna, rucna radnja korisnice (kao i dugme
         // Play/Pauza) - resetuje se ista zastavica, da automatsko citanje kasnije ispravno
         // zna da korisnica VISE nije "pauzirala i ostavila to tako".
@@ -419,7 +445,7 @@ object PlaybackController {
         } else {
             ttsManager?.resume()
         }
-        return wasRinging
+        return shouldCancel
     }
 
     fun isSnoozeAvailable(): Boolean = restAlarmActive && restSnoozeCount < MAX_SNOOZE_COUNT

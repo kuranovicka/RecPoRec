@@ -87,7 +87,7 @@ class HelpActivity : AppCompatActivity() {
         Upišeš tačno vreme, na primer 5:20.
         Čitanje tada tiho krene, bez alarma i bez punog ekrana, kao da ručno pritisneš Play.
         Statusna linija tada pokazuje za koliko sati i minuta je čitanje zakazano.
-        Ako pustiš knjigu ranije, zakazano čitanje se prekida.
+        Ako pustiš knjigu ranije, zakazano čitanje ostaje aktivno i i dalje će krenuti u zakazano vreme.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak isključuje tajmer.
         Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
@@ -111,6 +111,7 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak pauzira čitanje na 15 minuta.
         Minut pre kraja pauze ćeš čuti kratak zvučni signal.
         Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
+        Za razliku od Zakaži čitanje, ako pustiš knjigu ranije (dugmetom, drmanjem ili tasterom na slušalicama), Kratak predah se prekida.
         Ispod klizača je dugme Nazad.
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Dug pritisak na Nazad šalje aplikaciju u pozadinu, kao dugme Home na telefonu - dokument ostaje otvoren.
