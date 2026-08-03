@@ -655,10 +655,19 @@ class ReaderActivity : AppCompatActivity() {
             if (manual) settings.userManuallyPaused = true
         } else {
             if (manual) settings.userManuallyPaused = false
-            if (PlaybackController.restRemainingSeconds > 0) {
+            if (PlaybackController.restAlarmActive) {
+                // Alarm VEC zvoni (probudila se) - dugme Play ovde znaci "probudjena sam",
+                // isto kao "Prekini buđenje" - tek SAD se ceo niz stvarno prekida.
                 PlaybackController.cancelRest()
                 updateRestStatusText()
-                android.widget.Toast.makeText(this, "Odmor prekinut.", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
+            } else if (PlaybackController.restRemainingSeconds > 0) {
+                // Odbrojavanje JOS NIJE zazvonilo (npr. "Probudi me" za 6 ujutru, ali želiš da
+                // slušaš VEĆ sada, pre spavanja) - NE otkazujemo zakazano buđenje/čitanje, samo
+                // počinjemo da čitamo odmah. Ostaje aktivno i dalje će zazvoniti/krenuti tačno
+                // u svoje vreme, bez obzira što je knjiga u međuvremenu već ručno puštena.
+                val msg = if (PlaybackController.isWakeUpActive()) "Čitaš sada - buđenje ostaje zakazano." else "Čitaš sada - zakazano čitanje ostaje aktivno."
+                android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
             }
             // Servis (drzi drmanje aktivnim) se pokrece PRE pocetka citanja, ne posle - isti
             // razlog kao kod "Pri otvaranju dokumenta" iznad: pokretanje servisa nije trenutno,

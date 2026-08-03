@@ -361,8 +361,12 @@ object PlaybackController {
      * može ručno da se nastavi (dugme, drmanje...), da bi ponašanje bilo dosledno bez obzira
      * kojim putem korisnica nastavi. */
     fun resumeCancelingRestIfNeeded(): Boolean {
-        val wasResting = restRemainingSeconds > 0 || restAlarmActive
-        if (wasResting) cancelRest()
+        // Kao i dugme Play/Pauza: dok odbrojavanje JOS NIJE zazvonilo, drmanje/medijski taster
+        // ovde NE otkazuju zakazano budjenje/citanje - samo pokrecu citanje odmah, buđenje
+        // ostaje aktivno za svoje pravo vreme. Otkazuje se SAMO ako alarm VEC zvoni (tad ovo
+        // znaci "probudjena sam").
+        val wasRinging = restAlarmActive
+        if (wasRinging) cancelRest()
         // Drmanje i medijski taster su TAKODJE svesna, rucna radnja korisnice (kao i dugme
         // Play/Pauza) - resetuje se ista zastavica, da automatsko citanje kasnije ispravno
         // zna da korisnica VISE nije "pauzirala i ostavila to tako".
@@ -411,7 +415,7 @@ object PlaybackController {
         } else {
             ttsManager?.resume()
         }
-        return wasResting
+        return wasRinging
     }
 
     fun isSnoozeAvailable(): Boolean = restAlarmActive && restSnoozeCount < MAX_SNOOZE_COUNT
@@ -807,20 +811,30 @@ object PlaybackController {
                     if (restRemainingSeconds <= 0) {
                         restRemainingSeconds = 0
                         if (restSuppressAlarm) {
-                            // "Zakaži čitanje" - bez alarma, tiho krece.
+                            // "Zakaži čitanje" - bez alarma, tiho krece. AKO korisnica u
+                            // medjuvremenu VEC rucno cita (dozvoljeno otkad Play vise ne
+                            // otkazuje zakazano citanje), NE diramo je - vec cita, nema potrebe
+                            // da se ponovo (re)pokrene od sacuvane pozicije.
                             stopRestAlarm()
                             releaseRestWakeLock()
                             cancelWakeAlarm()
-                            ensureBackgroundServiceRunning()
-                            val offset = currentDocument?.currentCharacterOffset
-                            if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                            if (ttsManager?.isSpeaking != true) {
+                                ensureBackgroundServiceRunning()
+                                val offset = currentDocument?.currentCharacterOffset
+                                if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                            }
                             notifyPlaybackStateChanged()
                         } else {
                             // Odbrojavanje je isteklo - NE nastavlja citanje odmah, prvo pun
                             // minut zvoni alarm (kao pravi budilnik), a tek posle toga knjiga
-                            // krece.
+                            // krece. AKO korisnica u medjuvremenu VEC rucno cita (dozvoljeno
+                            // otkad Play vise ne otkazuje zakazano budjenje), pauziramo je PRE
+                            // nego sto alarm pocne da zvoni - inace bi se glas i alarm culi
+                            // istovremeno.
+                            ttsManager?.pause()
                             restAlarmActive = true
                             restAlarmSecondsLeft = ALARM_RING_SECONDS
+                            acquireRestWakeLock()
                             notifyPlaybackStateChanged()
                         }
                     }
