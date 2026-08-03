@@ -567,11 +567,14 @@ class ReaderActivity : AppCompatActivity() {
                 updateRestStatusText()
                 android.widget.Toast.makeText(this, "Odmor prekinut.", android.widget.Toast.LENGTH_SHORT).show()
             }
-            val startOffset = doc?.currentCharacterOffset ?: 0
-            tts.startFromOffset(startOffset)
+            // Servis (drzi drmanje aktivnim) se pokrece PRE pocetka citanja, ne posle - isti
+            // razlog kao kod "Pri otvaranju dokumenta" iznad: pokretanje servisa nije trenutno,
+            // pa bi drmanje odmah po pritisku Play moglo tiho da ne stigne da se registruje.
             if (settings.backgroundEnabled) {
                 ReadingService.start(this, settings.uninterruptedEnabled)
             }
+            val startOffset = doc?.currentCharacterOffset ?: 0
+            tts.startFromOffset(startOffset)
         }
     }
 

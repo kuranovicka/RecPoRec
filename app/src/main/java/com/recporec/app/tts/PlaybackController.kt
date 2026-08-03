@@ -248,9 +248,13 @@ object PlaybackController {
                 stopRestAlarm()
                 releaseRestWakeLock()
                 cancelWakeAlarm()
+                // Servis (drzi drmanje aktivnim) se pokrece PRE pocetka citanja, ne posle -
+                // pokretanje servisa nije trenutno (par stotina ms do onStartCommand/registracije
+                // senzora), pa bi drmanje odmah po pocetku citanja moglo tiho da ne uspe da se
+                // registruje na vreme.
+                ensureBackgroundServiceRunning()
                 val offset = currentDocument?.currentCharacterOffset
                 if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
-                ensureBackgroundServiceRunning()
                 notifyPlaybackStateChanged()
             } else {
                 ttsManager?.pause()
@@ -388,6 +392,15 @@ object PlaybackController {
             }
             return false
         }
+        // VAŽNO: servis (drži drmanje i medijski taster aktivnim) se pokreće PRE početka
+        // čitanja, ne posle - pokretanje servisa nije trenutno (par stotina ms do
+        // onStartCommand/registracije senzora), pa bi drmanje odmah po nastavku čitanja
+        // moglo tiho da ne uspe da se registruje na vreme. Radi se OVDE (drmanje, medijski
+        // taster, buđenje/odmor) umesto preko dugmeta u čitaču - dugme SAMO takođe (ponovo)
+        // pokreće ReadingService. Bez ovoga, ako servis iz bilo kog razloga nije radio,
+        // drmanje ostaje "gluvo" dok se ručno ne otvori app i pritisne dugme (što baš to
+        // radi) - primećeno posle buđenja/odmora.
+        ensureBackgroundServiceRunning()
         // Eksplicitno kreni od SAČUVANE pozicije (kao dugme Play/Pauza u čitaču), umesto da
         // se osloni na unutrašnji indeks rečenice u TtsManager-u - pouzdanije, posebno posle
         // duže pauze (odmor/buđenje) kad taj indeks moze da se razidje sa stvarno sacuvanom
@@ -397,21 +410,6 @@ object PlaybackController {
             ttsManager?.startFromOffset(offset)
         } else {
             ttsManager?.resume()
-        }
-        // VAŽNO: kad se čitanje nastavlja OVDE (drmanje, medijski taster, buđenje/odmor),
-        // umesto preko dugmeta u čitaču - dugme SAMO takođe (ponovo) pokreće ReadingService,
-        // koji drži drmanje (i wake lock za rad u pozadini) aktivnim. Bez ovoga, ako servis
-        // iz bilo kog razloga nije radio, drmanje ostaje "gluvo" dok se ručno ne otvori app i
-        // pritisne dugme (što baš to radi) - primećeno posle buđenja/odmora.
-        val ctx = appContext
-        if (ctx != null) {
-            try {
-                val settings = com.recporec.app.data.AppSettings(ctx)
-                if (settings.backgroundEnabled) {
-                    com.recporec.app.service.ReadingService.start(ctx, settings.uninterruptedEnabled)
-                }
-            } catch (_: Exception) {
-            }
         }
         return wasResting
     }
@@ -641,13 +639,7 @@ object PlaybackController {
             // tekst u motor - sto je moglo da prekine/pomeri VEC pripremljeno, pauzirano
             // stanje i ostavi drmanje "gluvim" dok se ponovni pokusaj priprema ne zavrsi.
             if (activeId == entity.id && ttsManager?.isEngineReady == true) {
-                try {
-                    val settings = com.recporec.app.data.AppSettings(context)
-                    if (settings.backgroundEnabled) {
-                        com.recporec.app.service.ReadingService.start(context, settings.uninterruptedEnabled)
-                    }
-                } catch (_: Exception) {
-                }
+                ensureBackgroundServiceRunning()
                 return@launch
             }
             // Ako je korisnica U MEDJUVREMENU vec rucno otvorila neki dokument (npr. odmah
@@ -656,19 +648,14 @@ object PlaybackController {
             if (!isLoadRequestCurrent(loadToken)) return@launch
             if (effectiveAutoPlay) playTransitionSound(context)
             ensureInitialized(context)
-            loadAndPlayDocumentInBackground(context, entity.id, loadToken, effectiveAutoPlay)
-            // VAZNO: bez ovoga, citanje se gasi posle SVEGA JEDNE recenice - Android nema
-            // razlog da drzi pozadinski rad zivim bez foreground servisa, koji svaki drugi
-            // put kad se citanje pokrene (dugme, drmanje, budjenje...) vec biva pokrenut.
+            // VAZNO: servis (drzi drmanje i medijski taster aktivnim) se pokrece PRE ucitavanja
+            // i pocetka citanja, ne posle - bez ovoga bi citanje moglo da se gasi posle SVEGA
+            // JEDNE recenice (Android nema razlog da drzi pozadinski rad zivim bez foreground
+            // servisa), a i drmanje bi moglo tiho da ne stigne da se registruje na vreme.
             // Servis se pokrece UVEK (ne samo kad je effectiveAutoPlay) - drmanje treba da
             // bude spremno u svakom slucaju.
-            try {
-                val settings = com.recporec.app.data.AppSettings(context)
-                if (settings.backgroundEnabled) {
-                    com.recporec.app.service.ReadingService.start(context, settings.uninterruptedEnabled)
-                }
-            } catch (_: Exception) {
-            }
+            ensureBackgroundServiceRunning()
+            loadAndPlayDocumentInBackground(context, entity.id, loadToken, effectiveAutoPlay)
         }
     }
 
@@ -803,9 +790,9 @@ object PlaybackController {
                             stopRestAlarm()
                             releaseRestWakeLock()
                             cancelWakeAlarm()
+                            ensureBackgroundServiceRunning()
                             val offset = currentDocument?.currentCharacterOffset
                             if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
-                            ensureBackgroundServiceRunning()
                             notifyPlaybackStateChanged()
                         } else {
                             // Odbrojavanje je isteklo - NE nastavlja citanje odmah, prvo pun
@@ -834,8 +821,8 @@ object PlaybackController {
                             stopRestAlarm()
                             releaseRestWakeLock()
                             cancelWakeAlarm()
-                            ttsManager?.resume()
                             ensureBackgroundServiceRunning()
+                            ttsManager?.resume()
                             notifyPlaybackStateChanged()
                         }
                     }
