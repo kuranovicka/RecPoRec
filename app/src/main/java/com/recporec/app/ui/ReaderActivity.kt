@@ -197,6 +197,7 @@ class ReaderActivity : AppCompatActivity() {
         btnBack.setOnLongClickListener { playClickSound(); moveTaskToBack(true); true }
 
         btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
+        btnToggleControls.setOnLongClickListener { quickShortBreak(); true }
 
         btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
         btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
@@ -299,10 +300,21 @@ class ReaderActivity : AppCompatActivity() {
         seekProgress.visibility = visibility
         btnBack.visibility = visibility
         btnToggleControls.contentDescription = if (controlsHidden) {
-            "Prikaži kontrole."
+            "Prikaži kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
         } else {
-            "Sakrij kontrole."
+            "Sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
         }
+    }
+
+    /** "Kratak predah" - dug pritisak na Kontrole. Trenutna radnja (kao brza oznaka), BEZ
+     * dijaloga - fiksnih 15 minuta, dovoljno npr. da se skuva kafa. Iskorišćava POSTOJEĆI,
+     * već proveren mehanizam "Zakaži čitanje" (tiho pauzira, tiho nastavlja u zakazano vreme,
+     * bez alarma) - isti pouzdan AlarmManager, ista zaštita od gašenja procesa i restarta
+     * telefona koju smo već sredile za buđenje. */
+    private fun quickShortBreak() {
+        PlaybackController.startScheduledReading(15 * 60)
+        updateRestStatusText()
+        android.widget.Toast.makeText(this, "Nastavljam za 15 minuta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun loadDocument() {
@@ -1487,7 +1499,7 @@ class ReaderActivity : AppCompatActivity() {
         val remaining = PlaybackController.restRemainingSeconds
         binding.textRestStatus.text = when {
             PlaybackController.isRestAlarmRinging() -> "Buđenje: alarm zvoni."
-            PlaybackController.isScheduledReadingActive() -> "Čitanje zakazano za ${formatHoursMinutes(remaining)}."
+            PlaybackController.isScheduledReadingActive() -> "Nastavljam čitanje za ${formatHoursMinutes(remaining)}."
             remaining > 0 -> "Do buđenja ostalo još ${formatHoursMinutes(remaining)}."
             else -> "Nije ništa zakazano."
         }
@@ -1536,7 +1548,7 @@ class ReaderActivity : AppCompatActivity() {
         if (PlaybackController.isRestAlarmRinging()) {
             parts.add("Buđenje: alarm zvoni.")
         } else if (PlaybackController.isScheduledReadingActive()) {
-            parts.add("Čitanje zakazano za ${formatHoursMinutes(restRemaining)}.")
+            parts.add("Nastavljam čitanje za ${formatHoursMinutes(restRemaining)}.")
         } else if (restRemaining > 0) {
             parts.add("Do buđenja ostalo još ${formatHoursMinutes(restRemaining)}.")
         }

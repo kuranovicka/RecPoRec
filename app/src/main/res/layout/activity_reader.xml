@@ -263,7 +263,7 @@
             android:textSize="14sp"
             android:backgroundTint="@color/btn_combined"
             android:textColor="@color/button_text"
-            android:contentDescription="Prikaži ili sakrij kontrole."
+            android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
             android:text="👁 Kontrole" />
     </LinearLayout>
 
