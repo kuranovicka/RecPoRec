@@ -109,6 +109,8 @@ class HelpActivity : AppCompatActivity() {
         Desno od klizača je dugme Prikaži-sakrij kontrole.
         Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe i dugmeta Pokreni/Pauziraj čitanje - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
         Dug pritisak pauzira čitanje na 15 minuta.
+        Minut pre kraja pauze ćeš čuti kratak zvučni signal.
+        Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
         Ispod klizača je dugme Nazad.
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Dug pritisak na Nazad šalje aplikaciju u pozadinu, kao dugme Home na telefonu - dokument ostaje otvoren.

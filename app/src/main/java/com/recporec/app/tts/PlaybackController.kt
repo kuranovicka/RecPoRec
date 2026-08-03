@@ -812,6 +812,17 @@ object PlaybackController {
                 if (restRemainingSeconds > 0) {
                     val remainingMillis = restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime()
                     restRemainingSeconds = (remainingMillis / 1000).toInt().coerceAtLeast(0)
+                    // Minut pre isteka - isto kratko DVOSTRUKO upozorenje kao kod Tajmera, ali
+                    // SAMO za "Zakazi citanje"/"Kratak predah" (restSuppressAlarm) - kod
+                    // "Probudi me" ne treba, jer je sam alarm vec dovoljno upozorenje.
+                    if (restRemainingSeconds == 60 && restSuppressAlarm) {
+                        val warnTone = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
+                        warnTone.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+                        delay(400)
+                        warnTone.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+                        delay(300)
+                        warnTone.release()
+                    }
                     if (restRemainingSeconds <= 0) {
                         restRemainingSeconds = 0
                         if (restSuppressAlarm) {

@@ -310,7 +310,10 @@ class ReaderActivity : AppCompatActivity() {
      * dijaloga - fiksnih 15 minuta, dovoljno npr. da se skuva kafa. Iskorišćava POSTOJEĆI,
      * već proveren mehanizam "Zakaži čitanje" (tiho pauzira, tiho nastavlja u zakazano vreme,
      * bez alarma) - isti pouzdan AlarmManager, ista zaštita od gašenja procesa i restarta
-     * telefona koju smo već sredile za buđenje. */
+     * telefona koju smo već sredile za buđenje.
+     * PRODUŽAVANJE: ako se dugo pritisne OPET dok je predah već u toku, ovo prosto ponovo
+     * postavi "15 minuta od SADA" - automatski produžava (ne sabira sa ostatkom prethodnog),
+     * bez potrebe za posebnom granom koda. */
     private fun quickShortBreak() {
         PlaybackController.startScheduledReading(15 * 60)
         updateRestStatusText()
