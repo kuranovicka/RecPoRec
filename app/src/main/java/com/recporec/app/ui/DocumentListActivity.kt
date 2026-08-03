@@ -34,6 +34,24 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
+    // Cuva "sledeci korak" u lancu dozvola dok cekamo da se SISTEMSKI dijalog (za dozvolu)
+    // zatvori - da se nas sledeci dijalog ne bi pojavio PREKO sistemskog, u isto vreme.
+    private var pendingPermissionChainNext: (() -> Unit)? = null
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* ako korisnik odbije, servis i dalje radi, samo bez vidljive notifikacije */
+        maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
+    }
+
+    private val phoneStatePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* ako korisnik odbije, i dalje se pokusava pauza preko audio fokusa, samo bez
+           rezervnog mehanizma za pozive */
+        pendingPermissionChainNext?.invoke()
+        pendingPermissionChainNext = null
+    }
+
     /** Otvara standardni sistemski birač fajlova, BEZ ikakvog usmeravanja na tačno određenu
      * lokaciju. NAMERNO bez ogranicenja na tipove fajlova (MIME tipovi) - lokalni fajlovi na
      * telefonu (posebno .mobi/.fb2/.azw) cesto imaju "pogresno" ili genericki prijavljen tip
@@ -70,6 +88,21 @@ class DocumentListActivity : AppCompatActivity() {
 
         binding.btnAddDocument.setOnClickListener {
             launchPicker()
+        }
+
+        // SVE dozvole (obavestenja, stanje telefona, izuzetak od stednje baterije, pun ekran
+        // za budjenje) se traze ODMAH pri pokretanju aplikacije - ne tek kad se otvori prvi
+        // dokument ili kad neka konkretna funkcija zatreba - da korisnika ne bi zbunilo
+        // iskakanje dozvole u nezgodnom trenutku (npr. tokom poziva). Idu JEDNA PO JEDNA, u
+        // lancu (ne sve odjednom - dva dijaloga istovremeno bi se pogazili).
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.POST_NOTIFICATIONS
+            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
         }
 
         binding.btnGeneralActions.setOnClickListener {
@@ -409,5 +442,109 @@ class DocumentListActivity : AppCompatActivity() {
                 }
             }
             .show()
+    }
+
+    /** Pita SAMO JEDNOM (ikad) za dozvolu stanja telefona - rezervni mehanizam za pauzu pri
+     * pozivu, odvojen od audio fokusa. Prvo objasnimo zašto, pa tek onda sistemski dijalog -
+     * ovo nije uobičajena dozvola za čitač knjiga, pa zaslužuje kratko objašnjenje. Ako
+     * korisnica odbije, ništa se ne pokvari - audio fokus i dalje pokušava da pauzira sam. */
+    private fun maybeAskPhoneStatePermission(onDone: () -> Unit = {}) {
+        if (settings.phoneStatePermissionAsked) { onDone(); return }
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.READ_PHONE_STATE
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            settings.phoneStatePermissionAsked = true
+            onDone()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Pauza pri pozivu")
+            .setMessage(
+                "Da bi čitanje pouzdanije prepoznalo dolazni poziv i samo se pauziralo, " +
+                    "aplikacija može da traži dozvolu za stanje telefona (da li poziv postoji, " +
+                    "ne i sa kim, niti sadržaj poziva). Nije obavezno - možeš i odbiti, " +
+                    "čitanje će i dalje pokušati da se pauzira na uobičajen način."
+            )
+            .setNegativeButton("Ne sada") { _, _ -> settings.phoneStatePermissionAsked = true; onDone() }
+            .setPositiveButton("Dozvoli") { _, _ ->
+                settings.phoneStatePermissionAsked = true
+                pendingPermissionChainNext = onDone
+                phoneStatePermissionLauncher.launch(android.Manifest.permission.READ_PHONE_STATE)
+            }
+            .setOnCancelListener { onDone() }
+            .show()
+    }
+
+    /** Pita SAMO JEDNOM (ikad) za izuzetak od štednje baterije - NEZAVISNO od "Čitanje bez
+     * prekida" (koje ovo takodje trazi, ali samo ako se ukljuci taj prekidac). Bez ovoga, na
+     * pojedinim uredjajima (narocito Samsung) sistem ume da uguši servis za citanje u pozadini
+     * (i njegovu notifikaciju i medijsku sesiju za slusalice) pre nego sto stigne pouzdano da
+     * proradi - primeceno kod korisnice sa Samsung telefonom i Bluetooth slusalicama. */
+    private fun maybeAskBatteryOptimization(onDone: () -> Unit = {}) {
+        if (settings.batteryOptimizationAsked) { onDone(); return }
+        val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            settings.batteryOptimizationAsked = true
+            onDone()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Pouzdano čitanje u pozadini")
+            .setMessage(
+                "Da bi čitanje u pozadini i medijski tasteri na slušalicama pouzdano radili " +
+                    "(posebno na Samsung telefonima), aplikacija može da zatraži izuzetak od " +
+                    "štednje baterije. Nije obavezno - možeš i odbiti."
+            )
+            .setNegativeButton("Ne sada") { _, _ -> settings.batteryOptimizationAsked = true; onDone() }
+            .setPositiveButton("Dozvoli") { _, _ ->
+                settings.batteryOptimizationAsked = true
+                try {
+                    startActivity(
+                        Intent(
+                            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                            Uri.parse("package:$packageName")
+                        )
+                    )
+                } catch (_: Exception) {
+                    // Neki proizvodjaci imaju svoja dodatna podesavanja stednje baterije van
+                    // standardnog Android sistema - korisnica ih onda mora rucno pronaci.
+                }
+                onDone()
+            }
+            .setOnCancelListener { onDone() }
+            .show()
+    }
+
+    /** Od Android 14 na dalje, pun ekran preko zaključanog ekrana (za pouzdano "Probudi me
+     * u") može biti onemogućen dok korisnica to ručno ne dozvoli - ista dozvola koju imaju
+     * i prave budilnik/poziv aplikacije. Poslednja karika u lancu - nema svoj onDone. */
+    private fun checkFullScreenIntentPermission() {
+        if (android.os.Build.VERSION.SDK_INT < 34) return
+        if (settings.fullScreenIntentAsked) return
+        val nm = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+        if (!nm.canUseFullScreenIntent()) {
+            AlertDialog.Builder(this)
+                .setTitle("Dozvola za buđenje preko zaključanog ekrana")
+                .setMessage(
+                    "Da bi \"Probudi me u\" moglo pouzdano da otvori ceo ekran i kad je telefon zaključan, " +
+                        "potrebno je ručno da dozvoliš to u podešavanjima telefona, na sledećem ekranu."
+                )
+                .setNegativeButton("Ne sada") { _, _ -> settings.fullScreenIntentAsked = true }
+                .setPositiveButton("Otvori podešavanja") { _, _ ->
+                    settings.fullScreenIntentAsked = true
+                    try {
+                        val intent = Intent(
+                            android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                            Uri.parse("package:$packageName")
+                        )
+                        startActivity(intent)
+                    } catch (_: Exception) {
+                    }
+                }
+                .show()
+        } else {
+            settings.fullScreenIntentAsked = true
+        }
     }
 }
