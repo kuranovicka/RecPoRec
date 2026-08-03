@@ -655,7 +655,7 @@ class ReaderActivity : AppCompatActivity() {
             if (manual) settings.userManuallyPaused = true
         } else {
             if (manual) settings.userManuallyPaused = false
-            if (PlaybackController.restAlarmActive) {
+            if (PlaybackController.isRestAlarmRinging()) {
                 // Alarm VEC zvoni (probudila se) - dugme Play ovde znaci "probudjena sam",
                 // isto kao "Prekini buđenje" - tek SAD se ceo niz stvarno prekida.
                 PlaybackController.cancelRest()
