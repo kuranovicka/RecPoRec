@@ -811,7 +811,17 @@ object PlaybackController {
                 // sekunde (primetljivo tek posle vise sati, ali baš to je i prijavljeno).
                 if (restRemainingSeconds > 0) {
                     val remainingMillis = restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime()
+                    val previousRemaining = restRemainingSeconds
                     restRemainingSeconds = (remainingMillis / 1000).toInt().coerceAtLeast(0)
+                    // Obavestenje (notifikacija) se NE osvezava svake sekunde sama od sebe -
+                    // samo na promenu stanja. Bez ovoga bi "Citanje pauzirano na X minuta." u
+                    // notifikaciji ostalo zamrznuto na pocetnoj vrednosti ceo predah, umesto da
+                    // prati isti odbrojavajuci broj kao statusna linija u citacu. Osvezava se
+                    // SAMO kad predjeni broj CELIH minuta stvarno promeni (ne svake sekunde) -
+                    // dovoljno cesto koliko se i prikazuje (minuti, ne sekunde).
+                    if (restSuppressAlarm && (previousRemaining + 59) / 60 != (restRemainingSeconds + 59) / 60) {
+                        notifyPlaybackStateChanged()
+                    }
                     // Minut pre isteka - isto kratko DVOSTRUKO upozorenje kao kod Tajmera, ali
                     // SAMO za "Zakazi citanje"/"Kratak predah" (restSuppressAlarm) - kod
                     // "Probudi me" ne treba, jer je sam alarm vec dovoljno upozorenje.
