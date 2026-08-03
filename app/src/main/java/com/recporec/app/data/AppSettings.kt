@@ -80,6 +80,17 @@ class AppSettings(context: Context) {
             .apply()
     }
 
+    /** Da li su kontrole (sve osim dugmeta Kontrole i Pokreni/Pauziraj) sakrivene za TAČNO
+     * OVAJ dokument - pamti se po dokumentu (ne globalno za app), jer korisnica moze da zeli
+     * "cist" prikaz samo za jednu knjigu, ne za sve. Prezivljava zatvaranje/ponovno otvaranje
+     * i dokumenta i cele aplikacije. */
+    fun isControlsHiddenForDocument(documentId: Long): Boolean =
+        prefs.getBoolean("$KEY_CONTROLS_HIDDEN_PREFIX$documentId", false)
+
+    fun setControlsHiddenForDocument(documentId: Long, hidden: Boolean) {
+        prefs.edit().putBoolean("$KEY_CONTROLS_HIDDEN_PREFIX$documentId", hidden).apply()
+    }
+
     /** Da li je ikad zatraženo dozvola za stanje telefona (rezervni mehanizam za pozive) -
      * pitamo samo JEDNOM, čak i ako korisnik odbije, da ne dosađujemo pri svakom otvaranju. */
     var phoneStatePermissionAsked: Boolean
@@ -227,6 +238,7 @@ class AppSettings(context: Context) {
         private const val KEY_PENDING_WAKE_DOC_ID = "pending_wake_doc_id"
         private const val KEY_PENDING_WAKE_TARGET_ELAPSED = "pending_wake_target_elapsed"
         private const val KEY_PENDING_WAKE_TARGET_WALL = "pending_wake_target_wall"
+        private const val KEY_CONTROLS_HIDDEN_PREFIX = "controls_hidden_doc_"
         private const val KEY_PENDING_WAKE_IS_WAKE_TIME = "pending_wake_is_wake_time"
         private const val KEY_PENDING_WAKE_SUPPRESS_ALARM = "pending_wake_suppress_alarm"
     }

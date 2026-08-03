@@ -44,8 +44,8 @@ class ReaderActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var tickerRunnable: Runnable? = null
 
-    // Namerno NE cuvano u AppSettings - resetuje se na "prikazano" svaki put kad se ekran
-    // otvori, kao kod slicnih "cist prikaz" prekidaca u drugim citacima/plejerima.
+    // Pamti se PO DOKUMENTU u AppSettings (vidi applyControlsVisibility/toggleControlsVisibility) -
+    // stvarna pocetna vrednost se ucitava u onCreate, cim je documentId poznat.
     private var controlsHidden = false
 
     private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
@@ -102,6 +102,13 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.ensureInitialized(applicationContext)
 
         setupButtons()
+        // Sacuvano stanje "sakrij kontrole" ZA OVAJ dokument - primenjuje se odmah, PRE
+        // loadDocument()/prve prikazane sekunde, da korisnica ne vidi kratak "trep" svih
+        // dugmica pre nego sto se sakriju.
+        if (documentId != -1L) {
+            controlsHidden = settings.isControlsHiddenForDocument(documentId)
+        }
+        applyControlsVisibility()
         loadDocument()
         startTicker()
         // Sve dozvole (obavestenja, stanje telefona, baterija, pun ekran za budjenje) se sad
@@ -269,10 +276,18 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /** Predlog korisnika: "cist" ekran za citanje ocima (za videce, ili kad kontrole smetaju) -
-     * sakriva SVE osim ovog dugmeta i Pokreni/Pauziraj citanje. Namerno se NE cuva izmedju
-     * otvaranja dokumenata - svaki put kad se ekran otvori, kontrole su ponovo prikazane. */
-    private fun toggleControlsVisibility() = with(binding) {
+     * sakriva SVE osim ovog dugmeta i Pokreni/Pauziraj citanje. Pamti se PO DOKUMENTU (ne
+     * globalno) - prezivljava zatvaranje i ponovno otvaranje i dokumenta i cele aplikacije. */
+    private fun toggleControlsVisibility() {
         controlsHidden = !controlsHidden
+        if (documentId != -1L) settings.setControlsHiddenForDocument(documentId, controlsHidden)
+        applyControlsVisibility()
+    }
+
+    /** Postavlja vidljivost kontrola prema TRENUTNOJ vrednosti controlsHidden - koristi se i
+     * pri prebacivanju (toggleControlsVisibility) i pri otvaranju dokumenta (da odmah prikaze
+     * sacuvano stanje za taj dokument, bez potrebe da korisnica prvo sama pritisne dugme). */
+    private fun applyControlsVisibility() = with(binding) {
         val visibility = if (controlsHidden) android.view.View.GONE else android.view.View.VISIBLE
         layoutStatus.visibility = visibility
         layoutRow1.visibility = visibility
