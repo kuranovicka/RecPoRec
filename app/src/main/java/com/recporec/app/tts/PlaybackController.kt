@@ -821,6 +821,10 @@ object PlaybackController {
                             stopRestAlarm()
                             releaseRestWakeLock()
                             cancelWakeAlarm()
+                            // Ovde je bilo zaboravljeno (za razliku od svih ostalih mesta gde se
+                            // odmor/budjenje zavrsava) - bez ovoga bi sacuvano stanje budjenja
+                            // ostalo "na cekanju" u podesavanjima i posle automatskog odustajanja.
+                            appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
                             ensureBackgroundServiceRunning()
                             ttsManager?.resume()
                             notifyPlaybackStateChanged()
