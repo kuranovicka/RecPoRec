@@ -70,8 +70,8 @@ class ReadingService : Service() {
             if (accel != null) {
                 val threshold = when (settings.shakeSensitivity) {
                     0 -> 6.0f  // blago - lako se okine
-                    2 -> 16.0f // jako - treba odlucno drmnuti
-                    else -> 11.0f // srednje
+                    2 -> 13.0f // jako - treba odlucno drmnuti (spusteno sa 16.0 - Marina javila da je bilo previsoko)
+                    else -> 9.0f // srednje (spusteno sa 11.0 - isti razlog)
                 }
                 shakeDetector = ShakeDetector(shakeThreshold = threshold) {
                     val tts = PlaybackController.ttsManager
