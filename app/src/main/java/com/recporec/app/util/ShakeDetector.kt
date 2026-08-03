@@ -14,34 +14,38 @@ class ShakeDetector(
     private var lastShakeTime = 0L
     private val minIntervalMs = 1200L
 
-    // VRACENO NA DVA nakon zajedno spustenih pragova (9.0/13.0) - kombinacija "samo JEDNO
-    // ocitavanje" + nizi prag je bila PREOSETLJIVA: obicno nosenje/pomeranje telefona posle
-    // pravog drmanja je povremeno samo prelazilo prag, sto se racunalo kao JOS JEDNO drmanje
-    // (posto je drmanje prekidac pusti/pauziraj, taj "duh" okidac je tiho vracao stanje nazad
-    // pre drugog namernog drmanja - Marina prijavila da "radi samo prvi put", sto se uklapa).
-    // Dva uzastopna ocitavanja i dalje dozvoljavaju stvaran, ostar trzaj (koji obicno traje
-    // vise od jednog ocitavanja na ~50Hz), ali odbacuju kratkotrajne slucajne vrhove.
-    private var consecutiveOverThreshold = 0
-    private val requiredConsecutive = 2
+    // DRUGACIJI PRISTUP (posle par pokusaja sa "uzastopnim ocitavanjima" koja su bila ili
+    // prestroga ili prelabava): umesto da trazimo da senzor OSTANE iznad praga kroz N
+    // ocitavanja zaredom, brojimo koliko puta senzor PREDJE prag (rastuce ivice, ne svako
+    // pojedinacno ocitavanje dok je iznad) unutar kratkog vremenskog prozora. Pravo drmanje
+    // rukom PRIRODNO osciluje (gore-dole-gore-dole), pa ovo prati stvaran pokret mnogo bolje
+    // nego "ostani iznad bez prekida", i nije osetljivo na tacan trenutak uzorkovanja senzora.
+    private val windowMs = 500L
+    private val requiredPeaksInWindow = 3
+    private val peakTimestamps = ArrayDeque<Long>()
+    private var wasAboveThreshold = false
 
     override fun onSensorChanged(event: SensorEvent) {
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
         val gForce = sqrt((x * x + y * y + z * z).toDouble()) - SensorManager.GRAVITY_EARTH
-        if (gForce > shakeThreshold) {
-            consecutiveOverThreshold++
-        } else {
-            consecutiveOverThreshold = 0
-        }
-        if (consecutiveOverThreshold >= requiredConsecutive) {
-            consecutiveOverThreshold = 0
+        val isAboveNow = gForce > shakeThreshold
+        if (isAboveNow && !wasAboveThreshold) {
             val now = System.currentTimeMillis()
-            if (now - lastShakeTime > minIntervalMs) {
-                lastShakeTime = now
-                onShake()
+            peakTimestamps.addLast(now)
+            while (peakTimestamps.isNotEmpty() && now - peakTimestamps.first() > windowMs) {
+                peakTimestamps.removeFirst()
+            }
+            if (peakTimestamps.size >= requiredPeaksInWindow) {
+                peakTimestamps.clear()
+                if (now - lastShakeTime > minIntervalMs) {
+                    lastShakeTime = now
+                    onShake()
+                }
             }
         }
+        wasAboveThreshold = isAboveNow
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
