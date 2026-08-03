@@ -59,4 +59,14 @@
             android:text="Podeli" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_margin="16dp"
+        android:textSize="20sp"
+        android:backgroundTint="@color/btn_combined"
+        android:textColor="@color/button_text"
+        android:text="Nazad" />
+
 </LinearLayout>

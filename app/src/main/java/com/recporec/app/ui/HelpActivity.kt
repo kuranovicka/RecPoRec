@@ -26,7 +26,7 @@ class HelpActivity : AppCompatActivity() {
         Njime dodaješ knjigu sa telefona ili sa Google diska, OneDrive-a, Dropboxa i slično.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf i mobi.
         Ispod njega je dugme Opšte radnje.
-        Otvara sledeće opcije:
+        To dugme se pojavljuje samo kada ima dokumenata i otvara sledeće opcije:
         Odaberi sve, obriši odabrano, ili opozovi izbor ako se predomisliš.
         Dugme Izlaz je ispod toga.
         Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
@@ -50,6 +50,8 @@ class HelpActivity : AppCompatActivity() {
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
+        Kada duplo klikneš na bilo koji dokument sa zadrškom, dobijaš sledeće opcije:
+        Premesti nagore,premesti nadole, preimenuj i obriši.
         Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
         U prvom redu odozgo, prvo dugme je Oznake.
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
@@ -129,6 +131,7 @@ class HelpActivity : AppCompatActivity() {
         }
 
         binding.btnShareHelp.setOnClickListener { shareHelpAsTxt() }
+        binding.btnBack.setOnClickListener { finish() }
     }
 
     private fun shareHelpAsTxt() {

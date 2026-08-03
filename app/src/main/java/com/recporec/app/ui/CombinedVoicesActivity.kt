@@ -60,6 +60,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         binding.btnAddVoice.setOnClickListener { showAddVoiceDialog() }
         binding.btnRemoveVoice.setOnClickListener { showRemoveVoiceDialog() }
         binding.btnSentenceCount.setOnClickListener { showSentenceCountDialog() }
+        binding.btnBack.setOnClickListener { finish() }
     }
 
     private fun langLabel(tag: String): String =

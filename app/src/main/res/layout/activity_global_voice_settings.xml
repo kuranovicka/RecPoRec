@@ -157,5 +157,16 @@
             android:textColor="@color/button_text"
             android:text="Vrati na zadano" />
 
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:text="Nazad" />
+
     </LinearLayout>
 </ScrollView>

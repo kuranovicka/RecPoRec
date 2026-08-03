@@ -115,6 +115,8 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .show()
         }
+
+        binding.btnBack.setOnClickListener { finish() }
     }
 
     private val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka")

@@ -85,6 +85,7 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
         })
 
         binding.btnResetVoiceDefaults.setOnClickListener { confirmResetVoiceDefaults() }
+        binding.btnBack.setOnClickListener { finish() }
     }
 
     private fun confirmResetVoiceDefaults() {

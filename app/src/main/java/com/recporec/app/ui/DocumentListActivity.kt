@@ -323,11 +323,42 @@ class DocumentListActivity : AppCompatActivity() {
     private fun showActionsMenu(doc: DocumentEntity) {
         AlertDialog.Builder(this)
             .setTitle(doc.title)
-            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Obriši")) { _, which ->
+            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Obriši")) { _, which ->
                 when (which) {
                     0 -> moveDocument(doc, up = true)
                     1 -> moveDocument(doc, up = false)
-                    2 -> confirmDelete(doc)
+                    2 -> showRenameDialog(doc)
+                    3 -> confirmDelete(doc)
+                }
+            }
+            .show()
+    }
+
+    private fun showRenameDialog(doc: DocumentEntity) {
+        val input = android.widget.EditText(this).apply {
+            setText(doc.title)
+            setSelection(text.length)
+            hint = "Naziv dokumenta"
+        }
+        val padding = (16 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(padding, padding / 2, padding, 0)
+            addView(input)
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Preimenuj")
+            .setView(container)
+            .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
+            .setPositiveButton("Sačuvaj") { _, _ ->
+                // Format (ekstenzija) se cuva ODVOJENO od naziva (doc.format) i ne menja se
+                // ovde - korisnica menja samo prikazani naziv, ne stvarni fajl na disku.
+                val newTitle = input.text?.toString()?.trim().orEmpty()
+                if (newTitle.isEmpty()) {
+                    android.widget.Toast.makeText(this, "Naziv ne može biti prazan.", android.widget.Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                lifecycleScope.launch {
+                    db.documentDao().update(doc.copy(title = newTitle))
                 }
             }
             .show()
