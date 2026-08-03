@@ -114,7 +114,7 @@ class HelpActivity : AppCompatActivity() {
         Kada ponovo pokreneš aplikaciju, vraćaš se tačno na taj dokument, sa svim dugmadima, umesto da kreneš od liste dokumenata.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
-        Svaka od njih će biti zatražena tek kad zatreba, ne unapred.
+        Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
     """.trimIndent()
 

@@ -84,6 +84,14 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_BATTERY_OPT_ASKED, false)
         set(value) = prefs.edit().putBoolean(KEY_BATTERY_OPT_ASKED, value).apply()
 
+    /** Da li je ikad ponuđena dozvola za pun ekran preko zaključanog ekrana (za "Probudi me
+     * u") - pitamo je SAD odmah pri prvom korišćenju, zajedno sa ostalim dozvolama, umesto da
+     * čekamo da korisnica prvi put stvarno postavi buđenje (da je ne bi zbunilo iskakanje
+     * dozvola u nezgodnom trenutku, npr. tokom poziva). */
+    var fullScreenIntentAsked: Boolean
+        get() = prefs.getBoolean(KEY_FULLSCREEN_INTENT_ASKED, false)
+        set(value) = prefs.edit().putBoolean(KEY_FULLSCREEN_INTENT_ASKED, value).apply()
+
     /** Osetljivost drmanja: 0 = blago, 1 = srednje (podrazumevano), 2 = jako. */
     var shakeSensitivity: Int
         get() = prefs.getInt(KEY_SHAKE_SENSITIVITY, 1)
@@ -188,6 +196,7 @@ class AppSettings(context: Context) {
         private const val KEY_SHAKE = "shake_enabled"
         private const val KEY_PHONE_STATE_ASKED = "phone_state_permission_asked"
         private const val KEY_BATTERY_OPT_ASKED = "battery_optimization_asked"
+        private const val KEY_FULLSCREEN_INTENT_ASKED = "fullscreen_intent_asked"
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_SOUND = "sound_feedback_enabled"
