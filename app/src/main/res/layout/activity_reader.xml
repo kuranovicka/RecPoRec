@@ -280,7 +280,7 @@
         android:textSize="18sp"
         android:backgroundTint="@color/btn_combined"
         android:textColor="@color/button_text"
-        android:contentDescription="Nazad. Zatvara ovaj dokument i vraća na listu dokumenata. Dug pritisak: svodi aplikaciju u pozadinu, kao dugme Home - ponovno pokretanje aplikacije vraća te tačno na ovaj dokument."
+        android:contentDescription="Nazad. Zatvara ovaj dokument i vraća na listu dokumenata. Dug pritisak: šalje aplikaciju u pozadinu, kao dugme Home - ponovno pokretanje aplikacije vraća te tačno na ovaj dokument."
         android:text="Nazad" />
 
 </LinearLayout>

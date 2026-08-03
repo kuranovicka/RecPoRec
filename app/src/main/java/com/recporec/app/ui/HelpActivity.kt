@@ -110,7 +110,7 @@ class HelpActivity : AppCompatActivity() {
         Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe i dugmeta Pokreni/Pauziraj čitanje - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
         Ispod klizača je dugme Nazad.
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
-        Dug pritisak na Nazad svodi celu aplikaciju u pozadinu, kao dugme Home na telefonu - dokument ostaje otvoren.
+        Dug pritisak na Nazad šalje aplikaciju u pozadinu, kao dugme Home na telefonu - dokument ostaje otvoren.
         Kada ponovo pokreneš aplikaciju, vraćaš se tačno na taj dokument, sa svim dugmadima, umesto da kreneš od liste dokumenata.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
