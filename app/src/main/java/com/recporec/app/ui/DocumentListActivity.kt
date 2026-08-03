@@ -225,6 +225,10 @@ class DocumentListActivity : AppCompatActivity() {
         adapter.submitList(filtered)
         binding.emptyView.visibility = if (filtered.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
         binding.recyclerDocuments.visibility = if (filtered.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+        // "Opšte radnje" (Odaberi sve / Obriši) nema smisla bez ijednog uvezenog dokumenta -
+        // gleda se CEO spisak (currentList), ne samo trenutno filtrirana kartica, jer se
+        // biranje/brisanje odnosi na dokumente uopšte, ne samo na "Započete" ili "Pročitane".
+        binding.btnGeneralActions.isEnabled = currentList.isNotEmpty()
         binding.emptyView.text = when (currentTab) {
             "started" -> "Nema započetih knjiga."
             "finished" -> "Nema pročitanih knjiga."
