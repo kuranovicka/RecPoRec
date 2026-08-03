@@ -87,7 +87,7 @@ class HelpActivity : AppCompatActivity() {
         Upišeš tačno vreme, na primer 5:20.
         Čitanje tada tiho krene, bez alarma i bez punog ekrana, kao da ručno pritisneš Play.
         Statusna linija tada pokazuje za koliko sati i minuta je čitanje zakazano.
-        Ako pustiš knjigu ranije, zakazano čitanje ostaje aktivno i i dalje će krenuti u zakazano vreme.
+        Ako pustiš knjigu ranije, zakazano čitanje se prekida.
         Četvrto dugme je Kombinovani glasovi, isto kao u Opštim podešavanjima, samo za ovaj dokument.
         Dug pritisak isključuje tajmer.
         Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.

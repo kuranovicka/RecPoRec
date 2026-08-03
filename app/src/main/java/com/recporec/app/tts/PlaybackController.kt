@@ -390,12 +390,13 @@ object PlaybackController {
      * može ručno da se nastavi (dugme, drmanje...), da bi ponašanje bilo dosledno bez obzira
      * kojim putem korisnica nastavi. */
     fun resumeCancelingRestIfNeeded(): Boolean {
-        // Kao i dugme Play/Pauza: dok odbrojavanje JOS NIJE zazvonilo, drmanje/medijski taster
-        // ovde NE otkazuju zakazano budjenje/citanje - samo pokrecu citanje odmah, buđenje
-        // ostaje aktivno za svoje pravo vreme. Otkazuje se ako alarm VEC zvoni ("probudjena
-        // sam"), ILI ako je u pitanju "Kratak predah" - tu rucno nastavljanje ZNACI "gotova
-        // sam sa predahom", za razliku od Probudi/Zakazi citanje.
-        val shouldCancel = restAlarmActive || restIsQuickBreak
+        // Kao i dugme Play/Pauza: JEDINO "Probudi me u" (restIsWakeTime) dok JOS NIJE
+        // zazvonio ostaje netaknut - drmanje/medijski taster ovde samo pokrecu citanje odmah,
+        // budjenje ostaje aktivno za svoje pravo vreme. Sve ostalo (alarm koji vec zvoni,
+        // "Zakazi citanje", "Kratak predah") se OTKAZUJE - i "Zakazi citanje" pretpostavlja
+        // da neko vreme neces biti tu da rucno pustis, pa rucno pustanje znaci da ta
+        // pretpostavka vise ne vazi.
+        val shouldCancel = restAlarmActive || (restSuppressAlarm && restRemainingSeconds > 0)
         if (shouldCancel) cancelRest()
         // Drmanje i medijski taster su TAKODJE svesna, rucna radnja korisnice (kao i dugme
         // Play/Pauza) - resetuje se ista zastavica, da automatsko citanje kasnije ispravno

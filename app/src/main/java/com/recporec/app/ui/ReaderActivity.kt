@@ -506,11 +506,28 @@ class ReaderActivity : AppCompatActivity() {
         return resolveForScope(docId) ?: resolveForScope(0L)
     }
 
+    /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
+     * MOTOR zavrsio svoju (asinhronu) inicijalizaciju! Na HLADNOM pokretanju (app se dugo nije
+     * pokretala, proces bas sad kreiran), motor moze da javi "spreman" tek nekoliko stotina ms
+     * POSLE ovoga - poziv startFromOffset() pre toga bi TIHO ne izgovorio nista (isti "tihi
+     * neuspeh" koji smo vec resile za budjenje posle gasenja procesa), iako se ton prelaska
+     * VEC cuo (playTransitionSound, pozvan ranije, pre ovoga) - otud utisak "cula sam zvuk da
+     * je pusteno, ali se nista ne cuje". Zato SACEKAMO isEngineReady pre auto-pustanja. */
     private fun markTtsReady() {
         ttsReady = true
         if (pendingPlayAfterReady) {
-            pendingPlayAfterReady = false
-            togglePlayPause(manual = false)
+            val tts = PlaybackController.ttsManager
+            if (tts != null && !tts.isEngineReady) {
+                tts.onReady = {
+                    if (pendingPlayAfterReady) {
+                        pendingPlayAfterReady = false
+                        togglePlayPause(manual = false)
+                    }
+                }
+            } else {
+                pendingPlayAfterReady = false
+                togglePlayPause(manual = false)
+            }
         }
     }
 
@@ -610,19 +627,24 @@ class ReaderActivity : AppCompatActivity() {
                 PlaybackController.cancelRest()
                 updateRestStatusText()
                 android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
+            } else if (PlaybackController.isWakeUpActive()) {
+                // JEDINO "Probudi me u" JOS NIJE zazvonilo (npr. za 6 ujutru, ali želiš da
+                // slušaš VEĆ sada, pre spavanja) - NE otkazuje se, ostaje aktivno za svoje
+                // pravo vreme, bez obzira što je knjiga u međuvremenu već ručno puštena.
+                android.widget.Toast.makeText(this, "Čitaš sada - buđenje ostaje zakazano.", android.widget.Toast.LENGTH_SHORT).show()
             } else if (PlaybackController.restIsQuickBreak) {
-                // "Kratak predah" - za razliku od Probudi/Zakazi citanje, RUCNO nastavljanje
-                // OVDE znaci "gotova sam sa predahom" - to je i poenta kratke pauze, prekida
-                // se odmah, ne ceka svoj rok u pozadini.
+                // "Kratak predah" - rucno nastavljanje OVDE znaci "gotova sam sa predahom" -
+                // to je i poenta kratke pauze, prekida se odmah.
                 PlaybackController.cancelRest()
                 updateRestStatusText()
             } else if (PlaybackController.restRemainingSeconds > 0) {
-                // Odbrojavanje JOS NIJE zazvonilo (npr. "Probudi me" za 6 ujutru, ali želiš da
-                // slušaš VEĆ sada, pre spavanja) - NE otkazujemo zakazano buđenje/čitanje, samo
-                // počinjemo da čitamo odmah. Ostaje aktivno i dalje će zazvoniti/krenuti tačno
-                // u svoje vreme, bez obzira što je knjiga u međuvremenu već ručno puštena.
-                val msg = if (PlaybackController.isWakeUpActive()) "Čitaš sada - buđenje ostaje zakazano." else "Čitaš sada - zakazano čitanje ostaje aktivno."
-                android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
+                // "Zakaži čitanje" (ne Probudi, ne Kratak predah) - PRETPOSTAVKA te funkcije
+                // je da neko vreme nećeš biti tu da rucno pustis (zato se i zakazuje unapred);
+                // ako ipak rucno pustis ranije, to znaci da ta pretpostavka vise ne vazi, pa
+                // se zakazivanje prekida - kao i pre.
+                PlaybackController.cancelRest()
+                updateRestStatusText()
+                android.widget.Toast.makeText(this, "Zakazano čitanje prekinuto.", android.widget.Toast.LENGTH_SHORT).show()
             }
             // Servis (drzi drmanje aktivnim) se pokrece PRE pocetka citanja, ne posle - isti
             // razlog kao kod "Pri otvaranju dokumenta" iznad: pokretanje servisa nije trenutno,
