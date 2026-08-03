@@ -230,6 +230,11 @@ class ReaderActivity : AppCompatActivity() {
         // Van gornje tastature od 20 dugmica - samo zatvara ovaj ekran (kao sistemsko Nazad),
         // NE zaustavlja citanje ako je u toku u pozadini.
         btnBack.setOnClickListener(clickSound { finish() })
+        // Dug pritisak: SVODI CEO ZADATAK (ne samo ovaj ekran) u pozadinu - kao pritisak na
+        // Home. Aktivnosti se NE gase (za razliku od finish() iznad), pa ponovno pokretanje
+        // ikonice aplikacije vraca korisnicu TACNO na ovaj isti ekran, sa svim dugmadima,
+        // umesto da krene ispocetka od liste dokumenata.
+        btnBack.setOnLongClickListener { playClickSound(); moveTaskToBack(true); true }
 
         btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
 
