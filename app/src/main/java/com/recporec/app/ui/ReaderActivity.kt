@@ -331,9 +331,9 @@ class ReaderActivity : AppCompatActivity() {
         seekProgress.visibility = visibility
         btnBack.visibility = visibility
         btnToggleControls.contentDescription = if (controlsHidden) {
-            "Prikaži kontrole. Trenutno su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
+            "Prikaži kontrole."
         } else {
-            "Sakrij kontrole. Kada su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
+            "Sakrij kontrole."
         }
     }
 

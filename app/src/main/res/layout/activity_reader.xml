@@ -263,7 +263,7 @@
             android:textSize="14sp"
             android:backgroundTint="@color/btn_combined"
             android:textColor="@color/button_text"
-            android:contentDescription="Prikaži ili sakrij kontrole. Kada su sakrivene, ostaje samo dugme Pokreni/Pauziraj čitanje."
+            android:contentDescription="Prikaži ili sakrij kontrole."
             android:text="👁 Kontrole" />
     </LinearLayout>
 
@@ -280,7 +280,7 @@
         android:textSize="18sp"
         android:backgroundTint="@color/btn_combined"
         android:textColor="@color/button_text"
-        android:contentDescription="Nazad. Zatvara ovaj dokument i vraća na listu dokumenata. Dug pritisak: šalje aplikaciju u pozadinu, kao dugme Home - ponovno pokretanje aplikacije vraća te tačno na ovaj dokument."
+        android:contentDescription="Nazad. Zatvara dokument, vraća na listu. Dug pritisak: pošalji aplikaciju u pozadinu."
         android:text="Nazad" />
 
 </LinearLayout>
