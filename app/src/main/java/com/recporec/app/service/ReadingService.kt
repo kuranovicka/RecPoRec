@@ -69,9 +69,10 @@ class ReadingService : Service() {
             val accel = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             if (accel != null) {
                 val threshold = when (settings.shakeSensitivity) {
-                    0 -> 6.0f  // blago - lako se okine
-                    2 -> 13.0f // jako - treba odlucno drmnuti (spusteno sa 16.0 - Marina javila da je bilo previsoko)
-                    else -> 9.0f // srednje (spusteno sa 11.0 - isti razlog)
+                    0 -> 4.0f  // blago - lako se okine (spusteno sa 6.0)
+                    2 -> 9.0f  // jako - treba odlucno drmnuti (spusteno sa 13.0)
+                    else -> 6.0f // srednje (spusteno sa 9.0) - i posle par manjih spustanja i
+                    // dalje trazilo prejak trzaj, ovaj put sece znacajnije, ne po malo
                 }
                 shakeDetector = ShakeDetector(shakeThreshold = threshold) {
                     val tts = PlaybackController.ttsManager
