@@ -76,6 +76,14 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_PHONE_STATE_ASKED, false)
         set(value) = prefs.edit().putBoolean(KEY_PHONE_STATE_ASKED, value).apply()
 
+    /** Da li je ikad ponuđen izuzetak od štednje baterije - pitamo samo JEDNOM (ikad), bez
+     * obzira da li je "Čitanje bez prekida" ukljuceno, jer bez ovoga sistem (posebno na
+     * pojedinim proizvođačima kao Samsung) može da uguši servis za čitanje u pozadini pre nego
+     * što notifikacija ili medijski tasteri stignu pouzdano da rade. */
+    var batteryOptimizationAsked: Boolean
+        get() = prefs.getBoolean(KEY_BATTERY_OPT_ASKED, false)
+        set(value) = prefs.edit().putBoolean(KEY_BATTERY_OPT_ASKED, value).apply()
+
     /** Osetljivost drmanja: 0 = blago, 1 = srednje (podrazumevano), 2 = jako. */
     var shakeSensitivity: Int
         get() = prefs.getInt(KEY_SHAKE_SENSITIVITY, 1)
@@ -179,6 +187,7 @@ class AppSettings(context: Context) {
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
         private const val KEY_PHONE_STATE_ASKED = "phone_state_permission_asked"
+        private const val KEY_BATTERY_OPT_ASKED = "battery_optimization_asked"
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_SOUND = "sound_feedback_enabled"

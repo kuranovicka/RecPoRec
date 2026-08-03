@@ -124,6 +124,7 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         maybeAskPhoneStatePermission()
+        maybeAskBatteryOptimization()
     }
 
     /** Pita SAMO JEDNOM (ikad) za dozvolu stanja telefona - rezervni mehanizam za pauzu pri
@@ -151,6 +152,43 @@ class ReaderActivity : AppCompatActivity() {
             .setPositiveButton("Dozvoli") { _, _ ->
                 settings.phoneStatePermissionAsked = true
                 phoneStatePermissionLauncher.launch(android.Manifest.permission.READ_PHONE_STATE)
+            }
+            .show()
+    }
+
+    /** Pita SAMO JEDNOM (ikad) za izuzetak od štednje baterije - NEZAVISNO od "Čitanje bez
+     * prekida" (koje ovo takodje trazi, ali samo ako se ukljuci taj prekidac). Bez ovoga, na
+     * pojedinim uredjajima (narocito Samsung) sistem ume da uguši servis za citanje u pozadini
+     * (i njegovu notifikaciju i medijsku sesiju za slusalice) pre nego sto stigne pouzdano da
+     * proradi - primeceno kod korisnice sa Samsung telefonom i Bluetooth slusalicama. */
+    private fun maybeAskBatteryOptimization() {
+        if (settings.batteryOptimizationAsked) return
+        val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            settings.batteryOptimizationAsked = true
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Pouzdano čitanje u pozadini")
+            .setMessage(
+                "Da bi čitanje u pozadini i medijski tasteri na slušalicama pouzdano radili " +
+                    "(posebno na Samsung telefonima), aplikacija može da zatraži izuzetak od " +
+                    "štednje baterije. Nije obavezno - možeš i odbiti."
+            )
+            .setNegativeButton("Ne sada") { _, _ -> settings.batteryOptimizationAsked = true }
+            .setPositiveButton("Dozvoli") { _, _ ->
+                settings.batteryOptimizationAsked = true
+                try {
+                    startActivity(
+                        android.content.Intent(
+                            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                            android.net.Uri.parse("package:$packageName")
+                        )
+                    )
+                } catch (_: Exception) {
+                    // Neki proizvodjaci imaju svoja dodatna podesavanja stednje baterije van
+                    // standardnog Android sistema - korisnica ih onda mora rucno pronaci.
+                }
             }
             .show()
     }
