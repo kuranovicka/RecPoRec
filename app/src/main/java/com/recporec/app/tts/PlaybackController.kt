@@ -144,7 +144,7 @@ object PlaybackController {
      * bilo koja petlja potraje i malo duže od tačno jedne sekunde). */
     private var restTargetElapsedMillis: Long = 0L
 
-    private const val WAKE_ALARM_REQUEST_CODE = 4271
+    const val WAKE_ALARM_REQUEST_CODE = 4271
 
     /** Zakazuje PRAVI, sistemski alarm (AlarmManager.setAlarmClock) tacno u trenutak kad
      * "Probudi" treba da zazvoni - IZUZET od Doze/uspavljivanja u pozadini, isti
@@ -340,6 +340,10 @@ object PlaybackController {
         val settings = com.recporec.app.data.AppSettings(ctx)
         settings.pendingWakeDocumentId = docId
         settings.pendingWakeTargetElapsedMillis = restTargetElapsedMillis
+        // Wall-clock verzija istog trenutka - jedina koja prezivljava restart telefona
+        // (elapsedRealtime se resetuje na 0 posle restarta). Koristi je BootRescheduleReceiver.
+        settings.pendingWakeTargetWallMillis = System.currentTimeMillis() +
+            (restTargetElapsedMillis - android.os.SystemClock.elapsedRealtime())
         settings.pendingWakeIsWakeTime = isWakeTime
         settings.pendingWakeSuppressAlarm = suppressAlarm
     }

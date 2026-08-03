@@ -50,6 +50,15 @@ class AppSettings(context: Context) {
         get() = prefs.getLong(KEY_PENDING_WAKE_TARGET_ELAPSED, 0L)
         set(value) = prefs.edit().putLong(KEY_PENDING_WAKE_TARGET_ELAPSED, value).apply()
 
+    /** ISTO vreme kao pendingWakeTargetElapsedMillis, ali u "wall clock" obliku
+     * (System.currentTimeMillis(), ne SystemClock.elapsedRealtime()) - elapsedRealtime se
+     * RESETUJE na 0 posle svakog restarta telefona, pa je beskoristan za ponovno zakazivanje
+     * POSLE restarta. Ovo polje postoji bas za to: BootRescheduleReceiver ga koristi da vrati
+     * "Probudi me u"/"Zakazi citanje" alarm koji bi inace bio tiho izgubljen restartom. */
+    var pendingWakeTargetWallMillis: Long
+        get() = prefs.getLong(KEY_PENDING_WAKE_TARGET_WALL, 0L)
+        set(value) = prefs.edit().putLong(KEY_PENDING_WAKE_TARGET_WALL, value).apply()
+
     var pendingWakeIsWakeTime: Boolean
         get() = prefs.getBoolean(KEY_PENDING_WAKE_IS_WAKE_TIME, false)
         set(value) = prefs.edit().putBoolean(KEY_PENDING_WAKE_IS_WAKE_TIME, value).apply()
@@ -65,6 +74,7 @@ class AppSettings(context: Context) {
         prefs.edit()
             .remove(KEY_PENDING_WAKE_DOC_ID)
             .remove(KEY_PENDING_WAKE_TARGET_ELAPSED)
+            .remove(KEY_PENDING_WAKE_TARGET_WALL)
             .remove(KEY_PENDING_WAKE_IS_WAKE_TIME)
             .remove(KEY_PENDING_WAKE_SUPPRESS_ALARM)
             .apply()
@@ -216,6 +226,7 @@ class AppSettings(context: Context) {
         private const val KEY_USER_MANUALLY_PAUSED = "user_manually_paused"
         private const val KEY_PENDING_WAKE_DOC_ID = "pending_wake_doc_id"
         private const val KEY_PENDING_WAKE_TARGET_ELAPSED = "pending_wake_target_elapsed"
+        private const val KEY_PENDING_WAKE_TARGET_WALL = "pending_wake_target_wall"
         private const val KEY_PENDING_WAKE_IS_WAKE_TIME = "pending_wake_is_wake_time"
         private const val KEY_PENDING_WAKE_SUPPRESS_ALARM = "pending_wake_suppress_alarm"
     }

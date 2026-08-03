@@ -30,6 +30,10 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <!-- Za vracanje zakazanog budjenja/citanja posle restarta telefona - AlarmManager sam
+         brise sve alarme na restart, ova (obicna, automatski odobrena) dozvola omogucava da
+         se to zakazivanje tiho vrati, umesto da budjenje bez traga nestane. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".RecPoRecApp"
@@ -114,6 +118,17 @@
         <receiver
             android:name=".service.WakeAlarmReceiver"
             android:exported="false" />
+
+        <!-- exported=true JE potrebno ovde (za razliku od WakeAlarmReceiver iznad) - ovo
+             prijemnik pokrece SAM SISTEM (spolja), ne nasa sopstvena PendingIntent. -->
+        <receiver
+            android:name=".service.BootRescheduleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".service.ReadingService"
