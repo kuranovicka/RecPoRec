@@ -14,13 +14,15 @@ class ShakeDetector(
     private var lastShakeTime = 0L
     private val minIntervalMs = 1200L
 
-    // Trazi SAMO JEDNO ocitavanje iznad praga (ranije je trazilo DVA uzastopna, ali Marina
-    // je na zivom testiranju primetila da prav, oštar trzaj cesto proizvede samo JEDAN kratak
-    // vrh iznad praga pre nego sto padne nazad - narocito kod brzih uzastopnih pokusaja - pa
-    // se DVA uzastopna cesto nisu ni desila iako je stvarno drmnula). Sam prag (magnituda) i
-    // minIntervalMs ispod i dalje sprecavaju lazna okidanja od obicnog nosenja telefona.
+    // VRACENO NA DVA nakon zajedno spustenih pragova (9.0/13.0) - kombinacija "samo JEDNO
+    // ocitavanje" + nizi prag je bila PREOSETLJIVA: obicno nosenje/pomeranje telefona posle
+    // pravog drmanja je povremeno samo prelazilo prag, sto se racunalo kao JOS JEDNO drmanje
+    // (posto je drmanje prekidac pusti/pauziraj, taj "duh" okidac je tiho vracao stanje nazad
+    // pre drugog namernog drmanja - Marina prijavila da "radi samo prvi put", sto se uklapa).
+    // Dva uzastopna ocitavanja i dalje dozvoljavaju stvaran, ostar trzaj (koji obicno traje
+    // vise od jednog ocitavanja na ~50Hz), ali odbacuju kratkotrajne slucajne vrhove.
     private var consecutiveOverThreshold = 0
-    private val requiredConsecutive = 1
+    private val requiredConsecutive = 2
 
     override fun onSensorChanged(event: SensorEvent) {
         val x = event.values[0]
