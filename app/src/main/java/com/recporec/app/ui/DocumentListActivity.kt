@@ -132,6 +132,10 @@ class DocumentListActivity : AppCompatActivity() {
                         startActivity(Intent(this, HelpActivity::class.java))
                         true
                     }
+                    com.recporec.app.R.id.action_stats -> {
+                        startActivity(Intent(this, StatsActivity::class.java))
+                        true
+                    }
                     else -> false
                 }
             }

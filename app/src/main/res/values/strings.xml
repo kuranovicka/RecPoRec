@@ -21,6 +21,8 @@
     <string name="btn_voice">Izbor glasa. Dug pritisak: Zakaži čitanje.</string>
     <string name="btn_speed_down">Smanji brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>
     <string name="btn_play_pause">Pokreni/Pauziraj čitanje. Dug pritisak: reci trenutni status.</string>
+    <string name="shortcut_continue_short">Nastavi čitanje</string>
+    <string name="shortcut_continue_long">Nastavi čitanje poslednje aktivne knjige</string>
     <string name="btn_speed_up">Povećaj brzinu čitanja. Dug pritisak: vrati brzinu na opštu.</string>
     <string name="btn_prev_page">Jedna stranica unazad</string>
     <string name="btn_goto_page">Idi na stranicu</string>

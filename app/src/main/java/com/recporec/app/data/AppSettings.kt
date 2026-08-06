@@ -211,6 +211,43 @@ class AppSettings(context: Context) {
             .apply()
     }
 
+    /** Izvozi SAMO prava, trajna podešavanja (glas, brzina, prekidači...) u JSON tekst -
+     * NAMERNO isključuje: "_asked" zastavice (ponovo pitati na novom uređaju ima smisla, jer
+     * stvarna dozvola tamo možda nije data), "pending_wake_*" (zakazano buđenje je vezano za
+     * konkretan trenutak, besmisleno prenositi), i "controls_hidden_doc_*" (vezano za ID
+     * dokumenta na OVOM uređaju, neće se poklapati na drugom). Koristi eksplicitnu listu
+     * (whitelist), ne "izuzmi ovo" - sigurnije ako se doda neko novo, buduće podešavanje. */
+    fun exportAsJson(): String {
+        val json = org.json.JSONObject()
+        val all = prefs.all
+        for (key in EXPORTABLE_KEYS) {
+            if (all.containsKey(key)) json.put(key, all[key])
+        }
+        return json.toString(2)
+    }
+
+    /** Uvozi podešavanja iz JSON teksta (izvezenog preko exportAsJson) - prepoznaje SAMO iste
+     * one ključeve sa liste, ignoriše sve ostalo (npr. ako je fajl iz novije verzije aplikacije
+     * sa poljima koja ova verzija ne zna da čita). Vraća broj uspešno primenjenih podešavanja. */
+    fun importFromJson(jsonText: String): Int {
+        val json = org.json.JSONObject(jsonText)
+        val editor = prefs.edit()
+        var count = 0
+        for (key in EXPORTABLE_KEYS) {
+            if (!json.has(key)) continue
+            when (val value = json.get(key)) {
+                is Boolean -> editor.putBoolean(key, value)
+                is Int -> editor.putInt(key, value)
+                is Long -> editor.putLong(key, value)
+                is String -> editor.putString(key, value)
+                else -> continue
+            }
+            count++
+        }
+        editor.apply()
+        return count
+    }
+
     companion object {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
@@ -241,5 +278,14 @@ class AppSettings(context: Context) {
         private const val KEY_CONTROLS_HIDDEN_PREFIX = "controls_hidden_doc_"
         private const val KEY_PENDING_WAKE_IS_WAKE_TIME = "pending_wake_is_wake_time"
         private const val KEY_PENDING_WAKE_SUPPRESS_ALARM = "pending_wake_suppress_alarm"
+
+        /** Prava, trajna podešavanja korisnice - vidi objašnjenje uz exportAsJson(). */
+        private val EXPORTABLE_KEYS = listOf(
+            KEY_BACKGROUND, KEY_UNINTERRUPTED, KEY_SHAKE, KEY_SHAKE_SENSITIVITY,
+            KEY_NAVIGATION, KEY_SOUND, KEY_SENTENCE_PAUSE_ENABLED, KEY_SENTENCE_PAUSE_MS,
+            KEY_PARAGRAPH_PAUSE_ENABLED, KEY_PARAGRAPH_PAUSE_MS, KEY_AUTO_NEXT,
+            KEY_G_LANG, KEY_G_VOICE, KEY_G_ENGINE, KEY_G_RATE, KEY_G_VOLUME, KEY_G_PITCH,
+            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER
+        )
     }
 }

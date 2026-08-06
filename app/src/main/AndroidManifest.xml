@@ -47,6 +47,9 @@
             android:name=".ui.DocumentListActivity"
             android:exported="true"
             android:launchMode="singleTop">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -88,8 +91,21 @@
             android:name=".ui.ReaderActivity"
             android:exported="false" />
 
+        <!-- Cilj prečice "Nastavi čitanje" (dug pritisak na ikonicu app-e) - providan, nema
+             sopstveni izgled, samo prosledi na pravi ekran. exported=true jer ga sistem
+             (launcher) pokreće spolja preko static shortcuts.xml. -->
+        <activity
+            android:name=".ui.ContinueReadingActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Transparent"
+            android:excludeFromRecents="true" />
+
         <activity
             android:name=".ui.SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.StatsActivity"
             android:exported="false" />
 
         <activity
