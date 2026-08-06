@@ -49,24 +49,28 @@ object DocumentParser {
         return raw.copy(fullText = stripJunkCharacters(raw.fullText))
     }
 
-    /** Znaci koje TTS motor ume da "izgovori" bukvalno (kao neki nepovezan, nerazumljiv
-     * hijeroglif) umesto da ih prosto ignoriše - prijava korisnika: rečenice sa ovim znacima
-     * su zvučale kao da čitač "zamuca" na neobjašnjiv nacin, a ni Word ni drugi čitač (Voice
-     * Aloud Reader) ih uopšte ne izgovaraju. Zamenjuje se RAZMAKOM (ne brisanjem) - namerno,
-     * da se NE pomeri duzina teksta, jer bi to pokvarilo sve vec izracunate offsete poglavlja
-     * (chapters) i kasnije oznake/pozicije koje se cuvaju kao broj karaktera u ovom tekstu. */
-    private val JUNK_CHARS: Set<Char> = (
-        "#$*|<>&°`{}¤¶¦§•µ©↨«»~¹²³⁴⁵⁶⁷⁸⁹⁰₀₁₂₃₄₅₆₇₈₉†‡‽※™®…‒–—―" +
-            "\u201C\u201D\u201E\u201F\u2018\u2019\u201A\u201B" +
-            "⁺⁻⁼⁽⁾ⁱⁿᵃᵇᶜᵈᵉᶠᵍʰʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻᵃₐₑₒᵤᵥₓ"
-        ).toSet()
+    /** Umesto nabrajanja poznatih "hijeroglifa" (staro: fiksna lista znakova) - PROPUSTA se
+     * SVE što je slovo (Character.isLetter - radi ispravno i za ćirilicu i za č/ć/š/đ/ž, ne
+     * samo englesku abecedu), broj, razmak/prelom reda, i mala, izričito dozvoljena lista
+     * uobičajene interpunkcije. SVE OSTALO (bilo koji simbol, čak i oni koje još nismo videli
+     * u nekom budućem dokumentu) se zamenjuje RAZMAKOM - namerno, da se NE pomeri dužina
+     * teksta, jer bi to pokvarilo već izračunate offsete poglavlja (chapters) i sačuvane
+     * pozicije/oznake koje se čuvaju kao broj karaktera u ovom tekstu.
+     * Predlog korisnika - otporniji pristup od nabrajanja, jer ne zavisi od toga da li smo mi
+     * unapred pogodile svaki mogući "čudan" znak. */
+    private val SAFE_PUNCTUATION: Set<Char> = setOf(
+        '.', ',', ';', ':', '!', '?', '-', '–', '—', '(', ')', '[', ']',
+        '"', '\'', '\u201C', '\u201D', '\u2018', '\u2019', '…', '/'
+    )
 
     private fun stripJunkCharacters(text: String): String {
         if (text.isEmpty()) return text
         val chars = text.toCharArray()
         var changed = false
         for (i in chars.indices) {
-            if (chars[i] in JUNK_CHARS) {
+            val c = chars[i]
+            val allowed = Character.isLetter(c) || Character.isDigit(c) || c.isWhitespace() || c in SAFE_PUNCTUATION
+            if (!allowed) {
                 chars[i] = ' '
                 changed = true
             }
