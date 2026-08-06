@@ -11,38 +11,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private val settings by lazy { AppSettings(this) }
 
-    private val exportLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        if (uri == null) return@registerForActivityResult
-        try {
-            contentResolver.openOutputStream(uri)?.use { out ->
-                out.write(settings.exportAsJson().toByteArray(Charsets.UTF_8))
-            }
-            android.widget.Toast.makeText(this, "Podešavanja su izvezena.", android.widget.Toast.LENGTH_SHORT).show()
-        } catch (_: Exception) {
-            android.widget.Toast.makeText(this, "Izvoz nije uspeo.", android.widget.Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val importLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri == null) return@registerForActivityResult
-        try {
-            val text = contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
-            if (text == null) {
-                android.widget.Toast.makeText(this, "Uvoz nije uspeo.", android.widget.Toast.LENGTH_SHORT).show()
-                return@registerForActivityResult
-            }
-            val count = settings.importFromJson(text)
-            refreshFromSettings()
-            android.widget.Toast.makeText(this, "Uvezeno podešavanja: $count.", android.widget.Toast.LENGTH_SHORT).show()
-        } catch (_: Exception) {
-            android.widget.Toast.makeText(this, "Fajl nije prepoznat kao ispravan izvoz podešavanja.", android.widget.Toast.LENGTH_SHORT).show()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
@@ -131,14 +99,6 @@ class SettingsActivity : AppCompatActivity() {
                 settings.navigationMode = navValues[index]
                 refreshNavButton()
             }
-        }
-
-        binding.btnExportSettings.setOnClickListener {
-            exportLauncher.launch("recporec-podesavanja.json")
-        }
-
-        binding.btnImportSettings.setOnClickListener {
-            importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
         }
 
         binding.btnResetGeneralDefaults.setOnClickListener {

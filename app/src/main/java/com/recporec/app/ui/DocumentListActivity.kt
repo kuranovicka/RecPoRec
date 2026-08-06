@@ -52,6 +52,49 @@ class DocumentListActivity : AppCompatActivity() {
         pendingPermissionChainNext = null
     }
 
+    private val exportSettingsLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        try {
+            contentResolver.openOutputStream(uri)?.use { out ->
+                out.write(settings.exportAsJson().toByteArray(Charsets.UTF_8))
+            }
+            android.widget.Toast.makeText(this, "Podešavanja su izvezena.", android.widget.Toast.LENGTH_SHORT).show()
+        } catch (_: Exception) {
+            android.widget.Toast.makeText(this, "Izvoz nije uspeo.", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val importSettingsLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        try {
+            val text = contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+            if (text == null) {
+                android.widget.Toast.makeText(this, "Uvoz nije uspeo.", android.widget.Toast.LENGTH_SHORT).show()
+                return@registerForActivityResult
+            }
+            val count = settings.importFromJson(text)
+            android.widget.Toast.makeText(this, "Uvezeno podešavanja: $count.", android.widget.Toast.LENGTH_SHORT).show()
+        } catch (_: Exception) {
+            android.widget.Toast.makeText(this, "Fajl nije prepoznat kao ispravan izvoz podešavanja.", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showImportExportDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Uvoz/izvoz podešavanja")
+            .setItems(arrayOf("Izvezi podešavanja u fajl", "Uvezi podešavanja iz fajla")) { _, which ->
+                when (which) {
+                    0 -> exportSettingsLauncher.launch("recporec-podesavanja.json")
+                    1 -> importSettingsLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
+                }
+            }
+            .show()
+    }
+
     /** Otvara standardni sistemski birač fajlova, BEZ ikakvog usmeravanja na tačno određenu
      * lokaciju. NAMERNO bez ogranicenja na tipove fajlova (MIME tipovi) - lokalni fajlovi na
      * telefonu (posebno .mobi/.fb2/.azw) cesto imaju "pogresno" ili genericki prijavljen tip
@@ -134,6 +177,10 @@ class DocumentListActivity : AppCompatActivity() {
                     }
                     com.recporec.app.R.id.action_stats -> {
                         startActivity(Intent(this, StatsActivity::class.java))
+                        true
+                    }
+                    com.recporec.app.R.id.action_import_export -> {
+                        showImportExportDialog()
                         true
                     }
                     else -> false
