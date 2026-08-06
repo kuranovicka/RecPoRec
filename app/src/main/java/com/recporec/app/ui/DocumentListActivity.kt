@@ -143,7 +143,40 @@ class DocumentListActivity : AppCompatActivity() {
                 this, android.Manifest.permission.POST_NOTIFICATIONS
             ) != android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            if (!settings.notificationPermissionRequestedOnce) {
+                settings.notificationPermissionRequestedOnce = true
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                // VEC smo jednom prosli kroz sistemski zahtev, a dozvola i dalje nije data -
+                // Android najverovatnije "trajno odbija" dalje pozive bez ikakvog dijaloga
+                // (nema ni znaka da se to desilo, otud utisak "obavestenja nigde nema"). Umesto
+                // cutke ponovnog (bezuspesnog) pokusaja, ponudi direktan put do Podesavanja.
+                AlertDialog.Builder(this)
+                    .setTitle("Dozvola za obaveštenja")
+                    .setMessage(
+                        "Bez dozvole za obaveštenja, ne možeš videti niti kontrolisati čitanje " +
+                            "u pozadini preko obaveštenja (Pusti/Pauziraj/Izlaz). Telefon je " +
+                            "ranije odbio ovaj zahtev, pa ga aplikacija više ne može sama " +
+                            "ponovo ponuditi - potrebno je ručno uključiti u podešavanjima."
+                    )
+                    .setNegativeButton("Ne sada") { _, _ ->
+                        maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
+                    }
+                    .setPositiveButton("Otvori podešavanja") { _, _ ->
+                        try {
+                            val intent = android.content.Intent(
+                                android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            ).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                            startActivity(intent)
+                        } catch (_: Exception) {
+                        }
+                        maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
+                    }
+                    .setOnCancelListener {
+                        maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
+                    }
+                    .show()
+            }
         } else {
             maybeAskPhoneStatePermission { maybeAskBatteryOptimization { checkFullScreenIntentPermission() } }
         }
