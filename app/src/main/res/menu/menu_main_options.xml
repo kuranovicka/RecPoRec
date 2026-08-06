@@ -13,10 +13,6 @@
         android:title="Statistika čitanja"
         android:showAsAction="never" />
     <item
-        android:id="@+id/action_import_export"
-        android:title="Uvoz/izvoz podešavanja"
-        android:showAsAction="never" />
-    <item
         android:id="@+id/action_help"
         android:title="@string/menu_help"
         android:showAsAction="never" />

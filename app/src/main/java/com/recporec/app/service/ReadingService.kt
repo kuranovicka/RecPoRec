@@ -204,6 +204,24 @@ class ReadingService : Service() {
 
         val title = PlaybackController.currentDocument?.title ?: "RečPoReč"
         val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
+        // KRITICNO: bez ovoga, Android u notifikaciji prikazuje dugmad (Pusti/Pauziraj) kao
+        // VIZUELNO onemoguceno (sivo) iako PendingIntent iza njih i dalje radi kad se dodirne -
+        // sistem "sivi" akcije koje MediaSession ne prijavi u svom setActions() skupu.
+        // Prijava korisnice: "Za pusti kaze onemoguceno, ali kad kliknem, stvarno krene."
+        mediaSession?.setPlaybackState(
+            PlaybackStateCompat.Builder()
+                .setActions(
+                    PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                )
+                .setState(
+                    if (isSpeaking) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                    PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                    1f
+                )
+                .build()
+        )
         // Notifikacija sad prikazuje i "Kratak predah"/"Zakazi citanje" pauzu, sa STVARNIM
         // preostalim vremenom (ne fiksnim brojem) - dosledno statusnoj liniji i brzoj precici
         // u citacu (koje isto odbrojavaju, bilo da je predah tek pocet ili produzen).
