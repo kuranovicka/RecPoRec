@@ -48,13 +48,19 @@ class HelpActivity : AppCompatActivity() {
         Druga opcija započinje čitanje čim otvoriš bilo koji dokument.
         Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
-        Treća stavka je Statistika čitanja - prikazuje koliko si ukupno slušala, koliko knjiga si pročitala do kraja, i koliko ih je u toku.
-        Četvrta stavka je Uvoz/izvoz podešavanja - čuva glas, brzinu i sve prekidače u fajl, ili ih vraća iz ranije sačuvanog fajla. Korisno pred promenu telefona. Ne čuva samu listu knjiga.
+        Treća stavka je Statistika čitanja.
+        prikazuje koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku.
+        Četvrta stavka je Uvoz/izvoz podešavanja.
+        Čuva glas, brzinu i sve prekidače u fajl, ili ih vraća iz ranije sačuvanog fajla.
+        Ne čuva samu listu knjiga.
+        Korisno pred promenu telefona.
         Peta stavka je Pomoć.
         Sada idemo u sam dokument.
-        Kada dugo pritisneš bilo koji dokument, dobijaš sledeće opcije:
-        Premesti nagore,premesti nadole, preimenuj i obriši.
-        Tastatura ima dvadeset dugmića, raspoređenih u pet redova, i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
+        Kada klikneš dugim pritiskom na bilo koji dokument, dobijaš sledeće opcije:
+        Premesti nagore, premesti nadole, preimenuj i obriši.
+        Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
+        Pored toga ima i dve dodatne kontrole:
+        Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Njime dodaješ, uklanjaš ili brišeš sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
@@ -109,16 +115,21 @@ class HelpActivity : AppCompatActivity() {
         Ispod tastature je veći klizač za lakši dodir.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
         Desno od klizača je dugme Prikaži-sakrij kontrole.
-        Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe, dugmeta Pokreni/Pauziraj čitanje, i dugmeta Nazad (ono ostaje prisutno u svakom stanju) - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
+        Kada ga pritisneš, sakriva svu dugmad i statusne redove osim kontrole prikaži-sakri, dugmeta Pokreni/Pauziraj čitanje, i dugmeta Nazad.
+        Ono ostaje prisutno u svim slučajevima.
+        Takav pojednostavljeni prikaz je koristan za čist ekran.
         Dug pritisak pauzira čitanje na 15 minuta.
         Minut pre kraja pauze ćeš čuti kratak zvučni signal.
         Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
-        Za razliku od Zakaži čitanje, ako pustiš knjigu ranije (dugmetom, drmanjem ili tasterom na slušalicama), Kratak predah se prekida.
+        Za razliku od opcije Zakaži čitanje, ako pustiš knjigu ranije (dugmetom, drmanjem ili tasterom na slušalicama), Kratak predah se prekida.
         Ispod klizača je dugme Nazad.
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
-        Dug pritisak na Nazad šalje aplikaciju u pozadinu, kao dugme Home na telefonu - dokument ostaje otvoren.
+        Dug pritisak na Nazad šalje aplikaciju u pozadinu, kao dugme Home na telefonu.
+        Tada dokument ostaje otvoren.
         Kada ponovo pokreneš aplikaciju, vraćaš se tačno na taj dokument, sa svim dugmadima, umesto da kreneš od liste dokumenata.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
+        Dug pritisak na prečicu programa na početnom ekranu, pored svega ostalog, nudi ti nastavak i pauziranje čitanja.
+        Tako ne moraš svaki put iznova pokretati poslednji dokument.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.
