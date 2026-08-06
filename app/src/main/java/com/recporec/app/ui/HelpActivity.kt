@@ -128,8 +128,8 @@ class HelpActivity : AppCompatActivity() {
         Tada dokument ostaje otvoren.
         Kada ponovo pokreneš aplikaciju, vraćaš se tačno na taj dokument, sa svim dugmadima, umesto da kreneš od liste dokumenata.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
-        Dug pritisak na prečicu programa na početnom ekranu, pored svega ostalog, nudi ti nastavak i pauziranje čitanja.
-        Tako ne moraš svaki put iznova pokretati poslednji dokument.
+        Dug pritisak na prečicu programa na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
+        Nastavak-pauza direktno otvara poslednji dokument i omogućava ti da ga direktno preko nje pustiš ili pauziraš.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

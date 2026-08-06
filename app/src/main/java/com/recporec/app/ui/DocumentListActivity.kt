@@ -79,21 +79,39 @@ class DocumentListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Precica sa ikonice ("Nastavi citanje", dug pritisak na ikonicu app-e) cilja OVAJ
+        // Precica sa ikonice ("Nastavak-pauza", dug pritisak na ikonicu app-e) cilja OVAJ
         // ekran direktno (ne poseban providan "trampolin" ekran - to je ranije pravilo
         // problem, Android ume da ne prikaze providne aktivnosti pokrenute iz precice kako
-        // treba, pa je delovalo "mrtvo"). Ako je ovo taj slucaj, pronadji poslednji aktivan
-        // dokument i odmah otvori citac na njemu - inace, nastavi normalno na listu.
+        // treba, pa je delovalo "mrtvo"). STVARNO naizmenicno pusta/pauzira (ne samo otvara):
+        // ako je bas ova knjiga VEC aktivna i cita se, pauzira je; inace otvara citac i
+        // pokrece citanje (koristi POSTOJECI, vec proveren EXTRA_AUTOPLAY mehanizam u
+        // ReaderActivity - isti onaj koji je vec bezbedan i na hladnom pokretanju, ne
+        // duplira se ovde nikakva nova logika za sam pocetak citanja).
         if (intent.action == ACTION_CONTINUE_READING) {
             lifecycleScope.launch {
                 val last = withContext(Dispatchers.IO) {
                     AppDatabase.getInstance(applicationContext).documentDao().getLastActiveDocument()
                 }
                 if (last != null) {
-                    startActivity(
-                        Intent(this@DocumentListActivity, ReaderActivity::class.java)
-                            .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, last.id)
-                    )
+                    com.recporec.app.tts.PlaybackController.ensureInitialized(applicationContext)
+                    val tts = com.recporec.app.tts.PlaybackController.ttsManager
+                    val alreadyPlayingThis =
+                        com.recporec.app.tts.PlaybackController.currentDocument?.id == last.id &&
+                            tts?.isSpeaking == true
+                    if (alreadyPlayingThis) {
+                        tts?.pause()
+                        settings.userManuallyPaused = true
+                        startActivity(
+                            Intent(this@DocumentListActivity, ReaderActivity::class.java)
+                                .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, last.id)
+                        )
+                    } else {
+                        startActivity(
+                            Intent(this@DocumentListActivity, ReaderActivity::class.java)
+                                .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, last.id)
+                                .putExtra(ReaderActivity.EXTRA_AUTOPLAY, true)
+                        )
+                    }
                 }
                 finish()
             }
