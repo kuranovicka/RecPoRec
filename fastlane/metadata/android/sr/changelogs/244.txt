@@ -1,0 +1,6 @@
+1. Sada se aplikacija lepo prikazuje u traci sa obaveštenjima, pa reprodukcija kreće čim krenemo na aplikaciju iz obaveštenja.
+2. Aplikacija više ne čita one čudne znake, razne kuke i kvake, zvane hijeroglifi. :)
+3. Sada je pored dugmeta Pusti/Pauziraj i dugme Nazad prikazano u svim situacijama, pa i kada su sve druge kontrole sakrivene.
+4. Kad dugo pritisnemo ikonicu aplikacije na početnom ekranu (kao kad dobijamo opcije za razne radnje), imamo i mogućnost da odmah nastavimo čitanje poslednje knjige, bez ulaska u listu dokumenata.
+5. U glavni meni je dodata Statistika čitanja - koliko smo ukupno pročitali, koliko je preostalo, u kojoj smo knjizi najduže zadržali, i koliko ukupno dokumenata imamo. Ovo je zbirni prikaz za sve dokumente zajedno, ne za jedan.
+6. U Podešavanja je dodat izvoz i uvoz podešavanja - korisno kad menjamo telefon, a želimo iste glasove i podešavanja kao ranije.
