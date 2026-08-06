@@ -209,14 +209,17 @@ class DocumentListActivity : AppCompatActivity() {
                         startActivity(Intent(this, HelpActivity::class.java))
                         true
                     }
-                    com.recporec.app.R.id.action_stats -> {
-                        startActivity(Intent(this, StatsActivity::class.java))
-                        true
-                    }
                     else -> false
                 }
             }
             popup.show()
+        }
+        // Statistika citanja: premestena sa liste u meniju na dug pritisak DUGMETA Opcije -
+        // elegantnije, i dosledno obrascu "dug pritisak = dodatna radnja" koji vec koristi
+        // sva ostala dugmad u citacu.
+        binding.btnOverflow.setOnLongClickListener {
+            startActivity(Intent(this, StatsActivity::class.java))
+            true
         }
 
         lifecycleScope.launch {

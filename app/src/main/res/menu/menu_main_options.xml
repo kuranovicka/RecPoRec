@@ -9,10 +9,6 @@
         android:title="@string/menu_settings"
         android:showAsAction="never" />
     <item
-        android:id="@+id/action_stats"
-        android:title="Statistika čitanja"
-        android:showAsAction="never" />
-    <item
         android:id="@+id/action_help"
         android:title="@string/menu_help"
         android:showAsAction="never" />

@@ -32,7 +32,8 @@ class HelpActivity : AppCompatActivity() {
         Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
         Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, ili obriši.
         Gore desno je dugme Opcije.
-        Tu su četiri stavke: Opšta podešavanja glasa, Podešavanja, Statistika čitanja i Pomoć.
+        Dug pritisak na njega otvara Statistiku čitanja - prikazuje koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku.
+        Tu su tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Prva stavka je Opšta podešavanja glasa.
         Tu biraš jezik i glas za sve nove dokumente, i čuješ kratak primer svakog glasa kad ga dodirneš.
         Tu je i dugme Kombinovani glasovi.
@@ -52,9 +53,7 @@ class HelpActivity : AppCompatActivity() {
         Ne čuvaju samu listu knjiga.
         Korisno pred promenu telefona.
         Na dnu ekrana je dugme Vrati na zadano, koje vraća sva ova podešavanja na početak.
-        Treća stavka je Statistika čitanja.
-        prikazuje koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku.
-        Četvrta stavka je Pomoć.
+        Treća stavka je Pomoć.
         Sada idemo u sam dokument.
         Kada klikneš dugim pritiskom na bilo koji dokument, dobijaš sledeće opcije:
         Premesti nagore, premesti nadole, preimenuj i obriši.
