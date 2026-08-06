@@ -270,6 +270,14 @@ class ReadingService : Service() {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY)
             )
         }
+        val skipPreviousAction = NotificationCompat.Action(
+            android.R.drawable.ic_media_previous, "Prethodni zapis",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+        )
+        val skipNextAction = NotificationCompat.Action(
+            android.R.drawable.ic_media_next, "Sledeći zapis",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
+        )
         val exitPendingIntent = PendingIntent.getService(
             this, 0,
             Intent(this, ReadingService::class.java).setAction(ACTION_EXIT),
@@ -279,17 +287,24 @@ class ReadingService : Service() {
             android.R.drawable.ic_menu_close_clear_cancel, "Izlaz", exitPendingIntent
         )
 
+        // NAPOMENA: otkad MediaSession prijavljuje SKIP_TO_NEXT/PREVIOUS (za spoljne Bluetooth
+        // tastere), sistem (posebno Android 13+) sam prioritizuje prethodni/sledeci/pusti-pauziraj
+        // u "sazetom" (compact) prikazu obavestenja - tu ima mesta za samo TRI dugmeta. Izlaz sad
+        // dodajemo kao CETVRTO dugme, van tog sazetog prikaza - ostaje dostupno kad se obavestenje
+        // razvuce/prosiri, ne nestaje, samo vise nije u prve tri pozicije.
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentIntent(contentIntent)
+            .addAction(skipPreviousAction)
             .addAction(playPauseAction)
+            .addAction(skipNextAction)
             .addAction(exitAction)
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSession?.sessionToken)
-                    .setShowActionsInCompactView(0, 1)
+                    .setShowActionsInCompactView(0, 1, 2)
             )
             // Namerno UVEK "ongoing" (ne samo dok cita) - korisnica treba da vidi obavestenje
             // (i Pusti/Pauziraj/Izlaz dugmad) sve dok servis za citanje radi u pozadini, ne
