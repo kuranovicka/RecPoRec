@@ -298,7 +298,8 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.visibility = visibility
         btnSpeedUp.visibility = visibility
         seekProgress.visibility = visibility
-        btnBack.visibility = visibility
+        // NAMERNO se ne dira - Nazad treba da bude prisutan u SVAKOM prozoru/stanju, i kad su
+        // ostale kontrole sakrivene (korisnicka prijava - ranije je nestajalo sa ostalim).
         btnToggleControls.contentDescription = if (controlsHidden) {
             "Prikaži kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
         } else {

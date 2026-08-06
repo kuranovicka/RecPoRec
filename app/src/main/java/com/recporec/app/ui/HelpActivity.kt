@@ -107,7 +107,7 @@ class HelpActivity : AppCompatActivity() {
         Ispod tastature je veći klizač za lakši dodir.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
         Desno od klizača je dugme Prikaži-sakrij kontrole.
-        Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe i dugmeta Pokreni/Pauziraj čitanje - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
+        Kada ga pritisneš, sakriva sve dugmadi i statusne redove osim sebe, dugmeta Pokreni/Pauziraj čitanje, i dugmeta Nazad (ono ostaje prisutno u svakom stanju) - koristan za čist ekran, na primer za videće osobe koje čitaju očima. Ponovni pritisak sve vraća.
         Dug pritisak pauzira čitanje na 15 minuta.
         Minut pre kraja pauze ćeš čuti kratak zvučni signal.
         Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
