@@ -147,6 +147,17 @@ class ReadingService : Service() {
         // podesavanja, koje ne zavisi od toga da li je intent sacuvan ili ne.
         val uninterrupted = AppSettings(this).uninterruptedEnabled
         startForeground(NOTIFICATION_ID, buildNotification())
+
+        if (intent?.action == ACTION_EXIT) {
+            // "Izlaz" iz same notifikacije - isti obrazac kao dugme Izlaz u aplikaciji
+            // (DocumentListActivity): zaustavi citanje, oslobodi sve resurse, ugasi servis.
+            PlaybackController.release()
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         setupShakeDetector()
 
         if (uninterrupted) {
@@ -222,6 +233,14 @@ class ReadingService : Service() {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY)
             )
         }
+        val exitPendingIntent = PendingIntent.getService(
+            this, 0,
+            Intent(this, ReadingService::class.java).setAction(ACTION_EXIT),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val exitAction = NotificationCompat.Action(
+            android.R.drawable.ic_menu_close_clear_cancel, "Izlaz", exitPendingIntent
+        )
 
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
@@ -229,12 +248,17 @@ class ReadingService : Service() {
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentIntent(contentIntent)
             .addAction(playPauseAction)
+            .addAction(exitAction)
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSession?.sessionToken)
-                    .setShowActionsInCompactView(0)
+                    .setShowActionsInCompactView(0, 1)
             )
-            .setOngoing(isSpeaking)
+            // Namerno UVEK "ongoing" (ne samo dok cita) - korisnica treba da vidi obavestenje
+            // (i Pusti/Pauziraj/Izlaz dugmad) sve dok servis za citanje radi u pozadini, ne
+            // samo dok je zvuk aktivan - inace bi moglo da se slucajno obrise povlacenjem dok
+            // je pauzirano, i onda ne bi bilo naceina da se citanje nastavi iz obavestenja.
+            .setOngoing(true)
             .build()
     }
 
@@ -270,6 +294,7 @@ class ReadingService : Service() {
     companion object {
         const val NOTIFICATION_ID = 42
         const val EXTRA_UNINTERRUPTED = "uninterrupted"
+        const val ACTION_EXIT = "com.recporec.app.ACTION_EXIT"
 
         fun start(context: Context, uninterrupted: Boolean) {
             val intent = Intent(context, ReadingService::class.java)
