@@ -33,7 +33,18 @@ class DocumentListActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            result.data?.data?.let { handlePickedFile(it) }
+            val clip = result.data?.clipData
+            if (clip != null && clip.itemCount > 0) {
+                // Dug pritisak na "Dodaj dokument" - vise izabranih fajlova odjednom
+                // (EXTRA_ALLOW_MULTIPLE). handlePickedFile() vec radi bezbedno pojedinacno
+                // (samo kopira i upisuje u bazu, ne otvara nista automatski), pa se prosto
+                // ponovi za svaki izabrani fajl.
+                for (i in 0 until clip.itemCount) {
+                    handlePickedFile(clip.getItemAt(i).uri)
+                }
+            } else {
+                result.data?.data?.let { handlePickedFile(it) }
+            }
         }
     }
 
@@ -67,11 +78,14 @@ class DocumentListActivity : AppCompatActivity() {
      * ali se ispostavilo da to gura spisak "korena" (svih izvora) van vidokruga, pa se birac
      * otvara zaglavljen na SAMO JEDNOM izvoru dok se rucno ne pronadje skriven prekidac
      * "Prikazi korene" (tesko dostupan preko TalkBack-a). Bez ikakvog usmeravanja, birac se
-     * otvara na SVOM podrazumevanom ekranu, koji bi trebalo da odmah pokaze sve izvore. */
-    private fun launchPicker() {
+     * otvara na SVOM podrazumevanom ekranu, koji bi trebalo da odmah pokaze sve izvore.
+     *
+     * allowMultiple: dug pritisak na dugme - dodavanje vise knjiga odjednom umesto jedne. */
+    private fun launchPicker(allowMultiple: Boolean = false) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
+            if (allowMultiple) putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         }
         pickFileLauncher.launch(intent)
     }
@@ -132,6 +146,10 @@ class DocumentListActivity : AppCompatActivity() {
 
         binding.btnAddDocument.setOnClickListener {
             launchPicker()
+        }
+        binding.btnAddDocument.setOnLongClickListener {
+            launchPicker(allowMultiple = true)
+            true
         }
 
         // SVE dozvole (obavestenja, stanje telefona, izuzetak od stednje baterije, pun ekran

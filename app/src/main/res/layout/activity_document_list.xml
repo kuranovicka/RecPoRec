@@ -70,6 +70,7 @@
                 android:backgroundTint="@color/btn_chapter"
                 android:textColor="@color/button_text"
                 android:background="@drawable/key_button_shape"
+                android:contentDescription="Dodaj dokument. Dug pritisak: dodaj više dokumenata odjednom."
                 android:text="@string/add_document" />
 
             <Button

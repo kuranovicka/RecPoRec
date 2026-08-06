@@ -25,6 +25,7 @@ class HelpActivity : AppCompatActivity() {
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Njime dodaješ knjigu sa telefona ili sa Google diska, OneDrive-a, Dropboxa i slično.
         Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf i mobi.
+        Dug pritisak na njega dodaje više dokumenata odjednom, umesto jednog po jednog.
         Ispod njega je dugme Opšte radnje.
         To dugme se pojavljuje samo kada ima dokumenata i otvara sledeće opcije:
         Odaberi sve, obriši odabrano, ili opozovi izbor ako se predomisliš.
