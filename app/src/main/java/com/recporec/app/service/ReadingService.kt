@@ -42,11 +42,30 @@ class ReadingService : Service() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         setupCallStateListener()
         mediaSession = MediaSessionCompat(this, "RecPoRecSession").apply {
+            // Za sirok opseg Android verzija/uredjaja - eksplicitno oznaci da sesija obradjuje
+            // medijske tastere i transportne komande (play/pauza/skip). Na novijim verzijama
+            // AndroidX-a je ovo vec podrazumevano, ali ne smeta i pomaze na starijim/manje
+            // uobicajenim uredjajima (razlog za ovo istrazivanje - spoljne Bluetooth
+            // slusalice/tastature).
+            @Suppress("DEPRECATION")
+            setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                    MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+            )
             setCallback(object : MediaSessionCompat.Callback() {
-                override fun onPlay() { PlaybackController.resumeCancelingRestIfNeeded() }
+                override fun onPlay() {
+                    // Zastita od udvostrucene komande - neki Bluetooth uredjaji/AVRCP steka
+                    // znaju povremeno da posalju PLAY i kad VEC svira, sto bi inace nasilno
+                    // restartovalo trenutnu recenicu usred citanja.
+                    if (PlaybackController.ttsManager?.isSpeaking != true) {
+                        PlaybackController.resumeCancelingRestIfNeeded()
+                    }
+                }
                 override fun onPause() {
-                    PlaybackController.ttsManager?.pause()
-                    AppSettings(this@ReadingService).userManuallyPaused = true
+                    if (PlaybackController.ttsManager?.isSpeaking == true) {
+                        PlaybackController.ttsManager?.pause()
+                        AppSettings(this@ReadingService).userManuallyPaused = true
+                    }
                 }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
                 // Android mehanizam za medijske tastere, isto kao play/pauza iznad. Nije

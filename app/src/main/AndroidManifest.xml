@@ -131,6 +131,18 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance" />
 
+        <!-- Standardna AndroidX klasa - prima medijske komande (Bluetooth slusalice, zicane
+             slusalice, spoljna tastatura) kad sistem ne moze direktno da ih usmeri na aktivnu
+             MediaSession (npr. app trenutno ne drzi audio fokus). Bez OVE deklaracije, spoljni
+             uredjaji ponekad "ne prepoznaju" app - tacno prijava od ranije. -->
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".service.WakeAlarmReceiver"
             android:exported="false" />
