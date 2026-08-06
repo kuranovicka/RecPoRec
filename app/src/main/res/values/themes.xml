@@ -33,14 +33,4 @@
         <item name="android:textColor">@color/btn_goto_page</item>
         <item name="android:textStyle">bold</item>
     </style>
-
-    <!-- Za ContinueReadingActivity (cilj precice "Nastavi citanje") - kratko, providno
-         "medjuvreme" dok se u pozadini trazi poslednji aktivan dokument, pre prosledjivanja
-         na pravi ekran. Ne koristi Theme.NoDisplay jer taj zahteva TRENUTNO finish(), a ovde
-         se ceka kratak (asinhron) upit ka bazi. -->
-    <style name="Theme.Transparent" parent="Theme.RecPoRec">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@null</item>
-    </style>
 </resources>

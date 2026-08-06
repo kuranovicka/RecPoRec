@@ -7,8 +7,8 @@
         android:shortcutShortLabel="@string/shortcut_continue_short"
         android:shortcutLongLabel="@string/shortcut_continue_long">
         <intent
-            android:action="android.intent.action.VIEW"
+            android:action="com.recporec.app.ACTION_CONTINUE_READING"
             android:targetPackage="com.recporec.app"
-            android:targetClass="com.recporec.app.ui.ContinueReadingActivity" />
+            android:targetClass="com.recporec.app.ui.DocumentListActivity" />
     </shortcut>
 </shortcuts>

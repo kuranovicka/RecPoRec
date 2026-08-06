@@ -16,6 +16,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Akcija koju koristi precica sa ikonice aplikacije ("Nastavi citanje") - vidi shortcuts.xml. */
+private const val ACTION_CONTINUE_READING = "com.recporec.app.ACTION_CONTINUE_READING"
+
 class DocumentListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDocumentListBinding
@@ -75,6 +78,28 @@ class DocumentListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Precica sa ikonice ("Nastavi citanje", dug pritisak na ikonicu app-e) cilja OVAJ
+        // ekran direktno (ne poseban providan "trampolin" ekran - to je ranije pravilo
+        // problem, Android ume da ne prikaze providne aktivnosti pokrenute iz precice kako
+        // treba, pa je delovalo "mrtvo"). Ako je ovo taj slucaj, pronadji poslednji aktivan
+        // dokument i odmah otvori citac na njemu - inace, nastavi normalno na listu.
+        if (intent.action == ACTION_CONTINUE_READING) {
+            lifecycleScope.launch {
+                val last = withContext(Dispatchers.IO) {
+                    AppDatabase.getInstance(applicationContext).documentDao().getLastActiveDocument()
+                }
+                if (last != null) {
+                    startActivity(
+                        Intent(this@DocumentListActivity, ReaderActivity::class.java)
+                            .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, last.id)
+                    )
+                }
+                finish()
+            }
+            return
+        }
+
         binding = ActivityDocumentListBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
