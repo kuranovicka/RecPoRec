@@ -556,10 +556,14 @@ class DocumentListActivity : AppCompatActivity() {
 
     /** Od Android 14 na dalje, pun ekran preko zaključanog ekrana (za pouzdano "Probudi me
      * u") može biti onemogućen dok korisnica to ručno ne dozvoli - ista dozvola koju imaju
-     * i prave budilnik/poziv aplikacije. Poslednja karika u lancu - nema svoj onDone. */
+     * i prave budilnik/poziv aplikacije. Poslednja karika u lancu - nema svoj onDone.
+     * VAŽNO: za razliku od ostalih dozvola u lancu, OVDE se NAMERNO proverava STVARNO,
+     * UŽIVO stanje pri svakom pokretanju - ne postoji "trajno zapamti da si pitala" izlaz,
+     * jer bi to (kao što se i desilo - korisnička prijava) moglo zauvek da ostavi ovu
+     * dozvolu neodobrenu bez ikakvog daljeg podsetnika, tiho onesposobljavajući puni ekran
+     * budjenja preko zaključanog ekrana bez ikakvog znaka da se to desilo. */
     private fun checkFullScreenIntentPermission() {
         if (android.os.Build.VERSION.SDK_INT < 34) return
-        if (settings.fullScreenIntentAsked) return
         val nm = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         if (!nm.canUseFullScreenIntent()) {
             AlertDialog.Builder(this)
@@ -568,9 +572,8 @@ class DocumentListActivity : AppCompatActivity() {
                     "Da bi \"Probudi me u\" moglo pouzdano da otvori ceo ekran i kad je telefon zaključan, " +
                         "potrebno je ručno da dozvoliš to u podešavanjima telefona, na sledećem ekranu."
                 )
-                .setNegativeButton("Ne sada") { _, _ -> settings.fullScreenIntentAsked = true }
+                .setNegativeButton("Ne sada", null)
                 .setPositiveButton("Otvori podešavanja") { _, _ ->
-                    settings.fullScreenIntentAsked = true
                     try {
                         val intent = Intent(
                             android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
@@ -581,8 +584,6 @@ class DocumentListActivity : AppCompatActivity() {
                     }
                 }
                 .show()
-        } else {
-            settings.fullScreenIntentAsked = true
         }
     }
 }
