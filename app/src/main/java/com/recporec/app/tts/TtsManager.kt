@@ -501,6 +501,9 @@ class TtsManager(private val appContext: Context) {
             activeInstance = tts
         }
         isSpeaking = true
+        // Vidi BluetoothKeepAlive - resenje za Bluetooth slusalice sa fizickim dodirom,
+        // preuzeto iz istrage tudjeg iskustva (@Voice Aloud Reader).
+        BluetoothKeepAlive.start()
         speakCurrentChunk()
     }
 
@@ -522,6 +525,7 @@ class TtsManager(private val appContext: Context) {
         tts?.stop()
         secondaryEngines.values.forEach { it.stop() }
         isSpeaking = false
+        BluetoothKeepAlive.stop()
         if (userInitiated) pausedDueToFocusLoss = false
     }
 
@@ -529,6 +533,7 @@ class TtsManager(private val appContext: Context) {
         if (chunks.isEmpty()) return
         requestAudioFocus()
         isSpeaking = true
+        BluetoothKeepAlive.start()
         speakCurrentChunk()
     }
 
@@ -537,6 +542,7 @@ class TtsManager(private val appContext: Context) {
         tts?.stop()
         secondaryEngines.values.forEach { it.stop() }
         isSpeaking = false
+        BluetoothKeepAlive.stop()
         pausedDueToFocusLoss = false
         abandonAudioFocus()
     }
