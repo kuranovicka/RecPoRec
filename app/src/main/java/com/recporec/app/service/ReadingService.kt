@@ -6,9 +6,9 @@ import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -17,7 +17,7 @@ import com.recporec.app.tts.PlaybackController
 import com.recporec.app.ui.ReaderActivity
 import com.recporec.app.util.ShakeDetector
 
-class ReadingService : MediaBrowserServiceCompat() {
+class ReadingService : Service() {
 
     private var mediaSession: MediaSessionCompat? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -98,32 +98,7 @@ class ReadingService : MediaBrowserServiceCompat() {
             })
             isActive = true
         }
-        // KLJUCNA VEZA za MediaBrowserServiceCompat - bez ovoga, "pretvaranje" servisa u
-        // MediaBrowserServiceCompat ne bi nista promenilo, sistem i dalje ne bi znao koja je
-        // NASA sesija. Istrazivanje: Bluetooth/AVRCP stek na telefonu prepoznaje aplikaciju
-        // kao "pravog" medijskog plejera pouzdanije kad ona ima ovaj zvanicni tip servisa
-        // (isti onaj koji koriste npr. Android Auto integracije), ne samo obican MediaSession
-        // unutar obicnog servisa (koji smo imali do sad, i koji je dovoljan za tastaturu, ali
-        // mozda ne i za direktan dodir na Bluetooth slusalicama).
-        sessionToken = mediaSession?.sessionToken
         PlaybackController.playbackStateListener = { refreshNotification() }
-    }
-
-    /** Deo standardnog MediaBrowserServiceCompat "ugovora" - MI ne nudimo pravo pretrazivanje
-     * (nema liste poglavlja/knjiga za spoljne uredjaje da biraju), samo minimalan, prazan
-     * koren - dovoljno da nas sistem prepozna kao legitimnog medijskog plejera. */
-    override fun onGetRoot(
-        clientPackageName: String,
-        clientUid: Int,
-        rootHints: android.os.Bundle?
-    ): BrowserRoot = BrowserRoot("recporec_empty_root", null)
-
-    /** Nemamo stvarno stablo za pretragu - uvek vraca praznu listu. */
-    override fun onLoadChildren(
-        parentId: String,
-        result: Result<MutableList<android.support.v4.media.MediaBrowserCompat.MediaItem>>
-    ) {
-        result.sendResult(mutableListOf())
     }
 
     private fun setupShakeDetector() {
@@ -406,11 +381,7 @@ class ReadingService : MediaBrowserServiceCompat() {
         nm.notify(NOTIFICATION_ID, buildNotification())
     }
 
-    // NAMERNO nema vise sopstvenog onBind() override-a - MediaBrowserServiceCompat (bazna
-    // klasa) sad sama obradjuje bind zahteve (potrebno da bi spoljni "browsing" klijenti,
-    // npr. Bluetooth stek, mogli da se povezu). Nasa app se i dalje NE povezuje na ovaj
-    // servis preko bindService() nigde - i dalje koristimo samo startService/
-    // startForegroundService, sto ostaje potpuno nepromenjeno.
+    override fun onBind(intent: Intent?): IBinder? = null
 
     @Suppress("DEPRECATION")
     override fun onDestroy() {

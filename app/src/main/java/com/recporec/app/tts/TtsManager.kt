@@ -124,9 +124,6 @@ class TtsManager(private val appContext: Context) {
 
     private var audioFocusGranted = false
 
-    /** Za dijagnostiku - da li je poslednji zahtev za audio fokus stvarno prihvaćen. */
-    fun isAudioFocusGranted(): Boolean = audioFocusGranted
-
     private fun requestAudioFocus() {
         // Ako vec drzimo fokus, ne traziti ga ponovo - ponovljeno trazenje (bez otpustanja
         // izmedju) registruje app VISE PUTA u sistemskom "stogu" fokusa, sto pravi
@@ -368,10 +365,6 @@ class TtsManager(private val appContext: Context) {
         initEngine(enginePackage)
     }
 
-    fun availableVoices(): List<Voice> {
-        return tts?.voices?.toList()?.sortedBy { it.name } ?: emptyList()
-    }
-
     fun setVoiceByName(name: String) {
         val voice = tts?.voices?.firstOrNull { it.name == name } ?: return
         // setLanguage() se poziva SAMO kad se jezik stvarno menja - kod nekih motora, poziv
@@ -552,21 +545,12 @@ class TtsManager(private val appContext: Context) {
         pendingNextChunk = null
     }
 
-    fun currentOffset(): Int {
-        if (chunkOffsets.isEmpty()) return 0
-        val idx = currentChunkIndex.coerceIn(0, chunkOffsets.size - 1)
-        return chunkOffsets[idx]
-    }
-
     /** Indeks rečenice (chunk-a) koji sadrži dati karakter-offset - koristi se za procenu
      * preostalog/proteklog vremena (uključujući pauze), ne za samo čitanje. */
     fun chunkIndexForOffset(offset: Int): Int {
         val idx = java.util.Collections.binarySearch(chunkOffsets, offset)
         return (if (idx >= 0) idx else -idx - 1).coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
     }
-
-    /** Koliko granica rečenica ima u dokumentu (za procenu vremena). */
-    fun boundaryCount(): Int = chunkParagraphAfter.size
 
     /** Procenjeno dodatno vreme (ms) usled pauza između rečenica/pasusa, za granice u
      * opsegu [fromIndex, toIndexExclusive). Na granici koja je kraj pasusa računa se
