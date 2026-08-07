@@ -1,0 +1,11 @@
+What's new in RečPoReč 10.0?
+
+1. The app now shows up properly in the notification shade, and playback starts right away when you open it from there.
+2. The app no longer reads out those strange stray symbols ("hieroglyphs") that sometimes appeared in documents.
+3. A Back button is now shown next to Play/Pause in every situation, even when all other controls are hidden.
+4. Long-pressing the app icon on the home screen (the same gesture used for shortcuts) now offers the option to continue or pause reading. This means we no longer need to open the last document directly.
+5. Long-pressing the Add document button now checks whether we've missed granting any permission - useful if something was accidentally skipped.
+6. Long-pressing Options on the main screen now reads out reading statistics across all documents: total listened time, how much is left, which document you've spent the most time on, and how many documents you have in total.
+7. Long-pressing the Exit button checks the connection status of Bluetooth devices and offers to connect manually, in case automatic connection didn't work.
+8. Settings export/import was added - useful when switching phones and reinstalling with the same voices as before.
+9. Physical media button support on Bluetooth devices has finally been fixed.

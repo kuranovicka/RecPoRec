@@ -1,6 +1,0 @@
-1. The app now shows up properly in the notification shade, and playback starts right away when you open it from there.
-2. The app no longer reads out those strange stray symbols ("hieroglyphs") that sometimes appeared in documents.
-3. A Back button is now shown next to Play/Pause in every situation, even when all other controls are hidden.
-4. Long-pressing the app icon on the home screen (the same gesture used for shortcuts) now offers "Continue reading", jumping straight to your last active document without going through the document list. This option is now reliable after some extra work - it used to appear but do nothing when tapped.
-5. A new Reading statistics screen was added to the main menu - total listening time, how many documents you've finished, which document you've spent the most time on, and how many documents you have in total, across your whole library.
-6. Settings export/import was added - useful when switching phones, to keep the same voice and settings as before.

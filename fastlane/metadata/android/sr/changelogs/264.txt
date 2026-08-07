@@ -1,0 +1,11 @@
+Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 10.0?
+
+1. Sada se aplikacija lepo prikazuje u traci sa obaveštenjima, pa reprodukcija kreće čim krenemo na aplikaciju iz obaveštenja.
+2. Aplikacija više ne čita one čudne znake, razne kuke i kvake, zvane hijeroglifi. :)
+3. Sada je pored dugmeta play pauza, i dugme nazad prikazano u svim situacijama, pa i kada su sve druge kontrole sakrivene.
+4. Kad dugo pritisnemo prečicu Reč po reč na početnom ekranu, kao ono kad dobijamo opcije za razne radnje, imamo i mogućnost nastavka i pauziranja čitanja. To znači da ne moramo ulaziti direktno u poslednju knjigu.
+5. Dug pritisak na dugme Dodaj dokument proverava da li smo propustili da damo neku dozvolu. Praktično, ako smo nešto slučajno preskočili.
+6. Dug pritisak na Opcije na glavnom ekranu programa od sada daje statističke podatke. Govori nam za sve dokumente zajedno: koliko smo pročitali, koliko je ukupno preostalo, koliko smo se najduže zadržali u jednoj knjizi ili dokumentu, i koliko ukupno ima dokumenata.
+7. Dug pritisak na dugme Izlaz očitava stanje povezivanja sa dodatnim Bluetooth uređajima i nudi nam ručno povezivanje, opet za slučaj da nešto automatski nije uspelo.
+8. U podešavanja je dodat uvoz i izvoz podešavanja. Korisno kada menjamo telefon, a instalirali smo iste glasove kao i ranije.
+9. Konačno popravljen rad sa fizičkim tasterima na Bluetooth uređajima.
