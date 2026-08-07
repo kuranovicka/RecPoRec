@@ -562,7 +562,7 @@ object PlaybackController {
         try {
             val settings = com.recporec.app.data.AppSettings(ctx)
             if (settings.backgroundEnabled) {
-                com.recporec.app.service.ReadingService.start(ctx, settings.uninterruptedEnabled)
+                com.recporec.app.service.ReadingService.start(ctx)
             }
         } catch (_: Exception) {
         }

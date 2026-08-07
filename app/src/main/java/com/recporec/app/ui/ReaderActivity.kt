@@ -436,7 +436,7 @@ class ReaderActivity : AppCompatActivity() {
                 // togglePlayPause() poziv, da ne bi ostao ni najmanji razmak u kom servis jos
                 // ne radi.
                 if (settings.backgroundEnabled) {
-                    ReadingService.start(this@ReaderActivity, settings.uninterruptedEnabled)
+                    ReadingService.start(this@ReaderActivity)
                 }
             }
             if (sessionAlreadyActive) {
@@ -656,7 +656,7 @@ class ReaderActivity : AppCompatActivity() {
             // razlog kao kod "Pri otvaranju dokumenta" iznad: pokretanje servisa nije trenutno,
             // pa bi drmanje odmah po pritisku Play moglo tiho da ne stigne da se registruje.
             if (settings.backgroundEnabled) {
-                ReadingService.start(this, settings.uninterruptedEnabled)
+                ReadingService.start(this)
             }
             val startOffset = doc?.currentCharacterOffset ?: 0
             tts.startFromOffset(startOffset)

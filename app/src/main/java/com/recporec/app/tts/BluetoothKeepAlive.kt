@@ -36,6 +36,13 @@ object BluetoothKeepAlive {
     @Synchronized
     fun start() {
         if (running) return
+        // Odbrambeno - ako je nekim slucajem ostalo nesto od prethodnog (nepotpuno
+        // zavrsenog) zaustavljanja, ocisti pre nego sto napravimo novu traku.
+        try {
+            audioTrack?.release()
+        } catch (_: Exception) {
+        }
+        audioTrack = null
         running = true
         val minBufferSize = AudioTrack.getMinBufferSize(
             SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -83,8 +90,19 @@ object BluetoothKeepAlive {
     fun stop() {
         if (!running) return
         running = false
+        // KRITICNO za brzo uzastopno pauziraj/nastavi: write() u MODE_STREAM BLOKIRA dok ne
+        // bude mesta u baferu. Bez pause() ovde, "running=false" ne bi bio primecen dok se
+        // trenutni write() ne zavrsi - join(200) bi mogao da istekne PRE toga, i onda bismo
+        // pozvale release() na traci dok pozadinska nit JOS UVEK pise u nju - to ostavlja
+        // audio podsistem u nekonzistentnom stanju za SLEDECI start(), objasnjava prijavu
+        // "prvi put radi, drugi put ne ako brzo ponovim". pause() odmah oslobadja blokirani
+        // write() poziv, pa nit odmah primeti running=false i izadje cisto.
         try {
-            playThread?.join(200)
+            audioTrack?.pause()
+        } catch (_: Exception) {
+        }
+        try {
+            playThread?.join(300)
         } catch (_: Exception) {
         }
         playThread = null

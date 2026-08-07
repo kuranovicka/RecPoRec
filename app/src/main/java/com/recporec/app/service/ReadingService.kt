@@ -6,7 +6,6 @@ import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Build
-import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.media.MediaBrowserServiceCompat
@@ -437,12 +436,14 @@ class ReadingService : MediaBrowserServiceCompat() {
 
     companion object {
         const val NOTIFICATION_ID = 42
-        const val EXTRA_UNINTERRUPTED = "uninterrupted"
         const val ACTION_EXIT = "com.recporec.app.ACTION_EXIT"
 
-        fun start(context: Context, uninterrupted: Boolean) {
+        /** Napomena: parametar "uninterrupted" je NAMERNO uklonjen (bio je viska - slao se,
+         * ali se nikad nije citao, jer onStartCommand() uvek cita direktno iz AppSettings,
+         * ne iz intent extra-a - vidi objasnjenje tamo). Svi pozivaoci vec imaju tu vrednost
+         * u podesavanjima, pa je prosledjivanje bilo redundantno. */
+        fun start(context: Context) {
             val intent = Intent(context, ReadingService::class.java)
-                .putExtra(EXTRA_UNINTERRUPTED, uninterrupted)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
