@@ -48,6 +48,7 @@ class HelpActivity : AppCompatActivity() {
         Prva opcija automatski nastavlja čitanje poslednjeg započetog dokumenta, čim otvoriš aplikaciju.
         Druga opcija započinje čitanje čim otvoriš bilo koji dokument.
         Dugme Navigacija bira šta rade dugmad za pomeranje unazad i unapred: stranicu, minute, ili oznaku.
+        Dugme Proveri dozvole ponovo proverava sve dozvole potrebne aplikaciji, i javlja ako neka nije data - isto kao pri prvom pokretanju aplikacije.
         Tu su i dugmad Izvezi podešavanja u fajl i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
         Ne čuvaju samu listu knjiga.
