@@ -32,7 +32,7 @@ class HelpActivity : AppCompatActivity() {
         Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
         Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, ili obriši.
         Gore desno je dugme Opcije.
-        Dug pritisak na njega otvara Statistiku čitanja - prikazuje koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku.
+        Dug pritisak na njega izgovara statistiku čitanja - koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku, bez otvaranja novog ekrana.
         Tu su tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Prva stavka je Opšta podešavanja glasa.
         Tu biraš jezik i glas za sve nove dokumente, i čuješ kratak primer svakog glasa kad ga dodirneš.
