@@ -218,7 +218,14 @@ class DocumentListActivity : AppCompatActivity() {
         // elegantnije, i dosledno obrascu "dug pritisak = dodatna radnja" koji vec koristi
         // sva ostala dugmad u citacu.
         binding.btnOverflow.setOnLongClickListener {
-            startActivity(Intent(this, StatsActivity::class.java))
+            // Izgovara statistiku naglas (kao Toast, cita ga TalkBack), BEZ otvaranja ikakvog
+            // ekrana - korisnicka zelja: "samo da pročita statistiku". Ista logika kao na
+            // ekranu Statistika (deljeno preko StatsFormatter), samo bez navigacije.
+            lifecycleScope.launch {
+                val docs = withContext(Dispatchers.IO) { db.documentDao().observeAllOnce() }
+                val text = com.recporec.app.util.StatsFormatter.buildStatsText(docs)
+                android.widget.Toast.makeText(this@DocumentListActivity, text, android.widget.Toast.LENGTH_LONG).show()
+            }
             true
         }
 
