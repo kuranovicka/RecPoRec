@@ -90,27 +90,36 @@ object BluetoothKeepAlive {
     fun stop() {
         if (!running) return
         running = false
-        // KRITICNO za brzo uzastopno pauziraj/nastavi: write() u MODE_STREAM BLOKIRA dok ne
-        // bude mesta u baferu. Bez pause() ovde, "running=false" ne bi bio primecen dok se
-        // trenutni write() ne zavrsi - join(200) bi mogao da istekne PRE toga, i onda bismo
-        // pozvale release() na traci dok pozadinska nit JOS UVEK pise u nju - to ostavlja
-        // audio podsistem u nekonzistentnom stanju za SLEDECI start(), objasnjava prijavu
-        // "prvi put radi, drugi put ne ako brzo ponovim". pause() odmah oslobadja blokirani
-        // write() poziv, pa nit odmah primeti running=false i izadje cisto.
-        try {
-            audioTrack?.pause()
-        } catch (_: Exception) {
-        }
-        try {
-            playThread?.join(300)
-        } catch (_: Exception) {
-        }
-        playThread = null
-        try {
-            audioTrack?.stop()
-            audioTrack?.release()
-        } catch (_: Exception) {
-        }
+        val trackToClose = audioTrack
+        val threadToJoin = playThread
         audioTrack = null
+        playThread = null
+        // pause() ODMAH oslobadja blokirani write() poziv (vidi objasnjenje u start()/pisanju
+        // niti) - ovo je brzo, ne blokira pozivaoca.
+        try {
+            trackToClose?.pause()
+        } catch (_: Exception) {
+        }
+        // OSTATAK ciscenja (cekanje da nit stvarno zavrsi, pa release) radi se U POZADINI, NE
+        // na pozivaocevoj niti. Ranije je stop() blokirao (join sa čekanjem do 300ms) ONU nit
+        // koja je pozvala pauzu (obicno glavna/UI nit, preko MediaSession callback-a) - to je
+        // pravilo primetno kasnjenje u odzivu na dodir slusalice/taster. Sad stop() vraca
+        // kontrolu odmah, a stvarno zatvaranje trake se zavrsi kratko posle, u pozadini -
+        // bezbedno, jer smo vec iznad "otkacile" stare reference (audioTrack/playThread su
+        // null), pa naredni start() ne moze da se sudari sa ovim ciscenjem.
+        Thread {
+            try {
+                threadToJoin?.join(300)
+            } catch (_: Exception) {
+            }
+            try {
+                trackToClose?.stop()
+                trackToClose?.release()
+            } catch (_: Exception) {
+            }
+        }.apply {
+            isDaemon = true
+            start()
+        }
     }
 }
