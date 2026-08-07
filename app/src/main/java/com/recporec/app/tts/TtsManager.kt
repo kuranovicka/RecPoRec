@@ -88,14 +88,28 @@ class TtsManager(private val appContext: Context) {
     private val focusChangeListener = android.media.AudioManager.OnAudioFocusChangeListener { focusChange ->
         when (focusChange) {
             android.media.AudioManager.AUDIOFOCUS_LOSS,
-            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                // OVO su prave, znacajne prekide (poziv, druga app preuzima fokus) - vredi
+                // pauzirati i kasnije automatski nastaviti.
                 audioFocusGranted = false
                 if (isSpeaking) {
                     pausedDueToFocusLoss = true
-                    pause()
+                    pause(userInitiated = false)
                     onAutoPaused?.invoke()
                 }
+            }
+            android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                // NAMERNO se NE pauzira ovde - po Android dokumentaciji, "CAN_DUCK" znaci
+                // "mozes da nastavis da svira, samo utisaj", NE "prekini i kasnije nastavi".
+                // Ranije smo ovo tretirale isto kao pravi prekid (puna pauza + automatski
+                // nastavak) - sumnja je da bas TAJ pogresan tretman izaziva prijavljen problem
+                // sa Bluetooth slusalicama (dupli dodir na slusalici izaziva kratak "duck"
+                // signal, koji smo pogresno tumacile kao "pauziraj pa nastavi" - ceo ciklus se
+                // desi u deliću sekunde, izgleda kao da se nista nije desilo osim kratkog
+                // zvucnog "skoka" koji je i sama pauza, momentalno ponistena nasim automatskim
+                // nastavkom). Ne diramo jacinu zvuka (nemamo ni implementirano prigušivanje) -
+                // prosto ignorisemo ovaj signal, citanje nastavlja normalno.
+                audioFocusGranted = false
             }
             android.media.AudioManager.AUDIOFOCUS_GAIN -> {
                 audioFocusGranted = true
@@ -497,11 +511,18 @@ class TtsManager(private val appContext: Context) {
             .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
     }
 
-    fun pause() {
+    /** [userInitiated]=true (podrazumevano) znaci da je OVO namerna, svesna radnja (dugme,
+     * medijski taster, drmanje) - takva pauza UVEK "pobedi" nad automatskim nastavkom, cak i
+     * ako se slucajno poklopi sa kratkim gubitkom/vracanjem audio fokusa (npr. Bluetooth
+     * dodir moze da izazove takav kratak "treptaj" kao sporedni efekat). Interni poziv iz
+     * focusChangeListener-a (zbog PRAVOG prekida, npr. poziva) koristi false, da ne bi sam
+     * sebe ponistio. */
+    fun pause(userInitiated: Boolean = true) {
         cancelPendingChunk()
         tts?.stop()
         secondaryEngines.values.forEach { it.stop() }
         isSpeaking = false
+        if (userInitiated) pausedDueToFocusLoss = false
     }
 
     fun resume() {
