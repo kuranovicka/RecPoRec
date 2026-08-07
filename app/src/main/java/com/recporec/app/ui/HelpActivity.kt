@@ -31,6 +31,10 @@ class HelpActivity : AppCompatActivity() {
         Odaberi sve, obriši odabrano, ili opozovi izbor ako se predomisliš.
         Dugme Izlaz je ispod toga.
         Zatvara aplikaciju potpuno, i prekida čitanje u pozadini.
+        Dug pritisak na ovo dugme: Otkrivanje spoljnog uređaja.
+        Ova funkcija naknadno otkriva:
+        Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
+        Korisno ako nije uspelo automatsko povezivanje.
         Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, ili obriši.
         Gore desno je dugme Opcije.
         Dug pritisak na njega izgovara statistiku čitanja - koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja, i koliko ih je u toku, bez otvaranja novog ekrana.

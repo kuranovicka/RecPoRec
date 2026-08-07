@@ -205,6 +205,10 @@ class DocumentListActivity : AppCompatActivity() {
             com.recporec.app.tts.PlaybackController.release()
             finishAffinity()
         }
+        binding.btnExit.setOnLongClickListener {
+            checkExternalDevices()
+            true
+        }
 
         binding.btnOverflow.setOnClickListener { view ->
             val popup = androidx.appcompat.widget.PopupMenu(this, view)
@@ -806,5 +810,52 @@ class DocumentListActivity : AppCompatActivity() {
         } else {
             onDone()
         }
+    }
+
+    /** Dug pritisak na "Izlaz" - "Otkrivanje spoljnog uređaja". NAMERNO samo PROVERAVA sta je
+     * TRENUTNO povezano (Bluetooth slusalice, zicane slusalice, spoljna tastatura) - ne
+     * pokusava SAMA da upari/poveze nista novo. Stvarno "trazenje i parovanje" novog Bluetooth
+     * uredjaja bi zahtevalo novu, "opasnu" dozvolu (BLUETOOTH_CONNECT) i nezvanicne/skrivene
+     * pozive sistemu (nestabilno, rizicno) - umesto toga, ako se nista ne pronadje, ponudi
+     * direktan put do Android-ovih SOPSTVENIH Bluetooth podesavanja, gde se parovanje stvarno
+     * i radi na bezbedan, standardan nacin. Koristi SAMO AudioManager/InputDevice provere -
+     * ne dodaje nijednu novu dozvolu, ne dira Bluetooth medijske tastere koje smo vec sredile. */
+    private fun checkExternalDevices() {
+        val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+        val outputs = audioManager.getDevices(android.media.AudioManager.GET_DEVICES_OUTPUTS)
+        val hasBluetooth = outputs.any {
+            it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+                it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO
+        }
+        val hasWired = outputs.any {
+            it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                it.type == android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                it.type == android.media.AudioDeviceInfo.TYPE_USB_HEADSET
+        }
+        val hasKeyboard = android.view.InputDevice.getDeviceIds().any { id ->
+            val dev = android.view.InputDevice.getDevice(id)
+            dev != null && dev.isExternal &&
+                (dev.sources and android.view.InputDevice.SOURCE_KEYBOARD) == android.view.InputDevice.SOURCE_KEYBOARD &&
+                dev.keyboardType == android.view.InputDevice.KEYBOARD_TYPE_ALPHABETIC
+        }
+
+        val lines = StringBuilder("Otkrivanje spoljnog uređaja.\n\n")
+        lines.append(if (hasBluetooth) "Bluetooth slušalice: povezane.\n" else "Bluetooth slušalice: nisu povezane.\n")
+        lines.append(if (hasWired) "Žične slušalice: povezane.\n" else "Žične slušalice: nisu povezane.\n")
+        lines.append(if (hasKeyboard) "Spoljna tastatura: povezana." else "Spoljna tastatura: nije povezana.")
+
+        val builder = AlertDialog.Builder(this)
+            .setTitle("Otkrivanje spoljnog uređaja")
+            .setMessage(lines.toString())
+            .setPositiveButton("U redu", null)
+        if (!hasBluetooth && !hasWired && !hasKeyboard) {
+            builder.setNegativeButton("Otvori Bluetooth podešavanja") { _, _ ->
+                try {
+                    startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
+                } catch (_: Exception) {
+                }
+            }
+        }
+        builder.show()
     }
 }
