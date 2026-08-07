@@ -160,6 +160,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
+            <!-- Otkriva servis kao zvanican "MediaBrowserService" - isti tip koji koriste npr.
+                 Android Auto integracije. Istrazivanje: Bluetooth/AVRCP stek na telefonu moze
+                 pouzdanije prepoznati app kao "pravog" medijskog plejera preko ovog zvanicnog
+                 puta, ne samo preko obicnog MediaSession-a unutar obicnog servisa. -->
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
         </service>
 
         <provider
