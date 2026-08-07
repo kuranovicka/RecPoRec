@@ -59,12 +59,23 @@ class ReadingService : Service() {
                     // restartovalo trenutnu recenicu usred citanja.
                     if (PlaybackController.ttsManager?.isSpeaking != true) {
                         PlaybackController.resumeCancelingRestIfNeeded()
+                        // KRITICNO: bez ovoga, MediaSession i dalje "misli" da je citanje
+                        // pauzirano (staro stanje) - sledeci pritisak na JEDAN kombinovan
+                        // play/pauza taster (kakav ima spoljna tastatura) bi sistem opet
+                        // usmerio na onPause() umesto na onPlay(), jer sistem ROUTE-uje
+                        // kombinovani taster prema NASEM POSLEDNJE PRIJAVLJENOM stanju, ne
+                        // prema stvarnom. Prijava korisnika: "nastavak citanja nakon pauze
+                        // ne funkcionise" na spoljnoj tastaturi - ovo je pravi uzrok.
+                        PlaybackController.notifyPlaybackStateChanged()
                     }
                 }
                 override fun onPause() {
                     if (PlaybackController.ttsManager?.isSpeaking == true) {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
+                        // Isti razlog kao gore - prijavi NOVO (pauzirano) stanje odmah, ne
+                        // cekaj da nesto drugo to uradi.
+                        PlaybackController.notifyPlaybackStateChanged()
                     }
                 }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni

@@ -620,6 +620,11 @@ class ReaderActivity : AppCompatActivity() {
         if (tts.isSpeaking) {
             tts.pause()
             if (manual) settings.userManuallyPaused = true
+            // Isti razlog kao za medijske tastere (ReadingService.onPause) - MediaSession
+            // treba ODMAH da zna za novo (pauzirano) stanje, inace spoljna tastatura/slusalice
+            // sa jednim kombinovanim play/pauza tasterom ne bi znale da li sledeci pritisak
+            // treba da pusti ili pauzira.
+            PlaybackController.notifyPlaybackStateChanged()
         } else {
             if (manual) settings.userManuallyPaused = false
             if (PlaybackController.isRestAlarmRinging()) {
@@ -655,6 +660,7 @@ class ReaderActivity : AppCompatActivity() {
             }
             val startOffset = doc?.currentCharacterOffset ?: 0
             tts.startFromOffset(startOffset)
+            PlaybackController.notifyPlaybackStateChanged()
         }
     }
 
