@@ -227,6 +227,10 @@ class DocumentListActivity : AppCompatActivity() {
                         startActivity(Intent(this, HelpActivity::class.java))
                         true
                     }
+                    com.recporec.app.R.id.action_export_log -> {
+                        exportLogcat()
+                        true
+                    }
                     else -> false
                 }
             }
@@ -857,5 +861,29 @@ class DocumentListActivity : AppCompatActivity() {
             }
         }
         builder.show()
+    }
+
+    /** PRIVREMENO, za istragu Bluetooth medijskih tastera - izvozi dnevnik (logcat) same
+     * aplikacije kao .txt fajl, spreman za deljenje. Android dozvoljava aplikaciji da cita
+     * SAMO SVOJ SOPSTVENI dnevnik (ne cele sistema, ne drugih app-a) bez ikakve posebne
+     * dozvole - dovoljno za nase "RecPoRecMedia" logove dodate uz MediaSession/medijske
+     * tastere. Ukloniti posle zavrsene istrage - namerno NIJE pomenuto u tekstu pomoci. */
+    private fun exportLogcat() {
+        try {
+            val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-v", "threadtime"))
+            val output = process.inputStream.bufferedReader().readText()
+            val shareDir = java.io.File(cacheDir, "share").apply { mkdirs() }
+            val file = java.io.File(shareDir, "recporec_dnevnik.txt")
+            file.writeText(output)
+            val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, "Podeli dnevnik"))
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, "Izvoz dnevnika nije uspeo: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 }

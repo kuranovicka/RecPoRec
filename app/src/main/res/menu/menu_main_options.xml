@@ -12,4 +12,8 @@
         android:id="@+id/action_help"
         android:title="@string/menu_help"
         android:showAsAction="never" />
+    <item
+        android:id="@+id/action_export_log"
+        android:title="Izvezi dnevnik (privremeno)"
+        android:showAsAction="never" />
 </menu>

@@ -53,7 +53,20 @@ class ReadingService : Service() {
                     MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
             )
             setCallback(object : MediaSessionCompat.Callback() {
+                override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+                    // Loguje SIROV taster PRE nego sto ga Android sam obradi (npr. dvostruki
+                    // dodir -> onSkipToNext) - ovo je najraniji trenutak da vidimo da li nam
+                    // dogadjaj uopste stize, i tacno koji je keyCode/action u pitanju.
+                    val keyEvent = mediaButtonIntent.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                    android.util.Log.d(
+                        "RecPoRecMedia",
+                        "onMediaButtonEvent: keyCode=${keyEvent?.keyCode} action=${keyEvent?.action} " +
+                            "repeatCount=${keyEvent?.repeatCount} source=${mediaButtonIntent.action}"
+                    )
+                    return super.onMediaButtonEvent(mediaButtonIntent)
+                }
                 override fun onPlay() {
+                    android.util.Log.d("RecPoRecMedia", "onPlay() pozvan - isSpeaking=${PlaybackController.ttsManager?.isSpeaking}")
                     // Zastita od udvostrucene komande - neki Bluetooth uredjaji/AVRCP steka
                     // znaju povremeno da posalju PLAY i kad VEC svira, sto bi inace nasilno
                     // restartovalo trenutnu recenicu usred citanja.
@@ -70,6 +83,7 @@ class ReadingService : Service() {
                     }
                 }
                 override fun onPause() {
+                    android.util.Log.d("RecPoRecMedia", "onPause() pozvan - isSpeaking=${PlaybackController.ttsManager?.isSpeaking}")
                     if (PlaybackController.ttsManager?.isSpeaking == true) {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
@@ -82,6 +96,7 @@ class ReadingService : Service() {
                 // razlicit od Pauze - bez ovoga bi taj taster tiho ne uradio nista. Ponasa se
                 // isto kao Pauza (nemamo poseban koncept "potpuno zaustavi" razlicit od pauze).
                 override fun onStop() {
+                    android.util.Log.d("RecPoRecMedia", "onStop() pozvan")
                     if (PlaybackController.ttsManager?.isSpeaking == true) {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
@@ -91,10 +106,22 @@ class ReadingService : Service() {
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
                 // Android mehanizam za medijske tastere, isto kao play/pauza iznad. Nije
                 // vezano za dodir ekrana pa ne remeti TalkBack, isto kao i drmanje.
-                override fun onSkipToNext() { PlaybackController.stepNavigate(true, applicationContext) }
-                override fun onSkipToPrevious() { PlaybackController.stepNavigate(false, applicationContext) }
-                override fun onFastForward() { PlaybackController.stepNavigate(true, applicationContext) }
-                override fun onRewind() { PlaybackController.stepNavigate(false, applicationContext) }
+                override fun onSkipToNext() {
+                    android.util.Log.d("RecPoRecMedia", "onSkipToNext() pozvan")
+                    PlaybackController.stepNavigate(true, applicationContext)
+                }
+                override fun onSkipToPrevious() {
+                    android.util.Log.d("RecPoRecMedia", "onSkipToPrevious() pozvan")
+                    PlaybackController.stepNavigate(false, applicationContext)
+                }
+                override fun onFastForward() {
+                    android.util.Log.d("RecPoRecMedia", "onFastForward() pozvan")
+                    PlaybackController.stepNavigate(true, applicationContext)
+                }
+                override fun onRewind() {
+                    android.util.Log.d("RecPoRecMedia", "onRewind() pozvan")
+                    PlaybackController.stepNavigate(false, applicationContext)
+                }
             })
             isActive = true
         }
@@ -186,6 +213,7 @@ class ReadingService : Service() {
         // pogresno oslobodio bas kad je najpotrebniji. Citamo direktno iz trajno sacuvanog
         // podesavanja, koje ne zavisi od toga da li je intent sacuvan ili ne.
         val uninterrupted = AppSettings(this).uninterruptedEnabled
+        android.util.Log.d("RecPoRecMedia", "onStartCommand: action=${intent?.action}")
         startForeground(NOTIFICATION_ID, buildNotification())
 
         if (intent?.action == ACTION_EXIT) {
@@ -206,6 +234,7 @@ class ReadingService : Service() {
             // manifestu) i preda mu dogadjaj - mi smo ti koji treba da ga prosledimo dalje.
             // Bez ovoga, dodir na slusalici stigne do servisa, ali se tu i zavrsi (tiho, bez
             // efekta - tacno ono sto je korisnica prijavila: "cuje se klik, nista vise").
+            android.util.Log.d("RecPoRecMedia", "onStartCommand: prosledjujem ACTION_MEDIA_BUTTON MediaSession-u, mediaSession=${mediaSession != null}")
             mediaSession?.let { MediaButtonReceiver.handleIntent(it, intent) }
         }
 
