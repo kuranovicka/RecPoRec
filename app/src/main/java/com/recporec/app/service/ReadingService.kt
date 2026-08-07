@@ -244,6 +244,36 @@ class ReadingService : Service() {
 
         val title = PlaybackController.currentDocument?.title ?: "RečPoReč"
         val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
+
+        // NOVO POKUSAJ za Bluetooth slusalice sa fizickim dodirom (AVRCP): do sad smo UVEK
+        // prijavljivale poziciju kao "nepoznato" i NIKAD nismo postavljale trajanje - neki
+        // Bluetooth uredjaji/AVRCP implementacije zahtevaju STVARNE (makar procenjene)
+        // vrednosti da bi uopste tretirale sesiju kao "pravi" medijski sadrzaj kojim mogu da
+        // upravljaju fizickim dodirom - bez toga, sistemski KEYCODE_MEDIA_* dogadjaji (kakve
+        // salje spoljna tastatura) i dalje rade, ali direktan AVRCP dodir na slusalici moze da
+        // bude ignorisan. Procena trajanja/pozicije koristi ISTU formulu (baseCharsPerMinute
+        // = 800, brzina citanja) kao "Proteklo/preostalo vreme" na ekranu citaca - dovoljno
+        // tacno za ovu svrhu, ne mora biti savrseno.
+        val doc = PlaybackController.currentDocument
+        val settingsForRate = AppSettings(this)
+        val rate = (doc?.speechRate?.takeIf { it > 0f }) ?: settingsForRate.globalSpeechRate
+        val safeRate = rate.coerceAtLeast(0.3f)
+        val baseCharsPerMinute = 800f
+        val totalChars = doc?.totalCharacters ?: 0
+        val currentChars = (doc?.currentCharacterOffset ?: 0).coerceIn(0, totalChars)
+        val totalDurationMs = if (totalChars > 0) {
+            (totalChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
+        } else 0L
+        val positionMs = if (totalChars > 0) {
+            (currentChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
+        } else 0L
+
+        mediaSession?.setMetadata(
+            android.support.v4.media.MediaMetadataCompat.Builder()
+                .putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE, title)
+                .putLong(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_DURATION, totalDurationMs)
+                .build()
+        )
         // KRITICNO: bez ovoga, Android u notifikaciji prikazuje dugmad (Pusti/Pauziraj) kao
         // VIZUELNO onemoguceno (sivo) iako PendingIntent iza njih i dalje radi kad se dodirne -
         // sistem "sivi" akcije koje MediaSession ne prijavi u svom setActions() skupu.
@@ -257,8 +287,8 @@ class ReadingService : Service() {
                 )
                 .setState(
                     if (isSpeaking) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
-                    PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
-                    1f
+                    positionMs,
+                    if (isSpeaking) 1f else 0f
                 )
                 .build()
         )
