@@ -11,21 +11,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private val settings by lazy { AppSettings(this) }
 
-    // Cuva "sledeci korak" u lancu dozvola dok cekamo da se SISTEMSKI dijalog (za dozvolu)
-    // zatvori - isti obrazac kao u DocumentListActivity.
-    private var pendingPermissionChainNext: (() -> Unit)? = null
-
-    private val notificationPermissionLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { }
-
-    private val phoneStatePermissionLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) {
-        pendingPermissionChainNext?.invoke()
-        pendingPermissionChainNext = null
-    }
-
     private val exportLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -146,10 +131,6 @@ class SettingsActivity : AppCompatActivity() {
                 settings.navigationMode = navValues[index]
                 refreshNavButton()
             }
-        }
-
-        binding.btnCheckPermissions.setOnClickListener {
-            checkAllPermissionsManually()
         }
 
         binding.btnExportSettings.setOnClickListener {
@@ -278,141 +259,6 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle("Dodatno podešavanje baterije")
                 .setMessage(message)
                 .setPositiveButton("Razumem", null)
-                .show()
-        }
-    }
-
-    /** Dugme "Proveri dozvole" - ponovo prolazi kroz SVE cetiri dozvole, ponasajuci se kao da
-     * se app prvi put pokrece: ako je nesto vec odobreno, tiho se preskace; ako nije, pita
-     * ponovo (ili, za obavestenja/pun ekran, ponudi direktan put do Podesavanja ako sistemski
-     * dijalog vise ne moze da se prikaze). NAMERNO zaobilazi "vec pitano" zastavice za stanje
-     * telefona i bateriju (za razliku od automatskog lanca pri pokretanju app-e) - ovo je
-     * eksplicitna, rucna radnja korisnice, pa ima smisla da uvek stvarno proveri, ne da cutke
-     * preskoci samo zato sto je nekad davno vec pitano. */
-    private fun checkAllPermissionsManually() {
-        checkNotificationPermissionManually {
-            checkPhoneStatePermissionManually {
-                checkBatteryOptimizationManually {
-                    checkFullScreenIntentPermission()
-                }
-            }
-        }
-    }
-
-    private fun checkNotificationPermissionManually(onDone: () -> Unit) {
-        if (android.os.Build.VERSION.SDK_INT < 33 ||
-            androidx.core.content.ContextCompat.checkSelfPermission(
-                this, android.Manifest.permission.POST_NOTIFICATIONS
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            onDone()
-            return
-        }
-        if (!settings.notificationPermissionRequestedOnce) {
-            settings.notificationPermissionRequestedOnce = true
-            pendingPermissionChainNext = onDone
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Dozvola za obaveštenja")
-                .setMessage(
-                    "Dozvola za obaveštenja i dalje nije data, a telefon je ranije odbio " +
-                        "ovaj zahtev, pa ga aplikacija više ne može sama ponovo ponuditi - " +
-                        "potrebno je ručno uključiti u podešavanjima."
-                )
-                .setNegativeButton("Ne sada") { _, _ -> onDone() }
-                .setPositiveButton("Otvori podešavanja") { _, _ ->
-                    try {
-                        startActivity(
-                            android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
-                        )
-                    } catch (_: Exception) {
-                    }
-                    onDone()
-                }
-                .setOnCancelListener { onDone() }
-                .show()
-        }
-    }
-
-    private fun checkPhoneStatePermissionManually(onDone: () -> Unit) {
-        if (androidx.core.content.ContextCompat.checkSelfPermission(
-                this, android.Manifest.permission.READ_PHONE_STATE
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            onDone()
-            return
-        }
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Pauza pri pozivu")
-            .setMessage(
-                "Da bi čitanje pouzdanije prepoznalo dolazni poziv i samo se pauziralo, " +
-                    "aplikacija može da traži dozvolu za stanje telefona. Nije obavezno."
-            )
-            .setNegativeButton("Ne sada") { _, _ -> onDone() }
-            .setPositiveButton("Dozvoli") { _, _ ->
-                pendingPermissionChainNext = onDone
-                phoneStatePermissionLauncher.launch(android.Manifest.permission.READ_PHONE_STATE)
-            }
-            .setOnCancelListener { onDone() }
-            .show()
-    }
-
-    private fun checkBatteryOptimizationManually(onDone: () -> Unit) {
-        val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
-        if (pm.isIgnoringBatteryOptimizations(packageName)) {
-            onDone()
-            return
-        }
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Pouzdano čitanje u pozadini")
-            .setMessage(
-                "Da bi čitanje u pozadini i medijski tasteri na slušalicama pouzdano radili " +
-                    "(posebno na Samsung telefonima), aplikacija može da zatraži izuzetak od " +
-                    "štednje baterije. Nije obavezno."
-            )
-            .setNegativeButton("Ne sada") { _, _ -> onDone() }
-            .setPositiveButton("Dozvoli") { _, _ ->
-                try {
-                    startActivity(
-                        android.content.Intent(
-                            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                            android.net.Uri.parse("package:$packageName")
-                        )
-                    )
-                } catch (_: Exception) {
-                }
-                onDone()
-            }
-            .setOnCancelListener { onDone() }
-            .show()
-    }
-
-    /** Ista provera kao pri pokretanju app-e (uvek uzivo stanje, bez "vec pitano" zastavice -
-     * ova dozvola nema ni pravi sistemski dijalog, uvek se ide na Podesavanja). */
-    private fun checkFullScreenIntentPermission() {
-        if (android.os.Build.VERSION.SDK_INT < 34) return
-        val nm = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-        if (!nm.canUseFullScreenIntent()) {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("Dozvola za buđenje preko zaključanog ekrana")
-                .setMessage(
-                    "Da bi \"Probudi me u\" moglo pouzdano da otvori ceo ekran i kad je telefon zaključan, " +
-                        "potrebno je ručno da dozvoliš to u podešavanjima telefona, na sledećem ekranu."
-                )
-                .setNegativeButton("Ne sada", null)
-                .setPositiveButton("Otvori podešavanja") { _, _ ->
-                    try {
-                        startActivity(
-                            android.content.Intent(
-                                android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
-                                android.net.Uri.parse("package:$packageName")
-                            )
-                        )
-                    } catch (_: Exception) {
-                    }
-                }
                 .show()
         }
     }

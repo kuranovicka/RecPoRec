@@ -78,6 +78,16 @@ class ReadingService : Service() {
                         PlaybackController.notifyPlaybackStateChanged()
                     }
                 }
+                // Neki uredjaji (posebno spoljne tastature) imaju POSEBAN taster "Stop",
+                // razlicit od Pauze - bez ovoga bi taj taster tiho ne uradio nista. Ponasa se
+                // isto kao Pauza (nemamo poseban koncept "potpuno zaustavi" razlicit od pauze).
+                override fun onStop() {
+                    if (PlaybackController.ttsManager?.isSpeaking == true) {
+                        PlaybackController.ttsManager?.pause()
+                        AppSettings(this@ReadingService).userManuallyPaused = true
+                        PlaybackController.notifyPlaybackStateChanged()
+                    }
+                }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
                 // Android mehanizam za medijske tastere, isto kao play/pauza iznad. Nije
                 // vezano za dodir ekrana pa ne remeti TalkBack, isto kao i drmanje.
