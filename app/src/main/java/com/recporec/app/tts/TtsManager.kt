@@ -210,6 +210,13 @@ class TtsManager(private val appContext: Context) {
                 secondaryEngines[enginePackage]?.setOnUtteranceProgressListener(makeSharedListener())
                 secondaryEngines[enginePackage]?.setSpeechRate(lastSpeechRate)
                 secondaryEngines[enginePackage]?.setPitch(lastPitch)
+                // Isti razlog kao za primarni motor - vidi initEngine().
+                secondaryEngines[enginePackage]?.setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                )
             }
         }, enginePackage)
         secondaryEngines[enginePackage] = instance
@@ -304,6 +311,21 @@ class TtsManager(private val appContext: Context) {
             currentEnginePackage = enginePackage
             if (ready) {
                 attachListener()
+                // KRITICNO za Bluetooth slusalice sa fizickim dodirom (dupli tap): sam TTS
+                // MOTOR mora da ima AudioAttributes.USAGE_MEDIA, ne samo AudioFocusRequest
+                // (koji vec ima ispravne atribute, vidi requestAudioFocus). Bluetooth AVRCP
+                // (dodir na slusalicama) odlucuje KOME da posalje komandu pauze/nastavka na
+                // osnovu toga koji STREAM trenutno aktivno svira sa USAGE_MEDIA oznakom - bez
+                // ovoga, sintetizovan glas moze da svira ispravno (cuje se), ali AVRCP ga ne
+                // prepoznaje kao "medijsku" reprodukciju, pa dodir na slusalicama ne uradi
+                // nista (samo lokalni "klik" zvuk slusalice, bez efekta u app-i). Prijava
+                // korisnice: "radi na pozivu (HFP, drugi profil), ne radi ovde".
+                tts?.setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                )
                 if (activeInstance == null) activeInstance = tts
                 onReady?.invoke()
             }
