@@ -152,7 +152,15 @@
         <service
             android:name=".service.ReadingService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback">
+            <!-- Bez ovoga, sirovi ACTION_MEDIA_BUTTON dogadjaji sa spoljnih Bluetooth uredjaja
+                 (fizicki dodir na slusalicama, AVRCP) nemaju gde da se proslede - sistem ne zna
+                 da NAS servis treba da ih obradi. Zajedno sa MediaButtonReceiver.handleIntent()
+                 pozivom u onStartCommand(). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

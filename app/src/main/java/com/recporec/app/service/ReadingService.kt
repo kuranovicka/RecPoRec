@@ -198,6 +198,17 @@ class ReadingService : Service() {
             return START_NOT_STICKY
         }
 
+        if (intent?.action == Intent.ACTION_MEDIA_BUTTON) {
+            // KRITICNO za Bluetooth slusalice sa fizickim dodirom (AVRCP): sirovi
+            // ACTION_MEDIA_BUTTON dogadjaj mora RUCNO da se prosledi MediaSession-u da bi
+            // stigao do onPlay()/onPause()/onSkip*() - standardni androidx MediaButtonReceiver
+            // SAM PO SEBI to ne radi, samo pronadje NAS servis (zahvaljujuci intent-filteru u
+            // manifestu) i preda mu dogadjaj - mi smo ti koji treba da ga prosledimo dalje.
+            // Bez ovoga, dodir na slusalici stigne do servisa, ali se tu i zavrsi (tiho, bez
+            // efekta - tacno ono sto je korisnica prijavila: "cuje se klik, nista vise").
+            mediaSession?.let { MediaButtonReceiver.handleIntent(it, intent) }
+        }
+
         setupShakeDetector()
 
         if (uninterrupted) {
