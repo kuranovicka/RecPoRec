@@ -209,7 +209,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
-        btnTimer.setOnLongClickListener { extendTimer(); true }
+        btnTimer.setOnLongClickListener { showAutoScrollDialog(); true }
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
         btnDocLanguage.setOnLongClickListener { undoAllJumps(); true }
@@ -312,7 +312,7 @@ class ReaderActivity : AppCompatActivity() {
      * već proveren mehanizam "Zakaži čitanje" (tiho pauzira, tiho nastavlja u zakazano vreme,
      * bez alarma) - isti pouzdan AlarmManager, ista zaštita od gašenja procesa i restarta
      * telefona koju smo već sredile za buđenje.
-     * PRODUŽAVANJE: kao kod Tajmera (extendTimer) - ako se dugo pritisne OPET dok predah VEĆ
+     * PRODUŽAVANJE: kao kod Tajmera (drmanje sad produžava tajmer) - ako se dugo pritisne OPET dok predah VEĆ
      * traje, SABIRA 15 novih minuta na PREOSTALO vreme (ne resetuje na svežih 15). */
     private fun quickShortBreak() {
         if (PlaybackController.isScheduledReadingActive()) {
@@ -618,6 +618,13 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun togglePlayPause(manual: Boolean = true) {
+        if (autoScrollRunnable != null) {
+            // Pusti/Pauziraj zaustavlja "Automatski listaj dokument" i cita OD TE tacke -
+            // tts.isSpeaking je vec false (listanje samo, bez citanja), pa ce nastavak ove
+            // funkcije prirodno upasti u granu "pocni citanje", bas odavde gde je listanje
+            // stalo, bez ikakve dodatne logike.
+            stopAutoScroll()
+        }
         val tts = PlaybackController.ttsManager ?: return
         if (!ttsReady) {
             pendingPlayAfterReady = true
@@ -1466,18 +1473,134 @@ class ReaderActivity : AppCompatActivity() {
         updateTimerStatusText()
     }
 
-    /** Dug pritisak na "Tajmer" - produžava VEĆ AKTIVAN tajmer za tačno onoliko minuta
-     * koliko je poslednji put postavljen, bez ponovnog otvaranja klizača. Radi sve dok
-     * tajmer ne istekne, čak i u poslednjem minutu. */
-    private fun extendTimer() {
-        val minutes = doc?.timerMinutes ?: 0
-        if (PlaybackController.timerRemainingSeconds <= 0 || minutes <= 0) {
-            android.widget.Toast.makeText(this, "Nema tajmera.", android.widget.Toast.LENGTH_SHORT).show()
+    /** "Automatski listaj dokument" - dug pritisak na Tajmer (dug pritisak tog dugmeta je
+     * ranije produžavao tajmer - to sad radi drmanje, pa je ovo mesto oslobođeno za novu
+     * funkciju). Automatski prelistava dokument po izabranoj jedinici (stranica/minut/oznaka/
+     * poglavlje) u izabranom smeru, POČEV od trenutne pozicije (ne od početka) - korisno da
+     * se brzo dobije osećaj o dokumentu bez da se čita naglas ceo tekst. Svaku novu poziciju
+     * izgovara (TalkBack preuzima Toast, isti obrazac kao svuda drugde u app-i). Zaustavlja
+     * se sama kad stigne do kraja/početka dokumenta, ili čim se pritisne Pusti/Pauziraj - tad
+     * se čitanje nastavlja baš odatle gde je listanje stalo, ne od početka. */
+    private fun showAutoScrollDialog() {
+        val unitLabels = listOf("Stranice", "Minuti", "Oznake", "Poglavlja")
+        val unitValues = listOf("page", "minute", "bookmark", "chapter")
+        PickerDialog.show(this, "Automatski listaj dokument", unitLabels, null, autoConfirm = true) { unitIdx ->
+            val dirLabels = listOf("Unapred", "Unazad")
+            // NAMERNO bez autoConfirm ovde (za razliku od izbora jedinice iznad) - ovo je
+            // korak koji stvarno POKREĆE automatsko listanje, zaslužuje eksplicitan pritisak
+            // na Potvrdi ("u redu"), ne samo dodir na stavku.
+            PickerDialog.show(this, "Smer listanja", dirLabels, null) { dirIdx ->
+                startAutoScroll(unitValues[unitIdx], dirIdx == 0)
+            }
+        }
+    }
+
+    private var autoScrollRunnable: Runnable? = null
+    private var autoScrollUnit: String? = null
+    private var autoScrollForward = true
+    private var autoScrollBookmarkOffsets: List<Int> = emptyList()
+
+    private fun startAutoScroll(unit: String, forward: Boolean) {
+        stopAutoScroll()
+        if (unit == "chapter" && parsed?.chapters.isNullOrEmpty()) {
+            android.widget.Toast.makeText(this, "Ovaj dokument nema prepoznata poglavlja.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
-        PlaybackController.extendTimerMinutes(minutes)
-        updateTimerStatusText()
-        android.widget.Toast.makeText(this, "Tajmer produžen za $minutes minuta.", android.widget.Toast.LENGTH_SHORT).show()
+        if (unit == "bookmark") {
+            lifecycleScope.launch {
+                val marks = db.bookmarkDao().getForDocument(documentId).sortedBy { it.characterOffset }.map { it.characterOffset }
+                if (marks.isEmpty()) {
+                    android.widget.Toast.makeText(this@ReaderActivity, "Nema oznaka u ovom dokumentu.", android.widget.Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                autoScrollBookmarkOffsets = marks
+                beginAutoScroll(unit, forward)
+            }
+        } else {
+            beginAutoScroll(unit, forward)
+        }
+    }
+
+    private fun beginAutoScroll(unit: String, forward: Boolean) {
+        autoScrollUnit = unit
+        autoScrollForward = forward
+        android.widget.Toast.makeText(this, "Automatsko listanje počinje.", android.widget.Toast.LENGTH_SHORT).show()
+        scheduleAutoScrollStep(firstDelayMs = 400L)
+    }
+
+    private fun scheduleAutoScrollStep(firstDelayMs: Long = AUTO_SCROLL_STEP_MS) {
+        val runnable = Runnable { performAutoScrollStep() }
+        autoScrollRunnable = runnable
+        handler.postDelayed(runnable, firstDelayMs)
+    }
+
+    private fun performAutoScrollStep() {
+        val unit = autoScrollUnit ?: return
+        val length = parsed?.length ?: 0
+        val current = doc?.currentCharacterOffset ?: 0
+        var newOffset = current
+        var label = ""
+        var reachedEdge: Boolean
+
+        when (unit) {
+            "page" -> {
+                val delta = if (autoScrollForward) charsPerPage else -charsPerPage
+                newOffset = (current + delta).coerceIn(0, max(0, length - 1))
+                reachedEdge = newOffset == current
+                label = "Stranica ${(newOffset / charsPerPage) + 1}."
+            }
+            "minute" -> {
+                val delta = if (autoScrollForward) minutesToChars(1) else -minutesToChars(1)
+                newOffset = (current + delta).coerceIn(0, max(0, length - 1))
+                reachedEdge = newOffset == current
+                val rate = effectiveRate(doc).coerceAtLeast(0.3f)
+                val minuteMark = (newOffset / (baseCharsPerMinute * rate)).toInt()
+                label = "Minut $minuteMark."
+            }
+            "chapter" -> {
+                val chapters = parsed?.chapters ?: emptyList()
+                if (chapters.isEmpty()) {
+                    stopAutoScroll()
+                    return
+                }
+                val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
+                val targetIdx = (idx + if (autoScrollForward) 1 else -1).coerceIn(0, chapters.size - 1)
+                reachedEdge = targetIdx == idx
+                newOffset = chapters[targetIdx].startOffset
+                label = chapters[targetIdx].title.ifBlank { "Poglavlje ${targetIdx + 1}." }
+            }
+            else -> { // "bookmark"
+                val marks = autoScrollBookmarkOffsets
+                if (marks.isEmpty()) {
+                    stopAutoScroll()
+                    return
+                }
+                val idx = marks.indexOfLast { it <= current }.coerceAtLeast(0)
+                val targetIdx = (idx + if (autoScrollForward) 1 else -1).coerceIn(0, marks.size - 1)
+                reachedEdge = targetIdx == idx
+                newOffset = marks[targetIdx]
+                label = "Oznaka ${targetIdx + 1}."
+            }
+        }
+
+        moveTo(newOffset, recordHistory = false)
+        android.widget.Toast.makeText(this, label, android.widget.Toast.LENGTH_SHORT).show()
+
+        if (reachedEdge) {
+            stopAutoScroll()
+            val edgeMsg = if (autoScrollForward) "Kraj dokumenta." else "Početak dokumenta."
+            handler.postDelayed({
+                android.widget.Toast.makeText(this, edgeMsg, android.widget.Toast.LENGTH_SHORT).show()
+            }, 600)
+        } else {
+            scheduleAutoScrollStep()
+        }
+    }
+
+    private fun stopAutoScroll() {
+        autoScrollRunnable?.let { handler.removeCallbacks(it) }
+        autoScrollRunnable = null
+        autoScrollUnit = null
     }
 
     /** "Podseti me": vraća čitanje UNAZAD za izabrani broj minuta, odmah čim potvrdiš -
@@ -1763,6 +1886,7 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        stopAutoScroll()
         PlaybackController.uiPositionListener = null
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
@@ -1781,5 +1905,9 @@ class ReaderActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_DOCUMENT_ID = "extra_document_id"
         const val EXTRA_AUTOPLAY = "extra_autoplay"
+        // Vreme izmedju svake stavke "Automatski listaj dokument" - dovoljno da TalkBack
+        // stigne da izgovori najavu (npr. naziv poglavlja) I da korisnica ima trenutak da
+        // reaguje/pritisne Pusti-Pauziraj pre sledeceg koraka.
+        private const val AUTO_SCROLL_STEP_MS = 3500L
     }
 }

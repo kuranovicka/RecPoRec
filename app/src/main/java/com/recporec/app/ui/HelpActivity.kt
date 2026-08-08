@@ -46,7 +46,7 @@ class HelpActivity : AppCompatActivity() {
         Na dnu tog ekrana je dugme Vrati na zadano.
         Vraća jezik, glas, brzinu, jačinu i visinu na početne vrednosti.
         Druga stavka je Podešavanja.
-        Tu su prekidači za: rad u pozadini, čitanje bez prekida, drmanje telefona za pauzu i nastavak, zvuk dugmadi, pauze između rečenica i pasusa i automatski prelazak na sledeći dokument.
+        Tu su prekidači za: rad u pozadini, čitanje bez prekida, drmanje telefona za produžetak tajmera, zvuk dugmadi, pauze između rečenica i pasusa i automatski prelazak na sledeći dokument.
         Tu je i prekidač Automatski čitaj aktivni dokument.
         Kad ga uključiš, biraš jednu od dve mogućnosti: Pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
         Prva opcija nastavlja čitanje poslednjeg dokumenta, čim otvoriš aplikaciju.
@@ -83,8 +83,14 @@ class HelpActivity : AppCompatActivity() {
         Drugo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
         Treće dugme je Tajmer.
-        Otvara klizač od pet do sto dvadeset minuta za automatski prekid čitanja, a dug pritisak produžava već aktivan tajmer.
+        Otvara klizač od pet do sto dvadeset minuta za automatski prekid čitanja.
         Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
+        Dug pritisak automatski lista dokument.
+        Biraš između stranice, oznaka, poglavlja ili minuta.
+        Zatim odabereš da li dokument listaš unapred ili unazad, pa klikneš na u redu.
+        Tada kreće automatsko listanje.
+        Čitač ekrana te obaveštava gde se trenutno nalaziš.
+        Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         Četvrto dugme je Sledeće poglavlje.
         Vodi na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
         U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.

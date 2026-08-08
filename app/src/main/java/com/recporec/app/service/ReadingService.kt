@@ -115,15 +115,23 @@ class ReadingService : Service() {
                     // dalje trazilo prejak trzaj, ovaj put sece znacajnije, ne po malo
                 }
                 shakeDetector = ShakeDetector(shakeThreshold = threshold) {
-                    val tts = PlaybackController.ttsManager
-                    if (tts != null) {
-                        if (tts.isSpeaking) {
-                            tts.pause()
-                            AppSettings(this).userManuallyPaused = true
-                        } else {
-                            PlaybackController.resumeCancelingRestIfNeeded()
-                        }
+                    // Korisnicka odluka: drmanje vise NE pauzira/nastavlja OBICNO citanje
+                    // (dovoljno je drugih, automatskih nacina pauze) - sad produzava vec
+                    // aktivan Tajmer, isto za koliko minuta i dugme Tajmer (dug pritisak).
+                    // IZUZETAK, namerno zadrzan: ako je budjenje TRENUTNO aktivno (zvoni, ili
+                    // jos samo odbrojava) - drmanje I DALJE prekida budjenje, kao i pre. To je
+                    // bezbednosna, korisna funkcija (fizicki drmni telefon u mraku umesto da
+                    // trazis dugme na zakljucanom ekranu) - RAZLICITA namena od obicne pauze
+                    // tokom citanja, nije diranje.
+                    if (PlaybackController.isRestAlarmRinging() || PlaybackController.restRemainingSeconds > 0) {
+                        PlaybackController.resumeCancelingRestIfNeeded()
                         refreshNotification()
+                    } else {
+                        val minutes = PlaybackController.currentDocument?.timerMinutes ?: 0
+                        if (PlaybackController.timerRemainingSeconds > 0 && minutes > 0) {
+                            PlaybackController.extendTimerMinutes(minutes)
+                            refreshNotification()
+                        }
                     }
                 }
                 sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_GAME)
