@@ -483,29 +483,39 @@ class DocumentListActivity : AppCompatActivity() {
             setText(doc.title)
             setSelection(text.length)
             hint = "Naziv dokumenta"
+            imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         }
         val padding = (16 * resources.displayMetrics.density).toInt()
         val container = android.widget.FrameLayout(this).apply {
             setPadding(padding, padding / 2, padding, 0)
             addView(input)
         }
-        AlertDialog.Builder(this)
+        fun confirm() {
+            // Format (ekstenzija) se cuva ODVOJENO od naziva (doc.format) i ne menja se
+            // ovde - korisnica menja samo prikazani naziv, ne stvarni fajl na disku.
+            val newTitle = input.text?.toString()?.trim().orEmpty()
+            if (newTitle.isEmpty()) {
+                android.widget.Toast.makeText(this, "Naziv ne može biti prazan.", android.widget.Toast.LENGTH_SHORT).show()
+                return
+            }
+            lifecycleScope.launch {
+                db.documentDao().update(doc.copy(title = newTitle))
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Preimenuj")
             .setView(container)
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
-            .setPositiveButton("Sačuvaj") { _, _ ->
-                // Format (ekstenzija) se cuva ODVOJENO od naziva (doc.format) i ne menja se
-                // ovde - korisnica menja samo prikazani naziv, ne stvarni fajl na disku.
-                val newTitle = input.text?.toString()?.trim().orEmpty()
-                if (newTitle.isEmpty()) {
-                    android.widget.Toast.makeText(this, "Naziv ne može biti prazan.", android.widget.Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                lifecycleScope.launch {
-                    db.documentDao().update(doc.copy(title = newTitle))
-                }
-            }
-            .show()
+            .setPositiveButton("Sačuvaj") { _, _ -> confirm() }
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     private fun moveDocument(doc: DocumentEntity, up: Boolean) {

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -681,19 +682,32 @@ class ReaderActivity : AppCompatActivity() {
     private fun showGotoMinuteDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
         input.hint = "Broj minuta od početka"
         input.contentDescription = "Broj minuta od početka dokumenta"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val minute = input.text.toString().toIntOrNull() ?: return
+            val length = parsed?.length ?: return
+            val offset = minutesToChars(minute).coerceIn(0, max(0, length - 1))
+            moveTo(offset)
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Unesi broj minuta od početka")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val minute = input.text.toString().toIntOrNull() ?: return@setPositiveButton
-                val length = parsed?.length ?: return@setPositiveButton
-                val offset = minutesToChars(minute).coerceIn(0, max(0, length - 1))
-                moveTo(offset)
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        // Tastatura ima svoje dugme "Idi" - odmah potvrđuje, bez potrebe da se posle
+        // dodatno traži i dodirne posebno dugme OK. Ne uklanja to dugme, samo dodaje
+        // preči put za nekoga ko već dira tastaturu.
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     private fun goToPercent(percent: Int) {
@@ -892,20 +906,30 @@ class ReaderActivity : AppCompatActivity() {
     private fun showSearchTextDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
+        input.imeOptions = EditorInfo.IME_ACTION_SEARCH
         input.hint = "Pojam za pretragu"
         input.contentDescription = "Pojam koji tražiš u dokumentu"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val query = input.text.toString().trim()
+            if (query.isNotEmpty()) {
+                lastSearchQuery = query
+                performTextSearch(query)
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Pretraži tekst")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val query = input.text.toString().trim()
-                if (query.isNotEmpty()) {
-                    lastSearchQuery = query
-                    performTextSearch(query)
-                }
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     /** Dug pritisak na "Pretraga" - ponovo pokreće POSLEDNJU pretragu, sa istim spiskom
@@ -1007,37 +1031,47 @@ class ReaderActivity : AppCompatActivity() {
     private fun showAddBookmarkDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
+        input.imeOptions = EditorInfo.IME_ACTION_DONE
         input.hint = "Naziv oznake (nije obavezno)"
         input.contentDescription = "Naziv nove oznake, nije obavezno - ako ostane prazno, dobija broj"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val currentDocId = documentId
+            val offset = doc?.currentCharacterOffset ?: 0
+            val typedName = input.text.toString().trim()
+            lifecycleScope.launch {
+                val name = if (typedName.isNotEmpty()) {
+                    typedName
+                } else {
+                    val count = db.bookmarkDao().countForDocument(currentDocId)
+                    (count + 1).toString()
+                }
+                db.bookmarkDao().insert(
+                    com.recporec.app.data.BookmarkEntity(
+                        documentId = currentDocId,
+                        name = name,
+                        characterOffset = offset
+                    )
+                )
+                android.widget.Toast.makeText(
+                    this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Dodaj oznaku")
             .setMessage("Postavlja se oznaka na mesto na kome se trenutno nalaziš.")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val currentDocId = documentId
-                val offset = doc?.currentCharacterOffset ?: 0
-                val typedName = input.text.toString().trim()
-                lifecycleScope.launch {
-                    val name = if (typedName.isNotEmpty()) {
-                        typedName
-                    } else {
-                        val count = db.bookmarkDao().countForDocument(currentDocId)
-                        (count + 1).toString()
-                    }
-                    db.bookmarkDao().insert(
-                        com.recporec.app.data.BookmarkEntity(
-                            documentId = currentDocId,
-                            name = name,
-                            characterOffset = offset
-                        )
-                    )
-                    android.widget.Toast.makeText(
-                        this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     private fun showRemoveBookmarkDialog() {
@@ -1117,20 +1151,30 @@ class ReaderActivity : AppCompatActivity() {
     private fun showGotoPageDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
         input.hint = "Broj stranice"
         input.contentDescription = "Broj stranice na koju treba preći"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val page = input.text.toString().toIntOrNull() ?: return
+            val totalPages = doc?.totalPages ?: 1
+            val safePage = page.coerceIn(1, max(1, totalPages))
+            val offset = (safePage - 1) * charsPerPage
+            moveTo(offset.coerceIn(0, max(0, (parsed?.length ?: 1) - 1)))
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.goto_page_title)
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val page = input.text.toString().toIntOrNull() ?: return@setPositiveButton
-                val totalPages = doc?.totalPages ?: 1
-                val safePage = page.coerceIn(1, max(1, totalPages))
-                val offset = (safePage - 1) * charsPerPage
-                moveTo(offset.coerceIn(0, max(0, (parsed?.length ?: 1) - 1)))
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     private fun jumpChapter(direction: Int) {
@@ -1378,9 +1422,23 @@ class ReaderActivity : AppCompatActivity() {
     private fun showScheduleReadingDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
+        input.imeOptions = EditorInfo.IME_ACTION_DONE
         input.hint = "npr. 5:20"
         input.contentDescription = "Zakaži čitanje u - upiši vreme u formi sat:minut, na primer 5:20"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val timeInput = input.text.toString().trim()
+            val seconds = parseWakeTimeToSecondsFromNow(timeInput)
+            if (seconds == null) {
+                android.widget.Toast.makeText(
+                    this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
+                ).show()
+            } else {
+                PlaybackController.startScheduledReading(seconds)
+                updateRestStatusText()
+                android.widget.Toast.makeText(this, "Čitanje je zakazano.", android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Zakaži čitanje")
             .setView(input)
             .setNegativeButton(R.string.cancel, null)
@@ -1389,20 +1447,19 @@ class ReaderActivity : AppCompatActivity() {
                 updateRestStatusText()
                 android.widget.Toast.makeText(this, "Zakazano čitanje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
             }
-            .setPositiveButton("Postavi") { _, _ ->
-                val timeInput = input.text.toString().trim()
-                val seconds = parseWakeTimeToSecondsFromNow(timeInput)
-                if (seconds == null) {
-                    android.widget.Toast.makeText(
-                        this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    PlaybackController.startScheduledReading(seconds)
-                    updateRestStatusText()
-                    android.widget.Toast.makeText(this, "Čitanje je zakazano.", android.widget.Toast.LENGTH_LONG).show()
-                }
-            }
-            .show()
+            .setPositiveButton("Postavi") { _, _ -> confirm() }
+            .create()
+        // Tastatura ne moze da "zna" da li korisnica hoce Postavi ili Iskljuci (to drugo nema
+        // sta da se upise) - dugme na tastaturi zato radi ISTO sto i Postavi, pretpostavljeno
+        // najcesce namera kad se nesto vec upisuje.
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     /** Dug pritisak na "Probudi" - "Probudi me u": upišeš tačno vreme, npr. 5:20. Potpuno
@@ -1410,26 +1467,36 @@ class ReaderActivity : AppCompatActivity() {
     private fun showWakeUpDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
+        input.imeOptions = EditorInfo.IME_ACTION_DONE
         input.hint = "npr. 5:20"
         input.contentDescription = "Probudi me u - upiši vreme u formi sat:minut, na primer 5:20"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val wakeInput = input.text.toString().trim()
+            val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
+            if (seconds == null) {
+                android.widget.Toast.makeText(
+                    this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
+                ).show()
+            } else {
+                PlaybackController.startRestUntil(seconds)
+                updateRestStatusText()
+                android.widget.Toast.makeText(this, "Buđenje je postavljeno.", android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Probudi me")
             .setView(input)
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val wakeInput = input.text.toString().trim()
-                val seconds = parseWakeTimeToSecondsFromNow(wakeInput)
-                if (seconds == null) {
-                    android.widget.Toast.makeText(
-                        this, "Neispravno vreme. Upiši u formi sat:minut, na primer 5:20.", android.widget.Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    PlaybackController.startRestUntil(seconds)
-                    updateRestStatusText()
-                    android.widget.Toast.makeText(this, "Buđenje je postavljeno.", android.widget.Toast.LENGTH_LONG).show()
-                }
-            }
-            .show()
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     /** Dug pritisak na "Probudi" - "Isključi buđenje": prekida SAMO buđenje ("Probudi me u"),

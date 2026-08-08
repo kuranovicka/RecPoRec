@@ -270,21 +270,31 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private fun showSentenceCountDialog() {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         input.hint = "Broj rečenica po glasu"
         input.contentDescription = "Broj rečenica koje svaki glas pročita pre nego što se smeni sledeći"
-        AlertDialog.Builder(this)
+        fun confirm() {
+            val count = input.text.toString().trim().toIntOrNull()?.coerceAtLeast(1) ?: 1
+            lifecycleScope.launch {
+                db.combinedVoiceDao().setSettings(CombinedVoiceSettingsEntity(scopeId = scopeId, sentencesPerVoice = count))
+                refreshStatusTexts()
+            }
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Broj rečenica po glasu")
             .setMessage("Svaki glas čita podjednak broj rečenica pre smene. Ako ostaviš prazno, svaki glas čita po jednu rečenicu.")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val count = input.text.toString().trim().toIntOrNull()?.coerceAtLeast(1) ?: 1
-                lifecycleScope.launch {
-                    db.combinedVoiceDao().setSettings(CombinedVoiceSettingsEntity(scopeId = scopeId, sentencesPerVoice = count))
-                    refreshStatusTexts()
-                }
-            }
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     private fun refreshStatusTexts() {
