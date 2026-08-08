@@ -12,3 +12,4 @@
 10. I meni najbitnije, sad dva prsta napokon pauziraju i nastavljaju čitanje.
 11. Pošto smo omogućili pauzu i nastavak čitanja sa dva prsta, više nema potrebe za sto načina ove i one pauze, tj. za drmanjem telefona zbog pauze i nastavka. Zato sada drmanje telefona, ako ga uključimo u podešavanjima, produžava tajmer, kao u smart audio book playeru.
 12. Umesto produžetka tajmera, na tom dugmetu imamo automatsko listanje dokumenta. Biramo: po stranicama, oznakama, minutima ili poglavljima ako ih ima. Biramo unapred ili unazad. Listanje zaustavljamo dugmetom play-pauza.
+13. Sitne popravke oko zvuka dugmadi, tajmera i automatskog listanja dokumenta.

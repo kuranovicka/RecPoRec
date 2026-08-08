@@ -12,3 +12,4 @@ What's new in RečPoReč 10.0?
 10. Most importantly, two-finger tap on screen finally pauses and resumes reading too.
 11. Since two-finger pause/resume is now available, there's no longer a need for yet another way to pause - shaking the phone. So now, if enabled in settings, shaking the phone extends the timer instead, just like in a smart audiobook player.
 12. In place of extending the timer, that same button (long-press) now offers auto-scrolling through the document. Choose by pages, bookmarks, minutes, or chapters (if any). Choose forward or backward. Stop scrolling with the play/pause button.
+13. Small fixes around button sound feedback, the timer, and document auto-scrolling.
