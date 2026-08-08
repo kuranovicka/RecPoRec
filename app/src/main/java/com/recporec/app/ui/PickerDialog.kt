@@ -50,6 +50,11 @@ object PickerDialog {
         textStatus.text = if (currentLabel != null) "Trenutno: $currentLabel" else "Nije izabrano"
         if (autoConfirm) {
             btnConfirm.visibility = android.view.View.GONE
+            // Ovaj status tekst je namenjen "izaberi, pa potvrdi" dvokoraku - kad se bira
+            // JEDNIM dodirom (autoConfirm), nema takvog medjukoraka, pa je ovaj tekst tu samo
+            // suvisan (izgledao je kao nepopunjena, neimenovana stavka liste - korisnicka
+            // primedba).
+            textStatus.visibility = android.view.View.GONE
         }
 
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_single_choice, items.toMutableList())
