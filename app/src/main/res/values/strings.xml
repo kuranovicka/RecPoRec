@@ -15,7 +15,7 @@
     <!-- Čitač - dugmad -->
     <string name="btn_prev_chapter">Prethodno poglavlje. Dug pritisak: ponovi trenutno poglavlje.</string>
     <string name="btn_next_chapter">Sledeće poglavlje. Dug pritisak: spisak svih poglavlja.</string>
-    <string name="btn_timer">Tajmer za automatsku pauzu. Dug pritisak: automatski listaj dokument.</string>
+    <string name="btn_timer">Tajmer za automatsku pauzu. Dug pritisak: isključi tajmer.</string>
     <string name="btn_vol_down">Smanji jačinu zvuka. Dug pritisak: vrati jačinu na opštu.</string>
     <string name="btn_vol_up">Pojačaj zvuk. Dug pritisak: vrati jačinu na opštu.</string>
     <string name="btn_voice">Izbor glasa. Dug pritisak: Zakaži čitanje.</string>

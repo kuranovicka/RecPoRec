@@ -85,12 +85,7 @@ class HelpActivity : AppCompatActivity() {
         Treće dugme je Tajmer.
         Otvara klizač od pet do sto dvadeset minuta za automatski prekid čitanja.
         Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
-        Dug pritisak automatski lista dokument.
-        Biraš između stranice, oznaka, poglavlja ili minuta.
-        Zatim odabereš da li dokument listaš unapred ili unazad.
-        Tada kreće automatsko listanje.
-        Čitač ekrana te obaveštava gde se trenutno nalaziš.
-        Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
+        Dug pritisak isključuje tajmer.
         Četvrto dugme je Sledeće poglavlje.
         Vodi na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
         U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.
@@ -104,7 +99,12 @@ class HelpActivity : AppCompatActivity() {
         Statusna linija tada pokazuje za koliko sati i minuta je čitanje zakazano.
         Ako pustiš knjigu ranije, zakazano čitanje se prekida.
         Četvrto dugme je Kombinovani glasovi, samo za ovaj dokument.
-        Dug pritisak isključuje tajmer.
+        Dug pritisak automatski lista dokument.
+        Biraš između stranice, oznaka, poglavlja ili minuta.
+        Zatim odabereš da li dokument listaš unapred ili unazad, pa klikneš na u redu.
+        Tada kreće automatsko listanje.
+        Čitač ekrana te obaveštava gde se trenutno nalaziš.
+        Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
         Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
         Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.

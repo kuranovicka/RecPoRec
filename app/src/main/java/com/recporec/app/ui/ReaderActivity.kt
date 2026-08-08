@@ -210,7 +210,7 @@ class ReaderActivity : AppCompatActivity() {
         btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
-        btnTimer.setOnLongClickListener { showAutoScrollDialog(); true }
+        btnTimer.setOnLongClickListener { turnOffTimer(); true }
 
         btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
         btnDocLanguage.setOnLongClickListener { undoAllJumps(); true }
@@ -223,7 +223,7 @@ class ReaderActivity : AppCompatActivity() {
                     .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
             )
         })
-        btnCombinedVoices.setOnLongClickListener { turnOffTimer(); true }
+        btnCombinedVoices.setOnLongClickListener { showAutoScrollDialog(); true }
         btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
         btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
@@ -1385,7 +1385,6 @@ class ReaderActivity : AppCompatActivity() {
             .setTitle("Tajmer")
             .setView(view)
             .setNegativeButton(R.string.cancel, null)
-            .setNeutralButton("Isključi") { _, _ -> setTimer(0) }
             .setPositiveButton("Postavi") { _, _ -> setTimer(minutesFor(seek.progress)) }
             .show()
         seek.requestAccessibilityFocusNow()
@@ -1540,9 +1539,9 @@ class ReaderActivity : AppCompatActivity() {
         updateTimerStatusText()
     }
 
-    /** "Automatski listaj dokument" - dug pritisak na Tajmer (dug pritisak tog dugmeta je
-     * ranije produžavao tajmer - to sad radi drmanje, pa je ovo mesto oslobođeno za novu
-     * funkciju). Automatski prelistava dokument po izabranoj jedinici (stranica/minut/oznaka/
+    /** "Automatski listaj dokument" - dug pritisak na Kombinovani glasovi (logičnije mesto -
+     * dug pritisak na Tajmer je sad "Isključi tajmer", a ovo je bilo tamo pre preraspodele).
+     * Automatski prelistava dokument po izabranoj jedinici (stranica/minut/oznaka/
      * poglavlje) u izabranom smeru, POČEV od trenutne pozicije (ne od početka) - korisno da
      * se brzo dobije osećaj o dokumentu bez da se čita naglas ceo tekst. Svaku novu poziciju
      * izgovara (TalkBack preuzima Toast, isti obrazac kao svuda drugde u app-i). Zaustavlja
