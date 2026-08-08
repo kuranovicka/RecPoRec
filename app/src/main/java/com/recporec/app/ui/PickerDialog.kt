@@ -26,6 +26,7 @@ object PickerDialog {
         currentLabel: String?,
         onSelectionPreview: ((Int) -> Unit)? = null,
         autoConfirm: Boolean = false,
+        showSearch: Boolean = true,
         onConfirmed: (Int) -> Unit
     ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_picker, null)
@@ -34,6 +35,13 @@ object PickerDialog {
         val textStatus = view.findViewById<TextView>(R.id.textConfirmStatus)
         val btnCancel = view.findViewById<Button>(R.id.btnCancel)
         val btnConfirm = view.findViewById<Button>(R.id.btnConfirm)
+
+        // Za kratke liste (npr. 4 stavke kod "Automatski listaj dokument") polje za
+        // pretragu/filter je suvišno - korisnicka primedba. Podrazumevano OSTAJE prikazano
+        // (nepromenjeno za jezik/glas i sve ostale duge liste).
+        if (!showSearch) {
+            editSearch.visibility = android.view.View.GONE
+        }
 
         // originalni indeksi za mapiranje filtrirane liste nazad na pravi izbor
         var visibleIndices = items.indices.toList()

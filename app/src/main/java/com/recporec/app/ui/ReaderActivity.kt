@@ -1550,11 +1550,11 @@ class ReaderActivity : AppCompatActivity() {
     private fun showAutoScrollDialog() {
         val unitLabels = listOf("Stranice", "Minuti", "Oznake", "Poglavlja")
         val unitValues = listOf("page", "minute", "bookmark", "chapter")
-        PickerDialog.show(this, "Automatski listaj dokument", unitLabels, null, autoConfirm = true) { unitIdx ->
+        PickerDialog.show(this, "Automatski listaj dokument", unitLabels, null, autoConfirm = true, showSearch = false) { unitIdx ->
             val dirLabels = listOf("Unapred", "Unazad")
             // Korisnicki zahtev: bez posebnog koraka potvrde ovde - jedan dodir na smer
             // odmah pokrece automatsko listanje, isto kao izbor jedinice iznad.
-            PickerDialog.show(this, "Smer listanja", dirLabels, null, autoConfirm = true) { dirIdx ->
+            PickerDialog.show(this, "Smer listanja", dirLabels, null, autoConfirm = true, showSearch = false) { dirIdx ->
                 startAutoScroll(unitValues[unitIdx], dirIdx == 0)
             }
         }
