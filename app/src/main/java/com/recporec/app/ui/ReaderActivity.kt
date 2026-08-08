@@ -1591,6 +1591,30 @@ class ReaderActivity : AppCompatActivity() {
         autoScrollForward = forward
         android.widget.Toast.makeText(this, "Automatsko listanje počinje.", android.widget.Toast.LENGTH_SHORT).show()
         scheduleAutoScrollStep(firstDelayMs = 400L)
+        startAutoScrollWatchdog()
+    }
+
+    private var autoScrollWatchdog: Runnable? = null
+
+    /** Zaustavljanje preko dodira na Pusti/Pauziraj je vec pokriveno direktno u
+     * togglePlayPause() - ali citanje moze da krene i na DRUGI nacin dok listanje traje
+     * (dva prsta, medijski taster na tastaturi, dodir na Bluetooth slusalicama) - te putanje
+     * ne prolaze kroz togglePlayPause() uopste. Ovaj "cuvar" proverava svakih 400ms da li je
+     * citanje POCELO NA BILO KOJI NACIN, i ako jeste, odmah zaustavlja listanje - da se ne bi
+     * nastavilo u pozadini dok se knjiga vec cita (korisnicka prijava). */
+    private fun startAutoScrollWatchdog() {
+        val runnable = object : Runnable {
+            override fun run() {
+                if (autoScrollUnit == null) return // vec zaustavljeno na neki drugi nacin
+                if (PlaybackController.ttsManager?.isSpeaking == true) {
+                    stopAutoScroll()
+                    return
+                }
+                handler.postDelayed(this, 400L)
+            }
+        }
+        autoScrollWatchdog = runnable
+        handler.postDelayed(runnable, 400L)
     }
 
     private fun scheduleAutoScrollStep(firstDelayMs: Long = AUTO_SCROLL_STEP_MS) {
@@ -1665,6 +1689,8 @@ class ReaderActivity : AppCompatActivity() {
     private fun stopAutoScroll() {
         autoScrollRunnable?.let { handler.removeCallbacks(it) }
         autoScrollRunnable = null
+        autoScrollWatchdog?.let { handler.removeCallbacks(it) }
+        autoScrollWatchdog = null
         autoScrollUnit = null
     }
 

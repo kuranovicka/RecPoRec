@@ -48,9 +48,8 @@ class HelpActivity : AppCompatActivity() {
         Druga stavka je Podešavanja.
         Tu su prekidači za: rad u pozadini, čitanje bez prekida, drmanje telefona za produžetak tajmera, zvuk dugmadi, pauze između rečenica i pasusa i automatski prelazak na sledeći dokument.
         Tu je i prekidač Automatski čitaj aktivni dokument.
-        Kad ga uključiš, biraš jednu od dve mogućnosti: Pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
-        Prva opcija nastavlja čitanje poslednjeg dokumenta, čim otvoriš aplikaciju.
-        Druga opcija počinje čitanje čim otvoriš bilo koji dokument.
+        Kad ga uključiš, biraš jednu od dve mogućnosti:
+        Automatsko čitanje pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, ili oznaku.
         Tu su i dugmad Izvezi podešavanja u fajl, i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
@@ -60,7 +59,6 @@ class HelpActivity : AppCompatActivity() {
         Vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Dug pritisak na bilo koji dokument otvara opcije: premesti nagore, premesti nadole, preimenuj i obriši.
         Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
@@ -69,17 +67,19 @@ class HelpActivity : AppCompatActivity() {
         Vodi na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
         Treće dugme je Probudi me u tačno vreme.
         Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
-        Statusna linija pri vrhu ekrana tada pokazuje koliko je u satima i minutima ostalo do buđenja.
         Kad dođe vreme za buđenje, alarm zvoni jedan minut.
         Na zaključanom ekranu se tada pojave dva dugmeta.
         Knjiga se nastavlja samo ako aktiviraš dugme Prekini buđenje.
         Ako ne reaguješ, ili aktiviraš dugme Spavaj još malo, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
         Ako u međuvremenu pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
         Dug pritisak isključuje buđenje.
+        Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
+        Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
+        Ponovno pokretanje pamti samo gde nastavljaš knjigu.
         Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
-        Dug pritisak na bilo koje od njih vraća visinu na opštu vrednost.
+        Dug pritisak na bilo koje od njih, vraća visinu na opštu vrednost.
         Drugo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
         Treće dugme je Tajmer.
@@ -91,24 +91,20 @@ class HelpActivity : AppCompatActivity() {
         U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.
         Jačina, kao i dug pritisak koji je vraća na opštu vrednost, važe samo za ovaj dokument.
         Drugo dugme je Jezik.
-        Menja jezik za ovaj dokument, a dug pritisak poništava sve tvoje radnje: na primer, vraćanje unazad, ili odlazak na stranicu.
+        Menja jezik za ovaj dokument, a dug pritisak poništava sve prethodne radnje.
         Treće dugme je Glas.
         Menja glas za ovaj dokument, a dug pritisak otvara Zakaži čitanje.
         Upišeš tačno vreme, na primer 5:20.
-        Čitanje tada tiho krene, bez alarma i bez punog ekrana, kao da ručno pritisneš Play.
-        Statusna linija tada pokazuje za koliko sati i minuta je čitanje zakazano.
+        Čitanje tada tiho krene, bez alarma i bez punog ekrana.
         Ako pustiš knjigu ranije, zakazano čitanje se prekida.
         Četvrto dugme je Kombinovani glasovi, samo za ovaj dokument.
+        Tu možeš dodati još jedan glas ili jezik, a najviše dva glasa ti mogu čitati knjigu.
         Dug pritisak automatski lista dokument.
         Biraš između stranice, oznaka, poglavlja ili minuta.
-        Zatim odabereš da li dokument listaš unapred ili unazad, pa klikneš na u redu.
+        Zatim odabereš da li dokument listaš unapred ili unazad.
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
-        Funkcija buđenja i zakazivanja radi pouzdanije ako u Podešavanjima uključiš čitanje bez prekida.
-        Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
-        Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
-        Ponovno pokretanje pamti samo gde nastavljaš knjigu.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
         Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
