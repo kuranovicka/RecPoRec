@@ -1486,10 +1486,9 @@ class ReaderActivity : AppCompatActivity() {
         val unitValues = listOf("page", "minute", "bookmark", "chapter")
         PickerDialog.show(this, "Automatski listaj dokument", unitLabels, null, autoConfirm = true) { unitIdx ->
             val dirLabels = listOf("Unapred", "Unazad")
-            // NAMERNO bez autoConfirm ovde (za razliku od izbora jedinice iznad) - ovo je
-            // korak koji stvarno POKREĆE automatsko listanje, zaslužuje eksplicitan pritisak
-            // na Potvrdi ("u redu"), ne samo dodir na stavku.
-            PickerDialog.show(this, "Smer listanja", dirLabels, null) { dirIdx ->
+            // Korisnicki zahtev: bez posebnog koraka potvrde ovde - jedan dodir na smer
+            // odmah pokrece automatsko listanje, isto kao izbor jedinice iznad.
+            PickerDialog.show(this, "Smer listanja", dirLabels, null, autoConfirm = true) { dirIdx ->
                 startAutoScroll(unitValues[unitIdx], dirIdx == 0)
             }
         }

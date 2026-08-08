@@ -115,23 +115,15 @@ class ReadingService : Service() {
                     // dalje trazilo prejak trzaj, ovaj put sece znacajnije, ne po malo
                 }
                 shakeDetector = ShakeDetector(shakeThreshold = threshold) {
-                    // Korisnicka odluka: drmanje vise NE pauzira/nastavlja OBICNO citanje
-                    // (dovoljno je drugih, automatskih nacina pauze) - sad produzava vec
-                    // aktivan Tajmer, isto za koliko minuta i dugme Tajmer (dug pritisak).
-                    // IZUZETAK, namerno zadrzan: ako je budjenje TRENUTNO aktivno (zvoni, ili
-                    // jos samo odbrojava) - drmanje I DALJE prekida budjenje, kao i pre. To je
-                    // bezbednosna, korisna funkcija (fizicki drmni telefon u mraku umesto da
-                    // trazis dugme na zakljucanom ekranu) - RAZLICITA namena od obicne pauze
-                    // tokom citanja, nije diranje.
-                    if (PlaybackController.isRestAlarmRinging() || PlaybackController.restRemainingSeconds > 0) {
-                        PlaybackController.resumeCancelingRestIfNeeded()
+                    // Drmanje produzava vec aktivan Tajmer, isto za koliko minuta i dugme
+                    // Tajmer (dug pritisak). Vise NAMERNO ne dira budjenje uopste (korisnicka
+                    // odluka - budjenje vec ima velika, jasna dugmad na zakljucanom ekranu za
+                    // to, drmanje tu vise nije potrebno).
+                    val minutes = PlaybackController.currentDocument?.timerMinutes ?: 0
+                    if (PlaybackController.timerRemainingSeconds > 0 && minutes > 0) {
+                        PlaybackController.extendTimerMinutes(minutes)
                         refreshNotification()
-                    } else {
-                        val minutes = PlaybackController.currentDocument?.timerMinutes ?: 0
-                        if (PlaybackController.timerRemainingSeconds > 0 && minutes > 0) {
-                            PlaybackController.extendTimerMinutes(minutes)
-                            refreshNotification()
-                        }
+                        android.widget.Toast.makeText(this, "Tajmer produžen.", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
                 sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_GAME)

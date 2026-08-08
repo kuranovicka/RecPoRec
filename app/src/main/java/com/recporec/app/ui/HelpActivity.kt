@@ -74,7 +74,7 @@ class HelpActivity : AppCompatActivity() {
         Na zaključanom ekranu se tada pojave dva dugmeta.
         Knjiga se nastavlja samo ako aktiviraš dugme Prekini buđenje.
         Ako ne reaguješ, ili aktiviraš dugme Spavaj još malo, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
-        Ako u međuvremenu drmneš telefon, ili pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
+        Ako u međuvremenu pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
         Dug pritisak isključuje buđenje.
         Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
@@ -87,7 +87,7 @@ class HelpActivity : AppCompatActivity() {
         Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
         Dug pritisak automatski lista dokument.
         Biraš između stranice, oznaka, poglavlja ili minuta.
-        Zatim odabereš da li dokument listaš unapred ili unazad, pa klikneš na u redu.
+        Zatim odabereš da li dokument listaš unapred ili unazad.
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
