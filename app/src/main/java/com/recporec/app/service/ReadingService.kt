@@ -28,6 +28,7 @@ class ReadingService : Service() {
     // stanje (to je pravilo problema sa TalkBack-om ranije) - čisto senzor -> toggle.
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
+    private var shakeToneGenerator: android.media.ToneGenerator? = null
 
     // Rezervni, DIREKTAN mehanizam za pauzu pri pozivu - odvojen od audio fokusa (koji se na
     // nekim uredjajima pokazao nepouzdanim, vidi TtsManager.pauseForCall/resumeForCall).
@@ -124,6 +125,18 @@ class ReadingService : Service() {
                         PlaybackController.extendTimerMinutes(minutes)
                         refreshNotification()
                         android.widget.Toast.makeText(this, "Tajmer produžen.", android.widget.Toast.LENGTH_SHORT).show()
+                        // Isti "zvuk dugmadi" kao svuda drugde (podleze istom prekidacu u
+                        // Podesavanjima) - korisnicka zelja: potvrda da je senzor STVARNO
+                        // reagovao, bez potrebe da se gleda ili trazi dugme za potvrdu.
+                        if (settings.soundFeedbackEnabled) {
+                            try {
+                                if (shakeToneGenerator == null) {
+                                    shakeToneGenerator = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+                                }
+                                shakeToneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+                            } catch (_: Exception) {
+                            }
+                        }
                     }
                 }
                 sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_GAME)
@@ -387,6 +400,7 @@ class ReadingService : Service() {
     override fun onDestroy() {
         PlaybackController.playbackStateListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
+        shakeToneGenerator?.release()
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()
