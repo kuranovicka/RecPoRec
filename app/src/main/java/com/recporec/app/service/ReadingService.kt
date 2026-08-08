@@ -28,7 +28,7 @@ class ReadingService : Service() {
     // stanje (to je pravilo problema sa TalkBack-om ranije) - čisto senzor -> toggle.
     private var sensorManager: SensorManager? = null
     private var shakeDetector: ShakeDetector? = null
-    private var shakeToneGenerator: android.media.ToneGenerator? = null
+    private var serviceToneGenerator: android.media.ToneGenerator? = null
 
     // Rezervni, DIREKTAN mehanizam za pauzu pri pozivu - odvojen od audio fokusa (koji se na
     // nekim uredjajima pokazao nepouzdanim, vidi TtsManager.pauseForCall/resumeForCall).
@@ -68,6 +68,10 @@ class ReadingService : Service() {
                         // prema stvarnom. Prijava korisnika: "nastavak citanja nakon pauze
                         // ne funkcionise" na spoljnoj tastaturi - ovo je pravi uzrok.
                         PlaybackController.notifyPlaybackStateChanged()
+                        // Isti "zvuk dugmadi" kao dodir na Pusti/Pauziraj u citacu - do sad je
+                        // POSTOJAO samo za dodir na ekranu, ne i za dva prsta/tastaturu/
+                        // slusalice (korisnicka primedba: "nema zvuka kod nastavka").
+                        playServiceClickSound()
                     }
                 }
                 override fun onPause() {
@@ -77,6 +81,7 @@ class ReadingService : Service() {
                         // Isti razlog kao gore - prijavi NOVO (pauzirano) stanje odmah, ne
                         // cekaj da nesto drugo to uradi.
                         PlaybackController.notifyPlaybackStateChanged()
+                        playServiceClickSound()
                     }
                 }
                 // Neki uredjaji (posebno spoljne tastature) imaju POSEBAN taster "Stop",
@@ -87,6 +92,7 @@ class ReadingService : Service() {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
                         PlaybackController.notifyPlaybackStateChanged()
+                        playServiceClickSound()
                     }
                 }
                 // Tasteri za premotavanje na slušalicama/spoljnoj tastaturi - standardni
@@ -100,6 +106,22 @@ class ReadingService : Service() {
             isActive = true
         }
         PlaybackController.playbackStateListener = { refreshNotification() }
+    }
+
+    /** Isti "zvuk dugmadi" koji koristi i sam čitač (ReaderActivity.playClickSound) - podleže
+     * istom prekidaču "Zvuk" u Podešavanjima. Ovde, u servisu, koristi se za potvrdu radnji
+     * koje NE prolaze kroz dodir na ekranu (dva prsta, medijski tasteri, drmanje) - bez ovoga,
+     * korisnica nema nikakvu zvučnu potvrdu da je komanda stvarno primljena kad ne gleda u
+     * telefon. */
+    private fun playServiceClickSound() {
+        if (!AppSettings(this).soundFeedbackEnabled) return
+        try {
+            if (serviceToneGenerator == null) {
+                serviceToneGenerator = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+            }
+            serviceToneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+        } catch (_: Exception) {
+        }
     }
 
     private fun setupShakeDetector() {
@@ -125,18 +147,7 @@ class ReadingService : Service() {
                         PlaybackController.extendTimerMinutes(minutes)
                         refreshNotification()
                         android.widget.Toast.makeText(this, "Tajmer produžen za $minutes minuta.", android.widget.Toast.LENGTH_SHORT).show()
-                        // Isti "zvuk dugmadi" kao svuda drugde (podleze istom prekidacu u
-                        // Podesavanjima) - korisnicka zelja: potvrda da je senzor STVARNO
-                        // reagovao, bez potrebe da se gleda ili trazi dugme za potvrdu.
-                        if (settings.soundFeedbackEnabled) {
-                            try {
-                                if (shakeToneGenerator == null) {
-                                    shakeToneGenerator = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
-                                }
-                                shakeToneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
-                            } catch (_: Exception) {
-                            }
-                        }
+                        playServiceClickSound()
                     }
                 }
                 sensorManager?.registerListener(shakeDetector, accel, SensorManager.SENSOR_DELAY_GAME)
@@ -400,7 +411,7 @@ class ReadingService : Service() {
     override fun onDestroy() {
         PlaybackController.playbackStateListener = null
         shakeDetector?.let { sensorManager?.unregisterListener(it) }
-        shakeToneGenerator?.release()
+        serviceToneGenerator?.release()
         wakeLock?.let { if (it.isHeld) it.release() }
         wifiLock?.let { if (it.isHeld) it.release() }
         mediaSession?.release()
