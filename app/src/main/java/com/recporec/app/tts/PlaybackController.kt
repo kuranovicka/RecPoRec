@@ -446,6 +446,16 @@ object PlaybackController {
         } else {
             ttsManager?.resume()
         }
+        // KRITICNO, CENTRALIZOVANO OVDE (ne kod svakog pozivaoca): bez ovoga MediaSession
+        // ostaje "zaglavljena" na starom stanju dok neka DRUGA, rucna akcija (npr. dodir na
+        // dugme u citacu) to prvi put ne osvezi - objasnjava prijave da dvoprst/slusalice ne
+        // rade odmah posle drmanja, budjenja, ili dugmeta "Prekini budjenje", ali PROORADE
+        // cim se JEDNOM rucno pauzira/nastavi preko dugmeta (koje ovo vec ispravno radi).
+        // Stavljeno OVDE, unutar deljene funkcije, umesto kod svakog pojedinacnog pozivaoca -
+        // sada su svi pozivaoci (drmanje, medijski taster, "Prekini budjenje", ponovni
+        // pokusaj posle hladnog starta) automatski pokriveni, bez oslanjanja da svaki od njih
+        // to setno ne zaboravi.
+        notifyPlaybackStateChanged()
         return shouldCancel
     }
 
@@ -776,6 +786,17 @@ object PlaybackController {
             if (combined != null) tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice) else tts.setCombinedVoices(emptyList(), 1)
             if (autoPlay) {
                 tts.startFromOffset(finalEntity.currentCharacterOffset)
+                // KRITICNO: ovaj put (automatski nastavak "Pri otvaranju aplikacije") je do
+                // sad pokretao citanje BEZ da ikad obavesti MediaSession o novom stanju -
+                // isti tip propusta koji smo vec resile za dodir na dugme/medijske tastere,
+                // samo se ovde provukao neopazen (dodir na ekranu radio je odmah, jer je
+                // togglePlayPause() vec imao ovaj poziv - ali AUTOMATSKI pokrenuto citanje
+                // pri otvaranju app-e nikad nije proslo kroz taj kod). Bez ovoga, MediaSession
+                // ostaje "zaglavljena" na starom (npr. pauzirano/nepoznato) stanju sve dok
+                // neka DRUGA, rucna akcija to prvi put ne osvezi - objasnjava korisnicku
+                // prijavu: "dvoprst ne radi posle automatskog pokretanja, ali radi cim rucno
+                // pauziram/nastavim".
+                notifyPlaybackStateChanged()
             } else {
                 // Samo "pripremi" dokument (ucitaj tekst/glas, uskladi poziciju) BEZ da
                 // pocne da cita - koristi se kad "Pri otvaranju dokumenta" nema da automatski
