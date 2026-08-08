@@ -1521,6 +1521,10 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na "Kombinovani glasovi" - isključuje tajmer, bez potrebe da se otvara
      * ceo meni za Tajmer. */
     private fun turnOffTimer() {
+        if (PlaybackController.timerRemainingSeconds <= 0) {
+            android.widget.Toast.makeText(this, "Nema aktivnog tajmera.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         setTimer(0)
     }
 
@@ -1535,6 +1539,14 @@ class ReaderActivity : AppCompatActivity() {
             android.widget.Toast.makeText(
                 this, getString(R.string.timer_set, minutes), android.widget.Toast.LENGTH_SHORT
             ).show()
+            // Isti razlog kao kod auto-citanja - servis (drzi drmanje aktivnim) mora da radi
+            // da bi drmanje uopste moglo da produzi tajmer, cak i PRE nego sto se pritisne
+            // Pusti. Bez ovoga, tajmer je ispravno postavljen (vrednost je tacna), ali
+            // drmanje ne radi nista sve dok se citanje ne pokrene bar jednom - korisnicka
+            // prijava.
+            if (settings.backgroundEnabled) {
+                ReadingService.start(this)
+            }
         }
         updateTimerStatusText()
     }
@@ -1999,6 +2011,6 @@ class ReaderActivity : AppCompatActivity() {
         // Vreme izmedju svake stavke "Automatski listaj dokument" - dovoljno da TalkBack
         // stigne da izgovori najavu (npr. naziv poglavlja) I da korisnica ima trenutak da
         // reaguje/pritisne Pusti-Pauziraj pre sledeceg koraka.
-        private const val AUTO_SCROLL_STEP_MS = 3500L
+        private const val AUTO_SCROLL_STEP_MS = 4500L
     }
 }
