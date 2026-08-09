@@ -38,7 +38,8 @@ class ShareReceiverActivity : AppCompatActivity() {
         when {
             action == Intent.ACTION_SEND && type == "text/plain" -> handleSharedText()
             action == Intent.ACTION_SEND && type?.startsWith("image/") == true -> {
-                val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                @Suppress("DEPRECATION")
+                val imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
                 handleSharedImage(imageUri)
             }
             action == Intent.ACTION_VIEW && type?.startsWith("image/") == true -> {
