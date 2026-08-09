@@ -1,5 +1,0 @@
-What's new in RečPoReč 11.0?
-
-1. Now, when you're on an article on your phone and tap Share, RečPoReč is offered as one of the options. The app reads the text aloud without permanently storing it.
-2. Long-pressing the "Export settings to file" button creates a backup of all documents in the app.
-3. Long-pressing the "Import settings from file" button restores that backup from where you saved it.

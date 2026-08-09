@@ -29,9 +29,10 @@ class HelpActivity : AppCompatActivity() {
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
-        Napravi rezervnu kopiju pravi kopiju svih dokumenata koje si dodao-la u program: same fajlove, poziciju čitanja, i oznake.
+        Dugme Napravi rezervnu kopiju, pravi kopiju svih dokumenata koje si dodao-la u program: sve fajlove, poziciju čitanja, i oznake.
         Dug pritisak vraća rezervnu kopiju iz fajla.
-        Npr, izvezeš ih na Google disk, pa ih nakon promene telefona vratiš.
+        Npr, izvezeš ih na Google disk, ili u telefon, pa ih nakon promene telefona vratiš.
+        Nakon vraćanja, zipovana rezervna kopija se automatski briše.
         Dugme Izlaz je ispod toga.
         Zatvara aplikaciju potpuno i prekida čitanje u pozadini.
         Dug pritisak otkriva spoljni uređaj: Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
@@ -109,7 +110,7 @@ class HelpActivity : AppCompatActivity() {
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
-        Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
+        Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.
@@ -134,8 +135,7 @@ class HelpActivity : AppCompatActivity() {
         Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga direktno pustiš ili pauziraš.
         Program podržava i rad sa fizičkim Bluetooth tastaturama, kao i sa slušalicama na dodir ili dugme.
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
-        Kada neki članak želiš da podeliš, u opcijama će ti biti ponuđen Reč po reč.
-        Program će članak pročitati automatski odabranim glasom.
+        Kada neki dokument ili knjigu želiš da podeliš, u opcijama će ti biti ponuđena i aplikacija Reč po reč.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

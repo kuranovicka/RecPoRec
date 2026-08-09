@@ -1,0 +1,5 @@
+What's new in RečPoReč 11.0?
+
+1. Now, when you're on an article or book on your phone and tap Share, RečPoReč is offered as one of the options. Handy, so you don't always need to go through "Open with".
+2. A "Create backup" button was added to the main screen - it backs up all your books, including where you left off in each. Long-pressing that same button restores from a backup.
+3. Reorganized book list on the main screen - there's now also a "New" tab.
