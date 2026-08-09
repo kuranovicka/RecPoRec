@@ -10,6 +10,10 @@ interface BookmarkDao {
     @Query("SELECT * FROM bookmarks WHERE documentId = :documentId ORDER BY dateAdded ASC")
     suspend fun getForDocument(documentId: Long): List<BookmarkEntity>
 
+    /** Za rezervnu kopiju - sve oznake, svih dokumenata. */
+    @Query("SELECT * FROM bookmarks")
+    suspend fun getAll(): List<BookmarkEntity>
+
     @Query("SELECT COUNT(*) FROM bookmarks WHERE documentId = :documentId")
     suspend fun countForDocument(documentId: Long): Int
 

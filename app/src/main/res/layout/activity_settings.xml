@@ -318,6 +318,7 @@
         android:textSize="20sp"
         android:backgroundTint="@color/btn_chapter"
         android:textColor="@color/button_text"
+        android:contentDescription="Izvezi podešavanja u fajl. Dug pritisak: napravi rezervnu kopiju dokumenata."
         android:text="Izvezi podešavanja u fajl" />
 
     <Button
@@ -328,6 +329,7 @@
         android:textSize="20sp"
         android:backgroundTint="@color/btn_chapter"
         android:textColor="@color/button_text"
+        android:contentDescription="Uvezi podešavanja iz fajla. Dug pritisak: vrati rezervnu kopiju."
         android:text="Uvezi podešavanja iz fajla" />
 
     <Button
