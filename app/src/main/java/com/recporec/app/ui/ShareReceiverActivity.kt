@@ -164,11 +164,25 @@ class ShareReceiverActivity : AppCompatActivity() {
             // zahtev: prepoznavanje teksta sa slike ne sme da prekine citanje koje vec traje
             // negde drugde. Ekran se i dalje otvara (da se vidi rezultat), samo se ne cita
             // automatski - ona sama pritiska Pusti kad hoce.
+            playOcrDoneSound()
+            android.widget.Toast.makeText(this@ShareReceiverActivity, "Tekst slike je spreman.", android.widget.Toast.LENGTH_SHORT).show()
             startActivity(
                 Intent(this@ShareReceiverActivity, ReaderActivity::class.java)
                     .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, newId)
             )
             finish()
+        }
+    }
+
+    /** Isti "zvuk dugmadi" korišćen svuda drugde (podleže istom prekidaču "Zvuk") - zvučna
+     * potvrda da je prepoznavanje teksta sa slike uspešno završeno, uz postojeću tekstualnu
+     * poruku - bitno za pristupačnost sa čitačima ekrana. */
+    private fun playOcrDoneSound() {
+        if (!com.recporec.app.data.AppSettings(this).soundFeedbackEnabled) return
+        try {
+            val tone = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+            tone.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+        } catch (_: Exception) {
         }
     }
 }

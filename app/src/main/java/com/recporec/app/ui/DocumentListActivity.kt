@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.recporec.app.data.AppDatabase
+import com.recporec.app.data.AppSettings
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.databinding.ActivityDocumentListBinding
 import com.recporec.app.parser.DocumentParser
@@ -26,6 +27,7 @@ class DocumentListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDocumentListBinding
     private lateinit var adapter: DocumentListAdapter
     private val db by lazy { AppDatabase.getInstance(this) }
+    private var ocrToneGenerator: android.media.ToneGenerator? = null
     private val settings by lazy { com.recporec.app.data.AppSettings(this) }
     private var currentList: List<DocumentEntity> = emptyList()
     // "Poništi brisanje" - dokumenti ovde su OPTIMISTICNO sakriveni iz prikaza, ali JOS UVEK
@@ -1357,6 +1359,20 @@ class DocumentListActivity : AppCompatActivity() {
      * i meri kolicinu. Prag je namerno vrlo nizak (200 karaktera za CEO dokument) - obican
      * PDF sa pravim tekstom ce imati hiljade karaktera i na SAMO prvoj strani, dok skeniran
      * PDF (bez tekstualnog sloja) vraca prazno ili skoro prazno. */
+    /** Isti "zvuk dugmadi" korišćen svuda drugde (podleže istom prekidaču "Zvuk") - zvučna
+     * potvrda da je prepoznavanje teksta sa slike/skeniranog PDF-a uspešno završeno, uz
+     * postojeću tekstualnu poruku - bitno za pristupačnost sa čitačima ekrana. */
+    private fun playOcrDoneSound() {
+        if (!AppSettings(this).soundFeedbackEnabled) return
+        try {
+            if (ocrToneGenerator == null) {
+                ocrToneGenerator = android.media.ToneGenerator(android.media.AudioManager.STREAM_MUSIC, 70)
+            }
+            ocrToneGenerator?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 60)
+        } catch (_: Exception) {
+        }
+    }
+
     private fun looksLikeScannedPdf(localUri: Uri): Boolean {
         return try {
             val parsed = com.recporec.app.parser.DocumentParser.parse(this, localUri, "pdf")
@@ -1455,8 +1471,9 @@ class DocumentListActivity : AppCompatActivity() {
                     sortOrder = bottomOrder
                 )
             )
+            playOcrDoneSound()
             android.widget.Toast.makeText(
-                this@DocumentListActivity, "Tekst dodat u listu dokumenata.", android.widget.Toast.LENGTH_SHORT
+                this@DocumentListActivity, "Tekst slike je spreman.", android.widget.Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -1525,7 +1542,8 @@ class DocumentListActivity : AppCompatActivity() {
                     sortOrder = bottomOrder
                 )
             )
-            android.widget.Toast.makeText(this@DocumentListActivity, "Tekst dodat u listu dokumenata.", android.widget.Toast.LENGTH_SHORT).show()
+            playOcrDoneSound()
+            android.widget.Toast.makeText(this@DocumentListActivity, "Tekst slike je spreman.", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1534,5 +1552,10 @@ class DocumentListActivity : AppCompatActivity() {
         // kratka najduza traje samo par sekundi, nedovoljno da se stigne pronaci i pritisnuti
         // dugme preko TalkBack-a).
         private const val UNDO_DELETE_WINDOW_MS = 30000L
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ocrToneGenerator?.release()
     }
 }
