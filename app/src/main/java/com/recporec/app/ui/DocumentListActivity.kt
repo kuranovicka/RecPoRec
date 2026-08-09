@@ -373,44 +373,26 @@ class DocumentListActivity : AppCompatActivity() {
                     .show()
                 return@launch
             }
-
-            // "Slikovni PDF" - PDF koji je zapravo samo skenirane slike, bez pravog teksta.
-            // Obican PdfParser (izvlaci samo PRAVI tekst) bi vratio skoro prazno, tiho, bez
-            // upozorenja. Proveri BRZO (parsiraj, izmeri kolicinu teksta) pre nego sto se
-            // doda kao obican dokument - ako izgleda skeniran, ponudi OCR po stranicama.
-            if (format == "pdf") {
-                val looksScanned = withContext(Dispatchers.IO) { looksLikeScannedPdf(localUri) }
-                if (looksScanned) {
-                    offerOcrForScannedPdf(localUri, name)
-                    return@launch
-                }
-            }
-
-            insertDocument(localUri, name, format)
-        }
-    }
-
-    private suspend fun insertDocument(localUri: Uri, name: String, format: String) {
-        val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
-        db.documentDao().insert(
-            DocumentEntity(
-                title = name.substringBeforeLast("."),
-                uri = localUri.toString(),
-                format = format,
-                // Namerno NE "zamrzavamo" trenutnu opštu vrednost ovde - nov dokument prati
-                // opšta podešavanja dinamički (kao Jezik/Glas), sve dok se za NJEGA
-                // posebno nešto ne promeni. -1 znači "nije posebno postavljeno" za
-                // brzinu/visinu (0 i naviše su ispravne vrednosti).
-                speechRate = -1f,
-                pitch = -1f,
-                volumePercent = -1,
-                voiceName = null,
-                voiceEngine = null,
-                languageTag = null,
-                sortOrder = bottomOrder
+            val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
+            db.documentDao().insert(
+                DocumentEntity(
+                    title = name.substringBeforeLast("."),
+                    uri = localUri.toString(),
+                    format = format,
+                    // Namerno NE "zamrzavamo" trenutnu opštu vrednost ovde - nov dokument prati
+                    // opšta podešavanja dinamički (kao Jezik/Glas), sve dok se za NJEGA
+                    // posebno nešto ne promeni. -1 znači "nije posebno postavljeno" za
+                    // brzinu/visinu (0 i naviše su ispravne vrednosti).
+                    speechRate = -1f,
+                    pitch = -1f,
+                    volumePercent = -1,
+                    voiceName = null,
+                    voiceEngine = null,
+                    languageTag = null,
+                    sortOrder = bottomOrder
+                )
             )
-        )
-    }
+        }
     }
 
     /** Kopira sadržaj u internu memoriju aplikacije da bi pristup bio trajan bez obzira na izvor (birač, Disk, Podeli). */
@@ -1353,115 +1335,6 @@ class DocumentListActivity : AppCompatActivity() {
      * ne salje preko interneta. NIJE 100% pouzdano (rukom pisan tekst, los kvalitet slike,
      * ili nestandardno pismo mogu dati lose rezultate) - zato se korisnica UVEK PITA prvo,
      * i tekst se jasno oznacava kao "iz slike" u nazivu, da zna otkud je dosao. */
-    /** Brza provera "da li je ovo skeniran PDF" (slike, bez pravog teksta) - parsira PDF
-     * (izvlaci samo PRAVI, ugradjen tekst, isto sto vec radi PdfParser za normalno citanje)
-     * i meri kolicinu. Prag je namerno vrlo nizak (200 karaktera za CEO dokument) - obican
-     * PDF sa pravim tekstom ce imati hiljade karaktera i na SAMO prvoj strani, dok skeniran
-     * PDF (bez tekstualnog sloja) vraca prazno ili skoro prazno. */
-    private fun looksLikeScannedPdf(localUri: Uri): Boolean {
-        return try {
-            val parsed = com.recporec.app.parser.DocumentParser.parse(this, localUri, "pdf")
-            parsed.fullText.trim().length < 200
-        } catch (_: Exception) {
-            false // ne uspe li provera, ne guraj na OCR - pusti obican tok da prijavi gresku
-        }
-    }
-
-    /** "Slikovni PDF" - PDF koji izgleda kao samo skenirane slike, bez pravog teksta. Umesto
-     * direktnog dodavanja (koje bi rezultovalo praznim/skoro praznim dokumentom), pita da li
-     * da se svaka stranica pretvori u sliku i pusti kroz OCR (isti kao za obicne slike). */
-    private fun offerOcrForScannedPdf(localUri: Uri, name: String) {
-        AlertDialog.Builder(this)
-            .setTitle("Skeniran PDF")
-            .setMessage(
-                "Ovaj PDF izgleda kao skeniran - slike, ne pravi tekst. Da probam da pročitam " +
-                    "tekst sa slika svake stranice? Ova opcija nije 100% pouzdana, i može " +
-                    "potrajati za veće dokumente."
-            )
-            .setNegativeButton("Ne, dodaj kao obično") { _, _ ->
-                lifecycleScope.launch { insertDocument(localUri, name, "pdf") }
-            }
-            .setPositiveButton("Probaj") { _, _ -> runOcrOnPdfPages(localUri, name) }
-            .show()
-    }
-
-    /** Isti princip kao OCR za jednu sliku, ponovljen za svaku stranicu PDF-a - svaka
-     * stranica se pretvori u sliku (PDFRenderer, vec deo postojece PDFBox zavisnosti, bez
-     * ijedne nove biblioteke), pa ide kroz isti ML Kit prepoznavalac (JEDNA instanca,
-     * ponovo koriscena za sve stranice - preporuceno od strane ML Kit-a, brze od pravljenja
-     * nove za svaku stranicu). Stranica koja ne uspe se preskace, ne prekida ostatak. */
-    private fun runOcrOnPdfPages(localUri: Uri, name: String) {
-        android.widget.Toast.makeText(
-            this, "Prepoznavanje teksta u toku, može potrajati...", android.widget.Toast.LENGTH_LONG
-        ).show()
-        lifecycleScope.launch {
-            val combinedText = withContext(Dispatchers.IO) {
-                try {
-                    val sb = StringBuilder()
-                    contentResolver.openInputStream(localUri)?.use { input ->
-                        com.tom_roush.pdfbox.pdmodel.PDDocument.load(input).use { doc ->
-                            val renderer = com.tom_roush.pdfbox.rendering.PDFRenderer(doc)
-                            val recognizer = com.google.mlkit.vision.text.TextRecognition.getClient(
-                                com.google.mlkit.vision.text.latin.TextRecognizerOptions.DEFAULT_OPTIONS
-                            )
-                            for (i in 0 until doc.numberOfPages) {
-                                try {
-                                    val bitmap = renderer.renderImage(
-                                        i, 2f, com.tom_roush.pdfbox.rendering.ImageType.RGB
-                                    )
-                                    val image = com.google.mlkit.vision.common.InputImage.fromBitmap(bitmap, 0)
-                                    val pageText = recognizer.process(image).await().text
-                                    sb.append(pageText).append("\n\n")
-                                } catch (_: Exception) {
-                                    // Preskoci samo ovu stranicu, nastavi sa ostalim.
-                                }
-                            }
-                        }
-                    }
-                    sb.toString()
-                } catch (_: Exception) {
-                    null
-                }
-            }
-            if (combinedText.isNullOrBlank()) {
-                AlertDialog.Builder(this@DocumentListActivity)
-                    .setMessage("Nije uspelo prepoznavanje teksta iz ovog PDF-a.")
-                    .setPositiveButton("U redu", null)
-                    .show()
-                return@launch
-            }
-            val savedUri = withContext(Dispatchers.IO) {
-                try {
-                    val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
-                    val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.txt")
-                    destFile.writeText(combinedText)
-                    Uri.fromFile(destFile)
-                } catch (_: Exception) {
-                    null
-                }
-            }
-            if (savedUri == null) return@launch
-            val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
-            db.documentDao().insert(
-                com.recporec.app.data.DocumentEntity(
-                    title = "${name.substringBeforeLast(".")} (iz slika)",
-                    uri = savedUri.toString(),
-                    format = "txt",
-                    speechRate = -1f,
-                    pitch = -1f,
-                    volumePercent = -1,
-                    voiceName = null,
-                    voiceEngine = null,
-                    languageTag = null,
-                    sortOrder = bottomOrder
-                )
-            )
-            android.widget.Toast.makeText(
-                this@DocumentListActivity, "Tekst dodat u listu dokumenata.", android.widget.Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
     private fun offerOcrForImage(uri: Uri, fileName: String) {
         AlertDialog.Builder(this)
             .setTitle("Slika, ne tekst")
