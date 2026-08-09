@@ -1,0 +1,5 @@
+Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 11.0?
+
+1. Sada, kad u telefonu stanemo npr. na neki članak, pa kliknemo na opciju Podeli, dobijamo mogućnost da taj članak podelimo i sa ovim programom. Tada nam program pročita tekst bez trajnog čuvanja.
+2. Dug pritisak na dugme Izvezi podešavanja u fajl pravi rezervnu kopiju svih dokumenata iz programa.
+3. Dug pritisak na dugme Uvezi podešavanja iz fajla vraća rezervnu kopiju u program sa mesta na kome smo je sačuvali.
