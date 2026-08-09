@@ -53,6 +53,22 @@ class DocumentListActivity : AppCompatActivity() {
         restoreDocumentsBackup(uri)
     }
 
+    // "Izvezi u txt" - radnja za jedan dokument (dug pritisak). Cuva ceo izvucen tekst
+    // dokumenta (bilo kog podrzanog formata) kao obican .txt, uz osnovno ciscenje (visestruki
+    // razmaci, prazni redovi, kontrolni znakovi, dekorativni separatori) - NE dira sam
+    // dokument niti njegovo citanje, samo pravi ODVOJENU, ociscenu kopiju za cuvanje/deljenje
+    // dalje. pendingExportDoc pamti KOJI dokument se izvozi, jer CreateDocument callback ne
+    // nosi sopstvene podatke.
+    private var pendingExportDoc: DocumentEntity? = null
+    private val exportTxtLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        val doc = pendingExportDoc
+        pendingExportDoc = null
+        if (uri == null || doc == null) return@registerForActivityResult
+        exportDocumentAsTxt(doc, uri)
+    }
+
     private val pickFileLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -491,17 +507,21 @@ class DocumentListActivity : AppCompatActivity() {
     private fun showActionsMenu(doc: DocumentEntity) {
         AlertDialog.Builder(this)
             .setTitle(doc.title)
-            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Obriši")) { _, which ->
+            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Izvezi u txt", "Obriši")) { _, which ->
                 when (which) {
                     0 -> moveDocument(doc, up = true)
                     1 -> moveDocument(doc, up = false)
                     2 -> showRenameDialog(doc)
                     3 -> shareDocument(doc)
-                    4 -> confirmDelete(doc)
+                    4 -> { pendingExportDoc = doc; exportTxtLauncher.launch("${sanitizeFileName(doc.title)}.txt") }
+                    5 -> confirmDelete(doc)
                 }
             }
             .show()
     }
+
+    private fun sanitizeFileName(name: String): String =
+        name.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "dokument" }
 
     /** "Podeli" - deli SAM FAJL dokumenta (originalni format, ne izvucen tekst) sa drugom
      * aplikacijom - obrnut smer od "Podeli sa" (ShareReceiverActivity), koji PRIMA tekst.
@@ -520,7 +540,7 @@ class DocumentListActivity : AppCompatActivity() {
             // pravi PRIVREMENA kopija sa PRAVIM nazivom u "share" folderu (isti obrazac vec
             // proveren za deljenje teksta pomoci) - primalac vidi TU kopiju, sa tacnim
             // naslovom.
-            val safeTitle = doc.title.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "dokument" }
+            val safeTitle = sanitizeFileName(doc.title)
             val shareDir = java.io.File(cacheDir, "share").apply { mkdirs() }
             val shareFile = java.io.File(shareDir, "$safeTitle.${doc.format}")
             srcFile.copyTo(shareFile, overwrite = true)
@@ -544,6 +564,60 @@ class DocumentListActivity : AppCompatActivity() {
         } catch (_: Exception) {
             android.widget.Toast.makeText(this, "Deljenje nije uspelo.", android.widget.Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /** "Izvezi u txt" - izvlaci ceo tekst dokumenta (bilo kog podrzanog formata) i cuva ga kao
+     * obican .txt, uz OSNOVNO ciscenje. Logika ciscenja je preneta (portovana u Kotlin,
+     * cisto regex/string operacije, bez ijedne nove zavisnosti) iz korisnicinog sopstvenog
+     * Windows alata "IzmedjuKorica" - namerno izabran KONZERVATIVAN podskup (samo ocigledno
+     * "smece": kontrolni znakovi, visestruki razmaci/prazni redovi, dekorativni separatori),
+     * BEZ ijedne izmene koja bi mogla promeniti stvarni sadrzaj (npr. NIJE preneta zamena
+     * decimalnog zareza tackom - to menja smisao brojeva, ne samo izgled). Radi na
+     * ODVOJENOJ kopiji - NE dira sam dokument niti kako se cita naglas. */
+    private fun exportDocumentAsTxt(doc: DocumentEntity, destUri: Uri) {
+        android.widget.Toast.makeText(this, "Izvoz u toku...", android.widget.Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    val parsed = com.recporec.app.parser.DocumentParser.parse(
+                        applicationContext, Uri.parse(doc.uri), doc.format
+                    )
+                    val cleaned = basicCleanText(parsed.fullText)
+                    contentResolver.openOutputStream(destUri)?.use { out ->
+                        out.write(cleaned.toByteArray(Charsets.UTF_8))
+                    }
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            android.widget.Toast.makeText(
+                this@DocumentListActivity,
+                if (ok) "Izvezeno u txt." else "Izvoz nije uspeo.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun basicCleanText(text: String): String {
+        var t = text
+        // Kontrolni znakovi (osim novog reda/tabulatora, koji se resavaju posebno ispod).
+        t = t.replace(Regex("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]"), "")
+        // Tabovi -> razmak, pa visestruki razmaci -> jedan.
+        t = t.replace("\t", " ").replace(Regex("[ ]{2,}"), " ")
+        // Obrisi razmake na kraju svake linije, i svedi svaku liniju (trim po liniji).
+        t = t.lines().joinToString("\n") { it.trim() }
+        // Dekorativne linije od 10+ istih znakova (---------- / ========== / itd).
+        t = t.lines().filterNot { Regex("^([=\\-*_~])\\1{9,}$").matches(it) }.joinToString("\n")
+        // Ekstremno duge linije "ASCII art" znakova (30+).
+        t = t.lines().filterNot { Regex("^[#*+=\\-._~/\\\\|\\[\\](){}]{30,}$").matches(it) }.joinToString("\n")
+        // Udvojena/utrojena interpunkcija (!!!, ????, .....) -> jedna/standardna elipsa.
+        t = t.replace(Regex("!{2,}"), "!").replace(Regex("\\?{2,}"), "?").replace(Regex("\\.{4,}"), "...")
+        // Vise od jednog praznog reda zaredom -> tacno jedan prazan red.
+        t = t.replace(Regex("\n{3,}"), "\n\n")
+        // Prazni redovi na samom kraju fajla.
+        t = t.trimEnd('\n') + "\n"
+        return t
     }
 
     private fun showRenameDialog(doc: DocumentEntity) {

@@ -37,7 +37,7 @@ class HelpActivity : AppCompatActivity() {
         Zatvara aplikaciju potpuno i prekida čitanje u pozadini.
         Dug pritisak otkriva spoljni uređaj: Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
         Korisno ako nije uspelo automatsko povezivanje.
-        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, obriši.
+        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, izvezi u txt, obriši.
         Ako slučajno obrišeš dokument, ili klikneš na Obriši sve u opštim radnjama, imaš nekoliko trenutaka da poništiš brisanje.
         Gore desno je dugme Opcije.
         Otvara tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.

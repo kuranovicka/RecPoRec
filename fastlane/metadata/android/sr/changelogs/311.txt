@@ -1,9 +1,0 @@
-Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 11.0?
-
-1. Sada, kad u telefonu stanemo npr. na neki članak, ili knjigu, pa kliknemo na opciju Podeli, dobijamo mogućnost da taj članak podelimo i sa ovim programom.
-2. Takođe, u opcijama samog dokumenta, imamo opciju deljenja, kako bismo i njega mogli podeliti sa drugom aplikacijom.
-3. Ako slučajno obrišemo jedan ili sve dokumente, imamo neko vreme rok da se predomislimo i poništimo radnju.
-4. Na glavni ekran dodato dugme za izradu rezervne kopije knjiga. Naravno, pamti i gde smo stali.
-5. Dug pritisak na to dugme je vraćanje iz rezervne kopije. Rezervna kopija se nakon vraćanja briše, da nam se ne bi gomilalo sve i svašta.
-6. Reorganizovan prikaz knjiga na glavnom ekranu. Sada imamo i karticu: Novo.
-7. Popravljeno deljenje dokumenta iz aplikacije - sad nosi pravi naziv knjige, ne slučajan niz brojeva i slova.
