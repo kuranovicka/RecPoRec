@@ -352,7 +352,7 @@ class ReadingService : Service() {
             )
         } else {
             NotificationCompat.Action(
-                android.R.drawable.ic_media_play, "Pusti",
+                android.R.drawable.ic_media_play, "Pokreni",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY)
             )
         }

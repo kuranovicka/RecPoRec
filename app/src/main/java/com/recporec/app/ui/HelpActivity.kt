@@ -20,7 +20,7 @@ class HelpActivity : AppCompatActivity() {
         Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
         Prvi ekran je lista dokumenata.
         Tu vidiš sve tvoje knjige.
-        Na dnu ekrana su tri kartice: sve, započete i pročitane knjige.
+        Na dnu ekrana su četiri kartice: sve, nove, započete i pročitane knjige.
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.

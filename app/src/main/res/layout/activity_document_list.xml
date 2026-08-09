@@ -132,6 +132,17 @@
             android:text="Sve knjige" />
 
         <RadioButton
+            android:id="@+id/tabNewBooks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/btn_chapter"
+            android:contentDescription="Nove knjige"
+            android:text="Nove" />
+
+        <RadioButton
             android:id="@+id/tabStartedBooks"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

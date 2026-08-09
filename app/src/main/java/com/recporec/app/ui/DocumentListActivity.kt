@@ -223,7 +223,7 @@ class DocumentListActivity : AppCompatActivity() {
             backupLauncher.launch("recporec-rezervna-kopija.zip")
         }
         binding.btnBackup.setOnLongClickListener {
-            restoreLauncher.launch(arrayOf("application/zip", "*/*"))
+            restoreLauncher.launch(arrayOf("*/*"))
             true
         }
 
@@ -283,6 +283,7 @@ class DocumentListActivity : AppCompatActivity() {
 
         binding.groupLibraryTabs.setOnCheckedChangeListener { _, checkedId ->
             currentTab = when (checkedId) {
+                binding.tabNewBooks.id -> "new"
                 binding.tabStartedBooks.id -> "started"
                 binding.tabFinishedBooks.id -> "finished"
                 else -> "all"
@@ -381,12 +382,13 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
-    /** Primenjuje trenutno odabranu karticu (Sve/Započete/Pročitane) na PUNU listu iz baze
+    /** Primenjuje trenutno odabranu karticu (Sve/Nove/Započete/Pročitane) na PUNU listu iz baze
      * (currentList) i prikazuje samo odgovarajući podskup - currentList i dalje ostaje
      * kompletna, necu neophodno za pomeranje gore/dole koje mora da radi sa PRAVIM
      * susedima u punom redosledu, ne samo unutar filtrirane kartice. */
     private fun applyTabFilter() {
         val filtered = when (currentTab) {
+            "new" -> currentList.filter { it.currentCharacterOffset <= 0 }
             "started" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset in 1 until it.totalCharacters }
             "finished" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset >= it.totalCharacters }
             else -> currentList
@@ -401,6 +403,7 @@ class DocumentListActivity : AppCompatActivity() {
         // samo na "Započete" ili "Pročitane".
         binding.btnGeneralActions.visibility = if (currentList.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
         binding.emptyView.text = when (currentTab) {
+            "new" -> "Nema novih knjiga."
             "started" -> "Nema započetih knjiga."
             "finished" -> "Nema pročitanih knjiga."
             else -> getString(com.recporec.app.R.string.no_documents)
@@ -1059,6 +1062,18 @@ class DocumentListActivity : AppCompatActivity() {
                     restoredCount
                 } catch (_: Exception) {
                     -1
+                }
+            }
+            if (result >= 0) {
+                // Zip vise nije potreban posle uspesnog vracanja - obrisi ga (korisnicki
+                // zahtev). DocumentsContract.deleteDocument radi za fajlove izabrane preko
+                // OpenDocument (SAF) - ne uspe li (npr. neki provajder ne dozvoljava
+                // brisanje), tiho preskoci, ne prekida ostatak toka.
+                withContext(Dispatchers.IO) {
+                    try {
+                        android.provider.DocumentsContract.deleteDocument(contentResolver, uri)
+                    } catch (_: Exception) {
+                    }
                 }
             }
             android.widget.Toast.makeText(
