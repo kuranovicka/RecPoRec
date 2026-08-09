@@ -628,17 +628,23 @@ class DocumentListActivity : AppCompatActivity() {
 
     private fun finalizeDelete(ids: List<Long>) {
         pendingDeleteRunnables.remove(ids)
-        lifecycleScope.launch {
-            // Ako je medju obrisanim dokument koji trenutno cita (npr. u pozadini), zaustavi
-            // citanje pre brisanja - inace bi nastavilo da cita fajl koji upravo brisemo.
-            if (com.recporec.app.tts.PlaybackController.currentDocument?.id in ids) {
-                com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
-                com.recporec.app.tts.PlaybackController.release()
-            }
-            val docsToDelete = currentList.filter { it.id in ids }
-            db.documentDao().deleteByIds(ids)
-            pendingDeleteIds.removeAll(ids.toSet())
-            withContext(Dispatchers.IO) {
+        // NAMERNO ne koristi lifecycleScope - taj se gasi cim se ovaj ekran zatvori (npr.
+        // otvori se neka knjiga, ili app ode u pozadinu i sistem je ugasi), sto bi znacilo da
+        // se zakazano brisanje NIKAD stvarno ne izvrsi ako se to desi u tih 5 sekundi. Ovo
+        // MORA da se zavrsi bez obzira da li je ovaj ekran jos uvek ziv - isti obrazac kao i
+        // drugde u app-i za "mora da se zavrsi" zadatke.
+        val docsToDelete = currentList.filter { it.id in ids }
+        val stopReading = com.recporec.app.tts.PlaybackController.currentDocument?.id in ids
+        if (stopReading) {
+            com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
+            com.recporec.app.tts.PlaybackController.release()
+        }
+        val appContext = applicationContext
+        Thread {
+            try {
+                kotlinx.coroutines.runBlocking {
+                    com.recporec.app.data.AppDatabase.getInstance(appContext).documentDao().deleteByIds(ids)
+                }
                 docsToDelete.forEach { d ->
                     try {
                         val uri = Uri.parse(d.uri)
@@ -648,8 +654,13 @@ class DocumentListActivity : AppCompatActivity() {
                     } catch (_: Exception) {
                     }
                 }
+            } catch (_: Exception) {
             }
-        }
+        }.start()
+        // NAMERNO se ne uklanja iz pendingDeleteIds ovde - dokument ce prirodno nestati iz
+        // currentList cim baza STVARNO bude azurirana (observeAll Flow). Uklanjanje odavde
+        // (pre nego sto je brisanje na pozadinskoj niti stvarno zavrseno) bi moglo da izazove
+        // kratak "trep" - dokument se na tren vrati u prikaz pa opet nestane.
     }
 
     /** Pita SAMO JEDNOM (ikad) za dozvolu stanja telefona - rezervni mehanizam za pauzu pri
