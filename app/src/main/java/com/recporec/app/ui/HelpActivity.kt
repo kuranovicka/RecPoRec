@@ -20,7 +20,7 @@ class HelpActivity : AppCompatActivity() {
         Ovo je aplikacija za čitanje dokumenata uz pomoć sinteze govora.
         Prvi ekran je lista dokumenata.
         Tu vidiš sve tvoje knjige.
-        Na dnu ekrana su četiri kartice: sve, nove, započete i pročitane knjige.
+        Na dnu ekrana su četiri kartice: sve, novo, započeto i pročitano.
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.
@@ -135,7 +135,7 @@ class HelpActivity : AppCompatActivity() {
         Program podržava i rad sa fizičkim Bluetooth tastaturama, kao i sa slušalicama na dodir ili dugme.
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
         Kada neki članak želiš da podeliš, u opcijama će ti biti ponuđen Reč po reč.
-        Program će članak pročitati automatski odabranim glasom i neće ga trajno čuvati.
+        Program će članak pročitati automatski odabranim glasom.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

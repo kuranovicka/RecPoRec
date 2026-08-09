@@ -12,9 +12,12 @@ import kotlinx.coroutines.withContext
 
 /**
  * "Podeli sa" - hvata standardni Android meni za deljenje teksta iz drugih aplikacija
- * (pregledač, email, i slično). Napravi PRIVREMEN dokument, odmah ga otvori za čitanje sa
- * trenutno odabranim glasom - i ČISTI GA pri izlasku, jer se NE čuva trajno u listi (korisnički
- * zahtev: "program će članak pročitati automatski... i neće ga trajno čuvati").
+ * (pregledač, email, i slično). Napravi NORMALAN, trajan dokument (isto kao "Dodaj dokument"),
+ * odmah ga otvori za čitanje sa trenutno odabranim glasom.
+ *
+ * NAMERNO se NE briše automatski (ranija verzija je to radila - uklonjeno po korisničkoj
+ * odluci: rizik da se nešto vredno/veliko podeli, pa se samo od sebe obriše, veći je problem
+ * od toga da ostane u listi kao i svaki drugi dodat dokument).
  *
  * Providna, bez sopstvenog izgleda - samo prosledi na ReaderActivity, isti obrazac kao
  * prečica sa ikonice (naučeno tada: ne koristiti Theme.Transparent za ovo, radije direktno
@@ -73,7 +76,6 @@ class ShareReceiverActivity : AppCompatActivity() {
                 Intent(this@ShareReceiverActivity, ReaderActivity::class.java)
                     .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, newId)
                     .putExtra(ReaderActivity.EXTRA_AUTOPLAY, true)
-                    .putExtra(ReaderActivity.EXTRA_EPHEMERAL, true)
             )
             finish()
         }

@@ -36,7 +36,6 @@ class ReaderActivity : AppCompatActivity() {
     private val settings by lazy { AppSettings(this) }
 
     private var documentId: Long = -1
-    private var isEphemeralSession: Boolean = false
     private var doc: DocumentEntity? = null
     private var parsed: ParsedDocument? = null
 
@@ -98,7 +97,6 @@ class ReaderActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
-        isEphemeralSession = intent.getBooleanExtra(EXTRA_EPHEMERAL, false)
         if (intent.getBooleanExtra(EXTRA_AUTOPLAY, false)) {
             pendingPlayAfterReady = true
         }
@@ -1975,12 +1973,6 @@ class ReaderActivity : AppCompatActivity() {
                     updateStatusTexts()
                     updateSeekBar()
                 }
-                // "Podeli sa" - cim se citanje PRIRODNO zavrsi, privremen dokument se odmah
-                // brise - ne cekamo eventualni onDestroy(), koji Android moze da odlozi
-                // neograniceno dugo ako korisnica samo predje na drugu app umesto da
-                // eksplicitno izadje preko Nazad (korisnicka prijava: podeljeni tekstovi su
-                // ostajali trajno u listi).
-                cleanupEphemeralDocumentIfNeeded()
             }
         }
         PlaybackController.uiTimerExpiredListener = {
@@ -2002,11 +1994,6 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
         persistState()
-        // "Podeli sa" - ako je OVO stvaran izlazak (Nazad, ne samo prelazak na drugu app),
-        // ocisti odmah - ne cekaj onDestroy(), koji moze kasniti.
-        if (isFinishing) {
-            cleanupEphemeralDocumentIfNeeded()
-        }
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
         }
@@ -2016,38 +2003,11 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
-        // Rezervna mreza - ako iz nekog razloga cleanupEphemeralDocumentIfNeeded() nije vec
-        // pozvana (onPause/uiFinishedListener), pokusaj poslednji put ovde.
-        cleanupEphemeralDocumentIfNeeded()
-    }
-
-    /** "Podeli sa" - brise PRIVREMEN dokument (bazu + fajl na disku). Idempotentno je bezbedno
-     * zvati vise puta (npr. i pri kraju citanja I pri izlasku) - drugi/treci poziv jednostavno
-     * nema sta da obrise, deleteById na vec obrisanom redu je bezopasan no-op. Radi na
-     * odvojenoj niti, ne preko lifecycleScope - taj moze biti nepouzdan/vec ugasen kasno u
-     * zivotnom ciklusu (onDestroy). */
-    private fun cleanupEphemeralDocumentIfNeeded() {
-        if (!isEphemeralSession || documentId <= 0) return
-        val idToDelete = documentId
-        val uriToDelete = doc?.uri
-        isEphemeralSession = false // sprecava duplo pokretanje niti ako se pozove vise puta
-        Thread {
-            try {
-                AppDatabase.getInstance(applicationContext).documentDao().let {
-                    kotlinx.coroutines.runBlocking { it.deleteById(idToDelete) }
-                }
-                uriToDelete?.let { android.net.Uri.parse(it).path?.let { path -> java.io.File(path).delete() } }
-            } catch (_: Exception) {
-            }
-        }.start()
     }
 
     companion object {
         const val EXTRA_DOCUMENT_ID = "extra_document_id"
         const val EXTRA_AUTOPLAY = "extra_autoplay"
-        // "Podeli sa" (ShareReceiverActivity) - obelezava dokument kao PRIVREMEN, koji se
-        // BRISE pri izlasku iz ovog ekrana (ne prikazuje se trajno u listi knjiga).
-        const val EXTRA_EPHEMERAL = "extra_ephemeral"
         // Vreme izmedju svake stavke "Automatski listaj dokument" - dovoljno da TalkBack
         // stigne da izgovori najavu (npr. naziv poglavlja) I da korisnica ima trenutak da
         // reaguje/pritisne Pusti-Pauziraj pre sledeceg koraka.
