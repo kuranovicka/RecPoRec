@@ -29,6 +29,25 @@ class DocumentListActivity : AppCompatActivity() {
     /** "all" / "started" / "finished" - koja kartica je trenutno aktivna. */
     private var currentTab: String = "all"
 
+    // "Napravi rezervnu kopiju" - dugme desno, pre Izlaz. Za razliku od izvoza podesavanja
+    // (samo glas/prekidaci), ovo pakuje SVE dokumente (same fajlove, pozicija citanja,
+    // oznake) u jedan .zip. Ranije bilo na dug pritisak u Podesavanjima preko ScrollView-a,
+    // ali je taj ekran "gutao" dug pritisak (poznat Android problem) - premesteno ovde, gde
+    // NEMA ScrollView-a oko dugmadi.
+    private val backupLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        backupAllDocuments(uri)
+    }
+
+    private val restoreLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        restoreDocumentsBackup(uri)
+    }
+
     private val pickFileLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -198,6 +217,14 @@ class DocumentListActivity : AppCompatActivity() {
 
         binding.btnGeneralActions.setOnClickListener {
             showGeneralActionsMenu()
+        }
+
+        binding.btnBackup.setOnClickListener {
+            backupLauncher.launch("recporec-rezervna-kopija.zip")
+        }
+        binding.btnBackup.setOnLongClickListener {
+            restoreLauncher.launch(arrayOf("application/zip", "*/*"))
+            true
         }
 
         binding.btnExit.setOnClickListener {
@@ -869,4 +896,176 @@ class DocumentListActivity : AppCompatActivity() {
         builder.show()
     }
 
+    /** Pakuje SVE dokumente (same fajlove, poziciju čitanja, oznake) u jedan .zip - koristi
+     * SAMO ugrađen java.util.zip i org.json (isti kao za izvoz podešavanja), bez ijedne nove
+     * zavisnosti - namerno nizak rizik, isto kao postojeći izvoz. */
+    private fun backupAllDocuments(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            android.widget.Toast.makeText(this@DocumentListActivity, "Pravljenje rezervne kopije...", android.widget.Toast.LENGTH_SHORT).show()
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    val db = com.recporec.app.data.AppDatabase.getInstance(applicationContext)
+                    val docs = db.documentDao().observeAllOnce()
+                    val bookmarks = db.bookmarkDao().getAll()
+
+                    val docsJson = org.json.JSONArray()
+                    val zipFileNames = HashMap<Long, String>()
+                    docs.forEach { d ->
+                        val zipName = "doc_${d.id}.${d.format}"
+                        zipFileNames[d.id] = zipName
+                        val obj = org.json.JSONObject()
+                        obj.put("origId", d.id)
+                        obj.put("zipFileName", zipName)
+                        obj.put("title", d.title)
+                        obj.put("format", d.format)
+                        obj.put("totalCharacters", d.totalCharacters)
+                        obj.put("currentCharacterOffset", d.currentCharacterOffset)
+                        obj.put("totalPages", d.totalPages)
+                        obj.put("currentPage", d.currentPage)
+                        obj.put("speechRate", d.speechRate.toDouble())
+                        obj.put("volumePercent", d.volumePercent)
+                        obj.put("voiceName", d.voiceName)
+                        obj.put("voiceEngine", d.voiceEngine)
+                        obj.put("languageTag", d.languageTag)
+                        obj.put("elapsedSeconds", d.elapsedSeconds)
+                        obj.put("timerMinutes", d.timerMinutes)
+                        obj.put("dateAdded", d.dateAdded)
+                        obj.put("sortOrder", d.sortOrder)
+                        obj.put("pitch", d.pitch.toDouble())
+                        obj.put("lastTimerStartOffset", d.lastTimerStartOffset)
+                        obj.put("lastTimerMinutes", d.lastTimerMinutes)
+                        obj.put("lastOpenedTimestamp", d.lastOpenedTimestamp)
+                        docsJson.put(obj)
+                    }
+                    val bookmarksJson = org.json.JSONArray()
+                    bookmarks.forEach { b ->
+                        val obj = org.json.JSONObject()
+                        obj.put("origDocumentId", b.documentId)
+                        obj.put("name", b.name)
+                        obj.put("characterOffset", b.characterOffset)
+                        obj.put("dateAdded", b.dateAdded)
+                        bookmarksJson.put(obj)
+                    }
+                    val manifest = org.json.JSONObject()
+                    manifest.put("version", 1)
+                    manifest.put("documents", docsJson)
+                    manifest.put("bookmarks", bookmarksJson)
+
+                    contentResolver.openOutputStream(uri)?.use { out ->
+                        java.util.zip.ZipOutputStream(out).use { zip ->
+                            zip.putNextEntry(java.util.zip.ZipEntry("manifest.json"))
+                            zip.write(manifest.toString().toByteArray(Charsets.UTF_8))
+                            zip.closeEntry()
+                            docs.forEach { d ->
+                                val srcPath = android.net.Uri.parse(d.uri).path ?: return@forEach
+                                val srcFile = java.io.File(srcPath)
+                                if (!srcFile.exists()) return@forEach
+                                zip.putNextEntry(java.util.zip.ZipEntry(zipFileNames[d.id]!!))
+                                srcFile.inputStream().use { it.copyTo(zip) }
+                                zip.closeEntry()
+                            }
+                        }
+                    }
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            android.widget.Toast.makeText(
+                this@DocumentListActivity,
+                if (ok) "Rezervna kopija napravljena." else "Pravljenje rezervne kopije nije uspelo.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    /** Vraća rezervnu kopiju napravljenu preko backupAllDocuments() - novi ID-jevi se
+     * generišu za svaki dokument (Room ih sam dodeljuje), pa se ID-jevi oznaka preslikaju
+     * (stari -> novi) da bi ostale vezane za pravi dokument. */
+    private fun restoreDocumentsBackup(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            android.widget.Toast.makeText(this@DocumentListActivity, "Vraćanje rezervne kopije...", android.widget.Toast.LENGTH_SHORT).show()
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    val db = com.recporec.app.data.AppDatabase.getInstance(applicationContext)
+                    val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
+                    val entries = HashMap<String, ByteArray>()
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        java.util.zip.ZipInputStream(input).use { zip ->
+                            var entry = zip.nextEntry
+                            while (entry != null) {
+                                entries[entry.name] = zip.readBytes()
+                                zip.closeEntry()
+                                entry = zip.nextEntry
+                            }
+                        }
+                    }
+                    val manifestBytes = entries["manifest.json"] ?: return@withContext -1
+                    val manifest = org.json.JSONObject(String(manifestBytes, Charsets.UTF_8))
+                    val docsJson = manifest.getJSONArray("documents")
+                    val bookmarksJson = manifest.optJSONArray("bookmarks")
+
+                    val idMap = HashMap<Long, Long>()
+                    var restoredCount = 0
+                    for (i in 0 until docsJson.length()) {
+                        val obj = docsJson.getJSONObject(i)
+                        val zipFileName = obj.getString("zipFileName")
+                        val fileBytes = entries[zipFileName] ?: continue
+                        val format = obj.getString("format")
+                        val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.$format")
+                        destFile.writeBytes(fileBytes)
+
+                        val newId = db.documentDao().insert(
+                            com.recporec.app.data.DocumentEntity(
+                                title = obj.getString("title"),
+                                uri = android.net.Uri.fromFile(destFile).toString(),
+                                format = format,
+                                totalCharacters = obj.optInt("totalCharacters", 0),
+                                currentCharacterOffset = obj.optInt("currentCharacterOffset", 0),
+                                totalPages = obj.optInt("totalPages", 0),
+                                currentPage = obj.optInt("currentPage", 0),
+                                speechRate = obj.optDouble("speechRate", -1.0).toFloat(),
+                                volumePercent = obj.optInt("volumePercent", -1),
+                                voiceName = obj.optString("voiceName", null),
+                                voiceEngine = obj.optString("voiceEngine", null),
+                                languageTag = obj.optString("languageTag", null),
+                                elapsedSeconds = obj.optLong("elapsedSeconds", 0),
+                                timerMinutes = obj.optInt("timerMinutes", 0),
+                                dateAdded = obj.optLong("dateAdded", System.currentTimeMillis()),
+                                sortOrder = obj.optInt("sortOrder", 0),
+                                pitch = obj.optDouble("pitch", -1.0).toFloat(),
+                                lastTimerStartOffset = if (obj.isNull("lastTimerStartOffset")) null else obj.optInt("lastTimerStartOffset"),
+                                lastTimerMinutes = if (obj.isNull("lastTimerMinutes")) null else obj.optInt("lastTimerMinutes"),
+                                lastOpenedTimestamp = obj.optLong("lastOpenedTimestamp", 0)
+                            )
+                        )
+                        idMap[obj.getLong("origId")] = newId
+                        restoredCount++
+                    }
+                    if (bookmarksJson != null) {
+                        for (i in 0 until bookmarksJson.length()) {
+                            val obj = bookmarksJson.getJSONObject(i)
+                            val newDocId = idMap[obj.getLong("origDocumentId")] ?: continue
+                            db.bookmarkDao().insert(
+                                com.recporec.app.data.BookmarkEntity(
+                                    documentId = newDocId,
+                                    name = obj.getString("name"),
+                                    characterOffset = obj.getInt("characterOffset"),
+                                    dateAdded = obj.optLong("dateAdded", System.currentTimeMillis())
+                                )
+                            )
+                        }
+                    }
+                    restoredCount
+                } catch (_: Exception) {
+                    -1
+                }
+            }
+            android.widget.Toast.makeText(
+                this@DocumentListActivity,
+                if (result >= 0) "Vraćeno dokumenata: $result." else "Vraćanje rezervne kopije nije uspelo - proveri da li je fajl ispravan.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 }

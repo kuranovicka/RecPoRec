@@ -29,6 +29,9 @@ class HelpActivity : AppCompatActivity() {
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
+        Napravi rezervnu kopiju pravi kopiju svih dokumenata koje si dodao-la u program: same fajlove, poziciju čitanja, i oznake.
+        Dug pritisak vraća rezervnu kopiju iz fajla.
+        Npr, izvezeš ih na Google disk, pa ih nakon promene telefona vratiš.
         Dugme Izlaz je ispod toga.
         Zatvara aplikaciju potpuno i prekida čitanje u pozadini.
         Dug pritisak otkriva spoljni uređaj: Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
@@ -53,11 +56,7 @@ class HelpActivity : AppCompatActivity() {
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, ili oznaku.
         Tu su i dugmad Izvezi podešavanja u fajl, i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
-        Dug pritisak: Napravi rezervnu kopiju dokumenata.
-        Dug pritisak: Vrati rezervnu kopiju.
-        Ove dve opcije se odnose na sve dokumente koje si dodao-la u program.
-        Npr, izvezeš ih na Google disk, pa ih nakon promene telefona vratiš.
-        Ova podešavanja pamte i prethodnu poziciju čitanja.
+        Ne čuvaju samu listu knjiga.
         Korisno pred promenu telefona.
         Na dnu ekrana je dugme Vrati na zadano.
         Vraća sva ova podešavanja na početak.
