@@ -131,6 +131,10 @@ class HelpActivity : AppCompatActivity() {
         Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga direktno pustiš ili pauziraš.
         Program podržava i rad sa fizičkim Bluetooth tastaturama, kao i sa slušalicama na dodir ili dugme.
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
+        Program ima još nekoliko mogućnosti.
+        Kada neki članak želiš da podeliš, u opcijama će ti biti ponuđen Reč po reč.
+        Program će članak pročitati automatski odabranim glasom i neće ga trajno čuvati.
+        Takođe, ako želiš da pročitaš tekst sa neke slike, iako opcija nije 100% pouzdana, program će pokušati da ga pročita.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

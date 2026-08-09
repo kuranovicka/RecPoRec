@@ -91,6 +91,21 @@
             android:name=".ui.ReaderActivity"
             android:exported="false" />
 
+        <!-- "Podeli sa" - hvata deljen tekst iz drugih aplikacija (pregledac, email...) -
+             exported="true" je NEOPHODNO ovde (za razliku od skoro svega ostalog u app-i) jer
+             sistem ovu aktivnost pokrece SPOLJA, iz DRUGIH aplikacija preko "Podeli" menija. -->
+        <activity
+            android:name=".ui.ShareReceiverActivity"
+            android:exported="true"
+            android:theme="@style/Theme.RecPoRec"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="false" />

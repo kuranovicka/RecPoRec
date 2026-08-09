@@ -36,6 +36,7 @@ class ReaderActivity : AppCompatActivity() {
     private val settings by lazy { AppSettings(this) }
 
     private var documentId: Long = -1
+    private var isEphemeralSession: Boolean = false
     private var doc: DocumentEntity? = null
     private var parsed: ParsedDocument? = null
 
@@ -97,6 +98,7 @@ class ReaderActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         documentId = intent.getLongExtra(EXTRA_DOCUMENT_ID, -1)
+        isEphemeralSession = intent.getBooleanExtra(EXTRA_EPHEMERAL, false)
         if (intent.getBooleanExtra(EXTRA_AUTOPLAY, false)) {
             pendingPlayAfterReady = true
         }
@@ -2003,11 +2005,30 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
+        // "Podeli sa" - PRIVREMEN dokument, brise se ovde (ne trajno u listi). Radi se na
+        // odvojenoj niti, ne preko lifecycleScope - taj se vec gasi u ovom trenutku
+        // zivotnog ciklusa, nepouzdan je za zavrsni "fire-and-forget" zadatak ovde.
+        if (isEphemeralSession && documentId > 0) {
+            val idToDelete = documentId
+            val uriToDelete = doc?.uri
+            Thread {
+                try {
+                    AppDatabase.getInstance(applicationContext).documentDao().let {
+                        kotlinx.coroutines.runBlocking { it.deleteById(idToDelete) }
+                    }
+                    uriToDelete?.let { android.net.Uri.parse(it).path?.let { path -> java.io.File(path).delete() } }
+                } catch (_: Exception) {
+                }
+            }.start()
+        }
     }
 
     companion object {
         const val EXTRA_DOCUMENT_ID = "extra_document_id"
         const val EXTRA_AUTOPLAY = "extra_autoplay"
+        // "Podeli sa" (ShareReceiverActivity) - obelezava dokument kao PRIVREMEN, koji se
+        // BRISE pri izlasku iz ovog ekrana (ne prikazuje se trajno u listi knjiga).
+        const val EXTRA_EPHEMERAL = "extra_ephemeral"
         // Vreme izmedju svake stavke "Automatski listaj dokument" - dovoljno da TalkBack
         // stigne da izgovori najavu (npr. naziv poglavlja) I da korisnica ima trenutak da
         // reaguje/pritisne Pusti-Pauziraj pre sledeceg koraka.
