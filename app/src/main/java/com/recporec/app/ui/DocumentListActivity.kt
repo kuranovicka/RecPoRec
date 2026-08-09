@@ -14,6 +14,7 @@ import com.recporec.app.databinding.ActivityDocumentListBinding
 import com.recporec.app.parser.DocumentParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 /** Akcija koju koristi precica sa ikonice aplikacije ("Nastavi citanje") - vidi shortcuts.xml. */
@@ -351,10 +352,14 @@ class DocumentListActivity : AppCompatActivity() {
         val name = queryFileName(uri) ?: "dokument"
         val mimeType = contentResolver.getType(uri)
         val format = DocumentParser.detectFormat(name, mimeType) ?: run {
-            AlertDialog.Builder(this)
-                .setMessage("Format ovog fajla nije podržan.")
-                .setPositiveButton("U redu", null)
-                .show()
+            if (looksLikeImage(name, mimeType)) {
+                offerOcrForImage(uri, name)
+            } else {
+                AlertDialog.Builder(this)
+                    .setMessage("Format ovog fajla nije podržan.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+            }
             return
         }
 
@@ -1237,6 +1242,87 @@ class DocumentListActivity : AppCompatActivity() {
                 if (result >= 0) "Vraćeno dokumenata: $result." else "Vraćanje rezervne kopije nije uspelo - proveri da li je fajl ispravan.",
                 android.widget.Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    /** Prepoznaje da li je izabran fajl SLIKA (ne podržan tekst format) - po ekstenziji ili
+     * MIME tipu. Koristi se da se ponudi OCR umesto obicne "format nije podrzan" poruke. */
+    private fun looksLikeImage(fileName: String, mimeType: String?): Boolean {
+        val lower = fileName.lowercase()
+        val byExtension = lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+            lower.endsWith(".png") || lower.endsWith(".bmp") || lower.endsWith(".webp")
+        return byExtension || mimeType?.startsWith("image/") == true
+    }
+
+    /** OCR (citanje teksta sa slike) - potpuno OFFLINE, na samom uredjaju (ML Kit), nista se
+     * ne salje preko interneta. NIJE 100% pouzdano (rukom pisan tekst, los kvalitet slike,
+     * ili nestandardno pismo mogu dati lose rezultate) - zato se korisnica UVEK PITA prvo,
+     * i tekst se jasno oznacava kao "iz slike" u nazivu, da zna otkud je dosao. */
+    private fun offerOcrForImage(uri: Uri, fileName: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Slika, ne tekst")
+            .setMessage(
+                "Ovo izgleda kao slika, ne podržan tekst format. Da probam da pročitam tekst " +
+                    "sa nje? Ova opcija nije 100% pouzdana - zavisi od kvaliteta slike i teksta na njoj."
+            )
+            .setNegativeButton("Ne, hvala", null)
+            .setPositiveButton("Probaj") { _, _ -> runOcrAndInsert(uri, fileName) }
+            .show()
+    }
+
+    private fun runOcrAndInsert(uri: Uri, fileName: String) {
+        android.widget.Toast.makeText(this, "Prepoznavanje teksta u toku...", android.widget.Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val recognizedText = withContext(Dispatchers.IO) {
+                try {
+                    val bitmap = contentResolver.openInputStream(uri)?.use {
+                        android.graphics.BitmapFactory.decodeStream(it)
+                    } ?: return@withContext null
+                    val image = com.google.mlkit.vision.common.InputImage.fromBitmap(bitmap, 0)
+                    val recognizer = com.google.mlkit.vision.text.TextRecognition.getClient(
+                        com.google.mlkit.vision.text.latin.TextRecognizerOptions.DEFAULT_OPTIONS
+                    )
+                    // ML Kit-ov API je asinhron (Task) - .await() (kotlinx-coroutines-play-services)
+                    // ga cisto povezuje sa suspend funkcijom, bez rucnog blokiranja niti.
+                    recognizer.process(image).await().text
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            if (recognizedText.isNullOrBlank()) {
+                AlertDialog.Builder(this@DocumentListActivity)
+                    .setMessage("Nije uspelo prepoznavanje teksta sa ove slike.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+                return@launch
+            }
+            val localUri = withContext(Dispatchers.IO) {
+                try {
+                    val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
+                    val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.txt")
+                    destFile.writeText(recognizedText)
+                    Uri.fromFile(destFile)
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            if (localUri == null) return@launch
+            val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
+            db.documentDao().insert(
+                com.recporec.app.data.DocumentEntity(
+                    title = "${fileName.substringBeforeLast(".")} (iz slike)",
+                    uri = localUri.toString(),
+                    format = "txt",
+                    speechRate = -1f,
+                    pitch = -1f,
+                    volumePercent = -1,
+                    voiceName = null,
+                    voiceEngine = null,
+                    languageTag = null,
+                    sortOrder = bottomOrder
+                )
+            )
+            android.widget.Toast.makeText(this@DocumentListActivity, "Tekst dodat u listu dokumenata.", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 }

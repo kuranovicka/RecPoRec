@@ -77,6 +77,13 @@ dependencies {
     // PDF text extraction
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 
+    // OCR (citanje teksta sa slika) - potpuno OFFLINE, na samom uredjaju, ne salje sliku
+    // nigde preko interneta - bitno za privatnost korisnika. Setup potvrdjen kao standardan
+    // (Google/Kodeco dokumentacija) - raniji neuspeli build-ovi su bili zbog NEPOVEZANE
+    // greske u drugom fajlu (ShareReceiverActivity), ne zbog ovoga.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
     // Za otvaranje fajlova (uključujući Google Disk kroz sistemski birač)
     implementation("androidx.activity:activity-ktx:1.9.1")
 
