@@ -24,7 +24,7 @@ class HelpActivity : AppCompatActivity() {
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.
-        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf i mobi.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi, jpg, png, bmp i webp.
         Dug pritisak proverava sve dozvole potrebne aplikaciji i javlja ako neka nije data, kao pri prvom pokretanju.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
@@ -137,6 +137,8 @@ class HelpActivity : AppCompatActivity() {
         Program podržava i rad sa fizičkim Bluetooth tastaturama, kao i sa slušalicama na dodir ili dugme.
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
         Kada neki dokument ili knjigu želiš da podeliš, u opcijama će ti biti ponuđena i aplikacija Reč po reč.
+        Program sada podržava i čitanje slikovnih datoteka.
+        Nije 100% pouzdano, ali radi za osnovnu upotrebu.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

@@ -1,9 +1,0 @@
-What's new in RečPoReč 11.0?
-
-1. Now, when you're on an article or book on your phone and tap Share, RečPoReč is offered as one of the options.
-2. Also, in a document's own options, there's now a Share option too, so you can share it with another app. Handy when you want to send someone a book you enjoyed, straight from the reader.
-3. Also added to the single-document actions: Export to txt. Includes basic cleanup.
-4. If you accidentally delete one or all documents, you now have a short window to change your mind and undo it.
-5. A "Create backup" button was added to the main screen - it backs up all your books, including where you left off.
-6. Long-pressing that same button restores from a backup. The backup file is deleted afterward, so nothing piles up.
-7. Reorganized book list on the main screen - there's now also a "New" tab.
