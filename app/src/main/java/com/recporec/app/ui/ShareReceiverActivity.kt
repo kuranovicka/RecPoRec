@@ -1,8 +1,8 @@
 package com.recporec.app.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.DocumentEntity
@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
  * targetirati pravi ekran - ovde nema potrebe za "trampolinom" jer nema asinhronog cekanja
  * pre nego sto znamo kuda dalje, sem same DB operacije koju i tako radimo u lifecycleScope).
  */
-class ShareReceiverActivity : Activity() {
+class ShareReceiverActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
