@@ -155,6 +155,24 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        // Ova dva dugmeta su JEDINA u celoj app-i unutar ekrana koji se skroluje (ScrollView) -
+        // poznat Android problem: ScrollView ume da protumaci pridrzan dodir kao POCETAK
+        // skrolovanja, i tiho otkaze dug pritisak pre nego sto stigne da se registruje (bez
+        // ikakve vidljive/culjne reakcije - korisnicka prijava: "kao da dugme ne postoji").
+        // Standardna popravka: reci roditelju (ScrollView) da NE presrece dodir dok je prst
+        // na dugmetu.
+        val protectLongPressFromScroll = android.view.View.OnTouchListener { v, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN ->
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL ->
+                    v.parent?.requestDisallowInterceptTouchEvent(false)
+            }
+            false // ne "guta" dodir - obican klik/dugi klik se i dalje normalno obradjuju
+        }
+        binding.btnExportSettings.setOnTouchListener(protectLongPressFromScroll)
+        binding.btnImportSettings.setOnTouchListener(protectLongPressFromScroll)
+
         binding.btnExportSettings.setOnClickListener {
             exportLauncher.launch("recporec-podesavanja.json")
         }
