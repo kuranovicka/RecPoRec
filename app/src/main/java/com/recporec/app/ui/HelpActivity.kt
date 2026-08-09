@@ -64,7 +64,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima dvadeset dugmića, raspoređenih u pet redova.
+        Tastatura ima dvadeset i jedno dugme, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
