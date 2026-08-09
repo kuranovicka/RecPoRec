@@ -77,13 +77,6 @@ dependencies {
     // PDF text extraction
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 
-    // OCR (citanje teksta sa slika) - potpuno OFFLINE, na samom uredjaju, ne salje sliku
-    // nigde preko interneta - bitno za privatnost korisnika.
-    implementation("com.google.mlkit:text-recognition:16.0.1")
-    // Eksplicitno - Tasks.await() ne mora uvek biti automatski povucen kao tranzitivna
-    // zavisnost samog text-recognition paketa.
-    implementation("com.google.android.gms:play-services-tasks:18.2.0")
-
     // Za otvaranje fajlova (uključujući Google Disk kroz sistemski birač)
     implementation("androidx.activity:activity-ktx:1.9.1")
 
