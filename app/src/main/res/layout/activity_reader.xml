@@ -96,12 +96,6 @@
                 android:textSize="16sp"
                 android:text="⏰ Probudi" />
 
-            <Button android:id="@+id/btnSelectAll" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_combined"
-                android:contentDescription="Odaberi sve. Dug pritisak: kopiraj odabrano."
-                android:textSize="16sp"
-                android:text="Odaberi sve" />
-
             <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: ponovi poslednju pretragu."

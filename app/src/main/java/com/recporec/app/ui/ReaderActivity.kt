@@ -185,8 +185,6 @@ class ReaderActivity : AppCompatActivity() {
         btnGoTo.setOnLongClickListener { goToDocumentStart(); true }
         btnWakeUp.setOnClickListener(clickSound { showWakeUpDialog() })
         btnWakeUp.setOnLongClickListener { cancelWakeUp(); true }
-        btnSelectAll.setOnClickListener(clickSound { selectAllText() })
-        btnSelectAll.setOnLongClickListener { copySelectedText(); true }
         btnSearchText.setOnClickListener(clickSound { showSearchTextDialog() })
         btnSearchText.setOnLongClickListener { repeatLastSearch(); true }
 
@@ -997,32 +995,6 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Dug pritisak na "Oznake" - odmah dodaje oznaku na trenutnu poziciju, bez otvaranja
      * menija/dijaloga (uvek dobija broj, kao kad se ostavi prazno ime u običnom dodavanju). */
-    // "Odaberi sve" - korisnicki zahtev, namerno JEDNOSTAVNO: samo oznaci ceo tekst dokumenta
-    // kao "spreman za kopiranje" (nema vizuelnog prikaza teksta u ovom citacu da bi se
-    // birao DEO teksta, pa je "sve ili nista" jedina realna opcija) - BEZ secenja, brisanja
-    // ili izmene, tacno kako je i trazeno.
-    private var textReadyToCopy = false
-
-    private fun selectAllText() {
-        textReadyToCopy = !parsed?.fullText.isNullOrEmpty()
-        if (textReadyToCopy) {
-            android.widget.Toast.makeText(this, "Tekst je odabran.", android.widget.Toast.LENGTH_SHORT).show()
-        } else {
-            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun copySelectedText() {
-        val text = parsed?.fullText
-        if (!textReadyToCopy || text.isNullOrEmpty()) {
-            android.widget.Toast.makeText(this, "Prvo odaberi tekst.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Reč po reč", text))
-        android.widget.Toast.makeText(this, "Tekst je kopiran u privremenu memoriju.", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
     private fun quickAddBookmark() {
         val currentDocId = documentId
         val offset = doc?.currentCharacterOffset ?: 0
