@@ -1975,6 +1975,12 @@ class ReaderActivity : AppCompatActivity() {
                     updateStatusTexts()
                     updateSeekBar()
                 }
+                // "Podeli sa" - cim se citanje PRIRODNO zavrsi, privremen dokument se odmah
+                // brise - ne cekamo eventualni onDestroy(), koji Android moze da odlozi
+                // neograniceno dugo ako korisnica samo predje na drugu app umesto da
+                // eksplicitno izadje preko Nazad (korisnicka prijava: podeljeni tekstovi su
+                // ostajali trajno u listi).
+                cleanupEphemeralDocumentIfNeeded()
             }
         }
         PlaybackController.uiTimerExpiredListener = {
@@ -1996,6 +2002,11 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
         persistState()
+        // "Podeli sa" - ako je OVO stvaran izlazak (Nazad, ne samo prelazak na drugu app),
+        // ocisti odmah - ne cekaj onDestroy(), koji moze kasniti.
+        if (isFinishing) {
+            cleanupEphemeralDocumentIfNeeded()
+        }
         if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
         }
@@ -2005,22 +2016,30 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
-        // "Podeli sa" - PRIVREMEN dokument, brise se ovde (ne trajno u listi). Radi se na
-        // odvojenoj niti, ne preko lifecycleScope - taj se vec gasi u ovom trenutku
-        // zivotnog ciklusa, nepouzdan je za zavrsni "fire-and-forget" zadatak ovde.
-        if (isEphemeralSession && documentId > 0) {
-            val idToDelete = documentId
-            val uriToDelete = doc?.uri
-            Thread {
-                try {
-                    AppDatabase.getInstance(applicationContext).documentDao().let {
-                        kotlinx.coroutines.runBlocking { it.deleteById(idToDelete) }
-                    }
-                    uriToDelete?.let { android.net.Uri.parse(it).path?.let { path -> java.io.File(path).delete() } }
-                } catch (_: Exception) {
+        // Rezervna mreza - ako iz nekog razloga cleanupEphemeralDocumentIfNeeded() nije vec
+        // pozvana (onPause/uiFinishedListener), pokusaj poslednji put ovde.
+        cleanupEphemeralDocumentIfNeeded()
+    }
+
+    /** "Podeli sa" - brise PRIVREMEN dokument (bazu + fajl na disku). Idempotentno je bezbedno
+     * zvati vise puta (npr. i pri kraju citanja I pri izlasku) - drugi/treci poziv jednostavno
+     * nema sta da obrise, deleteById na vec obrisanom redu je bezopasan no-op. Radi na
+     * odvojenoj niti, ne preko lifecycleScope - taj moze biti nepouzdan/vec ugasen kasno u
+     * zivotnom ciklusu (onDestroy). */
+    private fun cleanupEphemeralDocumentIfNeeded() {
+        if (!isEphemeralSession || documentId <= 0) return
+        val idToDelete = documentId
+        val uriToDelete = doc?.uri
+        isEphemeralSession = false // sprecava duplo pokretanje niti ako se pozove vise puta
+        Thread {
+            try {
+                AppDatabase.getInstance(applicationContext).documentDao().let {
+                    kotlinx.coroutines.runBlocking { it.deleteById(idToDelete) }
                 }
-            }.start()
-        }
+                uriToDelete?.let { android.net.Uri.parse(it).path?.let { path -> java.io.File(path).delete() } }
+            } catch (_: Exception) {
+            }
+        }.start()
     }
 
     companion object {
