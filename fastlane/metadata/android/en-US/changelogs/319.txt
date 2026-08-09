@@ -7,4 +7,5 @@ What's new in RečPoReč 11.0?
 5. A "Create backup" button was added to the main screen - it backs up all your books, including where you left off.
 6. Long-pressing that same button restores from a backup. The backup file is deleted afterward, so nothing piles up.
 7. Reorganized book list on the main screen - there's now also a "New" tab.
-8. Added reading of image files. It doesn't work 100% of the time, but works for basic use.
+8. In the reader's top row, the fourth button now selects all text, and long-pressing it copies the selection.
+9. Added reading of image formats too. That text is automatically exported to txt - simpler this way. The same applies to image-based (scanned) PDFs. Not 100% reliable, but useful.

@@ -160,10 +160,13 @@ class ShareReceiverActivity : AppCompatActivity() {
                     sortOrder = bottomOrder
                 )
             )
+            // NAMERNO BEZ EXTRA_AUTOPLAY (za razliku od deljenog TEKSTA gore) - korisnicki
+            // zahtev: prepoznavanje teksta sa slike ne sme da prekine citanje koje vec traje
+            // negde drugde. Ekran se i dalje otvara (da se vidi rezultat), samo se ne cita
+            // automatski - ona sama pritiska Pusti kad hoce.
             startActivity(
                 Intent(this@ShareReceiverActivity, ReaderActivity::class.java)
                     .putExtra(ReaderActivity.EXTRA_DOCUMENT_ID, newId)
-                    .putExtra(ReaderActivity.EXTRA_AUTOPLAY, true)
             )
             finish()
         }

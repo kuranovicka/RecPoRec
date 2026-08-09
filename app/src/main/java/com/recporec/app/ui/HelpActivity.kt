@@ -24,7 +24,7 @@ class HelpActivity : AppCompatActivity() {
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.
-        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi, jpg, png, bmp i webp.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf,  mobi i slikovni formati.
         Dug pritisak proverava sve dozvole potrebne aplikaciji i javlja ako neka nije data, kao pri prvom pokretanju.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
@@ -37,8 +37,8 @@ class HelpActivity : AppCompatActivity() {
         Zatvara aplikaciju potpuno i prekida čitanje u pozadini.
         Dug pritisak otkriva spoljni uređaj: Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
         Korisno ako nije uspelo automatsko povezivanje.
-        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, izvezi u txt, obriši.
-        Ako slučajno obrišeš dokument, ili klikneš na Obriši sve u opštim radnjama, imaš nekoliko trenutaka da poništiš brisanje.
+        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, obriši.
+        Ako slučajno obrišeš dokument, ili klikneš na Obriši sve, imaš nekoliko trenutaka da poništiš brisanje.
         Gore desno je dugme Opcije.
         Otvara tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Dug pritisak izgovara statistiku čitanja, bez otvaranja novog ekrana:
@@ -81,7 +81,8 @@ class HelpActivity : AppCompatActivity() {
         Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
         Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
         Ponovno pokretanje pamti samo gde nastavljaš knjigu.
-        Četvrto dugme je Pretraga.
+        Četvrto dugme je Odaberi sve, a dug pritisak kopira odabrani tekst u privremenu memoriju.
+        Peto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
         Dug pritisak na bilo koje od njih, vraća visinu na opštu vrednost.
@@ -111,7 +112,7 @@ class HelpActivity : AppCompatActivity() {
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
-        Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
+        Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.
@@ -138,7 +139,7 @@ class HelpActivity : AppCompatActivity() {
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
         Kada neki dokument ili knjigu želiš da podeliš, u opcijama će ti biti ponuđena i aplikacija Reč po reč.
         Program sada podržava i čitanje slikovnih datoteka.
-        Nije 100% pouzdano, ali radi za osnovnu upotrebu.
+        Radi tako što izvuče tekst iz slike i automatski ga izveze u txt.
         Aplikacija ponekad traži dodatne dozvole: za upravljanje pozivima, za neprekidno čitanje u pozadini, i za prikaz preko celog ekrana kod buđenja.
         Odobri sve dozvole pri prvom korišćenju, da kasnije program ne bi imao problem sa radom.
         Hvala ti što čitaš dokumente uz pomoć aplikacije: Reč po reč.

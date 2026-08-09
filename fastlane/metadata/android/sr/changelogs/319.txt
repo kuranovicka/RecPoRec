@@ -7,4 +7,5 @@
 5. Na glavni ekran dodato dugme za izradu rezervne kopije knjiga. Naravno, pamti i gde smo stali.
 6. Dug pritisak na to dugme je vraćanje iz rezervne kopije. Rezervna kopija se nakon vraćanja briše, da nam se ne bi gomilalo sve i svašta.
 7. Reorganizovan prikaz knjiga na glavnom ekranu. Sada imamo i karticu: Novo.
-8. Ubačeno i čitanje slikovnih datoteka. Ne radi u 100% slučajeva, ali radi za osnovnu upotrebu.
+8. U prvom gornjem redu u dokumentu, četvrto dugme selektuje ceo tekst, a dug pritisak kopira odabrano.
+9. Ubačeno i čitanje slikovnih formata. Takav tekst se automatski izveze u txt, jednostavnije je. Isto važi i za slikovni pdf. Ne radi 100% pouzdano, ali može da posluži.
