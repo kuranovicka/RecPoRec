@@ -112,6 +112,39 @@
 
     </LinearLayout>
 
+    <!-- "Poništi brisanje" - VELIKA, uvek prisutna traka (ne Snackbar) - korisnicka prijava
+         da dugme na Snackbar-u nije bilo dovoljno vidljivo/pouzdano za pronaci preko
+         TalkBack-a. Skrivena (GONE) dok nema aktivnog brisanja da se poniti. -->
+    <LinearLayout
+        android:id="@+id/undoDeleteBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#2A2A2A"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/undoDeleteText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:text="Obrisano." />
+
+        <Button
+            android:id="@+id/btnUndoDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:minWidth="140dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Poništi" />
+    </LinearLayout>
+
     <RadioGroup
         android:id="@+id/groupLibraryTabs"
         android:layout_width="match_parent"

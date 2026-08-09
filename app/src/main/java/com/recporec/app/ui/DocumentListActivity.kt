@@ -12,6 +12,7 @@ import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.databinding.ActivityDocumentListBinding
 import com.recporec.app.parser.DocumentParser
+import com.recporec.app.util.requestAccessibilityFocusNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -518,7 +519,7 @@ class DocumentListActivity : AppCompatActivity() {
                     1 -> moveDocument(doc, up = false)
                     2 -> showRenameDialog(doc)
                     3 -> shareDocument(doc)
-                    4 -> { pendingExportDoc = doc; exportTxtLauncher.launch("${sanitizeFileName(doc.title)}.txt") }
+                    4 -> showExportDestinationDialog(doc)
                     5 -> confirmDelete(doc)
                 }
             }
@@ -579,6 +580,64 @@ class DocumentListActivity : AppCompatActivity() {
      * BEZ ijedne izmene koja bi mogla promeniti stvarni sadrzaj (npr. NIJE preneta zamena
      * decimalnog zareza tackom - to menja smisao brojeva, ne samo izgled). Radi na
      * ODVOJENOJ kopiji - NE dira sam dokument niti kako se cita naglas. */
+    /** "Izvezi u txt" - prvo pita GDE: u samu biblioteku (Reč po reč, kao novi dokument -
+     * korisno da se posle lakše podeli preko "Podeli" akcije) ili na telefon (sistemski
+     * birač lokacije - Disk, memorija itd, isto kao do sad). */
+    private fun showExportDestinationDialog(doc: DocumentEntity) {
+        AlertDialog.Builder(this)
+            .setTitle("Izvezi u txt")
+            .setItems(arrayOf("Reč po reč", "Telefon")) { _, which ->
+                when (which) {
+                    0 -> exportDocumentAsTxtToLibrary(doc)
+                    1 -> { pendingExportDoc = doc; exportTxtLauncher.launch("${sanitizeFileName(doc.title)}.txt") }
+                }
+            }
+            .show()
+    }
+
+    /** "Reč po reč" grana izvoza - ociscen tekst se cuva kao NOV dokument u samoj biblioteci
+     * (isti obrazac umetanja kao svuda drugde - copyToLocalStorage stilom), da bi se posle
+     * mogao lako otvoriti za citanje ili podeliti preko vec postojece "Podeli" akcije. */
+    private fun exportDocumentAsTxtToLibrary(doc: DocumentEntity) {
+        android.widget.Toast.makeText(this, "Izvoz u toku...", android.widget.Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    val parsed = com.recporec.app.parser.DocumentParser.parse(
+                        applicationContext, Uri.parse(doc.uri), doc.format
+                    )
+                    val cleaned = basicCleanText(parsed.fullText)
+                    val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
+                    val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.txt")
+                    destFile.writeText(cleaned, Charsets.UTF_8)
+                    val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
+                    db.documentDao().insert(
+                        com.recporec.app.data.DocumentEntity(
+                            title = "${doc.title} (izvoz txt)",
+                            uri = Uri.fromFile(destFile).toString(),
+                            format = "txt",
+                            speechRate = -1f,
+                            pitch = -1f,
+                            volumePercent = -1,
+                            voiceName = null,
+                            voiceEngine = null,
+                            languageTag = null,
+                            sortOrder = bottomOrder
+                        )
+                    )
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            android.widget.Toast.makeText(
+                this@DocumentListActivity,
+                if (ok) "Izvezeno u Reč po reč." else "Izvoz nije uspeo.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private fun exportDocumentAsTxt(doc: DocumentEntity, destUri: Uri) {
         android.widget.Toast.makeText(this, "Izvoz u toku...", android.widget.Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
@@ -701,18 +760,36 @@ class DocumentListActivity : AppCompatActivity() {
     private fun scheduleDelete(ids: List<Long>) {
         pendingDeleteIds.addAll(ids)
         applyTabFilter()
-        val runnable = Runnable { finalizeDelete(ids) }
+        val runnable = Runnable {
+            finalizeDelete(ids)
+            hideUndoBarIfShowing(ids)
+        }
         pendingDeleteRunnables[ids] = runnable
-        undoHandler.postDelayed(runnable, 5000)
+        undoHandler.postDelayed(runnable, UNDO_DELETE_WINDOW_MS)
         val message = if (ids.size == 1) "Dokument obrisan." else "Obrisano dokumenata: ${ids.size}."
-        com.google.android.material.snackbar.Snackbar.make(binding.root, message, 5300)
-            .setAction("Poništi") {
-                undoHandler.removeCallbacks(runnable)
-                pendingDeleteRunnables.remove(ids)
-                pendingDeleteIds.removeAll(ids.toSet())
-                applyTabFilter()
-            }
-            .show()
+        binding.undoDeleteText.text = message
+        binding.undoDeleteBar.visibility = android.view.View.VISIBLE
+        binding.btnUndoDelete.setOnClickListener {
+            undoHandler.removeCallbacks(runnable)
+            pendingDeleteRunnables.remove(ids)
+            pendingDeleteIds.removeAll(ids.toSet())
+            binding.undoDeleteBar.visibility = android.view.View.GONE
+            applyTabFilter()
+        }
+        // Odbrambeno: fokusiraj traku odmah, da je TalkBack sigurno "vidi" i najavi, umesto
+        // da korisnica mora sama da je nadje prevlacenjem po ekranu.
+        binding.undoDeleteBar.post {
+            binding.btnUndoDelete.requestAccessibilityFocusNow()
+        }
+    }
+
+    /** Sakriva traku SAMO ako jos uvek prikazuje bas OVO zakazano brisanje (ne dira je ako je
+     * u medjuvremenu vec prikazuje NOVIJE brisanje - retko, ali moguce ako se brzo obrise
+     * vise razlicitih dokumenata zaredom). */
+    private fun hideUndoBarIfShowing(ids: List<Long>) {
+        if (!pendingDeleteRunnables.containsKey(ids)) {
+            runOnUiThread { binding.undoDeleteBar.visibility = android.view.View.GONE }
+        }
     }
 
     private val pendingDeleteRunnables = mutableMapOf<List<Long>, Runnable>()
@@ -721,7 +798,7 @@ class DocumentListActivity : AppCompatActivity() {
         pendingDeleteRunnables.remove(ids)
         // NAMERNO ne koristi lifecycleScope - taj se gasi cim se ovaj ekran zatvori (npr.
         // otvori se neka knjiga, ili app ode u pozadinu i sistem je ugasi), sto bi znacilo da
-        // se zakazano brisanje NIKAD stvarno ne izvrsi ako se to desi u tih 5 sekundi. Ovo
+        // se zakazano brisanje NIKAD stvarno ne izvrsi ako se to desi u tih 30 sekundi. Ovo
         // MORA da se zavrsi bez obzira da li je ovaj ekran jos uvek ziv - isti obrazac kao i
         // drugde u app-i za "mora da se zavrsi" zadatke.
         val docsToDelete = currentList.filter { it.id in ids }
@@ -1324,5 +1401,12 @@ class DocumentListActivity : AppCompatActivity() {
             )
             android.widget.Toast.makeText(this@DocumentListActivity, "Tekst dodat u listu dokumenata.", android.widget.Toast.LENGTH_SHORT).show()
         }
+    }
+
+    companion object {
+        // "Poništi brisanje" - korisnicki zahtev: do 30 sekundi (Snackbar-ova podrazumevana
+        // kratka najduza traje samo par sekundi, nedovoljno da se stigne pronaci i pritisnuti
+        // dugme preko TalkBack-a).
+        private const val UNDO_DELETE_WINDOW_MS = 30000L
     }
 }
