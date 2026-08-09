@@ -508,11 +508,23 @@ class DocumentListActivity : AppCompatActivity() {
      * Koristi FileProvider, isti obrazac vec proveren za deljenje teksta pomoci. */
     private fun shareDocument(doc: DocumentEntity) {
         try {
-            val uri = Uri.parse(doc.uri)
-            val fileUri = if (uri.scheme == "file") {
-                val file = java.io.File(uri.path!!)
-                androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-            } else uri
+            val srcUri = Uri.parse(doc.uri)
+            if (srcUri.scheme != "file") {
+                android.widget.Toast.makeText(this, "Deljenje nije uspelo.", android.widget.Toast.LENGTH_SHORT).show()
+                return
+            }
+            val srcFile = java.io.File(srcUri.path!!)
+            // KRITICNO: dokumenti se INTERNO cuvaju pod nasumicnim imenom (UUID), ne pod
+            // svojim naslovom - da smo delile TAJ fajl direktno, primalac (npr. Telegram) bi
+            // video baš to nasumicno ime, ne naziv knjige (korisnicka prijava). Zato se prvo
+            // pravi PRIVREMENA kopija sa PRAVIM nazivom u "share" folderu (isti obrazac vec
+            // proveren za deljenje teksta pomoci) - primalac vidi TU kopiju, sa tacnim
+            // naslovom.
+            val safeTitle = doc.title.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "dokument" }
+            val shareDir = java.io.File(cacheDir, "share").apply { mkdirs() }
+            val shareFile = java.io.File(shareDir, "$safeTitle.${doc.format}")
+            srcFile.copyTo(shareFile, overwrite = true)
+            val fileUri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", shareFile)
             val mimeType = when (doc.format) {
                 "txt" -> "text/plain"
                 "pdf" -> "application/pdf"

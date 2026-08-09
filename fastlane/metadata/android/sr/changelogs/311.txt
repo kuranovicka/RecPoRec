@@ -6,3 +6,4 @@
 4. Na glavni ekran dodato dugme za izradu rezervne kopije knjiga. Naravno, pamti i gde smo stali.
 5. Dug pritisak na to dugme je vraćanje iz rezervne kopije. Rezervna kopija se nakon vraćanja briše, da nam se ne bi gomilalo sve i svašta.
 6. Reorganizovan prikaz knjiga na glavnom ekranu. Sada imamo i karticu: Novo.
+7. Popravljeno deljenje dokumenta iz aplikacije - sad nosi pravi naziv knjige, ne slučajan niz brojeva i slova.
