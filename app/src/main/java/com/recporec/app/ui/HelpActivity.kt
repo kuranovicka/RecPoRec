@@ -37,7 +37,8 @@ class HelpActivity : AppCompatActivity() {
         Zatvara aplikaciju potpuno i prekida čitanje u pozadini.
         Dug pritisak otkriva spoljni uređaj: Bluetooth slušalice, tastaturu, ili neki drugi fizički uređaj.
         Korisno ako nije uspelo automatsko povezivanje.
-        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, ili obriši.
+        Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, obriši.
+        Ako slučajno obrišeš dokument, ili klikneš na Obriši sve u opštim radnjama, imaš nekoliko trenutaka da poništiš brisanje.
         Gore desno je dugme Opcije.
         Otvara tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Dug pritisak izgovara statistiku čitanja, bez otvaranja novog ekrana:
@@ -110,7 +111,7 @@ class HelpActivity : AppCompatActivity() {
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
-        Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
+        Dug pritisak na bilo koje od njih vraća brzinu na opštu vrednost.
         Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.

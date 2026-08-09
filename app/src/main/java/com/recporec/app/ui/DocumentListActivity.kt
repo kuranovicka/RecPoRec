@@ -26,6 +26,11 @@ class DocumentListActivity : AppCompatActivity() {
     private val db by lazy { AppDatabase.getInstance(this) }
     private val settings by lazy { com.recporec.app.data.AppSettings(this) }
     private var currentList: List<DocumentEntity> = emptyList()
+    // "Poništi brisanje" - dokumenti ovde su OPTIMISTICNO sakriveni iz prikaza, ali JOS UVEK
+    // postoje u bazi dok ne istekne kratak rok (undoHandler) - ako se u medjuvremenu pritisne
+    // "Poništi", vracaju se u prikaz, bez ikad stvarno obrisanih.
+    private val pendingDeleteIds = mutableSetOf<Long>()
+    private val undoHandler = android.os.Handler(android.os.Looper.getMainLooper())
     /** "all" / "started" / "finished" - koja kartica je trenutno aktivna. */
     private var currentTab: String = "all"
 
@@ -387,11 +392,12 @@ class DocumentListActivity : AppCompatActivity() {
      * kompletna, necu neophodno za pomeranje gore/dole koje mora da radi sa PRAVIM
      * susedima u punom redosledu, ne samo unutar filtrirane kartice. */
     private fun applyTabFilter() {
+        val visible = currentList.filter { it.id !in pendingDeleteIds }
         val filtered = when (currentTab) {
-            "new" -> currentList.filter { it.currentCharacterOffset <= 0 }
-            "started" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset in 1 until it.totalCharacters }
-            "finished" -> currentList.filter { it.totalCharacters > 0 && it.currentCharacterOffset >= it.totalCharacters }
-            else -> currentList
+            "new" -> visible.filter { it.currentCharacterOffset <= 0 }
+            "started" -> visible.filter { it.totalCharacters > 0 && it.currentCharacterOffset in 1 until it.totalCharacters }
+            "finished" -> visible.filter { it.totalCharacters > 0 && it.currentCharacterOffset >= it.totalCharacters }
+            else -> visible
         }
         adapter.submitList(filtered)
         binding.emptyView.visibility = if (filtered.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
@@ -472,24 +478,12 @@ class DocumentListActivity : AppCompatActivity() {
         }
         AlertDialog.Builder(this)
             .setTitle(getString(com.recporec.app.R.string.confirm_delete_title))
-            .setMessage("Obrisati ${ids.size} odabranih dokumenata? Ova radnja se ne može poništiti.")
+            .setMessage("Obrisati ${ids.size} odabranih dokumenata?")
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
             .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
-                lifecycleScope.launch {
-                    // Ako je medju odabranim i dokument koji trenutno cita (npr. u pozadini),
-                    // zaustavi citanje pre brisanja - ista bezbednosna provera kao za
-                    // pojedinacno brisanje.
-                    if (com.recporec.app.tts.PlaybackController.currentDocument?.id in ids) {
-                        com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
-                        com.recporec.app.tts.PlaybackController.release()
-                    }
-                    db.documentDao().deleteByIds(ids.toList())
-                    adapter.cancelSelection()
-                    updateGeneralActionsLabel(0)
-                    android.widget.Toast.makeText(
-                        this@DocumentListActivity, "Obrisano.", android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
+                adapter.cancelSelection()
+                updateGeneralActionsLabel(0)
+                scheduleDelete(ids.toList())
             }
             .show()
     }
@@ -497,15 +491,47 @@ class DocumentListActivity : AppCompatActivity() {
     private fun showActionsMenu(doc: DocumentEntity) {
         AlertDialog.Builder(this)
             .setTitle(doc.title)
-            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Obriši")) { _, which ->
+            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Obriši")) { _, which ->
                 when (which) {
                     0 -> moveDocument(doc, up = true)
                     1 -> moveDocument(doc, up = false)
                     2 -> showRenameDialog(doc)
-                    3 -> confirmDelete(doc)
+                    3 -> shareDocument(doc)
+                    4 -> confirmDelete(doc)
                 }
             }
             .show()
+    }
+
+    /** "Podeli" - deli SAM FAJL dokumenta (originalni format, ne izvucen tekst) sa drugom
+     * aplikacijom - obrnut smer od "Podeli sa" (ShareReceiverActivity), koji PRIMA tekst.
+     * Koristi FileProvider, isti obrazac vec proveren za deljenje teksta pomoci. */
+    private fun shareDocument(doc: DocumentEntity) {
+        try {
+            val uri = Uri.parse(doc.uri)
+            val fileUri = if (uri.scheme == "file") {
+                val file = java.io.File(uri.path!!)
+                androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            } else uri
+            val mimeType = when (doc.format) {
+                "txt" -> "text/plain"
+                "pdf" -> "application/pdf"
+                "epub" -> "application/epub+zip"
+                "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                "html" -> "text/html"
+                "fb2" -> "text/xml"
+                "rtf" -> "application/rtf"
+                else -> "application/octet-stream"
+            }
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = mimeType
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, "Podeli dokument"))
+        } catch (_: Exception) {
+            android.widget.Toast.makeText(this, "Deljenje nije uspelo.", android.widget.Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showRenameDialog(doc: DocumentEntity) {
@@ -571,26 +597,59 @@ class DocumentListActivity : AppCompatActivity() {
             .setMessage(getString(com.recporec.app.R.string.confirm_delete_message))
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
             .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
-                lifecycleScope.launch {
-                    // Ako je ovo dokument koji trenutno svira (npr. u pozadini),
-                    // zaustavi čitanje i ugasi servis pre brisanja - inače bi nastavilo
-                    // da čita fajl koji upravo brišemo, sa "zaglavljenom" notifikacijom.
-                    if (com.recporec.app.tts.PlaybackController.currentDocument?.id == doc.id) {
-                        com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
-                        com.recporec.app.tts.PlaybackController.release()
-                    }
-                    db.documentDao().deleteById(doc.id)
-                    withContext(Dispatchers.IO) {
-                        try {
-                            val uri = Uri.parse(doc.uri)
-                            if (uri.scheme == "file") {
-                                uri.path?.let { java.io.File(it).delete() }
-                            }
-                        } catch (_: Exception) { }
+                scheduleDelete(listOf(doc.id))
+            }
+            .show()
+    }
+
+    /** "Poništi brisanje" - zajednicka funkcija za pojedinacno i grupno brisanje (Obriši sve).
+     * Dokument(i) SE ODMAH SAKRIVAJU iz prikaza (applyTabFilter isključuje pendingDeleteIds),
+     * ali se STVARNO brišu tek posle kratkog roka - ako se u medjuvremenu pritisne "Poništi"
+     * na Snackbar-u, otkazuje se zakazano brisanje i dokumenti se vracaju u prikaz, bez ijedne
+     * stvarne izmene baze. */
+    private fun scheduleDelete(ids: List<Long>) {
+        pendingDeleteIds.addAll(ids)
+        applyTabFilter()
+        val runnable = Runnable { finalizeDelete(ids) }
+        pendingDeleteRunnables[ids] = runnable
+        undoHandler.postDelayed(runnable, 5000)
+        val message = if (ids.size == 1) "Dokument obrisan." else "Obrisano dokumenata: ${ids.size}."
+        com.google.android.material.snackbar.Snackbar.make(binding.root, message, 5300)
+            .setAction("Poništi") {
+                undoHandler.removeCallbacks(runnable)
+                pendingDeleteRunnables.remove(ids)
+                pendingDeleteIds.removeAll(ids.toSet())
+                applyTabFilter()
+            }
+            .show()
+    }
+
+    private val pendingDeleteRunnables = mutableMapOf<List<Long>, Runnable>()
+
+    private fun finalizeDelete(ids: List<Long>) {
+        pendingDeleteRunnables.remove(ids)
+        lifecycleScope.launch {
+            // Ako je medju obrisanim dokument koji trenutno cita (npr. u pozadini), zaustavi
+            // citanje pre brisanja - inace bi nastavilo da cita fajl koji upravo brisemo.
+            if (com.recporec.app.tts.PlaybackController.currentDocument?.id in ids) {
+                com.recporec.app.service.ReadingService.stop(this@DocumentListActivity)
+                com.recporec.app.tts.PlaybackController.release()
+            }
+            val docsToDelete = currentList.filter { it.id in ids }
+            db.documentDao().deleteByIds(ids)
+            pendingDeleteIds.removeAll(ids.toSet())
+            withContext(Dispatchers.IO) {
+                docsToDelete.forEach { d ->
+                    try {
+                        val uri = Uri.parse(d.uri)
+                        if (uri.scheme == "file") {
+                            uri.path?.let { java.io.File(it).delete() }
+                        }
+                    } catch (_: Exception) {
                     }
                 }
             }
-            .show()
+        }
     }
 
     /** Pita SAMO JEDNOM (ikad) za dozvolu stanja telefona - rezervni mehanizam za pauzu pri
