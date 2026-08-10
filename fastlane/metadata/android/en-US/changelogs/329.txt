@@ -1,3 +1,0 @@
-What's new in RečPoReč 12.0?
-
-The app now remembers which shelf (tab) you were on: All, New, Started, or Finished.
