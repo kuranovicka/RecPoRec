@@ -1220,15 +1220,8 @@ class DocumentListActivity : AppCompatActivity() {
                     manifest.put("version", 1)
                     manifest.put("documents", docsJson)
                     manifest.put("bookmarks", bookmarksJson)
-                    // Korisnicki zahtev: rezervna kopija sad pamti i ova (globalna) podesavanja
-                    // navigacije - nemaju veze sa POJEDINACNIM dokumentom, ali su bitna za
-                    // "vratiti stanje kao pre" posle promene telefona.
-                    val navigationSettings = org.json.JSONObject()
-                    navigationSettings.put("navigationMode", settings.navigationMode)
-                    navigationSettings.put("sentenceNavigationCount", settings.sentenceNavigationCount)
-                    manifest.put("navigationSettings", navigationSettings)
 
-                    contentResolver.openOutputStream(uri, "wt")?.use { out ->
+                    contentResolver.openOutputStream(uri)?.use { out ->
                         java.util.zip.ZipOutputStream(out).use { zip ->
                             zip.putNextEntry(java.util.zip.ZipEntry("manifest.json"))
                             zip.write(manifest.toString().toByteArray(Charsets.UTF_8))
@@ -1281,14 +1274,6 @@ class DocumentListActivity : AppCompatActivity() {
                     val manifest = org.json.JSONObject(String(manifestBytes, Charsets.UTF_8))
                     val docsJson = manifest.getJSONArray("documents")
                     val bookmarksJson = manifest.optJSONArray("bookmarks")
-                    // Korisnicki zahtev: vrati i (globalna) podesavanja navigacije ako postoje
-                    // u ovoj rezervnoj kopiji - stare kopije (pre ove izmene) ih nece imati,
-                    // pa se NAMERNO ne dira nista ako sekcija ne postoji (optJSONObject vraca
-                    // null umesto da izazove gresku).
-                    manifest.optJSONObject("navigationSettings")?.let { nav ->
-                        settings.navigationMode = nav.optString("navigationMode", settings.navigationMode)
-                        settings.sentenceNavigationCount = nav.optInt("sentenceNavigationCount", settings.sentenceNavigationCount)
-                    }
 
                     val idMap = HashMap<Long, Long>()
                     var restoredCount = 0
