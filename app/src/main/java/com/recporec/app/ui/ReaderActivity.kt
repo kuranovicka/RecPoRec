@@ -222,10 +222,6 @@ class ReaderActivity : AppCompatActivity() {
             )
         })
         btnCombinedVoices.setOnLongClickListener { showAutoScrollDialog(); true }
-        btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
-        btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
-        btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
-        btnVolUp.setOnLongClickListener { resetToGlobal("jačina"); true }
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
         btnVoice.setOnLongClickListener { showScheduleReadingDialog(); true }
 
@@ -1332,15 +1328,6 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(
             this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
         ).show()
-    }
-
-    private fun adjustVolume(direction: Int) {
-        val entity = doc ?: return
-        val newPercent = (effectiveVolume(entity) + direction * 5).coerceIn(0, 100)
-        doc = entity.copy(volumePercent = newPercent)
-        PlaybackController.ttsManager?.setVolume(newPercent / 100f)
-        persistState()
-        android.widget.Toast.makeText(this, "Jačina zvuka: $newPercent%", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private fun adjustSpeed(delta: Float) {
