@@ -1918,4 +1918,169 @@ class ReaderActivity : AppCompatActivity() {
         // reaguje/pritisne Pusti-Pauziraj pre sledeceg koraka.
         private const val AUTO_SCROLL_STEP_MS = 4500L
     }
+    /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
+     * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
+     * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
+    private fun resetToGlobal(what: String) {
+        val entity = doc ?: return
+        val tts = PlaybackController.ttsManager
+        doc = when (what) {
+            "brzina" -> {
+                val newRate = settings.globalSpeechRate
+                tts?.setSpeechRate(newRate)
+                entity.copy(speechRate = -1f)
+            }
+            "visina" -> {
+                val newPitch = settings.globalPitch
+                tts?.setPitch(newPitch)
+                entity.copy(pitch = -1f)
+            }
+            else -> {
+                val newVolume = settings.globalVolumePercent
+                tts?.setVolume(newVolume / 100f)
+                entity.copy(volumePercent = -1)
+            }
+        }
+        persistState()
+        android.widget.Toast.makeText(
+            this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun adjustVolume(direction: Int) {
+        val entity = doc ?: return
+        val newPercent = (effectiveVolume(entity) + direction * 5).coerceIn(0, 100)
+        doc = entity.copy(volumePercent = newPercent)
+        PlaybackController.ttsManager?.setVolume(newPercent / 100f)
+        persistState()
+        android.widget.Toast.makeText(this, "Jačina zvuka: $newPercent%", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    private fun adjustSpeed(delta: Float) {
+        val entity = doc ?: return
+        val newRate = (effectiveRate(entity) + delta).coerceIn(0.3f, 3.0f)
+        doc = entity.copy(speechRate = newRate)
+        PlaybackController.ttsManager?.setSpeechRate(newRate)
+        persistState()
+        val roundedRate = (newRate * 100).roundToInt() / 100f
+        android.widget.Toast.makeText(
+            this, "Brzina čitanja: ${String.format(Locale.US, "%.2f", roundedRate)}x", android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun adjustPitch(delta: Float) {
+        val entity = doc ?: return
+        val newPitch = (effectivePitch(entity) + delta).coerceIn(0.5f, 2.0f)
+        doc = entity.copy(pitch = newPitch)
+        PlaybackController.ttsManager?.setPitch(newPitch)
+        persistState()
+        val roundedPitch = (newPitch * 100).roundToInt() / 100f
+        android.widget.Toast.makeText(
+            this, "Visina glasa: ${String.format(Locale.US, "%.2f", roundedPitch)}x", android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun showDocLanguagePicker() {
+        loadVoicesIfNeeded { showDocLanguagePickerWithVoices() }
+    }
+
+    private fun showDocLanguagePickerWithVoices() {
+        val voices = allVoices.ifEmpty { return }
+        val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
+        val resetLabel = "Koristi opšti jezik (ukloni poseban izbor za ovaj dokument)"
+        val labels = listOf(resetLabel) + languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
+        val current = if (doc?.languageTag == null) {
+            resetLabel
+        } else {
+            doc?.languageTag?.let { code -> languages.firstOrNull { it.language == code }?.displayLanguage }
+        }
+        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current, autoConfirm = true) { index ->
+            if (index == 0) {
+                doc = doc?.copy(languageTag = null)
+                persistState()
+                updateDocLanguageButtonText()
+                return@show
+            }
+            val chosen = languages[index - 1]
+            doc = doc?.copy(languageTag = chosen.language)
+            persistState()
+            updateDocLanguageButtonText()
+        }
+    }
+
+    private fun updateDocLanguageButtonText() {
+        val tag = doc?.languageTag
+        binding.btnDocLanguage.text = if (tag != null) {
+            "Jezik: ${java.util.Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
+        } else {
+            "Jezik"
+        }
+    }
+
+    private fun showVoiceDialog() {
+        loadVoicesIfNeeded { showVoiceDialogWithVoices() }
+    }
+
+    private fun showVoiceDialogWithVoices() {
+        val voices = allVoices.ifEmpty { return }
+        val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
+        val filtered = if (languageFilter != null) {
+            voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
+        } else voices
+
+        val resetLabel = "Koristi opšti glas (ukloni poseban izbor za ovaj dokument)"
+        val labels = listOf(resetLabel) + com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
+        val effectiveVoiceName = doc?.voiceName ?: settings.globalVoiceName ?: PlaybackController.ttsManager?.currentVoiceName()
+        val current = if (doc?.voiceName == null) {
+            resetLabel
+        } else {
+            effectiveVoiceName?.let { name -> filtered.firstOrNull { it.voice.name == name }?.displayLabel }
+        }
+        PickerDialog.show(
+            this, getString(R.string.voice_dialog_title), labels, current,
+            onSelectionPreview = { index -> if (index > 0) com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index - 1]) },
+            autoConfirm = true
+        ) { index ->
+            if (index == 0) {
+                // Ukloni poseban glas ovog dokumenta I sve njegove kombinovane glasove/jezike -
+                // dokument se u potpunosti oslanja na opšta podešavanja, kombinovana ili ne.
+                doc = doc?.copy(voiceName = null, voiceEngine = null)
+                persistState()
+                lifecycleScope.launch {
+                    db.combinedVoiceDao().clearScope(documentId)
+                    loadDocument()
+                }
+                return@show
+            }
+            val chosen = filtered[index - 1]
+            val tts = PlaybackController.ttsManager
+            if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
+                ttsReady = false
+                tts.switchEngine(chosen.enginePackage, chosen.voice.name, effectiveRate(doc)) {
+                    parsed?.let { tts.loadText(it.fullText) }
+                    markTtsReady()
+                }
+            } else {
+                tts?.setVoiceByName(chosen.voice.name)
+            }
+            doc = doc?.copy(voiceName = chosen.voice.name, voiceEngine = chosen.enginePackage)
+            persistState()
+        }
+    }
+
+    /** Dug pritisak na "Jezik" - poništava SVE prethodne radnje odjednom, vraćajući na mesto
+     * od PRE prve od njih (npr. skočila si 2 sata napred, pa nazad, pa na oznaku, pa na
+     * nasumičnu stranicu - ovo te vraća tačno tamo gde si bila pre svega toga). */
+    private fun undoAllJumps() {
+        if (jumpHistory.isEmpty()) {
+            android.widget.Toast.makeText(this, "Nema prethodnih radnji.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val target = jumpHistory.first()
+        jumpHistory.clear()
+        moveTo(target, recordHistory = false)
+        android.widget.Toast.makeText(this, "Poništene sve prethodne radnje.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+
 }
