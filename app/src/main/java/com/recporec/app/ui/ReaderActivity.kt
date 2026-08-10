@@ -239,6 +239,7 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnRewindSentences.setOnClickListener(clickSound { showRewindSentencesDialog() })
         btnRewindSentences.setOnLongClickListener { repeatLastSentenceRewind(); true }
+        updateRewindSentencesDescription()
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -729,6 +730,7 @@ class ReaderActivity : AppCompatActivity() {
             val n = input.text.toString().toIntOrNull() ?: return
             if (n <= 0) return
             settings.lastSentenceRewindCount = n
+            updateRewindSentencesDescription()
             applySentenceRewind(n)
         }
         val dialog = AlertDialog.Builder(this)
@@ -752,6 +754,16 @@ class ReaderActivity : AppCompatActivity() {
      * pitanja. */
     private fun repeatLastSentenceRewind() {
         applySentenceRewind(settings.lastSentenceRewindCount)
+    }
+
+    /** Osvezava SAMO ono sto TalkBack najavljuje (contentDescription), NE i vidljiv naziv
+     * dugmeta (ostaje "Vrati rečenice") - korisnicki zahtev: da se preko citaca ekrana zna
+     * TACNO koliko ce dug pritisak da vrati unazad, bez da se sam natpis na dugmetu menja. */
+    private fun updateRewindSentencesDescription() {
+        val n = settings.lastSentenceRewindCount
+        val word = serbianPlural(n, "rečenicu", "rečenice", "rečenica")
+        binding.btnRewindSentences.contentDescription =
+            "Vrati rečenice. Dug pritisak: ponovi vraćanje za $n $word."
     }
 
     private fun applySentenceRewind(n: Int) {
