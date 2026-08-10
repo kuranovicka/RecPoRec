@@ -523,8 +523,9 @@ class ReaderActivity : AppCompatActivity() {
         // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
         // i dalje važi za dokumente koji nemaju sopstveni izbor.
         // Ako postoje kombinovani glasovi (za dokument ili opšte), oni imaju prednost.
-        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (entity.voiceName ?: settings.globalVoiceName)
-        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
+        // Sad UVEK opšti (globalni) glas - glas/jezik sad vaze za SVE dokumente.
+        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: settings.globalVoiceName
+        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: settings.globalVoiceEngine
         // Isti obrazac kao glas: dokumentova sopstvena brzina/visina ako je ikad eksplicitno
         // postavljena, inače opšta - da izmena opštih podešavanja stvarno utiče na dokumente
         // koji nemaju svoju (ranije je brzina/visina uvek bila "zamrznuta" od trenutka dodavanja).
@@ -773,23 +774,15 @@ class ReaderActivity : AppCompatActivity() {
      * postavljena (vrednost > 0), inače opšta (globalna). Isti obrazac kao kod glasa/jezika -
      * bez ovoga, promena Brzine u Opštim podešavanjima ne bi uticala ni na jedan dokument
      * koji je ikad otvoren (jer bi već imao "snimljenu" staru vrednost od trenutka dodavanja). */
-    private fun effectiveRate(entity: DocumentEntity?): Float {
-        val stored = entity?.speechRate ?: return settings.globalSpeechRate
-        return if (stored > 0f) stored else settings.globalSpeechRate
-    }
+    /** UVEK opšta (globalna) vrednost - brzina/visina/jačina sad važe za SVE dokumente,
+     * nema više posebnog izbora po dokumentu. DocumentEntity polja (speechRate/pitch/
+     * volumePercent) ostaju u bazi (bezopasno, neiskoriscena) radi kompatibilnosti sa
+     * starim rezervnim kopijama - samo se vise ne citaju ovde. */
+    private fun effectiveRate(entity: DocumentEntity?): Float = settings.globalSpeechRate
 
-    /** Isto kao [effectiveRate], samo za visinu glasa. */
-    private fun effectivePitch(entity: DocumentEntity?): Float {
-        val stored = entity?.pitch ?: return settings.globalPitch
-        return if (stored > 0f) stored else settings.globalPitch
-    }
+    private fun effectivePitch(entity: DocumentEntity?): Float = settings.globalPitch
 
-    /** Isto kao [effectiveRate], samo za jačinu (0-100%). Jačina je vezana za TTS (ovu knjigu),
-     * NE za sistemsku jačinu telefona. */
-    private fun effectiveVolume(entity: DocumentEntity?): Int {
-        val stored = entity?.volumePercent ?: return settings.globalVolumePercent
-        return if (stored >= 0) stored else settings.globalVolumePercent
-    }
+    private fun effectiveVolume(entity: DocumentEntity?): Int = settings.globalVolumePercent
 
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode
