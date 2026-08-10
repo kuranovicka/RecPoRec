@@ -225,10 +225,6 @@ class ReaderActivity : AppCompatActivity() {
         btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
         btnVoice.setOnLongClickListener { showScheduleReadingDialog(); true }
 
-        btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
-        btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
-        btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
-        btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -290,8 +286,6 @@ class ReaderActivity : AppCompatActivity() {
         layoutRow2.visibility = visibility
         layoutRow3.visibility = visibility
         layoutRow5.visibility = visibility
-        btnSpeedDown.visibility = visibility
-        btnSpeedUp.visibility = visibility
         seekProgress.visibility = visibility
         // NAMERNO se ne dira - Nazad treba da bude prisutan u SVAKOM prozoru/stanju, i kad su
         // ostale kontrole sakrivene (korisnicka prijava - ranije je nestajalo sa ostalim).
@@ -1327,18 +1321,6 @@ class ReaderActivity : AppCompatActivity() {
         persistState()
         android.widget.Toast.makeText(
             this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun adjustSpeed(delta: Float) {
-        val entity = doc ?: return
-        val newRate = (effectiveRate(entity) + delta).coerceIn(0.3f, 3.0f)
-        doc = entity.copy(speechRate = newRate)
-        PlaybackController.ttsManager?.setSpeechRate(newRate)
-        persistState()
-        val roundedRate = (newRate * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(
-            this, "Brzina čitanja: ${String.format(Locale.US, "%.2f", roundedRate)}x", android.widget.Toast.LENGTH_SHORT
         ).show()
     }
 
