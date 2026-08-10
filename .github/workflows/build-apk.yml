@@ -33,7 +33,16 @@ jobs:
           gradle-version: "8.10"
 
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace 2>&1 | tee /tmp/build_output.txt || true
+
+      - name: Write build output to summary on failure
+        if: always()
+        run: |
+          echo '## Build output (last 200 lines)' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 200 /tmp/build_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if grep -q "BUILD FAILED" /tmp/build_output.txt; then exit 1; fi
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
