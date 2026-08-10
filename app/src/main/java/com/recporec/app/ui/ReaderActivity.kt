@@ -202,14 +202,10 @@ class ReaderActivity : AppCompatActivity() {
         btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
         btnToggleControls.setOnLongClickListener { quickShortBreak(); true }
 
-        btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
-        btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
         btnNextChapter.setOnLongClickListener { showChapterList(); true }
-        btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
-        btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
@@ -1356,18 +1352,6 @@ class ReaderActivity : AppCompatActivity() {
         val roundedRate = (newRate * 100).roundToInt() / 100f
         android.widget.Toast.makeText(
             this, "Brzina čitanja: ${String.format(Locale.US, "%.2f", roundedRate)}x", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun adjustPitch(delta: Float) {
-        val entity = doc ?: return
-        val newPitch = (effectivePitch(entity) + delta).coerceIn(0.5f, 2.0f)
-        doc = entity.copy(pitch = newPitch)
-        PlaybackController.ttsManager?.setPitch(newPitch)
-        persistState()
-        val roundedPitch = (newPitch * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(
-            this, "Visina glasa: ${String.format(Locale.US, "%.2f", roundedPitch)}x", android.widget.Toast.LENGTH_SHORT
         ).show()
     }
 
