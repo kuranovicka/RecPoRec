@@ -220,8 +220,6 @@ class ReaderActivity : AppCompatActivity() {
             )
         })
         btnCombinedVoices.setOnLongClickListener { showAutoScrollDialog(); true }
-        btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
-        btnVoice.setOnLongClickListener { showScheduleReadingDialog(); true }
 
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
@@ -1305,57 +1303,6 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(
             this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
         ).show()
-    }
-
-    private fun showVoiceDialog() {
-        loadVoicesIfNeeded { showVoiceDialogWithVoices() }
-    }
-
-    private fun showVoiceDialogWithVoices() {
-        val voices = allVoices.ifEmpty { return }
-        val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
-        val filtered = if (languageFilter != null) {
-            voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
-        } else voices
-
-        val resetLabel = "Koristi opšti glas (ukloni poseban izbor za ovaj dokument)"
-        val labels = listOf(resetLabel) + com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
-        val effectiveVoiceName = doc?.voiceName ?: settings.globalVoiceName ?: PlaybackController.ttsManager?.currentVoiceName()
-        val current = if (doc?.voiceName == null) {
-            resetLabel
-        } else {
-            effectiveVoiceName?.let { name -> filtered.firstOrNull { it.voice.name == name }?.displayLabel }
-        }
-        PickerDialog.show(
-            this, getString(R.string.voice_dialog_title), labels, current,
-            onSelectionPreview = { index -> if (index > 0) com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index - 1]) },
-            autoConfirm = true
-        ) { index ->
-            if (index == 0) {
-                // Ukloni poseban glas ovog dokumenta I sve njegove kombinovane glasove/jezike -
-                // dokument se u potpunosti oslanja na opšta podešavanja, kombinovana ili ne.
-                doc = doc?.copy(voiceName = null, voiceEngine = null)
-                persistState()
-                lifecycleScope.launch {
-                    db.combinedVoiceDao().clearScope(documentId)
-                    loadDocument()
-                }
-                return@show
-            }
-            val chosen = filtered[index - 1]
-            val tts = PlaybackController.ttsManager
-            if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
-                ttsReady = false
-                tts.switchEngine(chosen.enginePackage, chosen.voice.name, effectiveRate(doc)) {
-                    parsed?.let { tts.loadText(it.fullText) }
-                    markTtsReady()
-                }
-            } else {
-                tts?.setVoiceByName(chosen.voice.name)
-            }
-            doc = doc?.copy(voiceName = chosen.voice.name, voiceEngine = chosen.enginePackage)
-            persistState()
-        }
     }
 
     private fun showTimerMenu() {

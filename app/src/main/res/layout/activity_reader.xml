@@ -143,11 +143,6 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnVoice" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_voice"
-                android:contentDescription="@string/btn_voice"
-                android:text="🗣 Glas" />
-
             <Button android:id="@+id/btnCombinedVoices" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
                 android:contentDescription="Kombinovani glasovi za ovaj dokument. Dug pritisak: automatski listaj dokument."
