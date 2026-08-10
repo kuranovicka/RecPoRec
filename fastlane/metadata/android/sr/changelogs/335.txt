@@ -1,4 +1,0 @@
-Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 12.0?
-
-1. Sada program pamti na kom folderu, tj. na kojoj smo polici stali: (Sve, Novo, Započeto, Pročitano).
-2. Dugme Navigacija sada ima i opciju Rečenice, pored stranice, minuta i oznake. Kad je izabereš, biraš i koliko rečenica po koraku: jednu, tri ili pet. Dugmad za korak nazad/napred tada rade po rečenicama, a dug pritisak na dugme za korak nazad ponavlja isti povratak.

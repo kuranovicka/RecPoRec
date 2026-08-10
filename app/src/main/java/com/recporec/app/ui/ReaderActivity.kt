@@ -202,41 +202,20 @@ class ReaderActivity : AppCompatActivity() {
         btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
         btnToggleControls.setOnLongClickListener { quickShortBreak(); true }
 
-        btnPitchDown.setOnClickListener(clickSound { adjustPitch(-0.1f) })
-        btnPitchDown.setOnLongClickListener { resetToGlobal("visina"); true }
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
         btnNextChapter.setOnLongClickListener { showChapterList(); true }
-        btnPitchUp.setOnClickListener(clickSound { adjustPitch(0.1f) })
-        btnPitchUp.setOnLongClickListener { resetToGlobal("visina"); true }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
 
-        btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
-        btnDocLanguage.setOnLongClickListener { undoAllJumps(); true }
-        btnCombinedVoices.setOnClickListener(clickSound {
-            startActivity(
-                android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
-                    .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc?.languageTag ?: settings.globalLanguageTag)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, doc?.voiceName ?: settings.globalVoiceName)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
-            )
-        })
-        btnCombinedVoices.setOnLongClickListener { showAutoScrollDialog(); true }
-        btnVolDown.setOnClickListener(clickSound { adjustVolume(-1) })
-        btnVolDown.setOnLongClickListener { resetToGlobal("jačina"); true }
-        btnVolUp.setOnClickListener(clickSound { adjustVolume(1) })
-        btnVolUp.setOnLongClickListener { resetToGlobal("jačina"); true }
-        btnVoice.setOnClickListener(clickSound { showVoiceDialog() })
-        btnVoice.setOnLongClickListener { showScheduleReadingDialog(); true }
+        // "Automatski listaj dokument" i "Zakaži čitanje" - korisnicki zahtev: PROMOVISANO iz
+        // dugog pritiska (na sad uklonjena dugmad Kombinovani glasovi/Glas) u SVOJA, obicna
+        // dugmad - bez dugog pritiska, kako je i trazeno.
+        btnAutoScroll.setOnClickListener(clickSound { showAutoScrollDialog() })
+        btnScheduleReading.setOnClickListener(clickSound { showScheduleReadingDialog() })
 
-        btnSpeedDown.setOnClickListener(clickSound { adjustSpeed(-0.05f) })
-        btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
-        btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
-        btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -298,8 +277,6 @@ class ReaderActivity : AppCompatActivity() {
         layoutRow2.visibility = visibility
         layoutRow3.visibility = visibility
         layoutRow5.visibility = visibility
-        btnSpeedDown.visibility = visibility
-        btnSpeedUp.visibility = visibility
         seekProgress.visibility = visibility
         // NAMERNO se ne dira - Nazad treba da bude prisutan u SVAKOM prozoru/stanju, i kad su
         // ostale kontrole sakrivene (korisnicka prijava - ranije je nestajalo sa ostalim).
@@ -514,7 +491,7 @@ class ReaderActivity : AppCompatActivity() {
             return CombinedVoiceConfig(refs, count)
         }
 
-        return resolveForScope(docId) ?: resolveForScope(0L)
+        return resolveForScope(0L)
     }
 
     /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
@@ -550,8 +527,10 @@ class ReaderActivity : AppCompatActivity() {
         // Ne upisujemo rešenje trajno u dokument, da naknadna izmena opštih podešavanja
         // i dalje važi za dokumente koji nemaju sopstveni izbor.
         // Ako postoje kombinovani glasovi (za dokument ili opšte), oni imaju prednost.
-        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (entity.voiceName ?: settings.globalVoiceName)
-        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (entity.voiceEngine ?: settings.globalVoiceEngine)
+        // Sad UVEK opšti (globalni) glas - korisnicki zahtev: glas/jezik/brzina/visina/jačina
+        // važe za SVE dokumente, nema više posebnog izbora po dokumentu.
+        val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: settings.globalVoiceName
+        val effectiveEngine = combined?.voices?.first()?.enginePackage ?: settings.globalVoiceEngine
         // Isti obrazac kao glas: dokumentova sopstvena brzina/visina ako je ikad eksplicitno
         // postavljena, inače opšta - da izmena opštih podešavanja stvarno utiče na dokumente
         // koji nemaju svoju (ranije je brzina/visina uvek bila "zamrznuta" od trenutka dodavanja).
@@ -800,23 +779,15 @@ class ReaderActivity : AppCompatActivity() {
      * postavljena (vrednost > 0), inače opšta (globalna). Isti obrazac kao kod glasa/jezika -
      * bez ovoga, promena Brzine u Opštim podešavanjima ne bi uticala ni na jedan dokument
      * koji je ikad otvoren (jer bi već imao "snimljenu" staru vrednost od trenutka dodavanja). */
-    private fun effectiveRate(entity: DocumentEntity?): Float {
-        val stored = entity?.speechRate ?: return settings.globalSpeechRate
-        return if (stored > 0f) stored else settings.globalSpeechRate
-    }
+    /** UVEK opšta (globalna) vrednost - korisnicki zahtev: brzina/visina/jačina/glas/jezik
+     * sad važe za SVE dokumente, nema vise posebnog izbora po dokumentu. Polja u
+     * DocumentEntity (speechRate/pitch/volumePercent) ostaju u bazi (bezopasno, neiskoriscena)
+     * radi kompatibilnosti sa starim rezervnim kopijama - samo se vise ne citaju ovde. */
+    private fun effectiveRate(entity: DocumentEntity?): Float = settings.globalSpeechRate
 
-    /** Isto kao [effectiveRate], samo za visinu glasa. */
-    private fun effectivePitch(entity: DocumentEntity?): Float {
-        val stored = entity?.pitch ?: return settings.globalPitch
-        return if (stored > 0f) stored else settings.globalPitch
-    }
+    private fun effectivePitch(entity: DocumentEntity?): Float = settings.globalPitch
 
-    /** Isto kao [effectiveRate], samo za jačinu (0-100%). Jačina je vezana za TTS (ovu knjigu),
-     * NE za sistemsku jačinu telefona. */
-    private fun effectiveVolume(entity: DocumentEntity?): Int {
-        val stored = entity?.volumePercent ?: return settings.globalVolumePercent
-        return if (stored >= 0) stored else settings.globalVolumePercent
-    }
+    private fun effectiveVolume(entity: DocumentEntity?): Int = settings.globalVolumePercent
 
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode
@@ -912,20 +883,6 @@ class ReaderActivity : AppCompatActivity() {
         moveTo(target, recordHistory = false)
         playClickSound()
         android.widget.Toast.makeText(this, "Poništena poslednja radnja.", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
-    /** Dug pritisak na "Jezik" - poništava SVE prethodne radnje odjednom, vraćajući na mesto
-     * od PRE prve od njih (npr. skočila si 2 sata napred, pa nazad, pa na oznaku, pa na
-     * nasumičnu stranicu - ovo te vraća tačno tamo gde si bila pre svega toga). */
-    private fun undoAllJumps() {
-        if (jumpHistory.isEmpty()) {
-            android.widget.Toast.makeText(this, "Nema prethodnih radnji.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        val target = jumpHistory.first()
-        jumpHistory.clear()
-        moveTo(target, recordHistory = false)
-        android.widget.Toast.makeText(this, "Poništene sve prethodne radnje.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     /** Dug pritisak na "Sledeće poglavlje" - spisak SVIH poglavlja, dodirneš da odeš direktno
@@ -1309,155 +1266,6 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, "Ponavljam poglavlje.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
-     * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
-     * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
-    private fun resetToGlobal(what: String) {
-        val entity = doc ?: return
-        val tts = PlaybackController.ttsManager
-        doc = when (what) {
-            "brzina" -> {
-                val newRate = settings.globalSpeechRate
-                tts?.setSpeechRate(newRate)
-                entity.copy(speechRate = -1f)
-            }
-            "visina" -> {
-                val newPitch = settings.globalPitch
-                tts?.setPitch(newPitch)
-                entity.copy(pitch = -1f)
-            }
-            else -> {
-                val newVolume = settings.globalVolumePercent
-                tts?.setVolume(newVolume / 100f)
-                entity.copy(volumePercent = -1)
-            }
-        }
-        persistState()
-        android.widget.Toast.makeText(
-            this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun adjustVolume(direction: Int) {
-        val entity = doc ?: return
-        val newPercent = (effectiveVolume(entity) + direction * 5).coerceIn(0, 100)
-        doc = entity.copy(volumePercent = newPercent)
-        PlaybackController.ttsManager?.setVolume(newPercent / 100f)
-        persistState()
-        android.widget.Toast.makeText(this, "Jačina zvuka: $newPercent%", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
-    private fun adjustSpeed(delta: Float) {
-        val entity = doc ?: return
-        val newRate = (effectiveRate(entity) + delta).coerceIn(0.3f, 3.0f)
-        doc = entity.copy(speechRate = newRate)
-        PlaybackController.ttsManager?.setSpeechRate(newRate)
-        persistState()
-        val roundedRate = (newRate * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(
-            this, "Brzina čitanja: ${String.format(Locale.US, "%.2f", roundedRate)}x", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun adjustPitch(delta: Float) {
-        val entity = doc ?: return
-        val newPitch = (effectivePitch(entity) + delta).coerceIn(0.5f, 2.0f)
-        doc = entity.copy(pitch = newPitch)
-        PlaybackController.ttsManager?.setPitch(newPitch)
-        persistState()
-        val roundedPitch = (newPitch * 100).roundToInt() / 100f
-        android.widget.Toast.makeText(
-            this, "Visina glasa: ${String.format(Locale.US, "%.2f", roundedPitch)}x", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun showDocLanguagePicker() {
-        loadVoicesIfNeeded { showDocLanguagePickerWithVoices() }
-    }
-
-    private fun showDocLanguagePickerWithVoices() {
-        val voices = allVoices.ifEmpty { return }
-        val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
-        val resetLabel = "Koristi opšti jezik (ukloni poseban izbor za ovaj dokument)"
-        val labels = listOf(resetLabel) + languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
-        val current = if (doc?.languageTag == null) {
-            resetLabel
-        } else {
-            doc?.languageTag?.let { code -> languages.firstOrNull { it.language == code }?.displayLanguage }
-        }
-        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current, autoConfirm = true) { index ->
-            if (index == 0) {
-                doc = doc?.copy(languageTag = null)
-                persistState()
-                updateDocLanguageButtonText()
-                return@show
-            }
-            val chosen = languages[index - 1]
-            doc = doc?.copy(languageTag = chosen.language)
-            persistState()
-            updateDocLanguageButtonText()
-        }
-    }
-
-    private fun updateDocLanguageButtonText() {
-        val tag = doc?.languageTag
-        binding.btnDocLanguage.text = if (tag != null) {
-            "Jezik: ${java.util.Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
-        } else {
-            "Jezik"
-        }
-    }
-
-    private fun showVoiceDialog() {
-        loadVoicesIfNeeded { showVoiceDialogWithVoices() }
-    }
-
-    private fun showVoiceDialogWithVoices() {
-        val voices = allVoices.ifEmpty { return }
-        val languageFilter = doc?.languageTag ?: settings.globalLanguageTag
-        val filtered = if (languageFilter != null) {
-            voices.filter { it.voice.locale.language == languageFilter }.ifEmpty { voices }
-        } else voices
-
-        val resetLabel = "Koristi opšti glas (ukloni poseban izbor za ovaj dokument)"
-        val labels = listOf(resetLabel) + com.recporec.app.tts.TtsEngineUtil.disambiguatedLabels(filtered)
-        val effectiveVoiceName = doc?.voiceName ?: settings.globalVoiceName ?: PlaybackController.ttsManager?.currentVoiceName()
-        val current = if (doc?.voiceName == null) {
-            resetLabel
-        } else {
-            effectiveVoiceName?.let { name -> filtered.firstOrNull { it.voice.name == name }?.displayLabel }
-        }
-        PickerDialog.show(
-            this, getString(R.string.voice_dialog_title), labels, current,
-            onSelectionPreview = { index -> if (index > 0) com.recporec.app.tts.TtsEngineUtil.previewVoice(this, filtered[index - 1]) },
-            autoConfirm = true
-        ) { index ->
-            if (index == 0) {
-                // Ukloni poseban glas ovog dokumenta I sve njegove kombinovane glasove/jezike -
-                // dokument se u potpunosti oslanja na opšta podešavanja, kombinovana ili ne.
-                doc = doc?.copy(voiceName = null, voiceEngine = null)
-                persistState()
-                lifecycleScope.launch {
-                    db.combinedVoiceDao().clearScope(documentId)
-                    loadDocument()
-                }
-                return@show
-            }
-            val chosen = filtered[index - 1]
-            val tts = PlaybackController.ttsManager
-            if (tts != null && tts.currentEnginePackage != chosen.enginePackage) {
-                ttsReady = false
-                tts.switchEngine(chosen.enginePackage, chosen.voice.name, effectiveRate(doc)) {
-                    parsed?.let { tts.loadText(it.fullText) }
-                    markTtsReady()
-                }
-            } else {
-                tts?.setVoiceByName(chosen.voice.name)
-            }
-            doc = doc?.copy(voiceName = chosen.voice.name, voiceEngine = chosen.enginePackage)
-            persistState()
-        }
-    }
 
     private fun showTimerMenu() {
         val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)

@@ -1,4 +1,0 @@
-What's new in RečPoReč 12.0?
-
-1. The app now remembers which shelf (tab) you were on: All, New, Started, or Finished.
-2. The Navigation button now also has a Sentences option, alongside page, minute, and bookmark. When chosen, you also pick how many sentences per step: one, three, or five. The step back/forward buttons then move by sentences, and long-pressing the back button repeats the same rewind.
