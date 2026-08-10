@@ -210,8 +210,6 @@ class ReaderActivity : AppCompatActivity() {
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
 
-        btnDocLanguage.setOnClickListener(clickSound { showDocLanguagePicker() })
-        btnDocLanguage.setOnLongClickListener { undoAllJumps(); true }
         btnCombinedVoices.setOnClickListener(clickSound {
             startActivity(
                 android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
@@ -461,7 +459,6 @@ class ReaderActivity : AppCompatActivity() {
             }
             updateStatusTexts()
             updateSeekBar()
-            updateDocLanguageButtonText()
             updateNavigationButtonLabels()
             updateTimerStatusText()
             updateRestStatusText()
@@ -900,20 +897,6 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, "Poništena poslednja radnja.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    /** Dug pritisak na "Jezik" - poništava SVE prethodne radnje odjednom, vraćajući na mesto
-     * od PRE prve od njih (npr. skočila si 2 sata napred, pa nazad, pa na oznaku, pa na
-     * nasumičnu stranicu - ovo te vraća tačno tamo gde si bila pre svega toga). */
-    private fun undoAllJumps() {
-        if (jumpHistory.isEmpty()) {
-            android.widget.Toast.makeText(this, "Nema prethodnih radnji.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        val target = jumpHistory.first()
-        jumpHistory.clear()
-        moveTo(target, recordHistory = false)
-        android.widget.Toast.makeText(this, "Poništene sve prethodne radnje.", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
     /** Dug pritisak na "Sledeće poglavlje" - spisak SVIH poglavlja, dodirneš da odeš direktno
      * na bilo koje, umesto da klikćeš jedno po jedno kroz dugačku knjigu. */
     private fun showChapterList() {
@@ -1322,43 +1305,6 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(
             this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
         ).show()
-    }
-
-    private fun showDocLanguagePicker() {
-        loadVoicesIfNeeded { showDocLanguagePickerWithVoices() }
-    }
-
-    private fun showDocLanguagePickerWithVoices() {
-        val voices = allVoices.ifEmpty { return }
-        val languages = com.recporec.app.tts.TtsEngineUtil.distinctLanguages(voices)
-        val resetLabel = "Koristi opšti jezik (ukloni poseban izbor za ovaj dokument)"
-        val labels = listOf(resetLabel) + languages.map { it.displayLanguage.replaceFirstChar { c -> c.uppercase() } }
-        val current = if (doc?.languageTag == null) {
-            resetLabel
-        } else {
-            doc?.languageTag?.let { code -> languages.firstOrNull { it.language == code }?.displayLanguage }
-        }
-        PickerDialog.show(this, "Jezik za ovaj dokument", labels, current, autoConfirm = true) { index ->
-            if (index == 0) {
-                doc = doc?.copy(languageTag = null)
-                persistState()
-                updateDocLanguageButtonText()
-                return@show
-            }
-            val chosen = languages[index - 1]
-            doc = doc?.copy(languageTag = chosen.language)
-            persistState()
-            updateDocLanguageButtonText()
-        }
-    }
-
-    private fun updateDocLanguageButtonText() {
-        val tag = doc?.languageTag
-        binding.btnDocLanguage.text = if (tag != null) {
-            "Jezik: ${java.util.Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }} ✓"
-        } else {
-            "Jezik"
-        }
     }
 
     private fun showVoiceDialog() {

@@ -143,12 +143,6 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnDocLanguage" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_goto_page"
-                android:contentDescription="Jezik za ovaj dokument. Dug pritisak: poništi sve prethodne radnje."
-                android:textSize="16sp"
-                android:text="Jezik" />
-
             <Button android:id="@+id/btnVoice" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_voice"
                 android:contentDescription="@string/btn_voice"
