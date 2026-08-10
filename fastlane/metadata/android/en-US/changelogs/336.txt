@@ -1,9 +1,0 @@
-What's new in RečPoReč 12.0?
-
-1. The app now remembers which shelf (tab) you were on: All, New, Started, or Finished.
-2. Fully reorganized buttons and a simplified layout in the reader.
-3. The reader no longer has volume, pitch, speed, reset-to-default, language, voice, or combined voices controls per document.
-4. Both in the reader and on the main screen, all voice and language settings now apply to every document, until changed.
-5. Settings > Navigation now includes navigation by sentences, with a choice of 1, 3, 5, or 10 sentences per step. All other reader buttons remain: navigation, jumping to a specific place, controls, timer, and auto-scroll.
-6. "Auto-scroll document" and "Schedule reading" are now their own regular buttons in the reader, no longer hidden behind a long-press.
-7. Backups now also remember navigation settings.

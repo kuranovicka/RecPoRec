@@ -1,9 +1,0 @@
-Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 12.0?
-
-1. Sada program pamti na kom folderu, tj. na kojoj smo polici stali: (Sve, Novo, Započeto, Pročitano).
-2. Potpuno reorganizovana dugmad i uprošćen izgled u dokumentu.
-3. Sada više u dokumentu nema jačine, visine, brzine, vraćanja na zadata podešavanja, jezika, glasova i kombinovanih glasova.
-4. U dokumentu, kao i u osnovnom prozoru se nalaze opcije, pa sva podešavanja glasa i jezika važe za sve, dok god se ne promene.
-5. U podešavanja, pa u podešavanja navigacije je dodata i navigacija po rečenicama. Imate 1, 3, 5, 10 rečenica, pa birajte. Sva ostala dugmad ostaju u dokumentu: (Navigacija, odlazak na određeno mesto, kontrole, tajmer i automatsko listanje).
-6. Automatski listaj dokument i Zakaži čitanje sada su svoja, obična dugmad u dokumentu, ne više skrivena na dugom pritisku.
-7. Rezervna kopija sada pamti i podešavanja navigacije.

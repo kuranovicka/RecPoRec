@@ -29,7 +29,7 @@ class HelpActivity : AppCompatActivity() {
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
-        Dugme Napravi rezervnu kopiju, pravi kopiju svih dokumenata koje si dodao-la u program: sve fajlove, poziciju čitanja, oznake i podešavanja navigacije.
+        Dugme Napravi rezervnu kopiju, pravi kopiju svih dokumenata koje si dodao-la u program: sve fajlove, poziciju čitanja, i oznake.
         Dug pritisak vraća rezervnu kopiju iz fajla.
         Npr, izvezeš ih na Google disk, ili u telefon, pa ih nakon promene telefona vratiš.
         Nakon vraćanja, zipovana rezervna kopija se automatski briše.
@@ -44,7 +44,7 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak izgovara statistiku čitanja, bez otvaranja novog ekrana:
         koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja i koliko ih je u toku.
         Prva stavka je Opšta podešavanja glasa.
-        Ovde biraš jezik i glas - važi za sve dokumente.
+        Ovde biraš jezik i glas za sve nove dokumente.
         Čuješ kratak primer svakog glasa kad ga dodirneš.
         Tu je i dugme Kombinovani glasovi.
         Njime biraš dva glasa koja se smenjuju dok čitaš.
@@ -65,7 +65,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima četrnaest dugmadi, raspoređenih u pet redova.
+        Tastatura ima dvadeset i jedno dugme, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
@@ -85,25 +85,36 @@ class HelpActivity : AppCompatActivity() {
         Četvrto dugme je Odaberi sve, a dug pritisak kopira odabrani tekst u privremenu memoriju.
         Peto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
-        U drugom redu, prvo dugme je Prethodno poglavlje.
+        U drugom redu, prvo dugme smanjuje visinu glasa, a peto je povećava.
+        Dug pritisak na bilo koje od njih, vraća visinu na opštu vrednost.
+        Drugo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
-        Drugo dugme je Tajmer.
+        Treće dugme je Tajmer.
         Otvara klizač od pet do sto dvadeset minuta za automatski prekid čitanja.
         Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
         Dug pritisak isključuje tajmer.
-        Treće dugme je Sledeće poglavlje.
+        Četvrto dugme je Sledeće poglavlje.
         Vodi na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
-        U trećem redu, prvo dugme je Automatski listaj dokument.
+        U trećem redu, prvo dugme smanjuje jačinu zvuka, a peto je povećava.
+        Jačina, kao i dug pritisak koji je vraća na opštu vrednost, važe samo za ovaj dokument.
+        Drugo dugme je Jezik.
+        Menja jezik za ovaj dokument, a dug pritisak poništava sve prethodne radnje.
+        Treće dugme je Glas.
+        Menja glas za ovaj dokument, a dug pritisak otvara Zakaži čitanje.
+        Upišeš tačno vreme, na primer 5:20.
+        Čitanje tada tiho krene, bez alarma i bez punog ekrana.
+        Ako pustiš knjigu ranije, zakazano čitanje se prekida.
+        Četvrto dugme je Kombinovani glasovi, samo za ovaj dokument.
+        Tu možeš dodati još jedan glas ili jezik, a najviše dva glasa ti mogu čitati knjigu.
+        Dug pritisak automatski lista dokument.
         Biraš između stranice, oznaka, poglavlja ili minuta.
         Zatim odabereš da li dokument listaš unapred ili unazad.
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
-        Drugo dugme je Zakaži čitanje.
-        Upišeš tačno vreme, na primer 5:20.
-        Čitanje tada tiho krene, bez alarma i bez punog ekrana.
-        Ako pustiš knjigu ranije, zakazano čitanje se prekida.
-        U četvrtom redu je samo jedno dugme - pušta ili pauzira čitanje.
+        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
+        Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
+        Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut, oznaku ili rečenice, zavisno od Navigacije.
         Dug pritisak ponavlja trenutnu stranicu od početka, ili prethodne rečenice ako je Navigacija podešena na rečenice.
