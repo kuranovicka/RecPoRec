@@ -195,16 +195,22 @@
                 android:contentDescription="@string/btn_speed_down"
                 android:text="🐢−" />
 
-            <Button android:id="@+id/btnRewindSentences" style="@style/KeyButton"
+            <Button android:id="@+id/btnPrevSentence" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
-                android:contentDescription="Vrati rečenice. Dug pritisak: ponovi poslednje vraćanje rečenica."
+                android:contentDescription="Prethodna rečenica. Dug pritisak: dve rečenice unazad."
                 android:textSize="14sp"
-                android:text="Vrati rečenice" />
+                android:text="◀ Rečenica" />
 
             <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_play"
                 android:contentDescription="@string/btn_play_pause"
                 android:text="▶ / ⏸" />
+
+            <Button android:id="@+id/btnNextSentence" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_combined"
+                android:contentDescription="Sledeća rečenica. Dug pritisak: dve rečenice unapred."
+                android:textSize="14sp"
+                android:text="Rečenica ▶" />
 
             <Button android:id="@+id/btnSpeedUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_speed"

@@ -517,6 +517,13 @@ class TtsManager(private val appContext: Context) {
         return chunkOffsets[targetIndex]
     }
 
+    /** Isto kao offsetGoingBackSentences, samo unapred - "Sledeća rečenica" dugme. */
+    fun offsetGoingForwardSentences(n: Int): Int? {
+        if (chunkOffsets.isEmpty()) return null
+        val targetIndex = (currentChunkIndex + n).coerceIn(0, chunkOffsets.size - 1)
+        return chunkOffsets[targetIndex]
+    }
+
     /** [userInitiated]=true (podrazumevano) znaci da je OVO namerna, svesna radnja (dugme,
      * medijski taster, drmanje) - takva pauza UVEK "pobedi" nad automatskim nastavkom, cak i
      * ako se slucajno poklopi sa kratkim gubitkom/vracanjem audio fokusa (npr. Bluetooth

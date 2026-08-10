@@ -140,12 +140,6 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_LAST_LIBRARY_TAB, "all") ?: "all"
         set(value) = prefs.edit().putString(KEY_LAST_LIBRARY_TAB, value).apply()
 
-    /** Poslednji broj rečenica upisan u "Vrati rečenice" - pamti se trajno (i posle
-     * zatvaranja app-e), koristi ga i dug pritisak (ponovi bez ponovnog pitanja). */
-    var lastSentenceRewindCount: Int
-        get() = prefs.getInt(KEY_LAST_SENTENCE_REWIND, 3)
-        set(value) = prefs.edit().putInt(KEY_LAST_SENTENCE_REWIND, value).apply()
-
     var soundFeedbackEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND, false)
         set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
@@ -282,7 +276,6 @@ class AppSettings(context: Context) {
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_LAST_LIBRARY_TAB = "last_library_tab"
-        private const val KEY_LAST_SENTENCE_REWIND = "last_sentence_rewind"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"

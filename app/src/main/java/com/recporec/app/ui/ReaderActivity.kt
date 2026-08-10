@@ -237,9 +237,10 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
-        btnRewindSentences.setOnClickListener(clickSound { showRewindSentencesDialog() })
-        btnRewindSentences.setOnLongClickListener { repeatLastSentenceRewind(); true }
-        updateRewindSentencesDescription()
+        btnPrevSentence.setOnClickListener(clickSound { moveSentences(-1) })
+        btnPrevSentence.setOnLongClickListener { moveSentences(-2); true }
+        btnNextSentence.setOnClickListener(clickSound { moveSentences(1) })
+        btnNextSentence.setOnLongClickListener { moveSentences(2); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -715,67 +716,22 @@ class ReaderActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    /** "Vrati rečenice" - korisnicki zahtev. Upises broj recenica, program se odmah vrati
-     * unazad za taj broj (koristi ISTU podelu na recenice koju TTS vec koristi za citanje,
-     * TtsManager.offsetGoingBackSentences - ne duplira logiku). Broj se pamti TRAJNO (i posle
-     * zatvaranja app-e), isti obrazac kao pamcenje kartice na glavnom ekranu. */
-    private fun showRewindSentencesDialog() {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.imeOptions = EditorInfo.IME_ACTION_GO
-        input.setText(settings.lastSentenceRewindCount.toString())
-        input.hint = "Broj rečenica"
-        input.contentDescription = "Broj rečenica za vraćanje unazad"
-        fun confirm() {
-            val n = input.text.toString().toIntOrNull() ?: return
-            if (n <= 0) return
-            settings.lastSentenceRewindCount = n
-            updateRewindSentencesDescription()
-            applySentenceRewind(n)
-        }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Vrati rečenice")
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
-            .setNegativeButton(R.string.cancel, null)
-            .create()
-        input.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_GO) {
-                confirm()
-                dialog.dismiss()
-                true
-            } else false
-        }
-        dialog.show()
-        input.requestAccessibilityFocusNow()
-    }
-
-    /** Dug pritisak na "Vrati rečenice" - ponovi POSLEDNJI koriscen broj, bez ponovnog
-     * pitanja. */
-    private fun repeatLastSentenceRewind() {
-        applySentenceRewind(settings.lastSentenceRewindCount)
-    }
-
-    /** Osvezava SAMO ono sto TalkBack najavljuje (contentDescription), NE i vidljiv naziv
-     * dugmeta (ostaje "Vrati rečenice") - korisnicki zahtev: da se preko citaca ekrana zna
-     * TACNO koliko ce dug pritisak da vrati unazad, bez da se sam natpis na dugmetu menja. */
-    private fun updateRewindSentencesDescription() {
-        val n = settings.lastSentenceRewindCount
-        val word = serbianPlural(n, "rečenicu", "rečenice", "rečenica")
-        binding.btnRewindSentences.contentDescription =
-            "Vrati rečenice. Dug pritisak: ponovi vraćanje za $n $word."
-    }
-
-    private fun applySentenceRewind(n: Int) {
+    /** "Prethodna/Sledeća rečenica" - korisnicki zahtev, pojednostavljeno u odnosu na prvu
+     * verziju (bez dijaloga za unos broja) - dodir ide JEDNU recenicu, dug pritisak DVE.
+     * Koristi ISTU podelu na recenice koju TTS vec koristi za citanje (TtsManager), ne
+     * duplira logiku. [n] pozitivno = napred, negativno = nazad. */
+    private fun moveSentences(n: Int) {
         val tts = PlaybackController.ttsManager
-        val offset = tts?.offsetGoingBackSentences(n)
+        val offset = if (n < 0) {
+            tts?.offsetGoingBackSentences(-n)
+        } else {
+            tts?.offsetGoingForwardSentences(n)
+        }
         if (offset == null) {
             android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         moveTo(offset)
-        // Korisnicki zahtev: obavesti (tekstom, ako moze i brojem) I zvukom - pristupacnost.
-        android.widget.Toast.makeText(this, "Vraćeno $n rečenica unazad.", android.widget.Toast.LENGTH_SHORT).show()
         playClickSound()
     }
 
