@@ -313,7 +313,17 @@ class DocumentListActivity : AppCompatActivity() {
                 binding.tabFinishedBooks.id -> "finished"
                 else -> "all"
             }
+            settings.lastLibraryTab = currentTab
             applyTabFilter()
+        }
+        // Vrati na karticu na kojoj je korisnica poslednji put ostala (korisnicka ideja) -
+        // podesi POSLE kacenja listenera iznad, da njegovo prirodno okidanje odmah postavi
+        // i currentTab i filtriran prikaz, bez duplirane logike ovde.
+        when (settings.lastLibraryTab) {
+            "new" -> binding.tabNewBooks.isChecked = true
+            "started" -> binding.tabStartedBooks.isChecked = true
+            "finished" -> binding.tabFinishedBooks.isChecked = true
+            else -> binding.tabAllBooks.isChecked = true
         }
 
         // Ako je aplikacija otvorena preko "Otvori sa" ili "Podeli" (npr. iz Google Diska)

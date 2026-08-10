@@ -133,6 +133,13 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_NAVIGATION, "page") ?: "page"
         set(value) = prefs.edit().putString(KEY_NAVIGATION, value).apply()
 
+    /** Poslednja odabrana kartica na glavnom ekranu (Sve/Novo/Zapoceto/Procitano) - pamti se
+     * da bi se app otvorila na istoj kartici na kojoj je poslednji put ostavljena, umesto da
+     * se uvek vraca na "Sve". Korisnicka ideja - "naš korisnik" (rec-po-rec grupa). */
+    var lastLibraryTab: String
+        get() = prefs.getString(KEY_LAST_LIBRARY_TAB, "all") ?: "all"
+        set(value) = prefs.edit().putString(KEY_LAST_LIBRARY_TAB, value).apply()
+
     var soundFeedbackEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND, false)
         set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
@@ -268,6 +275,7 @@ class AppSettings(context: Context) {
         private const val KEY_FULLSCREEN_INTENT_ASKED = "fullscreen_intent_asked"
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
+        private const val KEY_LAST_LIBRARY_TAB = "last_library_tab"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
