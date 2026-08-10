@@ -136,8 +136,8 @@ class SettingsActivity : AppCompatActivity() {
                 // recenica po koraku (1, 3 ili 5 - namerno OGRANICEN, ne slobodan unos: "5
                 // recenica je vec jedan minut", dalje nema smisla).
                 if (chosenMode == "sentence") {
-                    val countLabels = listOf("1 rečenica", "3 rečenice", "5 rečenica")
-                    val countValues = listOf(1, 3, 5)
+                    val countLabels = listOf("1 rečenica", "3 rečenice", "5 rečenica", "10 rečenica")
+                    val countValues = listOf(1, 3, 5, 10)
                     val currentCountLabel = countLabels[countValues.indexOf(settings.sentenceNavigationCount).coerceAtLeast(0)]
                     PickerDialog.show(this, "Koliko rečenica po koraku", countLabels, currentCountLabel, autoConfirm = true) { countIndex ->
                         settings.sentenceNavigationCount = countValues[countIndex]
