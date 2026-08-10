@@ -202,6 +202,31 @@ class ReaderActivity : AppCompatActivity() {
         btnToggleControls.setOnClickListener(clickSound { toggleControlsVisibility() })
         btnToggleControls.setOnLongClickListener { quickShortBreak(); true }
 
+        // "Opcije" - isto kao na glavnom ekranu (korisnicki zahtev - da bude lakse, ne mora
+        // se izlaziti iz citaca da bi se promenio glas/podesavanja).
+        binding.btnOverflow.setOnClickListener { view ->
+            val popup = androidx.appcompat.widget.PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.menu_main_options, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_global_voice -> {
+                        startActivity(android.content.Intent(this, GlobalVoiceSettingsActivity::class.java))
+                        true
+                    }
+                    R.id.action_settings -> {
+                        startActivity(android.content.Intent(this, SettingsActivity::class.java))
+                        true
+                    }
+                    R.id.action_help -> {
+                        startActivity(android.content.Intent(this, HelpActivity::class.java))
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
+        }
+
         btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
         btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
         btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
