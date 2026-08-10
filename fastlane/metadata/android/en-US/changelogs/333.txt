@@ -1,5 +1,0 @@
-What's new in RečPoReč 12.0?
-
-1. The app now remembers which shelf (tab) you were on: All, New, Started, or Finished.
-2. Before Play/Pause, there's a new button: Previous sentence. It takes you one sentence back. Long-pressing goes two sentences back.
-3. Before the speed button: Next sentence. Long-pressing skips two sentences forward.

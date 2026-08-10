@@ -237,10 +237,11 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
-        btnPrevSentence.setOnClickListener(clickSound { moveSentences(-1) })
-        btnPrevSentence.setOnLongClickListener { moveSentences(-2); true }
-        btnNextSentence.setOnClickListener(clickSound { moveSentences(1) })
-        btnNextSentence.setOnLongClickListener { moveSentences(2); true }
+        btnPrevSentence.setOnClickListener(clickSound { showPrevSentencesDialog() })
+        btnPrevSentence.setOnLongClickListener { repeatPrevSentences(); true }
+        btnNextSentence.setOnClickListener(clickSound { showNextSentencesDialog() })
+        btnNextSentence.setOnLongClickListener { repeatNextSentences(); true }
+        updateSentenceButtonDescriptions()
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -720,19 +721,115 @@ class ReaderActivity : AppCompatActivity() {
      * verziju (bez dijaloga za unos broja) - dodir ide JEDNU recenicu, dug pritisak DVE.
      * Koristi ISTU podelu na recenice koju TTS vec koristi za citanje (TtsManager), ne
      * duplira logiku. [n] pozitivno = napred, negativno = nazad. */
-    private fun moveSentences(n: Int) {
-        val tts = PlaybackController.ttsManager
-        val offset = if (n < 0) {
-            tts?.offsetGoingBackSentences(-n)
-        } else {
-            tts?.offsetGoingForwardSentences(n)
+    /** "Prethodne rečenice" - korisnicki zahtev. Upises broj recenica, program se odmah vrati
+     * unazad za taj broj (ista podela na recenice koju TTS vec koristi - TtsManager, ne
+     * duplira logiku). Broj se pamti TRAJNO. Dug pritisak PONAVLJA isti skok JOS JEDNOM od
+     * trenutne pozicije (npr. upises 5, dug pritisak posle toga vraca JOS 5 unazad - ukupno
+     * 10 od pocetne tacke, ali svaki poziv je nezavisan skok od TRENUTNE pozicije). */
+    private fun showPrevSentencesDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
+        input.setText(settings.lastPrevSentenceCount.toString())
+        input.hint = "Broj rečenica"
+        input.contentDescription = "Broj rečenica za vraćanje unazad"
+        fun confirm() {
+            val n = input.text.toString().toIntOrNull() ?: return
+            if (n <= 0) return
+            settings.lastPrevSentenceCount = n
+            updateSentenceButtonDescriptions()
+            applyPrevSentences(n)
         }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Prethodne rečenice")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
+        input.requestAccessibilityFocusNow()
+    }
+
+    private fun repeatPrevSentences() {
+        applyPrevSentences(settings.lastPrevSentenceCount)
+    }
+
+    private fun applyPrevSentences(n: Int) {
+        val offset = PlaybackController.ttsManager?.offsetGoingBackSentences(n)
         if (offset == null) {
             android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         moveTo(offset)
         playClickSound()
+    }
+
+    /** "Sledeće rečenice" - isti princip kao Prethodne rečenice, samo unapred, sa
+     * sopstvenim, ODVOJENIM pamćenjem broja. */
+    private fun showNextSentencesDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
+        input.setText(settings.lastNextSentenceCount.toString())
+        input.hint = "Broj rečenica"
+        input.contentDescription = "Broj rečenica za skok unapred"
+        fun confirm() {
+            val n = input.text.toString().toIntOrNull() ?: return
+            if (n <= 0) return
+            settings.lastNextSentenceCount = n
+            updateSentenceButtonDescriptions()
+            applyNextSentences(n)
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Sledeće rečenice")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
+        input.requestAccessibilityFocusNow()
+    }
+
+    private fun repeatNextSentences() {
+        applyNextSentences(settings.lastNextSentenceCount)
+    }
+
+    private fun applyNextSentences(n: Int) {
+        val offset = PlaybackController.ttsManager?.offsetGoingForwardSentences(n)
+        if (offset == null) {
+            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        moveTo(offset)
+        playClickSound()
+    }
+
+    /** Osvezava SAMO ono sto TalkBack najavljuje (contentDescription), NE i vidljiv naziv
+     * dugmadi (ostaju "Prethodne rečenice"/"Sledeće rečenice") - da se preko citaca ekrana
+     * zna TACAN trenutno upisan broj. */
+    private fun updateSentenceButtonDescriptions() {
+        val prevN = settings.lastPrevSentenceCount
+        val prevWord = serbianPlural(prevN, "rečenicu", "rečenice", "rečenica")
+        binding.btnPrevSentence.contentDescription =
+            "Prethodne rečenice. Vraća $prevN $prevWord unazad. Dug pritisak: ponovi."
+        val nextN = settings.lastNextSentenceCount
+        val nextWord = serbianPlural(nextN, "rečenicu", "rečenice", "rečenica")
+        binding.btnNextSentence.contentDescription =
+            "Sledeće rečenice. Ide $nextN $nextWord unapred. Dug pritisak: ponovi."
     }
 
     private fun goToPercent(percent: Int) {

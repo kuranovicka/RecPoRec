@@ -1,0 +1,5 @@
+What's new in RečPoReč 12.0?
+
+1. The app now remembers which shelf (tab) you were on: All, New, Started, or Finished.
+2. Before Play/Pause, there's a new button: Previous sentences. Type how many sentences you want to go back, and the app remembers that setting. Long-pressing repeats the same rewind - e.g., if you typed 5, it goes back another 5 sentences.
+3. After Play/Pause: Next sentences. Same idea - type e.g. 5, and the app jumps 5 sentences forward. Long-pressing repeats that jump.

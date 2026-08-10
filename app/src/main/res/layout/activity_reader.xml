@@ -197,9 +197,9 @@
 
             <Button android:id="@+id/btnPrevSentence" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
-                android:contentDescription="Prethodna rečenica. Dug pritisak: dve rečenice unazad."
+                android:contentDescription="Prethodne rečenice."
                 android:textSize="14sp"
-                android:text="◀ Rečenica" />
+                android:text="◀ Rečenice" />
 
             <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_play"
@@ -208,9 +208,9 @@
 
             <Button android:id="@+id/btnNextSentence" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
-                android:contentDescription="Sledeća rečenica. Dug pritisak: dve rečenice unapred."
+                android:contentDescription="Sledeće rečenice."
                 android:textSize="14sp"
-                android:text="Rečenica ▶" />
+                android:text="Rečenice ▶" />
 
             <Button android:id="@+id/btnSpeedUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_speed"

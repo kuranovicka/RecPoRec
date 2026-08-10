@@ -113,8 +113,9 @@ class HelpActivity : AppCompatActivity() {
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
         U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a peto je povećava.
         Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
-        Drugo dugme nas vraća na prethodnu rečenicu, a dug pritisak na dve rečenice unazad.
-        Četvrto dugme ide na sledeću rečenicu, a dug pritisak na dve rečenice unapred.
+        Drugo dugme nas vraća na upisani broj prethodnih rečenica, a dug pritisak ponavlja taj povratak.
+        Npr, ako smo upisali 5 rečenica, dug pritisak nas vraća za dodatnih 5 rečenica unazad.
+        Četvrto dugme ide za broj upisanih rečenica unapred, a dug pritisak ponavlja taj skok.
         Treće dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.

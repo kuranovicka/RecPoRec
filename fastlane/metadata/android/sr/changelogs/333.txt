@@ -1,5 +1,0 @@
-Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 12.0?
-
-1. Sada program pamti na kom folderu, tj. na kojoj smo polici stali: (Sve, Novo, Započeto, Pročitano).
-2. Pre puštanja i pauze, sada imamo novo dugme: Prethodna rečenica. Program nas vraća za jednu rečenicu unazad. Dug pritisak, na dve rečenice unazad.
-3. Pre dugmeta za brzinu: Sledeća rečenica. Dug pritisak, dve rečenice unapred. Program preskače dve rečenice u tekstu.

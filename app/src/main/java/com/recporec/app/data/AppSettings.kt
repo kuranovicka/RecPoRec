@@ -140,6 +140,16 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_LAST_LIBRARY_TAB, "all") ?: "all"
         set(value) = prefs.edit().putString(KEY_LAST_LIBRARY_TAB, value).apply()
 
+    /** Poslednji upisan broj u "Prethodne rečenice"/"Sledeće rečenice" - odvojeno po pravcu,
+     * pamti se trajno (i posle zatvaranja app-e). Dug pritisak ponavlja skok istim brojem. */
+    var lastPrevSentenceCount: Int
+        get() = prefs.getInt(KEY_LAST_PREV_SENTENCES, 3)
+        set(value) = prefs.edit().putInt(KEY_LAST_PREV_SENTENCES, value).apply()
+
+    var lastNextSentenceCount: Int
+        get() = prefs.getInt(KEY_LAST_NEXT_SENTENCES, 3)
+        set(value) = prefs.edit().putInt(KEY_LAST_NEXT_SENTENCES, value).apply()
+
     var soundFeedbackEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND, false)
         set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
@@ -276,6 +286,8 @@ class AppSettings(context: Context) {
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_LAST_LIBRARY_TAB = "last_library_tab"
+        private const val KEY_LAST_PREV_SENTENCES = "last_prev_sentences"
+        private const val KEY_LAST_NEXT_SENTENCES = "last_next_sentences"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
