@@ -143,11 +143,6 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnCombinedVoices" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_combined"
-                android:contentDescription="Kombinovani glasovi za ovaj dokument. Dug pritisak: automatski listaj dokument."
-                android:textSize="14sp"
-                android:text="Komb. glasovi" />
         </LinearLayout>
 
         <!-- Red: Pusti/Pauziraj -->

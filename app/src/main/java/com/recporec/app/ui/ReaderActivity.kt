@@ -210,17 +210,6 @@ class ReaderActivity : AppCompatActivity() {
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
 
-        btnCombinedVoices.setOnClickListener(clickSound {
-            startActivity(
-                android.content.Intent(this@ReaderActivity, CombinedVoicesActivity::class.java)
-                    .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc?.languageTag ?: settings.globalLanguageTag)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, doc?.voiceName ?: settings.globalVoiceName)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc?.voiceEngine ?: settings.globalVoiceEngine)
-            )
-        })
-        btnCombinedVoices.setOnLongClickListener { showAutoScrollDialog(); true }
-
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -495,7 +484,7 @@ class ReaderActivity : AppCompatActivity() {
             return CombinedVoiceConfig(refs, count)
         }
 
-        return resolveForScope(docId) ?: resolveForScope(0L)
+        return resolveForScope(0L)
     }
 
     /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
