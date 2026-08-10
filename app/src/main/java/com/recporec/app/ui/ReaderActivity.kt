@@ -210,6 +210,9 @@ class ReaderActivity : AppCompatActivity() {
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
 
+        btnAutoScroll.setOnClickListener(clickSound { showAutoScrollDialog() })
+        btnScheduleReading.setOnClickListener(clickSound { showScheduleReadingDialog() })
+
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })

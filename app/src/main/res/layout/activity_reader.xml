@@ -135,7 +135,8 @@
                 android:text="Poglavlje ⏭" />
         </LinearLayout>
 
-        <!-- Red: jačina- / Jezik(dokument) / Glas / jačina+ -->
+        <!-- Red: Automatski listaj dokument / Zakaži čitanje - promovisano iz dugih pritisaka
+             u svoja, obicna dugmad. -->
         <LinearLayout
             android:id="@+id/layoutRow3"
             android:layout_width="match_parent"
@@ -143,6 +144,17 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
+            <Button android:id="@+id/btnAutoScroll" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_combined"
+                android:contentDescription="Automatski listaj dokument."
+                android:textSize="16sp"
+                android:text="Automatski listaj" />
+
+            <Button android:id="@+id/btnScheduleReading" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_voice"
+                android:contentDescription="Zakaži čitanje."
+                android:textSize="16sp"
+                android:text="Zakaži čitanje" />
         </LinearLayout>
 
         <!-- Red: Pusti/Pauziraj -->
