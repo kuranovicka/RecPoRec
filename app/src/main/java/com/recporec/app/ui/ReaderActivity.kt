@@ -205,20 +205,20 @@ class ReaderActivity : AppCompatActivity() {
         // "Opcije" - isto kao na glavnom ekranu (korisnicki zahtev - da bude lakse, ne mora
         // se izlaziti iz citaca da bi se promenio glas/podesavanja).
         binding.btnOverflow.setOnClickListener { view ->
-            val popup = androidx.appcompat.widget.PopupMenu(this, view)
+            val popup = androidx.appcompat.widget.PopupMenu(this@ReaderActivity, view)
             popup.menuInflater.inflate(R.menu.menu_main_options, popup.menu)
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_global_voice -> {
-                        startActivity(android.content.Intent(this, GlobalVoiceSettingsActivity::class.java))
+                        startActivity(android.content.Intent(this@ReaderActivity, GlobalVoiceSettingsActivity::class.java))
                         true
                     }
                     R.id.action_settings -> {
-                        startActivity(android.content.Intent(this, SettingsActivity::class.java))
+                        startActivity(android.content.Intent(this@ReaderActivity, SettingsActivity::class.java))
                         true
                     }
                     R.id.action_help -> {
-                        startActivity(android.content.Intent(this, HelpActivity::class.java))
+                        startActivity(android.content.Intent(this@ReaderActivity, HelpActivity::class.java))
                         true
                     }
                     else -> false
