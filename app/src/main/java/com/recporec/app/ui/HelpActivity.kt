@@ -55,7 +55,8 @@ class HelpActivity : AppCompatActivity() {
         Tu je i prekidač Automatski čitaj aktivni dokument.
         Kad ga uključiš, biraš jednu od dve mogućnosti:
         Automatsko čitanje pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
-        Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, ili oznaku.
+        Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, oznaku ili rečenice.
+        Ako izabereš rečenice, biraš i koliko po koraku: jednu, tri ili pet.
         Tu su i dugmad Izvezi podešavanja u fajl, i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
         Ne čuvaju samu listu knjiga.
@@ -64,7 +65,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima dvadeset tri dugmeta, raspoređenih u pet redova.
+        Tastatura ima dvadeset i jedno dugme, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
@@ -111,14 +112,12 @@ class HelpActivity : AppCompatActivity() {
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
-        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a peto je povećava.
+        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
         Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
-        Drugo dugme nas vraća na upisani broj prethodnih rečenica, a dug pritisak ponavlja taj povratak.
-        Npr, ako smo upisali 5 rečenica, dug pritisak nas vraća za dodatnih 5 rečenica unazad.
-        Četvrto dugme ide za broj upisanih rečenica unapred, a dug pritisak ponavlja taj skok.
-        Treće dugme pušta ili pauzira čitanje.
+        Drugo dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
-        U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.
+        U petom redu, prvo dugme ide na prethodni element: stranicu, minut, oznaku ili rečenice, zavisno od Navigacije.
+        Dug pritisak ponavlja trenutnu stranicu od početka, ili prethodne rečenice ako je Navigacija podešena na rečenice.
         Drugo dugme je Podseti me.
         Vraća čitanje unazad za broj minuta koji izabereš na klizaču, a dug pritisak ponavlja poslednje korišćeno vreme.
         Treće dugme ide na sledeći element.

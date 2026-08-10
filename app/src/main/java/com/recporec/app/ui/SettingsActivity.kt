@@ -128,8 +128,21 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnNavigationMode.setOnClickListener {
             val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
             PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel, autoConfirm = true) { index ->
-                settings.navigationMode = navValues[index]
+                val chosenMode = navValues[index]
+                settings.navigationMode = chosenMode
                 refreshNavButton()
+                // "Rečenice" - korisnicki zahtev (isti obrazac kao izbor jedinice za
+                // Automatski listaj dokument) - odmah posle izbora nacina, pita se KOLIKO
+                // recenica po koraku (1, 3 ili 5 - namerno OGRANICEN, ne slobodan unos: "5
+                // recenica je vec jedan minut", dalje nema smisla).
+                if (chosenMode == "sentence") {
+                    val countLabels = listOf("1 rečenica", "3 rečenice", "5 rečenica")
+                    val countValues = listOf(1, 3, 5)
+                    val currentCountLabel = countLabels[countValues.indexOf(settings.sentenceNavigationCount).coerceAtLeast(0)]
+                    PickerDialog.show(this, "Koliko rečenica po koraku", countLabels, currentCountLabel, autoConfirm = true) { countIndex ->
+                        settings.sentenceNavigationCount = countValues[countIndex]
+                    }
+                }
             }
         }
 
@@ -159,8 +172,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener { finish() }
     }
 
-    private val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka")
-    private val navValues = listOf("page", "min1", "min5", "min10", "bookmark")
+    private val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka", "Rečenice")
+    private val navValues = listOf("page", "min1", "min5", "min10", "bookmark", "sentence")
 
     private fun refreshNavButton() {
         val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)

@@ -237,18 +237,13 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
-        btnPrevSentence.setOnClickListener(clickSound { showPrevSentencesDialog() })
-        btnPrevSentence.setOnLongClickListener { repeatPrevSentences(); true }
-        btnNextSentence.setOnClickListener(clickSound { showNextSentencesDialog() })
-        btnNextSentence.setOnLongClickListener { repeatNextSentences(); true }
-        updateSentenceButtonDescriptions()
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
         btnRemindMe.setOnLongClickListener { reactivateLastReminder(); true }
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
-        btnStepBack.setOnLongClickListener { repeatCurrentPage(); true }
+        btnStepBack.setOnLongClickListener { repeatCurrentStep(); true }
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
         btnStepForward.setOnLongClickListener { undoLastJump(); true }
 
@@ -726,112 +721,6 @@ class ReaderActivity : AppCompatActivity() {
      * duplira logiku). Broj se pamti TRAJNO. Dug pritisak PONAVLJA isti skok JOS JEDNOM od
      * trenutne pozicije (npr. upises 5, dug pritisak posle toga vraca JOS 5 unazad - ukupno
      * 10 od pocetne tacke, ali svaki poziv je nezavisan skok od TRENUTNE pozicije). */
-    private fun showPrevSentencesDialog() {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.imeOptions = EditorInfo.IME_ACTION_GO
-        input.setText(settings.lastPrevSentenceCount.toString())
-        input.hint = "Broj rečenica"
-        input.contentDescription = "Broj rečenica za vraćanje unazad"
-        fun confirm() {
-            val n = input.text.toString().toIntOrNull() ?: return
-            if (n <= 0) return
-            settings.lastPrevSentenceCount = n
-            updateSentenceButtonDescriptions()
-            applyPrevSentences(n)
-        }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Prethodne rečenice")
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
-            .setNegativeButton(R.string.cancel, null)
-            .create()
-        input.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_GO) {
-                confirm()
-                dialog.dismiss()
-                true
-            } else false
-        }
-        dialog.show()
-        input.requestAccessibilityFocusNow()
-    }
-
-    private fun repeatPrevSentences() {
-        applyPrevSentences(settings.lastPrevSentenceCount)
-    }
-
-    private fun applyPrevSentences(n: Int) {
-        val offset = PlaybackController.ttsManager?.offsetGoingBackSentences(n)
-        if (offset == null) {
-            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        moveTo(offset)
-        playClickSound()
-    }
-
-    /** "Sledeće rečenice" - isti princip kao Prethodne rečenice, samo unapred, sa
-     * sopstvenim, ODVOJENIM pamćenjem broja. */
-    private fun showNextSentencesDialog() {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.imeOptions = EditorInfo.IME_ACTION_GO
-        input.setText(settings.lastNextSentenceCount.toString())
-        input.hint = "Broj rečenica"
-        input.contentDescription = "Broj rečenica za skok unapred"
-        fun confirm() {
-            val n = input.text.toString().toIntOrNull() ?: return
-            if (n <= 0) return
-            settings.lastNextSentenceCount = n
-            updateSentenceButtonDescriptions()
-            applyNextSentences(n)
-        }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Sledeće rečenice")
-            .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
-            .setNegativeButton(R.string.cancel, null)
-            .create()
-        input.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_GO) {
-                confirm()
-                dialog.dismiss()
-                true
-            } else false
-        }
-        dialog.show()
-        input.requestAccessibilityFocusNow()
-    }
-
-    private fun repeatNextSentences() {
-        applyNextSentences(settings.lastNextSentenceCount)
-    }
-
-    private fun applyNextSentences(n: Int) {
-        val offset = PlaybackController.ttsManager?.offsetGoingForwardSentences(n)
-        if (offset == null) {
-            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
-            return
-        }
-        moveTo(offset)
-        playClickSound()
-    }
-
-    /** Osvezava SAMO ono sto TalkBack najavljuje (contentDescription), NE i vidljiv naziv
-     * dugmadi (ostaju "Prethodne rečenice"/"Sledeće rečenice") - da se preko citaca ekrana
-     * zna TACAN trenutno upisan broj. */
-    private fun updateSentenceButtonDescriptions() {
-        val prevN = settings.lastPrevSentenceCount
-        val prevWord = serbianPlural(prevN, "rečenicu", "rečenice", "rečenica")
-        binding.btnPrevSentence.contentDescription =
-            "Prethodne rečenice. Vraća $prevN $prevWord unazad. Dug pritisak: ponovi."
-        val nextN = settings.lastNextSentenceCount
-        val nextWord = serbianPlural(nextN, "rečenicu", "rečenice", "rečenica")
-        binding.btnNextSentence.contentDescription =
-            "Sledeće rečenice. Ide $nextN $nextWord unapred. Dug pritisak: ponovi."
-    }
-
     private fun goToPercent(percent: Int) {
         val length = parsed?.length ?: return
         val offset = (length * percent / 100).coerceIn(0, max(0, length - 1))
@@ -842,6 +731,10 @@ class ReaderActivity : AppCompatActivity() {
         val mode = settings.navigationMode
         if (mode == "bookmark") {
             jumpBookmark(forward)
+            return
+        }
+        if (mode == "sentence") {
+            stepNavigateSentences(forward)
             return
         }
         val length = parsed?.length ?: return
@@ -855,6 +748,23 @@ class ReaderActivity : AppCompatActivity() {
         val signedDelta = if (forward) delta else -delta
         val newOffset = (current + signedDelta).coerceIn(0, max(0, length - 1))
         moveTo(newOffset)
+    }
+
+    /** Navigacija po rečenicama - korisnicki zahtev. Koristi ISTU podelu na recenice koju
+     * TTS vec koristi za citanje (TtsManager), broj po koraku dolazi iz Podesavanja (1, 3 ili
+     * 5 - fiksan izbor, ne slobodan unos). */
+    private fun stepNavigateSentences(forward: Boolean) {
+        val n = settings.sentenceNavigationCount
+        val offset = if (forward) {
+            PlaybackController.ttsManager?.offsetGoingForwardSentences(n)
+        } else {
+            PlaybackController.ttsManager?.offsetGoingBackSentences(n)
+        }
+        if (offset == null) {
+            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        moveTo(offset)
     }
 
     /** Prelazi na prethodnu/sledeću oznaku (po poziciji u dokumentu, ne po redosledu dodavanja). */
@@ -936,6 +846,15 @@ class ReaderActivity : AppCompatActivity() {
                 binding.btnStepBack.contentDescription = "Prethodna oznaka.$backHint"
                 binding.btnStepForward.text = "Ozn. ▶"
                 binding.btnStepForward.contentDescription = "Sledeća oznaka.$forwardHint"
+            }
+            "sentence" -> {
+                val n = settings.sentenceNavigationCount
+                binding.btnStepBack.text = "◀ Rečenice"
+                binding.btnStepBack.contentDescription =
+                    "Prethodne rečenice. Vraća $n unazad. Dug pritisak: ponovi prethodne rečenice."
+                binding.btnStepForward.text = "Rečenice ▶"
+                binding.btnStepForward.contentDescription =
+                    "Sledeće rečenice. Ide $n unapred.$forwardHint"
             }
             else -> {
                 binding.btnStepBack.text = "◀ Str."
@@ -1342,6 +1261,31 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Dug pritisak na "Prethodna" (korak nazad) - ponavlja poslednju (trenutnu) stranicu
      * od početka, bez obzira na izabranu Navigaciju (uvek stranica, ne minut/oznaka). */
+    /** Dug pritisak na "Prethodni element" (korak nazad) - PRE ovoga je uvek pozivao
+     * repeatCurrentPage() bez obzira na Navigaciju. Korisnicki zahtev: kad je Navigacija
+     * "Rečenice", ovo treba da ponovi SKOK PO REČENICAMA ("Ponovi prethodne rečenice"), ne
+     * stranicu - SVE OSTALE rezime NAMERNO ostaju nepromenjene (i dalje ponavljaju stranicu,
+     * isto kao pre - ne dirati vec ustaljeno ponasanje za minute/oznaku bez izricitog zahteva). */
+    private fun repeatCurrentStep() {
+        if (settings.navigationMode == "sentence") {
+            repeatCurrentSentences()
+        } else {
+            repeatCurrentPage()
+        }
+    }
+
+    private fun repeatCurrentSentences() {
+        val n = settings.sentenceNavigationCount
+        val offset = PlaybackController.ttsManager?.offsetGoingBackSentences(n)
+        if (offset == null) {
+            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        moveTo(offset)
+        playClickSound()
+        android.widget.Toast.makeText(this, "Ponavljam prethodne rečenice.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     private fun repeatCurrentPage() {
         val current = doc?.currentCharacterOffset ?: 0
         val pageStart = (current / charsPerPage) * charsPerPage

@@ -140,15 +140,13 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_LAST_LIBRARY_TAB, "all") ?: "all"
         set(value) = prefs.edit().putString(KEY_LAST_LIBRARY_TAB, value).apply()
 
-    /** Poslednji upisan broj u "Prethodne rečenice"/"Sledeće rečenice" - odvojeno po pravcu,
-     * pamti se trajno (i posle zatvaranja app-e). Dug pritisak ponavlja skok istim brojem. */
-    var lastPrevSentenceCount: Int
-        get() = prefs.getInt(KEY_LAST_PREV_SENTENCES, 3)
-        set(value) = prefs.edit().putInt(KEY_LAST_PREV_SENTENCES, value).apply()
-
-    var lastNextSentenceCount: Int
-        get() = prefs.getInt(KEY_LAST_NEXT_SENTENCES, 3)
-        set(value) = prefs.edit().putInt(KEY_LAST_NEXT_SENTENCES, value).apply()
+    /** Broj rečenica po koraku kad je Navigacija postavljena na "Rečenice" - JEDAN broj,
+     * koristi se i za prethodni i za sledeći korak (korisnicki zahtev - jednostavnije od
+     * odvojenog pamcenja po pravcu). Uvek 1, 3 ili 5 (bira se iz spiska u Podesavanjima,
+     * isto kao ostale Navigacija opcije - ne slobodan unos). */
+    var sentenceNavigationCount: Int
+        get() = prefs.getInt(KEY_SENTENCE_NAV_COUNT, 1)
+        set(value) = prefs.edit().putInt(KEY_SENTENCE_NAV_COUNT, value).apply()
 
     var soundFeedbackEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND, false)
@@ -235,6 +233,7 @@ class AppSettings(context: Context) {
             .remove(KEY_AUTO_NEXT)
             .remove(KEY_AUTO_READ_ENABLED)
             .remove(KEY_AUTO_READ_TRIGGER)
+            .remove(KEY_SENTENCE_NAV_COUNT)
             .apply()
     }
 
@@ -286,8 +285,7 @@ class AppSettings(context: Context) {
         private const val KEY_SHAKE_SENSITIVITY = "shake_sensitivity"
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_LAST_LIBRARY_TAB = "last_library_tab"
-        private const val KEY_LAST_PREV_SENTENCES = "last_prev_sentences"
-        private const val KEY_LAST_NEXT_SENTENCES = "last_next_sentences"
+        private const val KEY_SENTENCE_NAV_COUNT = "sentence_nav_count"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
@@ -316,7 +314,7 @@ class AppSettings(context: Context) {
             KEY_NAVIGATION, KEY_SOUND, KEY_SENTENCE_PAUSE_ENABLED, KEY_SENTENCE_PAUSE_MS,
             KEY_PARAGRAPH_PAUSE_ENABLED, KEY_PARAGRAPH_PAUSE_MS, KEY_AUTO_NEXT,
             KEY_G_LANG, KEY_G_VOICE, KEY_G_ENGINE, KEY_G_RATE, KEY_G_VOLUME, KEY_G_PITCH,
-            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER
+            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT
         )
     }
 }
