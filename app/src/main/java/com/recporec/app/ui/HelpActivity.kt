@@ -64,7 +64,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća sva ova podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Tastatura ima dvadeset i jedno dugme, raspoređenih u pet redova.
+        Tastatura ima dvadeset dva dugmeta, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
@@ -111,9 +111,10 @@ class HelpActivity : AppCompatActivity() {
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
-        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a treće je povećava.
+        U četvrtom redu, prvo dugme smanjuje brzinu čitanja, a četvrto je povećava.
         Dug pritisak na bilo koje od njih, vraća brzinu na opštu vrednost.
-        Drugo dugme pušta ili pauzira čitanje.
+        Drugo dugme vraća na upisani broj rečenica, a dug pritisak ponavlja tu vrstu podsetnika.
+        Treće dugme pušta ili pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut ili oznaku, a dug pritisak ponavlja trenutnu stranicu od početka.
         Drugo dugme je Podseti me.

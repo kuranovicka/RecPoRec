@@ -1,0 +1,4 @@
+Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 12.0?
+
+1. Sada program pamti na kom folderu, tj. na kojoj smo polici stali: (Sve, Novo, Započeto, Pročitano).
+2. Pre puštanja i pauze, sada imamo novo dugme: Vrati rečenice. Tu upisujemo željeni broj rečenica na koji želimo da se vratimo, a program ih pamti. Dug pritisak ponavlja poslednje vraćanje rečenica. Npr, ako smo upisali pet rečenica, pamtiće taj broj sve dok ga ne promenimo.

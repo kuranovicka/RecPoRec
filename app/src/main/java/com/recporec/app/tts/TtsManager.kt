@@ -507,6 +507,16 @@ class TtsManager(private val appContext: Context) {
             .coerceIn(0, (chunks.size - 1).coerceAtLeast(0))
     }
 
+    /** "Vrati rečenice" - vraca karakter-offset pocetka recenice N mesta unazad od trenutne.
+     * Koristi ISTU podelu na recenice (chunkOffsets) koju TTS vec koristi za citanje - ne
+     * duplira logiku deljenja teksta na recenice negde drugde. Vraca null ako dokument jos
+     * nije spreman. Ne ide ispod pocetka dokumenta (coerceAtLeast 0). */
+    fun offsetGoingBackSentences(n: Int): Int? {
+        if (chunkOffsets.isEmpty()) return null
+        val targetIndex = (currentChunkIndex - n).coerceIn(0, chunkOffsets.size - 1)
+        return chunkOffsets[targetIndex]
+    }
+
     /** [userInitiated]=true (podrazumevano) znaci da je OVO namerna, svesna radnja (dugme,
      * medijski taster, drmanje) - takva pauza UVEK "pobedi" nad automatskim nastavkom, cak i
      * ako se slucajno poklopi sa kratkim gubitkom/vracanjem audio fokusa (npr. Bluetooth

@@ -237,6 +237,8 @@ class ReaderActivity : AppCompatActivity() {
         btnSpeedDown.setOnLongClickListener { resetToGlobal("brzina"); true }
         btnSpeedUp.setOnClickListener(clickSound { adjustSpeed(0.05f) })
         btnSpeedUp.setOnLongClickListener { resetToGlobal("brzina"); true }
+        btnRewindSentences.setOnClickListener(clickSound { showRewindSentencesDialog() })
+        btnRewindSentences.setOnLongClickListener { repeatLastSentenceRewind(); true }
         btnPlayPause.setOnClickListener(clickSound { togglePlayPause() })
         btnPlayPause.setOnLongClickListener { announceStatus(); true }
         btnRemindMe.setOnClickListener(clickSound { showRemindMeMenu() })
@@ -712,6 +714,59 @@ class ReaderActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    /** "Vrati rečenice" - korisnicki zahtev. Upises broj recenica, program se odmah vrati
+     * unazad za taj broj (koristi ISTU podelu na recenice koju TTS vec koristi za citanje,
+     * TtsManager.offsetGoingBackSentences - ne duplira logiku). Broj se pamti TRAJNO (i posle
+     * zatvaranja app-e), isti obrazac kao pamcenje kartice na glavnom ekranu. */
+    private fun showRewindSentencesDialog() {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
+        input.setText(settings.lastSentenceRewindCount.toString())
+        input.hint = "Broj rečenica"
+        input.contentDescription = "Broj rečenica za vraćanje unazad"
+        fun confirm() {
+            val n = input.text.toString().toIntOrNull() ?: return
+            if (n <= 0) return
+            settings.lastSentenceRewindCount = n
+            applySentenceRewind(n)
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Vrati rečenice")
+            .setView(input)
+            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
+        input.requestAccessibilityFocusNow()
+    }
+
+    /** Dug pritisak na "Vrati rečenice" - ponovi POSLEDNJI koriscen broj, bez ponovnog
+     * pitanja. */
+    private fun repeatLastSentenceRewind() {
+        applySentenceRewind(settings.lastSentenceRewindCount)
+    }
+
+    private fun applySentenceRewind(n: Int) {
+        val tts = PlaybackController.ttsManager
+        val offset = tts?.offsetGoingBackSentences(n)
+        if (offset == null) {
+            android.widget.Toast.makeText(this, "Dokument se još učitava, sačekaj trenutak.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        moveTo(offset)
+        // Korisnicki zahtev: obavesti (tekstom, ako moze i brojem) I zvukom - pristupacnost.
+        android.widget.Toast.makeText(this, "Vraćeno $n rečenica unazad.", android.widget.Toast.LENGTH_SHORT).show()
+        playClickSound()
+    }
+
     private fun goToPercent(percent: Int) {
         val length = parsed?.length ?: return
         val offset = (length * percent / 100).coerceIn(0, max(0, length - 1))
@@ -834,6 +889,7 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na "Idi na" - vraća na sam početak dokumenta. */
     private fun goToDocumentStart() {
         moveTo(0)
+        playClickSound()
         android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
@@ -870,6 +926,7 @@ class ReaderActivity : AppCompatActivity() {
         }
         val target = jumpHistory.removeAt(jumpHistory.size - 1)
         moveTo(target, recordHistory = false)
+        playClickSound()
         android.widget.Toast.makeText(this, "Poništena poslednja radnja.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
@@ -1036,6 +1093,7 @@ class ReaderActivity : AppCompatActivity() {
                     characterOffset = offset
                 )
             )
+            playClickSound()
             android.widget.Toast.makeText(
                 this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
             ).show()
@@ -1223,6 +1281,7 @@ class ReaderActivity : AppCompatActivity() {
         val current = doc?.currentCharacterOffset ?: 0
         val pageStart = (current / charsPerPage) * charsPerPage
         moveTo(pageStart)
+        playClickSound()
         android.widget.Toast.makeText(this, "Ponavljam stranicu.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
@@ -1237,6 +1296,7 @@ class ReaderActivity : AppCompatActivity() {
         val current = doc?.currentCharacterOffset ?: 0
         val idx = chapters.indexOfLast { it.startOffset <= current }.coerceAtLeast(0)
         moveTo(chapters[idx].startOffset)
+        playClickSound()
         android.widget.Toast.makeText(this, "Ponavljam poglavlje.", android.widget.Toast.LENGTH_SHORT).show()
     }
 

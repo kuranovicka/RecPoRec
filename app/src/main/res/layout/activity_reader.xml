@@ -195,6 +195,12 @@
                 android:contentDescription="@string/btn_speed_down"
                 android:text="🐢−" />
 
+            <Button android:id="@+id/btnRewindSentences" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_combined"
+                android:contentDescription="Vrati rečenice. Dug pritisak: ponovi poslednje vraćanje rečenica."
+                android:textSize="14sp"
+                android:text="Vrati rečenice" />
+
             <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_play"
                 android:contentDescription="@string/btn_play_pause"
