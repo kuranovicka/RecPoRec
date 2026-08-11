@@ -228,7 +228,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="@color/text_primary"
-            android:text="Navigacija: po stranici, minutima ili oznakama" />
+            android:text="Navigacija po stranicama, minutama, oznakama, ili rečenicama" />
 
         <Button
             android:id="@+id/btnNavigationMode"
