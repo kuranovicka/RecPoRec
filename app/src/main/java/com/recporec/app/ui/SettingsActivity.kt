@@ -77,6 +77,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
             if (checked) showShakeSensitivityPicker()
+            updateShakeLabel()
         }
         binding.switchShake.setOnLongClickListener {
             if (settings.shakeEnabled) showShakeSensitivityPicker()
@@ -121,6 +122,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
             settings.autoReadEnabled = checked
             if (checked) showAutoReadTriggerPicker()
+            updateAutoReadLabel()
         }
         binding.switchAutoRead.setOnLongClickListener {
             if (settings.autoReadEnabled) showAutoReadTriggerPicker()
@@ -199,6 +201,20 @@ class SettingsActivity : AppCompatActivity() {
         val currentLabel = if (settings.autoReadTrigger == "document") labels[1] else labels[0]
         PickerDialog.show(this, "Kada automatski čitati", labels, currentLabel, autoConfirm = true, showSearch = false) { index ->
             settings.autoReadTrigger = if (index == 1) "document" else "app"
+            updateAutoReadLabel()
+        }
+    }
+
+    private fun updateAutoReadLabel() {
+        val baseLabel = "Automatski čitaj aktivni dokument"
+        if (settings.autoReadEnabled) {
+            val triggerLabel = if (settings.autoReadTrigger == "document") "Pri otvaranju dokumenta" else "Pri otvaranju aplikacije"
+            binding.switchAutoRead.text = "$baseLabel - $triggerLabel"
+            binding.switchAutoRead.contentDescription =
+                "$baseLabel. Trenutno: $triggerLabel. Dug pritisak: promeni."
+        } else {
+            binding.switchAutoRead.text = baseLabel
+            binding.switchAutoRead.contentDescription = baseLabel
         }
     }
 
@@ -207,6 +223,24 @@ class SettingsActivity : AppCompatActivity() {
         val currentLabel = labels[settings.shakeSensitivity.coerceIn(0, 2)]
         PickerDialog.show(this, "Jačina drmanja", labels, currentLabel, autoConfirm = true, showSearch = false) { index ->
             settings.shakeSensitivity = index
+            updateShakeLabel()
+        }
+    }
+
+    /** Korisnicki zahtev: prekidac sam po sebi (tekst i sazetak za citac ekrana) sad pokazuje
+     * TRENUTNO odabranu podopciju - isti princip kao "Prethodne rečenice" dugme u citacu koje
+     * pokazuje tacan broj. Bez ovoga bi korisnica morala da pamti sta je izabrala, ili da
+     * ponovo otvara izbornik samo da proveri. */
+    private fun updateShakeLabel() {
+        val baseLabel = getString(com.recporec.app.R.string.setting_shake)
+        if (settings.shakeEnabled) {
+            val levelLabel = listOf("Blago", "Srednje", "Jako")[settings.shakeSensitivity.coerceIn(0, 2)]
+            binding.switchShake.text = "$baseLabel - $levelLabel"
+            binding.switchShake.contentDescription =
+                "$baseLabel. Trenutno: $levelLabel. Dug pritisak: promeni jačinu."
+        } else {
+            binding.switchShake.text = baseLabel
+            binding.switchShake.contentDescription = baseLabel
         }
     }
 
@@ -229,7 +263,9 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
             if (checked) showShakeSensitivityPicker()
+            updateShakeLabel()
         }
+        updateShakeLabel()
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
         binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
@@ -240,7 +276,9 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
             settings.autoReadEnabled = checked
             if (checked) showAutoReadTriggerPicker()
+            updateAutoReadLabel()
         }
+        updateAutoReadLabel()
 
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
