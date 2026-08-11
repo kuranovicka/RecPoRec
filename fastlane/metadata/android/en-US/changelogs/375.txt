@@ -14,3 +14,4 @@ What's new in RečPoReč 12.0?
 12. Fixed combined voices not resetting to defaults.
 13. For the Shake and Auto-read switches - turning them on now immediately opens the picker (shake intensity / when to read), instead of a list that stays permanently visible underneath. Long-pressing the switch reopens the picker to change it later.
 14. Those same switches now show the currently selected option in their own text (e.g. "Shake phone... - Light"), so you don't have to remember what you picked.
+15. Shortened all text-entry dialogs (search, go to page/minute, bookmarks, wake-up, scheduled reading, rename, combined voices) - just the input field and Cancel, the keyboard itself confirms.

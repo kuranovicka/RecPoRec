@@ -14,3 +14,4 @@
 12. Popravljeno vraćanje kombinovanih glasova na zadano.
 13. Kod prekidača Drmanje telefona i Automatski čitaj - uključivanje sad odmah otvara izbor (jačina drmanja / kada čitati), umesto liste koja stalno stoji ispod. Dug pritisak na prekidač ponovo otvara izbor za kasniju promenu.
 14. Ti isti prekidači sad u svom tekstu pokazuju i trenutno odabranu opciju (npr. "Prodrmaj telefon... - Blago"), da se ne mora pamtiti šta je izabrano.
+15. Skraćeni svi dijalozi za unos teksta (pretraga, idi na stranicu/minut, oznake, buđenje, zakazano čitanje, preimenovanje, kombinovani glasovi) - samo polje za unos i Otkaži, tastatura sama potvrđuje.
