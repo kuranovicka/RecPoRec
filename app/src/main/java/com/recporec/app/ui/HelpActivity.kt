@@ -41,7 +41,7 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak na dokument otvara njegove radnje: pomeri gore, pomeri dole, preimenuj, podeli, obriši.
         Ako slučajno obrišeš dokument, ili klikneš na Obriši sve, imaš nekoliko trenutaka da poništiš brisanje.
         Gore desno je dugme Opcije.
-        Otvara tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
+        Otvara tri stavke: Opšta podešavanja glasa, Podešavanja programa i Pomoć.
         Dug pritisak proverava sve dozvole potrebne aplikaciji i javlja ako neka nije data, kao pri prvom pokretanju.
         Prva stavka je Opšta podešavanja glasa.
         Ovde biraš jezik i glas, (važi za sve dokumente).
@@ -50,7 +50,7 @@ class HelpActivity : AppCompatActivity() {
         Njime biraš dva glasa koja se smenjuju dok čitaš.
         Na dnu tog ekrana je dugme Vrati na zadano.
         Vraća baš sva podešavanja - glas, jezik, brzinu, jačinu, visinu i sve prekidače - na početne vrednosti.
-        Druga stavka je Podešavanja.
+        Druga stavka je Podešavanja programa.
         Tu su prekidači za: rad u pozadini, čitanje bez prekida, drmanje telefona za produžetak tajmera, zvuk dugmadi, pauze između rečenica i pasusa i automatski prelazak na sledeći dokument.
         Tu je i prekidač Automatski čitaj aktivni dokument.
         Kad ga uključiš, biraš jednu od dve mogućnosti:

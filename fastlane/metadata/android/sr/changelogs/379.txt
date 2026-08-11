@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Podešavanja su preimenovana u "Podešavanja programa", da se više ne mešaju sa Opštim podešavanjima glasa.
+2. Ispravljen opis navigacije - sad tačno piše da postoji navigacija po stranicama, minutama, oznakama i rečenicama.

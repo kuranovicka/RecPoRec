@@ -1,0 +1,4 @@
+What's new:
+
+1. Settings renamed to "Podešavanja programa" (App settings), to avoid confusion with General voice settings.
+2. Fixed the navigation description - it now correctly lists navigation by pages, minutes, bookmarks, and sentences.
