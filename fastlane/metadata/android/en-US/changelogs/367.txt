@@ -9,3 +9,6 @@ What's new in RečPoReč 12.0?
 7. Long-pressing Options now checks permissions, and long-pressing Add document now announces statistics.
 8. "Reset to defaults" now resets absolutely everything at once, on both settings screens.
 9. Buttons are now aligned and evened out, with larger text for better readability.
+10. Fixed tooltip texts that were giving stale, incorrect information.
+11. Navigation by minutes consolidated into one option with a minute-count picker, instead of three separate entries.
+12. Fixed combined voices not resetting to defaults.

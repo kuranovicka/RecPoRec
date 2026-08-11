@@ -9,3 +9,6 @@
 7. Dug pritisak na Opcije sad proverava dozvole, a dug pritisak na Dodaj dokument sad izgovara statistiku.
 8. Dugme Vrati na zadano sad vraća baš sva podešavanja odjednom, na oba ekrana podešavanja.
 9. Dugmad je poravnata i ujednačena, sa uvećanim slovima za bolju čitljivost.
+10. Popravljeni tooltip tekstovi koji su davali stare, netačne informacije.
+11. Navigacija po minutima objedinjena u jednu opciju sa izborom broja minuta, umesto tri odvojene stavke.
+12. Popravljeno vraćanje kombinovanih glasova na zadano.

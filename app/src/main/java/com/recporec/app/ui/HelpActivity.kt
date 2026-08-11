@@ -44,7 +44,7 @@ class HelpActivity : AppCompatActivity() {
         Otvara tri stavke: Opšta podešavanja glasa, Podešavanja i Pomoć.
         Dug pritisak proverava sve dozvole potrebne aplikaciji i javlja ako neka nije data, kao pri prvom pokretanju.
         Prva stavka je Opšta podešavanja glasa.
-        Ovde biraš jezik i glas - važi za sve dokumente.
+        Ovde biraš jezik i glas, (važi za sve dokumente).
         Čuješ kratak primer svakog glasa kad ga dodirneš.
         Tu je i dugme Kombinovani glasovi.
         Njime biraš dva glasa koja se smenjuju dok čitaš.
@@ -56,7 +56,8 @@ class HelpActivity : AppCompatActivity() {
         Kad ga uključiš, biraš jednu od dve mogućnosti:
         Automatsko čitanje pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, oznaku ili rečenice.
-        Ako izabereš rečenice, biraš i koliko po koraku: jednu, tri, pet ili deset.
+        Ako biraš minute, biraš: 1, 5, 10.
+        Ako izabereš rečenice, biraš: jednu, tri, pet ili deset.
         Tu su i dugmad Izvezi podešavanja u fajl, i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
         Ne čuvaju samu listu knjiga.
@@ -65,7 +66,8 @@ class HelpActivity : AppCompatActivity() {
         Isto kao i na prethodnom ekranu, vraća baš sva podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Gore desno je opet dugme Opcije, isto kao na prvom ekranu - da ne moraš da izlaziš iz knjige da bi promenio-la glas ili podešavanja.
+        Gore desno je opet dugme Opcije, isto kao na prvom ekranu.
+        Tako ne moraš izaći iz knjige da bi promenio-la glas ili podešavanja.
         Tastatura ima četrnaest dugmadi, raspoređenih u pet redova.
         Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
         U prvom redu odozgo, prvo dugme je Oznake.
@@ -89,7 +91,7 @@ class HelpActivity : AppCompatActivity() {
         U drugom redu, prvo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
         Drugo dugme je Tajmer.
-        Otvara klizač od pet do sto dvadeset minuta za automatski prekid čitanja.
+        Otvara klizač od pet do sto dvadeset minuta, za automatski prekid čitanja.
         Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
         Dug pritisak isključuje tajmer.
         Treće dugme je Sledeće poglavlje.
@@ -104,7 +106,7 @@ class HelpActivity : AppCompatActivity() {
         Upišeš tačno vreme, na primer 5:20.
         Čitanje tada tiho krene, bez alarma i bez punog ekrana.
         Ako pustiš knjigu ranije, zakazano čitanje se prekida.
-        U četvrtom redu je samo jedno dugme - pušta ili pauzira čitanje.
+        U četvrtom redu je samo jedno dugme koje pokreće i pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
         U petom redu, prvo dugme ide na prethodni element: stranicu, minut, oznaku ili rečenice, zavisno od Navigacije.
         Dug pritisak ponavlja trenutnu stranicu od početka, ili prethodne rečenice ako je Navigacija podešena na rečenice.
@@ -125,8 +127,8 @@ class HelpActivity : AppCompatActivity() {
         Dug pritisak šalje aplikaciju u pozadinu, kao dugme Home na telefonu.
         Tada dokument ostaje otvoren.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
-        Dug pritisak na prečicu programa na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
-        Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga direktno pustiš ili pauziraš.
+        Dug pritisak na prečicu Reč po reč na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
+        Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga pustiš ili pauziraš.
         Program podržava i rad sa fizičkim Bluetooth tastaturama, kao i sa slušalicama na dodir ili dugme.
         Dvostruki pritisak sa dva prsta na glavnom ekranu, takođe pauzira i nastavlja čitanje.
         Kada neki dokument ili knjigu želiš da podeliš, u opcijama će ti biti ponuđena i aplikacija Reč po reč.
