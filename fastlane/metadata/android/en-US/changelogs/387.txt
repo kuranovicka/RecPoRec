@@ -1,0 +1,3 @@
+What's new:
+
+1. Pronunciation Dictionary: added a "Play pronunciation" option on each entry - hear exactly how the replacement will sound, without waiting to encounter the word in a book.

@@ -125,13 +125,14 @@ class PronunciationActivity : AppCompatActivity() {
     }
 
     private fun showEntryActionsDialog(entry: PronunciationEntity) {
-        val options = arrayOf("Izmeni", "Obriši")
+        val options = arrayOf("Pusti izgovor", "Izmeni", "Obriši")
         AlertDialog.Builder(this)
             .setTitle("${entry.originalWord} → ${entry.replacement}")
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> showAddOrEditDialog(existing = entry)
-                    1 -> lifecycleScope.launch {
+                    0 -> previewPronunciation(entry.replacement)
+                    1 -> showAddOrEditDialog(existing = entry)
+                    2 -> lifecycleScope.launch {
                         db.pronunciationDao().deleteById(entry.id)
                         refreshList()
                     }
@@ -139,6 +140,26 @@ class PronunciationActivity : AppCompatActivity() {
             }
             .setNegativeButton(com.recporec.app.R.string.cancel, null)
             .show()
+    }
+
+    /** Izgovara samu zamenu (ne originalnu reč) - korisnica ovako čuje TAČNO ono što će
+     * čuti i tokom čitanja knjige, bez čekanja da naiđe na tu reč u tekstu. Isti obrazac
+     * kao TtsEngineUtil.previewVoice - kratkotrajan TTS koji se sam gasi kad završi. */
+    private fun previewPronunciation(text: String) {
+        var tts: android.speech.tts.TextToSpeech? = null
+        tts = android.speech.tts.TextToSpeech(this) { status ->
+            if (status == android.speech.tts.TextToSpeech.SUCCESS) {
+                tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) { tts?.shutdown() }
+                    @Deprecated("Deprecated in Java")
+                    override fun onError(utteranceId: String?) { tts?.shutdown() }
+                })
+                tts?.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "pronunciation_preview")
+            } else {
+                tts?.shutdown()
+            }
+        }
     }
 
     /** Uvoz iz obicnog tekst fajla: jedan par po redu, "originalna_rec=zamena". Otporan na
