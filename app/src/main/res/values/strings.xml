@@ -42,7 +42,7 @@
 
     <!-- Meni -->
     <string name="menu_settings">Podešavanja</string>
-    <string name="menu_options_button">Opcije. Dug pritisak: Statistika čitanja.</string>
+    <string name="menu_options_button">Opcije. Dug pritisak: provera dozvola.</string>
     <string name="menu_help">Pomoć</string>
 
     <!-- Podešavanja -->

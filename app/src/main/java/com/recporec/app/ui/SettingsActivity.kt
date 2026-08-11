@@ -2,11 +2,15 @@ package com.recporec.app.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.recporec.app.data.AppSettings
 import com.recporec.app.databinding.ActivitySettingsBinding
 import com.recporec.app.util.requestAccessibilityFocusNow
+import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val db by lazy { com.recporec.app.data.AppDatabase.getInstance(this) }
 
     private lateinit var binding: ActivitySettingsBinding
     private val settings by lazy { AppSettings(this) }
@@ -157,10 +161,15 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnResetGeneralDefaults.setOnClickListener {
             android.app.AlertDialog.Builder(this)
                 .setTitle("Vrati na zadano")
-                .setMessage("Vraća SVA podešavanja (glas, jezik, brzina, jačina, visina, navigacija i sve prekidače) na podrazumevano stanje.")
+                .setMessage("Vraća SVA podešavanja (glas, jezik, brzina, jačina, visina, kombinovani glasovi, navigacija i sve prekidače) na podrazumevano stanje.")
                 .setNegativeButton(com.recporec.app.R.string.cancel, null)
                 .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
                     settings.resetAllSettingsToDefaults()
+                    // Korisnicka prijava: kombinovani glasovi se nisu resetovali odavde (samo
+                    // sa drugog ekrana) - ovaj ekran uopste nije imao pristup bazi za to.
+                    lifecycleScope.launch {
+                        db.combinedVoiceDao().clearScope(0L)
+                    }
                     // Direktno osvežavamo prikaz umesto da se oslanjamo na recreate() - na
                     // nekim uređajima recreate() ume da se ne pokrene pouzdano posle dijaloga.
                     refreshFromSettings()
