@@ -187,8 +187,13 @@ class DocumentListActivity : AppCompatActivity() {
         binding.btnAddDocument.setOnClickListener {
             launchPicker()
         }
+        // Korisnicki zahtev: zamenjeno sa Opcije - sad Dodaj dokument izgovara statistiku.
         binding.btnAddDocument.setOnLongClickListener {
-            checkAllPermissionsManually()
+            lifecycleScope.launch {
+                val docs = withContext(Dispatchers.IO) { db.documentDao().observeAllOnce() }
+                val text = com.recporec.app.util.StatsFormatter.buildStatsText(docs)
+                android.widget.Toast.makeText(this@DocumentListActivity, text, android.widget.Toast.LENGTH_LONG).show()
+            }
             true
         }
 
@@ -284,18 +289,9 @@ class DocumentListActivity : AppCompatActivity() {
             }
             popup.show()
         }
-        // Statistika citanja: premestena sa liste u meniju na dug pritisak DUGMETA Opcije -
-        // elegantnije, i dosledno obrascu "dug pritisak = dodatna radnja" koji vec koristi
-        // sva ostala dugmad u citacu.
+        // Korisnicki zahtev: zamenjeno sa Dodaj dokument - sad Opcije proverava dozvole.
         binding.btnOverflow.setOnLongClickListener {
-            // Izgovara statistiku naglas (kao Toast, cita ga TalkBack), BEZ otvaranja ikakvog
-            // ekrana - korisnicka zelja: "samo da pročita statistiku". Ista logika kao na
-            // ekranu Statistika (deljeno preko StatsFormatter), samo bez navigacije.
-            lifecycleScope.launch {
-                val docs = withContext(Dispatchers.IO) { db.documentDao().observeAllOnce() }
-                val text = com.recporec.app.util.StatsFormatter.buildStatsText(docs)
-                android.widget.Toast.makeText(this@DocumentListActivity, text, android.widget.Toast.LENGTH_LONG).show()
-            }
+            checkAllPermissionsManually()
             true
         }
 
