@@ -157,14 +157,14 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnResetGeneralDefaults.setOnClickListener {
             android.app.AlertDialog.Builder(this)
                 .setTitle("Vrati na zadano")
-                .setMessage("Vraća sva podešavanja na ovom ekranu (rad u pozadini, drmanje, zvuk, pauza između rečenica, automatski nastavak, automatsko čitanje, navigacija) na podrazumevano stanje.")
+                .setMessage("Vraća SVA podešavanja (glas, jezik, brzina, jačina, visina, navigacija i sve prekidače) na podrazumevano stanje.")
                 .setNegativeButton(com.recporec.app.R.string.cancel, null)
                 .setPositiveButton(getString(com.recporec.app.R.string.delete)) { _, _ ->
-                    settings.resetGeneralSettingsToDefaults()
+                    settings.resetAllSettingsToDefaults()
                     // Direktno osvežavamo prikaz umesto da se oslanjamo na recreate() - na
                     // nekim uređajima recreate() ume da se ne pokrene pouzdano posle dijaloga.
                     refreshFromSettings()
-                    android.widget.Toast.makeText(this, "Podešavanja su vraćena na zadano.", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, "Sva podešavanja su vraćena na zadano.", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 .show()
         }

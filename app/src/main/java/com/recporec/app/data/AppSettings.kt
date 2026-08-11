@@ -205,6 +205,13 @@ class AppSettings(context: Context) {
 
     /** Vraća SVA opšta podešavanja glasa (jezik/glas/brzina/jačina/visina) na podrazumevano.
      * Ne dira podešavanja pojedinačnih dokumenata niti opšta podešavanja iz ekrana "Podešavanja". */
+    /** Korisnicki zahtev: "Vrati na zadano" se sad odnosi na SVA podesavanja odjednom (glas +
+     * opsta podesavanja), umesto dva odvojena dugmeta koja resetuju samo deo. Jednostavnije. */
+    fun resetAllSettingsToDefaults() {
+        resetVoiceSettingsToDefaults()
+        resetGeneralSettingsToDefaults()
+    }
+
     fun resetVoiceSettingsToDefaults() {
         prefs.edit()
             .remove(KEY_G_LANG)

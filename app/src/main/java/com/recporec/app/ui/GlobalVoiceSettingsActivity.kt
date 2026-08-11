@@ -91,10 +91,10 @@ class GlobalVoiceSettingsActivity : AppCompatActivity() {
     private fun confirmResetVoiceDefaults() {
         android.app.AlertDialog.Builder(this)
             .setTitle("Vrati na zadano")
-            .setMessage("Vraća jezik, glas, brzinu, jačinu, visinu i kombinovane glasove na podrazumevano stanje. Ovo se odnosi samo na opšta podešavanja, ne na pojedinačne dokumente.")
+            .setMessage("Vraća SVA podešavanja (glas, jezik, brzinu, jačinu, visinu, kombinovane glasove, navigaciju i sve prekidače) na podrazumevano stanje.")
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                settings.resetVoiceSettingsToDefaults()
+                settings.resetAllSettingsToDefaults()
                 lifecycleScope.launch {
                     db.combinedVoiceDao().clearScope(0L)
                     // Direktno osvežavamo prikaz umesto da se oslanjamo na recreate() - na
