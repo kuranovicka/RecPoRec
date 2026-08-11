@@ -35,11 +35,45 @@
         android:id="@+id/btnAddEntry"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:textSize="20sp"
         android:backgroundTint="@color/btn_page_nav"
         android:textColor="@color/button_text"
         android:text="Dodaj reč" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/btnImportDictionary"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Uvezi" />
+
+        <Button
+            android:id="@+id/btnExportDictionary"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Izvezi" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnBack"

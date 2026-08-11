@@ -1,18 +1,22 @@
 package com.recporec.app.ui
 
 import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.recporec.app.data.AppDatabase
 import com.recporec.app.data.PronunciationEntity
 import com.recporec.app.databinding.ActivityPronunciationBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Ekran "Rečnik izgovora" - korisnikova SOPSTVENA lista zamena (odvojeno od ugrađenog
  * rečnika koji je resurs u aplikaciji i ne dira se odavde). Dodir ili dug pritisak na
@@ -22,6 +26,22 @@ class PronunciationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPronunciationBinding
     private val db by lazy { AppDatabase.getInstance(this) }
     private lateinit var adapter: PronunciationAdapter
+
+    // Isti obrazac kao rezervna kopija/izvoz podesavanja u DocumentListActivity - obican
+    // SAF (Storage Access Framework) birac fajlova, bez ijedne nove zavisnosti.
+    private val importLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        importFromFile(uri)
+    }
+
+    private val exportLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        exportToFile(uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +56,8 @@ class PronunciationActivity : AppCompatActivity() {
         binding.recyclerPronunciation.adapter = adapter
 
         binding.btnAddEntry.setOnClickListener { showAddOrEditDialog(existing = null) }
+        binding.btnImportDictionary.setOnClickListener { importLauncher.launch(arrayOf("*/*")) }
+        binding.btnExportDictionary.setOnClickListener { exportLauncher.launch("recnik-izgovora.txt") }
         binding.btnBack.setOnClickListener { finish() }
 
         refreshList()
@@ -117,5 +139,84 @@ class PronunciationActivity : AppCompatActivity() {
             }
             .setNegativeButton(com.recporec.app.R.string.cancel, null)
             .show()
+    }
+
+    /** Uvoz iz obicnog tekst fajla: jedan par po redu, "originalna_rec=zamena". Otporan na
+     * "prljave" fajlove (visak navodnika, zvezdica, praznih redova) - iz istih razloga
+     * kao svaki drugi uvoz u ovoj aplikaciji (npr. import dokumenata) ne sme da padne na
+     * necem sto korisnica nije ni napravila rucno, vec je preneto/konvertovano odnekud. */
+    private fun importFromFile(uri: Uri) {
+        lifecycleScope.launch {
+            Toast.makeText(this@PronunciationActivity, "Uvoz rečnika...", Toast.LENGTH_SHORT).show()
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    val text = contentResolver.openInputStream(uri)?.use { input ->
+                        input.readBytes().toString(Charsets.UTF_8)
+                    } ?: return@withContext -1
+                    // Ukloni BOM ako postoji (Windows Notepad ga cesto dodaje).
+                    val cleanText = text.removePrefix("\uFEFF")
+                    val seen = LinkedHashMap<String, Pair<String, String>>()
+                    var skipped = 0
+                    for (rawLine in cleanText.lines()) {
+                        var line = rawLine.trim()
+                        if (line.isEmpty()) continue
+                        // Skini slucajne navodnike i zvezdice sa ivica reda - ostaci iz
+                        // razlicitih izvora odakle je fajl mogao doci.
+                        line = line.trim('"', '*', ' ')
+                        if ('=' !in line) { skipped++; continue }
+                        val idx = line.indexOf('=')
+                        var word = line.substring(0, idx).trim().trim('"', '*', ' ')
+                        var replacement = line.substring(idx + 1).trim().trim('"', '*', ' ')
+                        if (word.isEmpty() || replacement.isEmpty()) { skipped++; continue }
+                        // Poslednji unos u fajlu pobedjuje kod sudara - dogovoreno pravilo,
+                        // bez upozorenja (isto kao pri rucnom dodavanju).
+                        seen[word.lowercase()] = word to replacement
+                    }
+                    if (seen.isEmpty()) return@withContext 0
+                    val db = AppDatabase.getInstance(this@PronunciationActivity).pronunciationDao()
+                    val existing = db.getAll()
+                    val existingByLower = existing.associateBy { it.originalWord.lowercase() }
+                    for ((lower, pair) in seen) {
+                        val (word, replacement) = pair
+                        existingByLower[lower]?.let { db.deleteById(it.id) }
+                        db.insert(PronunciationEntity(originalWord = word, replacement = replacement))
+                    }
+                    seen.size
+                } catch (_: Exception) {
+                    -1
+                }
+            }
+            refreshList()
+            val msg = when {
+                result < 0 -> "Uvoz nije uspeo - proveri da li je fajl ispravan."
+                result == 0 -> "Fajl ne sadrži nijedan ispravan unos."
+                else -> "Uvezeno unosa: $result."
+            }
+            Toast.makeText(this@PronunciationActivity, msg, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Izvoz u ISTI, cist format ("rec=zamena", bez navodnika/zvezdica) - cak i ako je
+     * uvezen "prljav" fajl, ono sto se izveze je uvek uredno. */
+    private fun exportToFile(uri: Uri) {
+        lifecycleScope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    val entries = AppDatabase.getInstance(this@PronunciationActivity).pronunciationDao().getAll()
+                    val text = entries.joinToString("\n") { "${it.originalWord}=${it.replacement}" }
+                    contentResolver.openOutputStream(uri)?.use { out ->
+                        out.write(text.toByteArray(Charsets.UTF_8))
+                    }
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            Toast.makeText(
+                this@PronunciationActivity,
+                if (ok) "Rečnik izvezen." else "Izvoz nije uspeo.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }
