@@ -18,9 +18,4 @@ interface PronunciationDao {
 
     @Query("DELETE FROM pronunciation_entries")
     suspend fun deleteAll()
-
-    /** Za uvoz iz fajla - poslednji unos sa istom reči (bez razlike velikih/malih slova)
-     * pobeđuje, kao i pri samom čitanju fajla (jednostavno pravilo, bez upozorenja). */
-    @Query("DELETE FROM pronunciation_entries WHERE originalWord = :originalWord COLLATE NOCASE")
-    suspend fun deleteByWord(originalWord: String)
 }

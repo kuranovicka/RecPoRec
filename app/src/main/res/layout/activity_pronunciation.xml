@@ -49,7 +49,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:textSize="20sp"
-        android:backgroundTint="@color/btn_neutral"
+        android:backgroundTint="@color/btn_combined"
         android:textColor="@color/button_text"
         android:text="Nazad" />
 

@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -77,12 +76,13 @@ class PronunciationActivity : AppCompatActivity() {
                 return
             }
             lifecycleScope.launch {
-                // Ako se menja postojeći unos, prvo ga ukloni PO ID-ju (da ne ostane
-                // "duh" ako je korisnica promenila samu reč, ne samo zamenu).
-                if (existing != null) db.pronunciationDao().deleteById(existing.id)
                 // Ista reč (bez razlike velikih/malih slova) se zamenjuje, ne dodaje duplo -
-                // dogovoreno pravilo: poslednji unos pobeđuje, bez upozorenja.
-                db.pronunciationDao().deleteByWord(word)
+                // dogovoreno pravilo: poslednji unos pobeđuje, bez upozorenja. Poređenje se
+                // radi ovde (ne u SQL upitu) da se izbegne COLLATE u @Query, koji zna da
+                // zbuni Room-ov prevodilac upita u vreme kompajliranja.
+                val all = db.pronunciationDao().getAll()
+                val toRemove = all.filter { it.originalWord.equals(word, ignoreCase = true) || it.id == existing?.id }
+                toRemove.forEach { db.pronunciationDao().deleteById(it.id) }
                 db.pronunciationDao().insert(PronunciationEntity(originalWord = word, replacement = replacement))
                 refreshList()
             }
