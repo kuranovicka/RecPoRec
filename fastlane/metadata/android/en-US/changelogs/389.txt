@@ -1,0 +1,5 @@
+What's new:
+
+1. Pronunciation Dictionary: the list stays hidden until you search or press "Word list" - easier to navigate through nearly 1900 entries.
+2. The built-in dictionary and your own entries are now grouped, not mixed alphabetically - the whole built-in dictionary first, then your own entries.
+3. Fixed: "Play pronunciation" no longer silently fails if pressed twice quickly.

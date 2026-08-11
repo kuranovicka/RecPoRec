@@ -34,6 +34,7 @@ class PronunciationActivity : AppCompatActivity() {
     private lateinit var adapter: PronunciationAdapter
     private var fullList: List<PronunciationListItem> = emptyList()
     private var previewTts: TextToSpeech? = null
+    private var listExpanded = false
 
     private val importLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -60,12 +61,19 @@ class PronunciationActivity : AppCompatActivity() {
         adapter = PronunciationAdapter(onTap = { showEntryActionsDialog(it) })
         binding.recyclerPronunciation.layoutManager = LinearLayoutManager(this)
         binding.recyclerPronunciation.adapter = adapter
+        // Lista se ne prikazuje dok korisnica eksplicitno ne zatrazi (dugme Lista reci) ili
+        // ne pocne da pretrazuje - sa skoro 1900 unosa (ugradjeni + sopstveni), stalno
+        // vidljiva lista bi znacila da se mora prevuci kroz sve njih da bi se doslo do
+        // dugmadi ispod (Dodaj rec, Uvezi, Izvezi, Nazad).
+        binding.recyclerPronunciation.visibility = android.view.View.GONE
 
         binding.btnAddEntry.setOnClickListener { showAddOrEditDialog(prefillWord = null, prefillReplacement = null, editEntityId = null) }
         binding.btnImportDictionary.setOnClickListener { importLauncher.launch(arrayOf("*/*")) }
         binding.btnExportDictionary.setOnClickListener { exportLauncher.launch("recnik-izgovora.txt") }
         binding.btnBack.setOnClickListener { finish() }
         binding.btnWordList.setOnClickListener {
+            listExpanded = true
+            binding.recyclerPronunciation.visibility = android.view.View.VISIBLE
             Toast.makeText(this, "${adapter.currentList.size} unosa u rečniku.", Toast.LENGTH_SHORT).show()
             binding.recyclerPronunciation.requestAccessibilityFocusNow()
         }
@@ -84,25 +92,27 @@ class PronunciationActivity : AppCompatActivity() {
     }
 
     /** Spaja ugrađeni rečnik (iz resursa) i korisnikov (iz baze) - korisnikov unos
-     * PREKRIVA ugrađeni ako je ista reč (prikazuje se kao "tvoj unos", potpuno menjiv). */
+     * PREKRIVA ugrađeni ako je ista reč (prikazuje se kao "tvoj unos", potpuno menjiv).
+     * NAMERNO grupisano, ne izmešano abecedno - prvo ceo ugrađeni rečnik, pa TEK ONDA
+     * tvoji sopstveni unosi - lakše za pratiti nego da se sve meša u jednu abecednu listu. */
     private fun refreshList() {
         lifecycleScope.launch {
             val merged = withContext(Dispatchers.Default) {
                 val builtIn = PronunciationDictionary.loadBuiltInRaw(this@PronunciationActivity)
                 val userEntries = db.pronunciationDao().getAll()
                 val userByLower = userEntries.associateBy { it.originalWord.lowercase() }
-                val result = mutableListOf<PronunciationListItem>()
+                val builtInItems = mutableListOf<PronunciationListItem>()
                 for ((word, replacement) in builtIn) {
                     val override = userByLower[word.lowercase()]
                     if (override == null) {
-                        result.add(PronunciationListItem(word, replacement, isBuiltIn = true, entityId = null))
+                        builtInItems.add(PronunciationListItem(word, replacement, isBuiltIn = true, entityId = null))
                     }
                 }
-                for (entry in userEntries) {
-                    result.add(PronunciationListItem(entry.originalWord, entry.replacement, isBuiltIn = false, entityId = entry.id))
-                }
-                result.sortBy { it.originalWord.lowercase() }
-                result
+                builtInItems.sortBy { it.originalWord.lowercase() }
+                val userItems = userEntries
+                    .map { PronunciationListItem(it.originalWord, it.replacement, isBuiltIn = false, entityId = it.id) }
+                    .sortedBy { it.originalWord.lowercase() }
+                builtInItems + userItems
             }
             fullList = merged
             applyFilter(binding.inputSearch.text?.toString().orEmpty())
@@ -113,6 +123,11 @@ class PronunciationActivity : AppCompatActivity() {
         val trimmed = query.trim().lowercase()
         val filtered = if (trimmed.isEmpty()) fullList else fullList.filter { it.originalWord.lowercase().contains(trimmed) }
         adapter.submitList(filtered)
+        // Pretraga otkriva listu (filtrirane rezultate) cak i ako korisnica nije pritisla
+        // Lista reci - ali ako obrise pretragu, lista se vraca u sakriveno stanje, OSIM ako
+        // je vec eksplicitno otvorena dugmetom (listExpanded).
+        binding.recyclerPronunciation.visibility =
+            if (trimmed.isNotEmpty() || listExpanded) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     /** Dva polja jedno ispod drugog (originalna reč / zamena), isti "skraćeni dijalog"
@@ -197,27 +212,44 @@ class PronunciationActivity : AppCompatActivity() {
 
     /** Izgovara zamenu KORIŠĆENJEM ISTOG GLASA/MOTORA/JEZIKA koji je podešen u programu za
      * čitanje (Opšta podešavanja glasa) - ne generičkog sistemskog glasa, jer bi to bio
-     * pogrešan utisak o tome kako će zaista zvučati tokom čitanja knjige. */
+     * pogrešan utisak o tome kako će zaista zvučati tokom čitanja knjige.
+     *
+     * Motor se pravi SAMO JEDNOM i ostaje živ (ne gasi se/pravi iznova pri svakom pritisku) -
+     * ranije se pri brzom uzastopnom pritisku dešavalo da drugi pritisak tiho propadne, jer
+     * je novi motor još bio "u pripremi" dok se stari gasio (isti obrazac problema kao i
+     * TtsManager - vidi komentare tamo o "tihom neuspehu"). */
+    private var previewTtsReady = false
+    private var pendingPreviewText: String? = null
+
     private fun previewPronunciation(text: String) {
-        previewTts?.shutdown()
-        val settings = AppSettings(this)
-        val voiceName = settings.globalVoiceName
-        val enginePackage = settings.globalVoiceEngine
-        previewTts = TextToSpeech(this, { status ->
-            val tts = previewTts ?: return@TextToSpeech
-            if (status == TextToSpeech.SUCCESS) {
-                if (voiceName != null) {
-                    tts.voices?.firstOrNull { it.name == voiceName }?.let { tts.voice = it }
+        val tts = previewTts
+        if (tts == null) {
+            pendingPreviewText = text
+            val settings = AppSettings(this)
+            previewTts = TextToSpeech(this, { status ->
+                previewTtsReady = status == TextToSpeech.SUCCESS
+                if (previewTtsReady) {
+                    applyPreviewVoice()
+                    pendingPreviewText?.let { speakPreview(it) }
+                    pendingPreviewText = null
                 }
-                tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) {}
-                    @Deprecated("Deprecated in Java")
-                    override fun onError(utteranceId: String?) {}
-                })
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pronunciation_preview")
-            }
-        }, enginePackage)
+            }, settings.globalVoiceEngine)
+            return
+        }
+        if (!previewTtsReady) {
+            pendingPreviewText = text
+            return
+        }
+        speakPreview(text)
+    }
+
+    private fun applyPreviewVoice() {
+        val voiceName = AppSettings(this).globalVoiceName ?: return
+        previewTts?.voices?.firstOrNull { it.name == voiceName }?.let { previewTts?.voice = it }
+    }
+
+    private fun speakPreview(text: String) {
+        previewTts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pronunciation_preview")
     }
 
     /** Uvoz iz obicnog tekst fajla: jedan par po redu, "originalna_rec=zamena". Otporan na

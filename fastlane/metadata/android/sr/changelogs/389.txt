@@ -1,0 +1,5 @@
+Šta je novo:
+
+1. Rečnik izgovora: lista se ne prikazuje dok se ne pretraži ili dok se ne pritisne dugme "Lista reči" - lakše za snalaženje kroz skoro 1900 unosa.
+2. Ugrađeni rečnik i tvoji sopstveni unosi sad su grupisani, ne izmešani abecedno - prvo ceo ugrađeni rečnik, pa tek onda tvoji unosi.
+3. Ispravljeno: "Pusti izgovor" više ne propada ako se pritisne dva puta brzo uzastopno.
