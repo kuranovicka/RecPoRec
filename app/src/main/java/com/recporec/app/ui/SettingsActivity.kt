@@ -280,6 +280,11 @@ class SettingsActivity : AppCompatActivity() {
         }
         updateAutoReadLabel()
 
+        binding.switchBuiltInPronunciationDict.isChecked = settings.builtInPronunciationDictionaryEnabled
+        binding.switchBuiltInPronunciationDict.setOnCheckedChangeListener { _, checked ->
+            settings.builtInPronunciationDictionaryEnabled = checked
+        }
+
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
         binding.seekSentencePause.max = 1000

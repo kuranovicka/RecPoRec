@@ -17,6 +17,13 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_SHAKE, false)
         set(value) = prefs.edit().putBoolean(KEY_SHAKE, value).apply()
 
+    /** "Rečnik izgovora" - ugrađeni (bundled) rečnik NIJE uključen po difoltu (niko ga ne
+     * dobija nametnuto) - korisnik ga sam uključuje u podešavanjima ako želi. Ne utiče na
+     * korisnikov sopstveni rečnik (PronunciationEntity), koji radi nezavisno od ovoga. */
+    var builtInPronunciationDictionaryEnabled: Boolean
+        get() = prefs.getBoolean(KEY_BUILTIN_PRONUNCIATION_DICT, false)
+        set(value) = prefs.edit().putBoolean(KEY_BUILTIN_PRONUNCIATION_DICT, value).apply()
+
     /** "Automatski čitaj aktivni dokument" - glavni prekidač. */
     var autoReadEnabled: Boolean
         get() = prefs.getBoolean(KEY_AUTO_READ_ENABLED, false)
@@ -248,6 +255,7 @@ class AppSettings(context: Context) {
             .remove(KEY_AUTO_READ_TRIGGER)
             .remove(KEY_SENTENCE_NAV_COUNT)
             .remove(KEY_MINUTE_NAV_COUNT)
+            .remove(KEY_BUILTIN_PRONUNCIATION_DICT)
             .apply()
     }
 
@@ -292,6 +300,7 @@ class AppSettings(context: Context) {
         private const val KEY_BACKGROUND = "background_enabled"
         private const val KEY_UNINTERRUPTED = "uninterrupted_enabled"
         private const val KEY_SHAKE = "shake_enabled"
+        private const val KEY_BUILTIN_PRONUNCIATION_DICT = "builtin_pronunciation_dict_enabled"
         private const val KEY_PHONE_STATE_ASKED = "phone_state_permission_asked"
         private const val KEY_BATTERY_OPT_ASKED = "battery_optimization_asked"
         private const val KEY_NOTIF_PERMISSION_REQUESTED = "notification_permission_requested_once"
@@ -329,7 +338,8 @@ class AppSettings(context: Context) {
             KEY_NAVIGATION, KEY_SOUND, KEY_SENTENCE_PAUSE_ENABLED, KEY_SENTENCE_PAUSE_MS,
             KEY_PARAGRAPH_PAUSE_ENABLED, KEY_PARAGRAPH_PAUSE_MS, KEY_AUTO_NEXT,
             KEY_G_LANG, KEY_G_VOICE, KEY_G_ENGINE, KEY_G_RATE, KEY_G_VOLUME, KEY_G_PITCH,
-            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT, KEY_MINUTE_NAV_COUNT
+            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT, KEY_MINUTE_NAV_COUNT,
+            KEY_BUILTIN_PRONUNCIATION_DICT
         )
     }
 }

@@ -13,9 +13,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         BookmarkEntity::class,
         CombinedVoiceLanguageEntity::class,
         CombinedVoiceEntryEntity::class,
-        CombinedVoiceSettingsEntity::class
+        CombinedVoiceSettingsEntity::class,
+        PronunciationEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -23,6 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun documentDao(): DocumentDao
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun combinedVoiceDao(): CombinedVoiceDao
+    abstract fun pronunciationDao(): PronunciationDao
 
     companion object {
         @Volatile
@@ -154,13 +156,30 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Nova tabela za korisnikov rečnik izgovora - ne dira postojeće podatke, samo
+         * dodaje novu tabelu (isti obrazac kao MIGRATION_3_4 za oznake). */
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS pronunciation_entries (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        originalWord TEXT NOT NULL,
+                        replacement TEXT NOT NULL,
+                        dateAdded INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recporec.db"
-                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
