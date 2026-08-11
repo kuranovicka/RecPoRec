@@ -27,9 +27,6 @@ interface DocumentDao {
     @Query("UPDATE documents SET lastOpenedTimestamp = :timestamp WHERE id = :id")
     suspend fun updateLastOpenedTimestamp(id: Long, timestamp: Long)
 
-    @Query("SELECT MIN(sortOrder) FROM documents")
-    suspend fun minSortOrder(): Int?
-
     @Query("SELECT MAX(sortOrder) FROM documents")
     suspend fun maxSortOrder(): Int?
 

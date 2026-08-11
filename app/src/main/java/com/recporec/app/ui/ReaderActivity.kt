@@ -49,32 +49,6 @@ class ReaderActivity : AppCompatActivity() {
     // stvarna pocetna vrednost se ucitava u onCreate, cim je documentId poznat.
     private var controlsHidden = false
 
-    private var allVoices: List<com.recporec.app.tts.VoiceOption> = emptyList()
-    private var voicesLoadJob: kotlinx.coroutines.Job? = null
-
-    /** Lenjo ucitavanje liste glasova - pravi PRIVREMENU instancu TTS motora za SVAKI
-     * instalirani motor na telefonu (Google, Samsung...), sto je primetno "tesko" i suvisno
-     * da se radi svaki put kad se otvori ekran za citanje (ranije je bilo u onCreate) - dok
-     * se pri tom istovremeno i GLAVNI motor za citanje priprema, oteze mu se start. Ucitava se
-     * samo kad korisnica STVARNO otvori meni za jezik/glas, jednom, pa se rezultat pamti. */
-    private fun loadVoicesIfNeeded(onReady: () -> Unit) {
-        if (allVoices.isNotEmpty()) {
-            onReady()
-            return
-        }
-        if (voicesLoadJob == null) {
-            voicesLoadJob = lifecycleScope.launch {
-                allVoices = try {
-                    com.recporec.app.tts.TtsEngineUtil.listAllVoices(this@ReaderActivity)
-                } catch (e: Exception) {
-                    emptyList()
-                }
-                onReady()
-            }
-        } else {
-            android.widget.Toast.makeText(this, "Učitavanje glasova, sačekaj trenutak", android.widget.Toast.LENGTH_SHORT).show()
-        }
-    }
     private var toneGenerator: android.media.ToneGenerator? = null
     private var seekBarTouchTracking = false
 
@@ -693,9 +667,7 @@ class ReaderActivity : AppCompatActivity() {
             moveTo(offset)
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Unesi broj minuta od početka")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
             .create()
         // Tastatura ima svoje dugme "Idi" - odmah potvrđuje, bez potrebe da se posle
@@ -924,9 +896,7 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Pretraži tekst")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
@@ -1092,10 +1062,7 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Dodaj oznaku")
-            .setMessage("Postavlja se oznaka na mesto na kome se trenutno nalaziš.")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
@@ -1196,9 +1163,7 @@ class ReaderActivity : AppCompatActivity() {
             moveTo(offset.coerceIn(0, max(0, (parsed?.length ?: 1) - 1)))
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle(R.string.goto_page_title)
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
@@ -1352,7 +1317,6 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Zakaži čitanje")
             .setView(input)
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton("Isključi") { _, _ ->
@@ -1360,7 +1324,6 @@ class ReaderActivity : AppCompatActivity() {
                 updateRestStatusText()
                 android.widget.Toast.makeText(this, "Zakazano čitanje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
             }
-            .setPositiveButton("Postavi") { _, _ -> confirm() }
             .create()
         // Tastatura ne moze da "zna" da li korisnica hoce Postavi ili Iskljuci (to drugo nema
         // sta da se upise) - dugme na tastaturi zato radi ISTO sto i Postavi, pretpostavljeno
@@ -1397,10 +1360,8 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Probudi me")
             .setView(input)
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {

@@ -281,10 +281,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Broj rečenica po glasu")
-            .setMessage("Svaki glas čita podjednak broj rečenica pre smene. Ako ostaviš prazno, svaki glas čita po jednu rečenicu.")
             .setView(input)
-            .setPositiveButton(R.string.ok) { _, _ -> confirm() }
             .setNegativeButton(R.string.cancel, null)
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->

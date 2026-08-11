@@ -734,10 +734,8 @@ class DocumentListActivity : AppCompatActivity() {
             }
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Preimenuj")
             .setView(container)
             .setNegativeButton(getString(com.recporec.app.R.string.cancel), null)
-            .setPositiveButton("Sačuvaj") { _, _ -> confirm() }
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
