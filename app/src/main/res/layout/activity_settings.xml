@@ -236,6 +236,16 @@
             android:trackTint="@color/btn_chapter"
             android:text="Koristi ugrađeni rečnik izgovora"
             android:contentDescription="Koristi ugrađeni rečnik izgovora" />
+
+        <Button
+            android:id="@+id/btnPronunciationDictionary"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Rečnik izgovora" />
     </LinearLayout>
 
     <LinearLayout

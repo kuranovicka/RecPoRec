@@ -123,6 +123,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.PronunciationActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.StatsActivity"
             android:exported="false" />
 

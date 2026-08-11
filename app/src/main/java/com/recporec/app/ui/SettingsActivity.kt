@@ -284,6 +284,9 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchBuiltInPronunciationDict.setOnCheckedChangeListener { _, checked ->
             settings.builtInPronunciationDictionaryEnabled = checked
         }
+        binding.btnPronunciationDictionary.setOnClickListener {
+            startActivity(android.content.Intent(this, PronunciationActivity::class.java))
+        }
 
         binding.groupSentencePauseMs.visibility =
             if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
