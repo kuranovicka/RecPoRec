@@ -1289,32 +1289,6 @@ class ReaderActivity : AppCompatActivity() {
     /** Dug pritisak na dugmad za brzinu/visinu/jačinu vraća TU vrednost za OVAJ dokument
      * na "prati opšte" (isto kao "Koristi opšti glas" za glas) - korisno ako si nešto slučajno
      * prilagodila i želiš da se to poništi bez ručnog vraćanja na tačnu staru vrednost. */
-    private fun resetToGlobal(what: String) {
-        val entity = doc ?: return
-        val tts = PlaybackController.ttsManager
-        doc = when (what) {
-            "brzina" -> {
-                val newRate = settings.globalSpeechRate
-                tts?.setSpeechRate(newRate)
-                entity.copy(speechRate = -1f)
-            }
-            "visina" -> {
-                val newPitch = settings.globalPitch
-                tts?.setPitch(newPitch)
-                entity.copy(pitch = -1f)
-            }
-            else -> {
-                val newVolume = settings.globalVolumePercent
-                tts?.setVolume(newVolume / 100f)
-                entity.copy(volumePercent = -1)
-            }
-        }
-        persistState()
-        android.widget.Toast.makeText(
-            this, "${what.replaceFirstChar { it.uppercase() }}: vraćeno na opšte.", android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-
     private fun showTimerMenu() {
         val view = layoutInflater.inflate(R.layout.dialog_remind_me, null)
         val textStatus = view.findViewById<android.widget.TextView>(R.id.textRemindStatus)
