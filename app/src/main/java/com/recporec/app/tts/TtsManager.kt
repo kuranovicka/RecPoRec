@@ -28,6 +28,8 @@ class TtsManager(private val appContext: Context) {
     var onPositionChanged: ((Int) -> Unit)? = null
     var onFinished: (() -> Unit)? = null
     var onReady: (() -> Unit)? = null
+
+    private var pronunciationDictionary: PronunciationDictionary = PronunciationDictionary.EMPTY
     /** Pozvano kad čitanje automatski pauzira zbog telefonskog poziva ili nekog drugog
      * zvuka koji preuzme prednost (audio fokus) - ne zbog korisnikovog dodira na dugme. */
     var onAutoPaused: (() -> Unit)? = null
@@ -430,7 +432,7 @@ class TtsManager(private val appContext: Context) {
      * Paragraf (pasus) se prepoznaje kad posle kraja rečenice sledi prazan red (dva ili
      * više preloma reda zaredom) - koristi se za posebnu, obično dužu pauzu.
      */
-    fun loadText(fullText: String) {
+    suspend fun loadText(fullText: String) {
         // (?<!\d)[.!?]["'’”)]{0,2}(\s+) - kraj recenice (uz izuzetak brojeva ispred tacke)
         // ILI (\n{2,}) - goli prazan red bez interpunkcije ispred (npr. naslov, lista)
         val pattern = Regex("(?<!\\d)[.!?][\"'\u2019\u201d)]{0,2}(\\s+)|(\\n{2,})")
@@ -471,6 +473,9 @@ class TtsManager(private val appContext: Context) {
         chunks = cleaned
         chunkOffsets = offsets
         chunkParagraphAfter = paragraphAfter
+        // Ucitava se OVDE (jednom po otvaranju dokumenta), ne po recenici - jeftino je
+        // cak i sa par hiljada unosa u recniku, nema potrebe za slozenijim kesiranjem.
+        pronunciationDictionary = PronunciationDictionary.load(appContext)
     }
 
     /** Počni čitanje od zadatog offseta u tekstu (karakter). */
@@ -594,7 +599,7 @@ class TtsManager(private val appContext: Context) {
         val params = android.os.Bundle().apply {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume)
         }
-        speaker?.speak(chunk, TextToSpeech.QUEUE_FLUSH, params, UUID.randomUUID().toString())
+        speaker?.speak(pronunciationDictionary.apply(chunk), TextToSpeech.QUEUE_FLUSH, params, UUID.randomUUID().toString())
     }
 
     fun shutdown() {
