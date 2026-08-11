@@ -215,34 +215,6 @@
             android:trackTint="@color/btn_wakeup"
             android:text="Automatski čitaj aktivni dokument"
             android:contentDescription="Automatski čitaj aktivni dokument" />
-
-        <!-- Vidljivo samo kad je automatsko čitanje uključeno -->
-        <RadioGroup
-            android:id="@+id/groupAutoReadTrigger"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-
-            <RadioButton
-                android:id="@+id/radioAutoReadApp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_wakeup"
-                android:text="Pri otvaranju aplikacije" />
-
-            <RadioButton
-                android:id="@+id/radioAutoReadDocument"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_wakeup"
-                android:text="Pri otvaranju dokumenta" />
-        </RadioGroup>
     </LinearLayout>
 
     <LinearLayout

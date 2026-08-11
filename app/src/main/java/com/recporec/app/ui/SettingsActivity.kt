@@ -120,14 +120,11 @@ class SettingsActivity : AppCompatActivity() {
         }
         binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
             settings.autoReadEnabled = checked
-            binding.groupAutoReadTrigger.visibility =
-                if (checked) android.view.View.VISIBLE else android.view.View.GONE
+            if (checked) showAutoReadTriggerPicker()
         }
-        binding.groupAutoReadTrigger.setOnCheckedChangeListener { _, checkedId ->
-            settings.autoReadTrigger = when (checkedId) {
-                binding.radioAutoReadDocument.id -> "document"
-                else -> "app"
-            }
+        binding.switchAutoRead.setOnLongClickListener {
+            if (settings.autoReadEnabled) showAutoReadTriggerPicker()
+            true
         }
 
         binding.btnNavigationMode.setOnClickListener {
@@ -197,6 +194,14 @@ class SettingsActivity : AppCompatActivity() {
     private val navLabels = listOf("Stranica", "Minuti", "Oznaka", "Rečenice")
     private val navValues = listOf("page", "minute", "bookmark", "sentence")
 
+    private fun showAutoReadTriggerPicker() {
+        val labels = listOf("Pri otvaranju aplikacije", "Pri otvaranju dokumenta")
+        val currentLabel = if (settings.autoReadTrigger == "document") labels[1] else labels[0]
+        PickerDialog.show(this, "Kada automatski čitati", labels, currentLabel, autoConfirm = true, showSearch = false) { index ->
+            settings.autoReadTrigger = if (index == 1) "document" else "app"
+        }
+    }
+
     private fun showShakeSensitivityPicker() {
         val labels = listOf("Blago", "Srednje", "Jako")
         val currentLabel = labels[settings.shakeSensitivity.coerceIn(0, 2)]
@@ -228,13 +233,13 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
         binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
+        // Isti razlog kao kod Drmanja iznad - bez detach/reattach, izbor "kada citati" bi
+        // iskakao SVAKI PUT kad se ekran otvori (ako je vec ukljuceno), ne samo pri dodiru.
+        binding.switchAutoRead.setOnCheckedChangeListener(null)
         binding.switchAutoRead.isChecked = settings.autoReadEnabled
-        binding.groupAutoReadTrigger.visibility =
-            if (settings.autoReadEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        if (settings.autoReadTrigger == "document") {
-            binding.radioAutoReadDocument.isChecked = true
-        } else {
-            binding.radioAutoReadApp.isChecked = true
+        binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
+            settings.autoReadEnabled = checked
+            if (checked) showAutoReadTriggerPicker()
         }
 
         binding.groupSentencePauseMs.visibility =
