@@ -1,0 +1,6 @@
+Šta je novo:
+
+1. Novo: Rečnik izgovora - biraš šta program izgovara umesto originalne reči (npr. John kao Džon). Otvara se dugmetom iz Podešavanja programa.
+2. Ugrađeni rečnik (skoro 1900 unosa, uglavnom strana imena) je dostupan, ali isključen po difoltu - uključuje se prekidačem u Podešavanjima programa.
+3. Sopstveni unosi: dodaj/izmeni/obriši, uz uvoz i izvoz iz običnog tekst fajla.
+4. Program prepoznaje i domaće padežne nastavke nalepljene na strano ime (npr. "Maryn" izgovara kao "Merin", ako rečnik ima Mary=Meri).

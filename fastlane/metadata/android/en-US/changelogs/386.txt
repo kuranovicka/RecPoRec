@@ -1,0 +1,6 @@
+What's new:
+
+1. New: Pronunciation Dictionary - choose what the app says instead of the original word (e.g. pronounce "John" as "Džon"). Opens from a button in App Settings.
+2. A built-in dictionary (nearly 1900 entries, mostly foreign names) is available but off by default - enable it with the toggle in App Settings.
+3. Your own entries: add/edit/delete, plus import and export as a plain text file.
+4. The app also recognizes domestic case endings attached to a foreign name (e.g. "Maryn" is read as "Merin" if the dictionary has Mary=Meri).

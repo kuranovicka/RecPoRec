@@ -55,6 +55,7 @@ class HelpActivity : AppCompatActivity() {
         Tu je i prekidač Automatski čitaj aktivni dokument.
         Kad ga uključiš, biraš jednu od dve mogućnosti:
         Automatsko čitanje pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
+        Tu je i prekidač i dugme Rečnik izgovora - bira šta program izgovara umesto originalne reči (npr. John kao Džon), potpuno neobavezno.
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, oznaku ili rečenice.
         Ako biraš minute, biraš: 1, 5, 10.
         Ako izabereš rečenice, biraš: jednu, tri, pet ili deset.
