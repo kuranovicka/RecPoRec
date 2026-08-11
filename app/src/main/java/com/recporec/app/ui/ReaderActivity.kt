@@ -739,9 +739,7 @@ class ReaderActivity : AppCompatActivity() {
         val length = parsed?.length ?: return
         val current = doc?.currentCharacterOffset ?: 0
         val delta: Int = when (mode) {
-            "min1" -> minutesToChars(1)
-            "min5" -> minutesToChars(5)
-            "min10" -> minutesToChars(10)
+            "minute" -> minutesToChars(settings.minuteNavigationCount)
             else -> charsPerPage // "page"
         }
         val signedDelta = if (forward) delta else -delta
@@ -814,23 +812,12 @@ class ReaderActivity : AppCompatActivity() {
         val backHint = " Dug pritisak: ponovi trenutnu stranicu."
         val forwardHint = " Dug pritisak: poništi poslednju radnju."
         when (mode) {
-            "min1" -> {
-                binding.btnStepBack.text = "◀ 1 min"
-                binding.btnStepBack.contentDescription = "1 minut unazad.$backHint"
-                binding.btnStepForward.text = "1 min ▶"
-                binding.btnStepForward.contentDescription = "1 minut unapred.$forwardHint"
-            }
-            "min5" -> {
-                binding.btnStepBack.text = "◀ 5 min"
-                binding.btnStepBack.contentDescription = "5 minuta unazad.$backHint"
-                binding.btnStepForward.text = "5 min ▶"
-                binding.btnStepForward.contentDescription = "5 minuta unapred.$forwardHint"
-            }
-            "min10" -> {
-                binding.btnStepBack.text = "◀ 10 min"
-                binding.btnStepBack.contentDescription = "10 minuta unazad.$backHint"
-                binding.btnStepForward.text = "10 min ▶"
-                binding.btnStepForward.contentDescription = "10 minuta unapred.$forwardHint"
+            "minute" -> {
+                val n = settings.minuteNavigationCount
+                binding.btnStepBack.text = "◀ $n min"
+                binding.btnStepBack.contentDescription = "$n minuta unazad.$backHint"
+                binding.btnStepForward.text = "$n min ▶"
+                binding.btnStepForward.contentDescription = "$n minuta unapred.$forwardHint"
             }
             "bookmark" -> {
                 binding.btnStepBack.text = "◀ Ozn."

@@ -148,6 +148,12 @@ class AppSettings(context: Context) {
         get() = prefs.getInt(KEY_SENTENCE_NAV_COUNT, 1)
         set(value) = prefs.edit().putInt(KEY_SENTENCE_NAV_COUNT, value).apply()
 
+    /** Broj minuta po koraku kad je Navigacija na "Minuti" - konsolidovano iz tri odvojene
+     * opcije (1/5/10 minuta) u jednu, sa pod-izborom - isti obrazac kao rečenice. */
+    var minuteNavigationCount: Int
+        get() = prefs.getInt(KEY_MINUTE_NAV_COUNT, 1)
+        set(value) = prefs.edit().putInt(KEY_MINUTE_NAV_COUNT, value).apply()
+
     var soundFeedbackEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND, false)
         set(value) = prefs.edit().putBoolean(KEY_SOUND, value).apply()
@@ -241,6 +247,7 @@ class AppSettings(context: Context) {
             .remove(KEY_AUTO_READ_ENABLED)
             .remove(KEY_AUTO_READ_TRIGGER)
             .remove(KEY_SENTENCE_NAV_COUNT)
+            .remove(KEY_MINUTE_NAV_COUNT)
             .apply()
     }
 
@@ -293,6 +300,7 @@ class AppSettings(context: Context) {
         private const val KEY_NAVIGATION = "navigation_mode"
         private const val KEY_LAST_LIBRARY_TAB = "last_library_tab"
         private const val KEY_SENTENCE_NAV_COUNT = "sentence_nav_count"
+        private const val KEY_MINUTE_NAV_COUNT = "minute_nav_count"
         private const val KEY_SOUND = "sound_feedback_enabled"
         private const val KEY_SENTENCE_PAUSE_ENABLED = "sentence_pause_enabled"
         private const val KEY_SENTENCE_PAUSE_MS = "sentence_pause_ms"
@@ -321,7 +329,7 @@ class AppSettings(context: Context) {
             KEY_NAVIGATION, KEY_SOUND, KEY_SENTENCE_PAUSE_ENABLED, KEY_SENTENCE_PAUSE_MS,
             KEY_PARAGRAPH_PAUSE_ENABLED, KEY_PARAGRAPH_PAUSE_MS, KEY_AUTO_NEXT,
             KEY_G_LANG, KEY_G_VOICE, KEY_G_ENGINE, KEY_G_RATE, KEY_G_VOLUME, KEY_G_PITCH,
-            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT
+            KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT, KEY_MINUTE_NAV_COUNT
         )
     }
 }

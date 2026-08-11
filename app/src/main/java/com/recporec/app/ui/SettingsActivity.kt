@@ -131,10 +131,22 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnNavigationMode.setOnClickListener {
             val currentLabel = navLabels[navValues.indexOf(settings.navigationMode).coerceAtLeast(0)]
-            PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel, autoConfirm = true) { index ->
+            // showSearch = false - korisnicka prijava: pretraga je suvisna za ovako kratku
+            // listu, i pravila je probleme (video se nepotreban element).
+            PickerDialog.show(this, "Izaberi način navigacije", navLabels, currentLabel, autoConfirm = true, showSearch = false) { index ->
                 val chosenMode = navValues[index]
                 settings.navigationMode = chosenMode
                 refreshNavButton()
+                // "Minuti" - konsolidovano iz tri odvojene opcije (1/5/10 minuta) u jednu, sa
+                // pod-izborom - isti obrazac kao "Rečenice" ispod.
+                if (chosenMode == "minute") {
+                    val minuteLabels = listOf("1 minut", "5 minuta", "10 minuta")
+                    val minuteValues = listOf(1, 5, 10)
+                    val currentMinuteLabel = minuteLabels[minuteValues.indexOf(settings.minuteNavigationCount).coerceAtLeast(0)]
+                    PickerDialog.show(this, "Koliko minuta po koraku", minuteLabels, currentMinuteLabel, autoConfirm = true, showSearch = false) { minIndex ->
+                        settings.minuteNavigationCount = minuteValues[minIndex]
+                    }
+                }
                 // "Rečenice" - korisnicki zahtev (isti obrazac kao izbor jedinice za
                 // Automatski listaj dokument) - odmah posle izbora nacina, pita se KOLIKO
                 // recenica po koraku (1, 3 ili 5 - namerno OGRANICEN, ne slobodan unos: "5
@@ -143,7 +155,7 @@ class SettingsActivity : AppCompatActivity() {
                     val countLabels = listOf("1 rečenica", "3 rečenice", "5 rečenica", "10 rečenica")
                     val countValues = listOf(1, 3, 5, 10)
                     val currentCountLabel = countLabels[countValues.indexOf(settings.sentenceNavigationCount).coerceAtLeast(0)]
-                    PickerDialog.show(this, "Koliko rečenica po koraku", countLabels, currentCountLabel, autoConfirm = true) { countIndex ->
+                    PickerDialog.show(this, "Koliko rečenica po koraku", countLabels, currentCountLabel, autoConfirm = true, showSearch = false) { countIndex ->
                         settings.sentenceNavigationCount = countValues[countIndex]
                     }
                 }
@@ -181,8 +193,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener { finish() }
     }
 
-    private val navLabels = listOf("Stranica", "1 minut", "5 minuta", "10 minuta", "Oznaka", "Rečenice")
-    private val navValues = listOf("page", "min1", "min5", "min10", "bookmark", "sentence")
+    private val navLabels = listOf("Stranica", "Minuti", "Oznaka", "Rečenice")
+    private val navValues = listOf("page", "minute", "bookmark", "sentence")
 
     private fun refreshNavButton() {
         val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
