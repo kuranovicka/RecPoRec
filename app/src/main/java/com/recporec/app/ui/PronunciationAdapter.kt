@@ -5,15 +5,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.recporec.app.data.PronunciationEntity
 import com.recporec.app.databinding.ItemPronunciationBinding
 
-/** Lista korisnikovog rečnika izgovora - isti obrazac kao DocumentListAdapter (dodir =
- * otvori/izmeni, dug pritisak = radnje), samo bez rezima za višestruko biranje jer ovde
- * nije bilo potrebe za tim. */
+/** Lista spojenog rečnika (ugrađeni + korisnikov) - dodir na bilo koji unos otvara radnje
+ * (za ugrađen: Pusti izgovor / Dodaj svoju zamenu; za korisnikov: Pusti izgovor / Izmeni /
+ * Obriši) - isti "dodir umesto dugog pritiska" princip kao u prethodnoj verziji, jednostavnije
+ * za TalkBack. */
 class PronunciationAdapter(
-    private val onLongPress: (PronunciationEntity) -> Unit
-) : ListAdapter<PronunciationEntity, PronunciationAdapter.VH>(DIFF_CALLBACK) {
+    private val onTap: (PronunciationListItem) -> Unit
+) : ListAdapter<PronunciationListItem, PronunciationAdapter.VH>(DIFF_CALLBACK) {
 
     inner class VH(val binding: ItemPronunciationBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -24,27 +24,21 @@ class PronunciationAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val entry = getItem(position)
-        val text = "${entry.originalWord} → ${entry.replacement}"
-        holder.binding.textEntry.text = text
-        holder.binding.textEntry.contentDescription = "${entry.originalWord}, izgovara se kao ${entry.replacement}"
-        holder.binding.root.setOnLongClickListener {
-            onLongPress(entry)
-            true
-        }
-        // Dodir isto otvara radnje kao dug pritisak - jednostavnije za TalkBack (nema dva
-        // razlicita nacina da se dodje do iste akcije, jedan je dovoljan i jasan).
-        holder.binding.root.setOnClickListener {
-            onLongPress(entry)
-        }
+        val suffix = if (entry.isBuiltIn) " (ugrađeno)" else ""
+        holder.binding.textEntry.text = "${entry.originalWord} → ${entry.replacement}$suffix"
+        holder.binding.textEntry.contentDescription =
+            if (entry.isBuiltIn) "${entry.originalWord}, izgovara se kao ${entry.replacement}, ugrađeno u aplikaciju"
+            else "${entry.originalWord}, izgovara se kao ${entry.replacement}, tvoj unos"
+        holder.binding.root.setOnClickListener { onTap(entry) }
     }
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PronunciationEntity>() {
-            override fun areItemsTheSame(oldItem: PronunciationEntity, newItem: PronunciationEntity): Boolean =
-                oldItem.id == newItem.id
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PronunciationListItem>() {
+            override fun areItemsTheSame(oldItem: PronunciationListItem, newItem: PronunciationListItem): Boolean =
+                oldItem.originalWord.lowercase() == newItem.originalWord.lowercase() && oldItem.isBuiltIn == newItem.isBuiltIn
 
-            override fun areContentsTheSame(oldItem: PronunciationEntity, newItem: PronunciationEntity): Boolean =
-                oldItem.originalWord == newItem.originalWord && oldItem.replacement == newItem.replacement
+            override fun areContentsTheSame(oldItem: PronunciationListItem, newItem: PronunciationListItem): Boolean =
+                oldItem == newItem
         }
     }
 }

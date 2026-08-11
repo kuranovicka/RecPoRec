@@ -46,6 +46,28 @@ class PronunciationDictionary private constructor(private val exactMap: Map<Stri
         private const val MIN_PREFIX_LEN = 3
         val EMPTY = PronunciationDictionary(emptyMap())
 
+        /** Čita SAMO ugrađeni rečnik iz resursa (bez obzira na prekidač, bez korisnikovih
+         * unosa) - koristi ga i ovo kačenje na TTS, i ekran za pregled/pretragu, da se
+         * čitanje fajla ne piše na dva mesta. Vraća originalnu reč (ne malim slovima), da
+         * bi se lepo prikazala na ekranu za pregled. */
+        fun loadBuiltInRaw(context: Context): List<Pair<String, String>> {
+            return try {
+                val list = mutableListOf<Pair<String, String>>()
+                context.assets.open("recnik_izgovora_ugradjeni.txt").bufferedReader(Charsets.UTF_8).use { reader ->
+                    reader.forEachLine { line ->
+                        val idx = line.indexOf('=')
+                        if (idx <= 0) return@forEachLine
+                        val word = line.substring(0, idx).trim()
+                        val replacement = line.substring(idx + 1).trim()
+                        if (word.isNotEmpty() && replacement.isNotEmpty()) list.add(word to replacement)
+                    }
+                }
+                list
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+
         /** Učitava ugrađeni (ako je uključen) i korisnikov sopstveni rečnik, i spaja ih -
          * korisnikov unos pobeđuje kod sudara (namernije, konkretnije od ugrađenog). Poziva
          * se jednom po otvaranju dokumenta (iz loadText), ne po rečenici - jeftino je čak i
@@ -55,14 +77,8 @@ class PronunciationDictionary private constructor(private val exactMap: Map<Stri
                 val map = LinkedHashMap<String, String>()
                 val settings = AppSettings(context)
                 if (settings.builtInPronunciationDictionaryEnabled) {
-                    context.assets.open("recnik_izgovora_ugradjeni.txt").bufferedReader(Charsets.UTF_8).use { reader ->
-                        reader.forEachLine { line ->
-                            val idx = line.indexOf('=')
-                            if (idx <= 0) return@forEachLine
-                            val word = line.substring(0, idx).trim()
-                            val replacement = line.substring(idx + 1).trim()
-                            if (word.isNotEmpty() && replacement.isNotEmpty()) map[word.lowercase()] = replacement
-                        }
+                    for ((word, replacement) in loadBuiltInRaw(context)) {
+                        map[word.lowercase()] = replacement
                     }
                 }
                 val userEntries = AppDatabase.getInstance(context).pronunciationDao().getAll()

@@ -19,9 +19,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
+        android:paddingBottom="8dp"
         android:textSize="16sp"
         android:textColor="@color/text_primary"
-        android:text="Ovde biraš šta program da izgovori umesto originalne reči (npr. John → Džon). Dug pritisak na unos otvara izmenu ili brisanje." />
+        android:text="Ovde biraš šta program da izgovori umesto originalne reči (npr. John → Džon). Dodir na unos otvara izmenu, brisanje ili probni izgovor. Unosi označeni sa (ugrađeno) su iz ugrađenog rečnika - dodirom na njih možeš dodati svoju zamenu." />
+
+    <EditText
+        android:id="@+id/inputSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:padding="12dp"
+        android:textSize="18sp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_primary"
+        android:hint="Pretraga (npr. deo reči)"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:contentDescription="Pretraga rečnika izgovora" />
+
+    <Button
+        android:id="@+id/btnWordList"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="18sp"
+        android:backgroundTint="@color/btn_speed"
+        android:textColor="@color/button_text"
+        android:text="Lista reči" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerPronunciation"

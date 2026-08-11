@@ -3,6 +3,8 @@ package com.recporec.app.ui
 import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -12,23 +14,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.recporec.app.data.AppDatabase
+import com.recporec.app.data.AppSettings
 import com.recporec.app.data.PronunciationEntity
 import com.recporec.app.databinding.ActivityPronunciationBinding
+import com.recporec.app.tts.PronunciationDictionary
+import com.recporec.app.util.requestAccessibilityFocusNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Ekran "Rečnik izgovora" - korisnikova SOPSTVENA lista zamena (odvojeno od ugrađenog
- * rečnika koji je resurs u aplikaciji i ne dira se odavde). Dodir ili dug pritisak na
- * unos otvara Izmeni/Obriši - isti obrazac kao svuda drugde u aplikaciji. */
+/** Ekran "Rečnik izgovora" - spojen prikaz UGRAĐENOG rečnika (iz resursa, samo za čitanje i
+ * probni izgovor) i KORISNIKOVOG sopstvenog rečnika (baza, potpuno menjivo). Dodir na
+ * ugrađen unos nudi "Dodaj svoju zamenu" (pravi novi red u bazi koji ga prepisuje); dodir
+ * na sopstveni unos nudi puno Izmeni/Obriši, uz Pusti izgovor za oba tipa. */
 class PronunciationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPronunciationBinding
     private val db by lazy { AppDatabase.getInstance(this) }
     private lateinit var adapter: PronunciationAdapter
+    private var fullList: List<PronunciationListItem> = emptyList()
+    private var previewTts: TextToSpeech? = null
 
-    // Isti obrazac kao rezervna kopija/izvoz podesavanja u DocumentListActivity - obican
-    // SAF (Storage Access Framework) birac fajlova, bez ijedne nove zavisnosti.
     private val importLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -51,34 +57,75 @@ class PronunciationActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        adapter = PronunciationAdapter(onLongPress = { showEntryActionsDialog(it) })
+        adapter = PronunciationAdapter(onTap = { showEntryActionsDialog(it) })
         binding.recyclerPronunciation.layoutManager = LinearLayoutManager(this)
         binding.recyclerPronunciation.adapter = adapter
 
-        binding.btnAddEntry.setOnClickListener { showAddOrEditDialog(existing = null) }
+        binding.btnAddEntry.setOnClickListener { showAddOrEditDialog(prefillWord = null, prefillReplacement = null, editEntityId = null) }
         binding.btnImportDictionary.setOnClickListener { importLauncher.launch(arrayOf("*/*")) }
         binding.btnExportDictionary.setOnClickListener { exportLauncher.launch("recnik-izgovora.txt") }
         binding.btnBack.setOnClickListener { finish() }
+        binding.btnWordList.setOnClickListener {
+            Toast.makeText(this, "${adapter.currentList.size} unosa u rečniku.", Toast.LENGTH_SHORT).show()
+            binding.recyclerPronunciation.requestAccessibilityFocusNow()
+        }
+        binding.inputSearch.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { applyFilter(s?.toString().orEmpty()) }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
         refreshList()
     }
 
+    override fun onDestroy() {
+        previewTts?.shutdown()
+        super.onDestroy()
+    }
+
+    /** Spaja ugrađeni rečnik (iz resursa) i korisnikov (iz baze) - korisnikov unos
+     * PREKRIVA ugrađeni ako je ista reč (prikazuje se kao "tvoj unos", potpuno menjiv). */
     private fun refreshList() {
         lifecycleScope.launch {
-            val entries = db.pronunciationDao().getAll()
-            adapter.submitList(entries)
+            val merged = withContext(Dispatchers.Default) {
+                val builtIn = PronunciationDictionary.loadBuiltInRaw(this@PronunciationActivity)
+                val userEntries = db.pronunciationDao().getAll()
+                val userByLower = userEntries.associateBy { it.originalWord.lowercase() }
+                val result = mutableListOf<PronunciationListItem>()
+                for ((word, replacement) in builtIn) {
+                    val override = userByLower[word.lowercase()]
+                    if (override == null) {
+                        result.add(PronunciationListItem(word, replacement, isBuiltIn = true, entityId = null))
+                    }
+                }
+                for (entry in userEntries) {
+                    result.add(PronunciationListItem(entry.originalWord, entry.replacement, isBuiltIn = false, entityId = entry.id))
+                }
+                result.sortBy { it.originalWord.lowercase() }
+                result
+            }
+            fullList = merged
+            applyFilter(binding.inputSearch.text?.toString().orEmpty())
         }
     }
 
+    private fun applyFilter(query: String) {
+        val trimmed = query.trim().lowercase()
+        val filtered = if (trimmed.isEmpty()) fullList else fullList.filter { it.originalWord.lowercase().contains(trimmed) }
+        adapter.submitList(filtered)
+    }
+
     /** Dva polja jedno ispod drugog (originalna reč / zamena), isti "skraćeni dijalog"
-     * princip kao svuda - samo polja i Otkaži, tastatura potvrđuje. */
-    private fun showAddOrEditDialog(existing: PronunciationEntity?) {
+     * princip kao svuda - samo polja i Otkaži, tastatura potvrđuje. editEntityId != null
+     * znači da se menja POSTOJEĆI red u bazi (ne ugrađen unos - taj se samo "prepisuje"
+     * novim redom, originalni resurs se nikad ne dira). */
+    private fun showAddOrEditDialog(prefillWord: String?, prefillReplacement: String?, editEntityId: Long?) {
         val inputWord = EditText(this).apply {
-            setText(existing?.originalWord.orEmpty())
+            setText(prefillWord.orEmpty())
             hint = "Originalna reč (npr. John)"
         }
         val inputReplacement = EditText(this).apply {
-            setText(existing?.replacement.orEmpty())
+            setText(prefillReplacement.orEmpty())
             hint = "Kako da se izgovori (npr. Džon)"
             imeOptions = EditorInfo.IME_ACTION_DONE
         }
@@ -103,7 +150,7 @@ class PronunciationActivity : AppCompatActivity() {
                 // radi ovde (ne u SQL upitu) da se izbegne COLLATE u @Query, koji zna da
                 // zbuni Room-ov prevodilac upita u vreme kompajliranja.
                 val all = db.pronunciationDao().getAll()
-                val toRemove = all.filter { it.originalWord.equals(word, ignoreCase = true) || it.id == existing?.id }
+                val toRemove = all.filter { it.originalWord.equals(word, ignoreCase = true) || it.id == editEntityId }
                 toRemove.forEach { db.pronunciationDao().deleteById(it.id) }
                 db.pronunciationDao().insert(PronunciationEntity(originalWord = word, replacement = replacement))
                 refreshList()
@@ -124,16 +171,22 @@ class PronunciationActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showEntryActionsDialog(entry: PronunciationEntity) {
-        val options = arrayOf("Pusti izgovor", "Izmeni", "Obriši")
+    private fun showEntryActionsDialog(entry: PronunciationListItem) {
+        val options = if (entry.isBuiltIn) {
+            arrayOf("Pusti izgovor", "Dodaj svoju zamenu")
+        } else {
+            arrayOf("Pusti izgovor", "Izmeni", "Obriši")
+        }
+        val titleSuffix = if (entry.isBuiltIn) " (ugrađeno)" else ""
         AlertDialog.Builder(this)
-            .setTitle("${entry.originalWord} → ${entry.replacement}")
+            .setTitle("${entry.originalWord} → ${entry.replacement}$titleSuffix")
             .setItems(options) { _, which ->
-                when (which) {
-                    0 -> previewPronunciation(entry.replacement)
-                    1 -> showAddOrEditDialog(existing = entry)
-                    2 -> lifecycleScope.launch {
-                        db.pronunciationDao().deleteById(entry.id)
+                when {
+                    which == 0 -> previewPronunciation(entry.replacement)
+                    entry.isBuiltIn && which == 1 -> showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = null)
+                    !entry.isBuiltIn && which == 1 -> showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = entry.entityId)
+                    !entry.isBuiltIn && which == 2 -> lifecycleScope.launch {
+                        entry.entityId?.let { db.pronunciationDao().deleteById(it) }
                         refreshList()
                     }
                 }
@@ -142,24 +195,29 @@ class PronunciationActivity : AppCompatActivity() {
             .show()
     }
 
-    /** Izgovara samu zamenu (ne originalnu reč) - korisnica ovako čuje TAČNO ono što će
-     * čuti i tokom čitanja knjige, bez čekanja da naiđe na tu reč u tekstu. Isti obrazac
-     * kao TtsEngineUtil.previewVoice - kratkotrajan TTS koji se sam gasi kad završi. */
+    /** Izgovara zamenu KORIŠĆENJEM ISTOG GLASA/MOTORA/JEZIKA koji je podešen u programu za
+     * čitanje (Opšta podešavanja glasa) - ne generičkog sistemskog glasa, jer bi to bio
+     * pogrešan utisak o tome kako će zaista zvučati tokom čitanja knjige. */
     private fun previewPronunciation(text: String) {
-        var tts: android.speech.tts.TextToSpeech? = null
-        tts = android.speech.tts.TextToSpeech(this) { status ->
-            if (status == android.speech.tts.TextToSpeech.SUCCESS) {
-                tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+        previewTts?.shutdown()
+        val settings = AppSettings(this)
+        val voiceName = settings.globalVoiceName
+        val enginePackage = settings.globalVoiceEngine
+        previewTts = TextToSpeech(this, { status ->
+            val tts = previewTts ?: return@TextToSpeech
+            if (status == TextToSpeech.SUCCESS) {
+                if (voiceName != null) {
+                    tts.voices?.firstOrNull { it.name == voiceName }?.let { tts.voice = it }
+                }
+                tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) { tts?.shutdown() }
+                    override fun onDone(utteranceId: String?) {}
                     @Deprecated("Deprecated in Java")
-                    override fun onError(utteranceId: String?) { tts?.shutdown() }
+                    override fun onError(utteranceId: String?) {}
                 })
-                tts?.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "pronunciation_preview")
-            } else {
-                tts?.shutdown()
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pronunciation_preview")
             }
-        }
+        }, enginePackage)
     }
 
     /** Uvoz iz obicnog tekst fajla: jedan par po redu, "originalna_rec=zamena". Otporan na
@@ -174,33 +232,27 @@ class PronunciationActivity : AppCompatActivity() {
                     val text = contentResolver.openInputStream(uri)?.use { input ->
                         input.readBytes().toString(Charsets.UTF_8)
                     } ?: return@withContext -1
-                    // Ukloni BOM ako postoji (Windows Notepad ga cesto dodaje).
                     val cleanText = text.removePrefix("\uFEFF")
                     val seen = LinkedHashMap<String, Pair<String, String>>()
-                    var skipped = 0
                     for (rawLine in cleanText.lines()) {
                         var line = rawLine.trim()
                         if (line.isEmpty()) continue
-                        // Skini slucajne navodnike i zvezdice sa ivica reda - ostaci iz
-                        // razlicitih izvora odakle je fajl mogao doci.
                         line = line.trim('"', '*', ' ')
-                        if ('=' !in line) { skipped++; continue }
+                        if ('=' !in line) continue
                         val idx = line.indexOf('=')
-                        var word = line.substring(0, idx).trim().trim('"', '*', ' ')
-                        var replacement = line.substring(idx + 1).trim().trim('"', '*', ' ')
-                        if (word.isEmpty() || replacement.isEmpty()) { skipped++; continue }
-                        // Poslednji unos u fajlu pobedjuje kod sudara - dogovoreno pravilo,
-                        // bez upozorenja (isto kao pri rucnom dodavanju).
+                        val word = line.substring(0, idx).trim().trim('"', '*', ' ')
+                        val replacement = line.substring(idx + 1).trim().trim('"', '*', ' ')
+                        if (word.isEmpty() || replacement.isEmpty()) continue
                         seen[word.lowercase()] = word to replacement
                     }
                     if (seen.isEmpty()) return@withContext 0
-                    val db = AppDatabase.getInstance(this@PronunciationActivity).pronunciationDao()
-                    val existing = db.getAll()
+                    val dao = AppDatabase.getInstance(this@PronunciationActivity).pronunciationDao()
+                    val existing = dao.getAll()
                     val existingByLower = existing.associateBy { it.originalWord.lowercase() }
                     for ((lower, pair) in seen) {
                         val (word, replacement) = pair
-                        existingByLower[lower]?.let { db.deleteById(it.id) }
-                        db.insert(PronunciationEntity(originalWord = word, replacement = replacement))
+                        existingByLower[lower]?.let { dao.deleteById(it.id) }
+                        dao.insert(PronunciationEntity(originalWord = word, replacement = replacement))
                     }
                     seen.size
                 } catch (_: Exception) {
@@ -217,8 +269,8 @@ class PronunciationActivity : AppCompatActivity() {
         }
     }
 
-    /** Izvoz u ISTI, cist format ("rec=zamena", bez navodnika/zvezdica) - cak i ako je
-     * uvezen "prljav" fajl, ono sto se izveze je uvek uredno. */
+    /** Izvoz u ISTI, cist format ("rec=zamena", bez navodnika/zvezdica) - izveze SAMO
+     * korisnikove sopstvene unose (ne ugrađeni rečnik - taj je vec u samoj aplikaciji). */
     private fun exportToFile(uri: Uri) {
         lifecycleScope.launch {
             val ok = withContext(Dispatchers.IO) {

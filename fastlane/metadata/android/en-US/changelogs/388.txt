@@ -1,0 +1,6 @@
+What's new:
+
+1. Pronunciation Dictionary now shows the WHOLE dictionary in one place - both the built-in one (1887 entries) and your own, with search by partial word.
+2. Added a "Word list" button - immediately moves screen-reader focus to the list.
+3. Tapping a built-in entry now offers "Add your own replacement" if you want to override it.
+4. "Play pronunciation" now uses the EXACT voice configured for reading books, not a generic system voice.

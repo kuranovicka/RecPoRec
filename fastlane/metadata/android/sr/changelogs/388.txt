@@ -1,0 +1,6 @@
+Šta je novo:
+
+1. Rečnik izgovora sad prikazuje CEO rečnik na jednom mestu - i ugrađeni (1887 unosa) i tvoj sopstveni, sa pretragom po delu reči.
+2. Dodato dugme "Lista reči" - odmah postavlja fokus na listu za ekranski čitač.
+3. Dodir na ugrađen unos nudi "Dodaj svoju zamenu" ako želiš da ga prepišeš svojom verzijom.
+4. "Pusti izgovor" sad koristi TAČNO onaj glas koji je podešen za čitanje knjiga, ne generički sistemski glas.
