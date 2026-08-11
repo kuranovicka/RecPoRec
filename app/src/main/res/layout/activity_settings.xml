@@ -68,46 +68,6 @@
             android:trackTint="@color/btn_speed"
             android:text="@string/setting_shake"
             android:contentDescription="@string/setting_shake" />
-
-        <!-- Vidljivo samo kad je drmanje uključeno -->
-        <RadioGroup
-            android:id="@+id/groupShakeSensitivity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-
-            <RadioButton
-                android:id="@+id/radioShakeLight"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_speed"
-                android:text="Blago" />
-
-            <RadioButton
-                android:id="@+id/radioShakeMedium"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_speed"
-                android:text="Srednje" />
-
-            <RadioButton
-                android:id="@+id/radioShakeStrong"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:buttonTint="@color/btn_speed"
-                android:text="Jako" />
-        </RadioGroup>
     </LinearLayout>
 
     <Switch

@@ -69,17 +69,18 @@ class SettingsActivity : AppCompatActivity() {
             settings.uninterruptedEnabled = checked
             if (checked) requestIgnoreBatteryOptimizations()
         }
+        // "Prekidac u prekidacu" - korisnicki zahtev: umesto da opcije (Blago/Srednje/Jako)
+        // trajno vise ispod prekidaca (siri listu podesavanja bez potrebe), sad se odmah
+        // otvara mali izbor cim se prekidac ukljuci, izabere se, i vrati direktno u
+        // Podesavanja. Za KASNIJU izmenu (dok je vec ukljuceno) - dug pritisak na prekidac,
+        // isti obrazac "dug pritisak = dodatna radnja" koji vec koristi sva dugmad u citacu.
         binding.switchShake.setOnCheckedChangeListener { _, checked ->
             settings.shakeEnabled = checked
-            binding.groupShakeSensitivity.visibility =
-                if (checked) android.view.View.VISIBLE else android.view.View.GONE
+            if (checked) showShakeSensitivityPicker()
         }
-        binding.groupShakeSensitivity.setOnCheckedChangeListener { _, checkedId ->
-            settings.shakeSensitivity = when (checkedId) {
-                binding.radioShakeLight.id -> 0
-                binding.radioShakeStrong.id -> 2
-                else -> 1
-            }
+        binding.switchShake.setOnLongClickListener {
+            if (settings.shakeEnabled) showShakeSensitivityPicker()
+            true
         }
         binding.switchSound.setOnCheckedChangeListener { _, checked ->
             settings.soundFeedbackEnabled = checked
@@ -196,6 +197,14 @@ class SettingsActivity : AppCompatActivity() {
     private val navLabels = listOf("Stranica", "Minuti", "Oznaka", "Rečenice")
     private val navValues = listOf("page", "minute", "bookmark", "sentence")
 
+    private fun showShakeSensitivityPicker() {
+        val labels = listOf("Blago", "Srednje", "Jako")
+        val currentLabel = labels[settings.shakeSensitivity.coerceIn(0, 2)]
+        PickerDialog.show(this, "Jačina drmanja", labels, currentLabel, autoConfirm = true, showSearch = false) { index ->
+            settings.shakeSensitivity = index
+        }
+    }
+
     private fun refreshNavButton() {
         val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
         binding.btnNavigationMode.text = navLabels[idx]
@@ -206,7 +215,16 @@ class SettingsActivity : AppCompatActivity() {
     private fun refreshFromSettings() {
         binding.switchBackground.isChecked = settings.backgroundEnabled
         binding.switchUninterrupted.isChecked = settings.uninterruptedEnabled
+        // Bez ovoga bi postavljanje isChecked OVDE (programski, ne dodirom) ponovo pokrenulo
+        // dole prikacen listener, i izbornik za jacinu drmanja bi iskakao SVAKI PUT kad se
+        // ekran otvori (ako je drmanje vec ukljuceno) - ne samo kad korisnica STVARNO dodirne
+        // prekidac.
+        binding.switchShake.setOnCheckedChangeListener(null)
         binding.switchShake.isChecked = settings.shakeEnabled
+        binding.switchShake.setOnCheckedChangeListener { _, checked ->
+            settings.shakeEnabled = checked
+            if (checked) showShakeSensitivityPicker()
+        }
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
         binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
@@ -231,14 +249,6 @@ class SettingsActivity : AppCompatActivity() {
         binding.seekParagraphPause.max = 1000
         binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 1000)
         binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
-
-        binding.groupShakeSensitivity.visibility =
-            if (settings.shakeEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        when (settings.shakeSensitivity) {
-            0 -> binding.radioShakeLight.isChecked = true
-            2 -> binding.radioShakeStrong.isChecked = true
-            else -> binding.radioShakeMedium.isChecked = true
-        }
 
         refreshNavButton()
     }
