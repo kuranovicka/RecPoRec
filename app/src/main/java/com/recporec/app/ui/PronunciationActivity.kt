@@ -187,27 +187,51 @@ class PronunciationActivity : AppCompatActivity() {
     }
 
     private fun showEntryActionsDialog(entry: PronunciationListItem) {
-        val options = if (entry.isBuiltIn) {
-            arrayOf("Pusti izgovor", "Dodaj svoju zamenu")
-        } else {
-            arrayOf("Pusti izgovor", "Izmeni", "Obriši")
+        // setItems() automatski zatvara dijalog na SVAKI izbor - to je bio uzrok da "Pusti
+        // izgovor" izbacuje korisnicu nazad na listu umesto da ostane u opcijama za tu reč
+        // (i zato dupli pritisak na izgovor nije radio kako treba - dijalog se vec zatvorio
+        // posle prvog). Sad je svako dugme posebno - Pusti izgovor NE zatvara dijalog,
+        // ostale radnje zatvaraju kao i pre.
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
         }
-        val titleSuffix = if (entry.isBuiltIn) " (ugrađeno)" else ""
-        AlertDialog.Builder(this)
-            .setTitle("${entry.originalWord} → ${entry.replacement}$titleSuffix")
-            .setItems(options) { _, which ->
-                when {
-                    which == 0 -> previewPronunciation(entry.replacement)
-                    entry.isBuiltIn && which == 1 -> showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = null)
-                    !entry.isBuiltIn && which == 1 -> showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = entry.entityId)
-                    !entry.isBuiltIn && which == 2 -> lifecycleScope.launch {
-                        entry.entityId?.let { db.pronunciationDao().deleteById(it) }
-                        refreshList()
-                    }
+        lateinit var dialog: AlertDialog
+
+        fun addActionButton(label: String, dismissAfter: Boolean, action: () -> Unit) {
+            val btn = android.widget.Button(this).apply {
+                text = label
+                setOnClickListener {
+                    if (dismissAfter) dialog.dismiss()
+                    action()
                 }
             }
+            container.addView(btn)
+        }
+
+        addActionButton("Pusti izgovor", dismissAfter = false) { previewPronunciation(entry.replacement) }
+        if (entry.isBuiltIn) {
+            addActionButton("Dodaj svoju zamenu", dismissAfter = true) {
+                showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = null)
+            }
+        } else {
+            addActionButton("Izmeni", dismissAfter = true) {
+                showAddOrEditDialog(entry.originalWord, entry.replacement, editEntityId = entry.entityId)
+            }
+            addActionButton("Obriši", dismissAfter = true) {
+                lifecycleScope.launch {
+                    entry.entityId?.let { db.pronunciationDao().deleteById(it) }
+                    refreshList()
+                }
+            }
+        }
+
+        val titleSuffix = if (entry.isBuiltIn) " (ugrađeno)" else ""
+        dialog = AlertDialog.Builder(this)
+            .setTitle("${entry.originalWord} → ${entry.replacement}$titleSuffix")
+            .setView(container)
             .setNegativeButton(com.recporec.app.R.string.cancel, null)
-            .show()
+            .create()
+        dialog.show()
     }
 
     /** Izgovara zamenu KORIŠĆENJEM ISTOG GLASA/MOTORA/JEZIKA koji je podešen u programu za

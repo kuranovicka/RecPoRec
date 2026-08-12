@@ -1,0 +1,5 @@
+Šta je novo:
+
+1. Ispravljeno: "Pusti izgovor" više ne izbacuje iz opcija za reč nazad na listu - dijalog ostaje otvoren, možeš i da izmeniš ili obrišeš odmah posle slušanja.
+2. Očišćena dva zaostala unosa u ugrađenom rečniku koja su imala suvišne znakove (-creek, ^Sandhurst).
+3. Osvežene slike u opisu aplikacije, uključujući i novi ekran Rečnik izgovora.

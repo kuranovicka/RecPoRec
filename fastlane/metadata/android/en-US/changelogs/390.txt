@@ -1,0 +1,5 @@
+What's new:
+
+1. Fixed: "Play pronunciation" no longer kicks you out of a word's options back to the list - the dialog stays open, so you can edit or delete right after listening.
+2. Cleaned up two leftover entries in the built-in dictionary that had stray characters (-creek, ^Sandhurst).
+3. Refreshed the screenshots in the app listing, including the new Pronunciation Dictionary screen.
