@@ -1,0 +1,3 @@
+Šta je novo:
+
+1. Ugrađeni rečnik izgovora proširen sa 321 novim unosom (poznata imena, prezimena, gradovi, titule) - sad ukupno 2207 reči, bez duplikata, abecedno sortiran.

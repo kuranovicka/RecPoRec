@@ -1,0 +1,3 @@
+What's new:
+
+1. Built-in pronunciation dictionary expanded with 321 new entries (common names, surnames, cities, titles) - now 2207 words total, no duplicates, alphabetically sorted.
