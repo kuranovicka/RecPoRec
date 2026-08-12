@@ -101,36 +101,6 @@
             android:trackTint="@color/btn_page_nav"
             android:text="@string/setting_sentence_pause"
             android:contentDescription="@string/setting_sentence_pause" />
-
-        <!-- Vidljivo samo kad je pauza između rečenica uključena -->
-        <LinearLayout
-            android:id="@+id/groupSentencePauseMs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-
-            <SeekBar
-                android:id="@+id/seekSentencePause"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Trajanje pauze između rečenica u milisekundama"
-                android:max="1000"
-                android:progress="300"
-                android:progressTint="@color/btn_page_nav"
-                android:thumbTint="@color/btn_page_nav" />
-
-            <TextView
-                android:id="@+id/textSentencePauseStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:accessibilityLiveRegion="polite"
-                android:text="Pauza između rečenica: 300 ms" />
-        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -152,36 +122,6 @@
             android:trackTint="@color/btn_timer"
             android:text="Pauza između pasusa"
             android:contentDescription="Pauza između pasusa - primenjuje se umesto obične pauze na kraju pasusa" />
-
-        <!-- Vidljivo samo kad je pauza između pasusa uključena -->
-        <LinearLayout
-            android:id="@+id/groupParagraphPauseMs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-
-            <SeekBar
-                android:id="@+id/seekParagraphPause"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Trajanje pauze između pasusa u milisekundama"
-                android:max="1000"
-                android:progress="800"
-                android:progressTint="@color/btn_timer"
-                android:thumbTint="@color/btn_timer" />
-
-            <TextView
-                android:id="@+id/textParagraphPauseStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:accessibilityLiveRegion="polite"
-                android:text="Pauza između pasusa: 800 ms" />
-        </LinearLayout>
     </LinearLayout>
 
     <Switch

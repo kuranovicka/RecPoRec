@@ -44,7 +44,7 @@ class HelpActivity : AppCompatActivity() {
         Otvara tri stavke: Opšta podešavanja glasa, Podešavanja programa i Pomoć.
         Dug pritisak proverava sve dozvole potrebne aplikaciji i javlja ako neka nije data, kao pri prvom pokretanju.
         Prva stavka je Opšta podešavanja glasa.
-        Ovde biraš jezik i glas, (važi za sve dokumente).
+        Ovde biraš jezik i glas, važi za sve dokumente.
         Čuješ kratak primer svakog glasa kad ga dodirneš.
         Tu je i dugme Kombinovani glasovi.
         Njime biraš dva glasa koja se smenjuju dok čitaš.
@@ -55,7 +55,11 @@ class HelpActivity : AppCompatActivity() {
         Tu je i prekidač Automatski čitaj aktivni dokument.
         Kad ga uključiš, biraš jednu od dve mogućnosti:
         Automatsko čitanje pri otvaranju aplikacije, ili Pri otvaranju dokumenta.
-        Tu je i prekidač i dugme Rečnik izgovora - bira šta program izgovara umesto originalne reči (npr. John kao Džon), potpuno neobavezno.
+        Tu je i prekidač za uključivanje ugrađenog rečnika.
+        Za sad podržava samo srpski i hrvatski jezik.
+        Dugme Rečnik izgovora, otvara upravljanje rečnikom.
+        Aktiviranjem svake od ponuđene reči u listi, tu reč možeš izmeniti, ukloniti ili čuti kako zvuči njen izgovor.
+        Takođe imaš mogućnost da neku reč pronađeš u pretrazi tako što upišeš stranu, a ne našu reč.
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, oznaku ili rečenice.
         Ako biraš minute, biraš: 1, 5, 10.
         Ako izabereš rečenice, biraš: jednu, tri, pet ili deset.

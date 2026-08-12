@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Pauze između rečenica i pasusa sad su kao dinamički prekidači - dodirom se otvara klizač u dijalogu (isto kao Tajmer), umesto da stalno stoji na ekranu. Prekidač pokazuje trenutnu vrednost (npr. "Pauza između rečenica - 300 ms").
+2. Pomoć potpuno osvežena i dopunjena, uključujući detaljniji opis Rečnika izgovora.

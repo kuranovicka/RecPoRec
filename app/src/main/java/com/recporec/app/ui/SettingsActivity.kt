@@ -86,36 +86,27 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchSound.setOnCheckedChangeListener { _, checked ->
             settings.soundFeedbackEnabled = checked
         }
+        // "Prekidac u prekidacu" - isti obrazac kao Drmanje: dijalog sa klizacem se otvara
+        // ODMAH cim se prekidac ukljuci (ne stoji trajno vidljiv na ekranu), a za KASNIJU
+        // izmenu (dok je vec ukljuceno) - dug pritisak, isto kao svuda drugde.
         binding.switchSentencePause.setOnCheckedChangeListener { _, checked ->
             settings.sentencePauseEnabled = checked
-            binding.groupSentencePauseMs.visibility =
-                if (checked) android.view.View.VISIBLE else android.view.View.GONE
-            if (checked) binding.seekSentencePause.requestAccessibilityFocusNow()
+            if (checked) showPauseMsPicker(isSentence = true)
+            updateSentencePauseLabel()
         }
-        binding.seekSentencePause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                if (!fromUser) return
-                settings.sentencePauseMs = progress
-                binding.textSentencePauseStatus.text = "Pauza između rečenica: $progress ms"
-            }
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        })
+        binding.switchSentencePause.setOnLongClickListener {
+            if (settings.sentencePauseEnabled) showPauseMsPicker(isSentence = true)
+            true
+        }
         binding.switchParagraphPause.setOnCheckedChangeListener { _, checked ->
             settings.paragraphPauseEnabled = checked
-            binding.groupParagraphPauseMs.visibility =
-                if (checked) android.view.View.VISIBLE else android.view.View.GONE
-            if (checked) binding.seekParagraphPause.requestAccessibilityFocusNow()
+            if (checked) showPauseMsPicker(isSentence = false)
+            updateParagraphPauseLabel()
         }
-        binding.seekParagraphPause.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                if (!fromUser) return
-                settings.paragraphPauseMs = progress
-                binding.textParagraphPauseStatus.text = "Pauza između pasusa: $progress ms"
-            }
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        })
+        binding.switchParagraphPause.setOnLongClickListener {
+            if (settings.paragraphPauseEnabled) showPauseMsPicker(isSentence = false)
+            true
+        }
         binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
             settings.autoNextDocumentEnabled = checked
         }
@@ -244,6 +235,66 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** Isti "dinamički prekidač" princip kao Drmanje - dijalog sa klizačem se otvara ODMAH
+     * čim se prekidač uključi, a za kasniju izmenu služi dug pritisak. Klizač NIJE trajno
+     * vidljiv na ekranu (isto kao Tajmer u čitaču). */
+    private fun showPauseMsPicker(isSentence: Boolean) {
+        val view = layoutInflater.inflate(com.recporec.app.R.layout.dialog_pause_ms, null)
+        val seek = view.findViewById<android.widget.SeekBar>(com.recporec.app.R.id.seekPauseMs)
+        val status = view.findViewById<android.widget.TextView>(com.recporec.app.R.id.textPauseStatus)
+        val current = if (isSentence) settings.sentencePauseMs else settings.paragraphPauseMs
+        seek.max = 1000
+        seek.progress = current.coerceIn(0, 1000)
+        status.text = "${seek.progress} ms"
+        seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                status.text = "$progress ms"
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+        val title = if (isSentence) "Pauza između rečenica" else "Pauza između pasusa"
+        android.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(view)
+            .setNegativeButton(com.recporec.app.R.string.cancel, null)
+            .setPositiveButton("Postavi") { _, _ ->
+                if (isSentence) {
+                    settings.sentencePauseMs = seek.progress
+                    updateSentencePauseLabel()
+                } else {
+                    settings.paragraphPauseMs = seek.progress
+                    updateParagraphPauseLabel()
+                }
+            }
+            .show()
+        seek.requestAccessibilityFocusNow()
+    }
+
+    private fun updateSentencePauseLabel() {
+        val baseLabel = getString(com.recporec.app.R.string.setting_sentence_pause)
+        if (settings.sentencePauseEnabled) {
+            binding.switchSentencePause.text = "$baseLabel - ${settings.sentencePauseMs} ms"
+            binding.switchSentencePause.contentDescription =
+                "$baseLabel. Trenutno: ${settings.sentencePauseMs} ms. Dug pritisak: promeni."
+        } else {
+            binding.switchSentencePause.text = baseLabel
+            binding.switchSentencePause.contentDescription = baseLabel
+        }
+    }
+
+    private fun updateParagraphPauseLabel() {
+        val baseLabel = "Pauza između pasusa"
+        if (settings.paragraphPauseEnabled) {
+            binding.switchParagraphPause.text = "$baseLabel - ${settings.paragraphPauseMs} ms"
+            binding.switchParagraphPause.contentDescription =
+                "$baseLabel. Trenutno: ${settings.paragraphPauseMs} ms. Dug pritisak: promeni."
+        } else {
+            binding.switchParagraphPause.text = baseLabel
+            binding.switchParagraphPause.contentDescription = baseLabel
+        }
+    }
+
     private fun refreshNavButton() {
         val idx = navValues.indexOf(settings.navigationMode).coerceAtLeast(0)
         binding.btnNavigationMode.text = navLabels[idx]
@@ -267,7 +318,6 @@ class SettingsActivity : AppCompatActivity() {
         }
         updateShakeLabel()
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
-        binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
         // Isti razlog kao kod Drmanja iznad - bez detach/reattach, izbor "kada citati" bi
         // iskakao SVAKI PUT kad se ekran otvori (ako je vec ukljuceno), ne samo pri dodiru.
@@ -288,18 +338,25 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, PronunciationActivity::class.java))
         }
 
-        binding.groupSentencePauseMs.visibility =
-            if (settings.sentencePauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        binding.seekSentencePause.max = 1000
-        binding.seekSentencePause.progress = settings.sentencePauseMs.coerceIn(0, 1000)
-        binding.textSentencePauseStatus.text = "Pauza između rečenica: ${settings.sentencePauseMs} ms"
+        // Isti razlog kao kod Drmanja - bez detach/reattach, dijalog sa klizacem bi iskakao
+        // SVAKI PUT kad se ekran otvori (ako je pauza vec ukljucena), ne samo pri dodiru.
+        binding.switchSentencePause.setOnCheckedChangeListener(null)
+        binding.switchSentencePause.isChecked = settings.sentencePauseEnabled
+        binding.switchSentencePause.setOnCheckedChangeListener { _, checked ->
+            settings.sentencePauseEnabled = checked
+            if (checked) showPauseMsPicker(isSentence = true)
+            updateSentencePauseLabel()
+        }
+        updateSentencePauseLabel()
 
+        binding.switchParagraphPause.setOnCheckedChangeListener(null)
         binding.switchParagraphPause.isChecked = settings.paragraphPauseEnabled
-        binding.groupParagraphPauseMs.visibility =
-            if (settings.paragraphPauseEnabled) android.view.View.VISIBLE else android.view.View.GONE
-        binding.seekParagraphPause.max = 1000
-        binding.seekParagraphPause.progress = settings.paragraphPauseMs.coerceIn(0, 1000)
-        binding.textParagraphPauseStatus.text = "Pauza između pasusa: ${settings.paragraphPauseMs} ms"
+        binding.switchParagraphPause.setOnCheckedChangeListener { _, checked ->
+            settings.paragraphPauseEnabled = checked
+            if (checked) showPauseMsPicker(isSentence = false)
+            updateParagraphPauseLabel()
+        }
+        updateParagraphPauseLabel()
 
         refreshNavButton()
     }

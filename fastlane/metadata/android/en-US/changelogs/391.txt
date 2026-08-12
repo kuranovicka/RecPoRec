@@ -1,0 +1,4 @@
+What's new:
+
+1. Sentence and paragraph pause settings now work as dynamic switches - tapping opens a slider dialog (same as the Timer), instead of staying permanently on screen. The switch label shows the current value (e.g. "Sentence pause - 300 ms").
+2. Help screen fully refreshed and expanded, including a more detailed description of the Pronunciation Dictionary.
