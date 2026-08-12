@@ -1,0 +1,22 @@
+What's new in the document reader for Android Reč po reč 12.0?
+
+1. The app now remembers which shelf/tab you were on (All, New, Started, Finished).
+2. Sentence-based navigation added to settings - choose 1, 3, 5, or 10 sentences per step.
+3. General voice settings (language, voice, speed, volume, pitch, combined voices) now apply to all documents, not per-document.
+4. Removed per-document buttons for pitch/speed/volume/language/voice/combined voices - all managed in one place now.
+5. Auto-scroll and Scheduled reading are now regular buttons in the reader, no longer hidden behind long-press.
+6. The Options button is now also available inside the document, top right - same as the main screen, so you don't have to leave the book to change settings.
+7. Long-press on Options now checks permissions; long-press on Add document now announces reading statistics.
+8. Restore Defaults now resets absolutely all settings at once, on both settings screens.
+9. Buttons aligned and unified, with larger text for readability.
+10. Fixed outdated tooltip texts.
+11. Minute-based navigation unified into one option with a minute count picker, instead of three separate items.
+12. Fixed restoring combined voices to default.
+13. For the Shake and Auto-read switches - turning them on now immediately opens the picker (shake intensity / when to read), instead of a list staying visible below. Long-press reopens the picker later.
+14. Those same switches now show the currently selected option in their own text (e.g. "Shake phone... - Light"), so you don't have to remember your choice.
+15. Shortened all text-entry dialogs (search, go to page/minute, bookmarks, wake-up, scheduled reading, rename, combined voices) - just the input field and Cancel, the keyboard itself confirms.
+16. New: Pronunciation Dictionary - choose what the app says instead of the original word (e.g. pronounce "John" as "Džon"). Built-in dictionary has 2207 entries (names, surnames, cities), off by default - enable via the toggle in App Settings. Add your own words too, with search, import, export, and a pronunciation preview using the app's actual configured voice. The app also recognizes domestic case endings attached to a foreign name (e.g. "Maryn" is read as "Merin").
+17. Settings renamed to "App Settings", to avoid confusion with "General Voice Settings".
+18. Fixed the navigation description - it now correctly lists sentence-based navigation too.
+19. Sentence pause and paragraph pause are now switches of the same type as Shake Phone - turning them on immediately opens a slider to set the value, and the switch label shows the current value (e.g. "Sentence pause - 300 ms").
+20. Help screen fully refreshed and expanded, including a detailed description of the Pronunciation Dictionary.

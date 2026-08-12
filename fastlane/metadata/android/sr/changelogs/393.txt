@@ -1,0 +1,22 @@
+Šta je novo u programu za čitanje knjiga na Android telefonima Reč po reč 12.0?
+
+1. Sada program pamti na kom folderu, tj. na kojoj smo polici stali: (Sve, Novo, Započeto, Pročitano).
+2. U podešavanja je dodata navigacija po rečenicama - biraš 1, 3, 5 ili 10 rečenica po koraku.
+3. Opšta podešavanja glasa (jezik, glas, brzina, jačina, visina, kombinovani glasovi) sad važe za sve dokumente, ne posebno za svaki.
+4. Uklonjena je posebna dugmad za visinu, brzinu, jačinu, jezik, glas i kombinovane glasove iz samog dokumenta - sve to se sad podešava na jednom mestu.
+5. Automatski listaj dokument i Zakaži čitanje sada su svoja, obična dugmad u dokumentu, ne više skrivena na dugom pritisku.
+6. Dugme Opcije dodato je i u sam dokument, gore desno - isto kao na glavnom ekranu, da ne moraš da izlaziš iz knjige da bi promenio-la podešavanja.
+7. Dug pritisak na Opcije sad proverava dozvole, a dug pritisak na Dodaj dokument sad izgovara statistiku.
+8. Dugme Vrati na zadano sad vraća baš sva podešavanja odjednom, na oba ekrana podešavanja.
+9. Dugmad je poravnata i ujednačena, sa uvećanim slovima za bolju čitljivost.
+10. Popravljeni tooltip tekstovi koji su davali stare, netačne informacije.
+11. Navigacija po minutima objedinjena u jednu opciju sa izborom broja minuta, umesto tri odvojene stavke.
+12. Popravljeno vraćanje kombinovanih glasova na zadano.
+13. Kod prekidača Drmanje telefona i Automatski čitaj - uključivanje sad odmah otvara izbor (jačina drmanja / kada čitati), umesto liste koja stalno stoji ispod. Dug pritisak na prekidač ponovo otvara izbor za kasniju promenu.
+14. Ti isti prekidači sad u svom tekstu pokazuju i trenutno odabranu opciju (npr. "Prodrmaj telefon... - Blago"), da se ne mora pamtiti šta je izabrano.
+15. Skraćeni svi dijalozi za unos teksta (pretraga, idi na stranicu/minut, oznake, buđenje, zakazano čitanje, preimenovanje, kombinovani glasovi) - samo polje za unos i Otkaži, tastatura sama potvrđuje.
+16. Novo: Rečnik izgovora - biraš šta program izgovara umesto originalne reči (npr. John kao Džon). Ugrađeni rečnik ima 2207 unosa (imena, prezimena, gradovi), isključen po difoltu - uključuješ ga prekidačem u Podešavanjima programa. Dodaješ i svoje reči, sa pretragom, uvozom, izvozom, i probnim izgovorom pravim glasom iz programa. Program prepoznaje i domaće padežne nastavke nalepljene na strano ime (npr. "Maryn" izgovara kao "Merin").
+17. Podešavanja preimenovana u "Podešavanja programa", da se ne mešaju sa "Opštim podešavanjima glasa".
+18. Ispravljen opis navigacije - sad tačno piše da postoji i navigacija po rečenicama.
+19. Pauza između rečenica i pauza između pasusa sad su prekidači istog tipa kao Drmanje telefona - uključivanje odmah otvara klizač za podešavanje, a prekidač u svom tekstu pokazuje trenutnu vrednost (npr. "Pauza između rečenica - 300 ms").
+20. Pomoć je potpuno osvežena i dopunjena, uključujući detaljan opis Rečnika izgovora.
