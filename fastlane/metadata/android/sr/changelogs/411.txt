@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Potpuno preraspoređen donji deo čitača, tačno po opisu: tastatura sad ima fiksnu (nepromenljivu) visinu reda po redu, umesto rastegljive. Play-pauza je sama u sredini preostalog prostora, velika i istaknuta. Prikaži-sakrij kontrole i Nazad sad su jedan pored drugog u istom redu (Kontrole levo, Nazad desno), tačno iznad klizača koji ostaje poslednji na samom dnu.
+2. Statusna traka (naslov, stranice, vreme) smanjena - manji font i razmak, oslobađa više prostora tastaturi i dugmadima.

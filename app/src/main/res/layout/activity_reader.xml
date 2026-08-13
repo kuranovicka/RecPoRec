@@ -26,19 +26,20 @@
             android:src="@android:drawable/ic_menu_more" />
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Traka statusa -->
+    <!-- Traka statusa - smanjena (manji font, manji padding) da ne zauzima previse prostora,
+         posebno kad nema aktivnog tajmera/budjenja (te linije se i sakrivaju kad su neaktivne). -->
     <LinearLayout
         android:id="@+id/layoutStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="6dp">
 
         <TextView
             android:id="@+id/textDocTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
             android:maxLines="1"
@@ -49,7 +50,7 @@
             android:id="@+id/textPages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/text_primary"
             android:accessibilityLiveRegion="polite" />
 
@@ -57,21 +58,21 @@
             android:id="@+id/textElapsed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/textRemaining"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/textTimerStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/text_primary"
             android:text="Tajmer nije aktivan." />
 
@@ -79,17 +80,17 @@
             android:id="@+id/textRestStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/text_primary"
             android:text="Odmor nije aktivan." />
     </LinearLayout>
 
-    <!-- Numerička tastatura, redovi dugmadi - fiksna, ravna. weight=2 (naspram weight=1 na
-    donjem bloku) da dugmad budu visa, blize kvadratu, ne tanki pravougaonici. -->
+    <!-- Numerička tastatura - SVAKI red ima FIKSNU visinu u dp (ne procenat/weight koji se
+         menja) - Marinin izričit zahtev da dugmad budu stvarno fiksna, ne "bezi" menjanjem
+         proporcija između build-ova. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="6dp">
 
@@ -97,8 +98,7 @@
         <LinearLayout
             android:id="@+id/layoutRow1"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="58dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnBookmarks" style="@style/KeyButton"
@@ -142,8 +142,7 @@
         <LinearLayout
             android:id="@+id/layoutRow2"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="58dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPrevChapter" style="@style/KeyButton"
@@ -178,8 +177,7 @@
         <LinearLayout
             android:id="@+id/layoutRow3"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="58dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnTimer" style="@style/KeyButton"
@@ -208,13 +206,11 @@
             android:background="@color/slider_track"
             android:importantForAccessibility="no" />
 
-        <!-- Red: korak nazad / korak napred - Play/pauza premesten odavde dole, da stoji
-             zajedno sa Kontrole i Nazad (uvek vidljiva trojka), na Marinin zahtev. -->
+        <!-- Red: korak nazad / korak napred -->
         <LinearLayout
             android:id="@+id/layoutRow5"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="58dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnStepBack" style="@style/KeyButton"
@@ -247,40 +243,42 @@
         android:background="@color/slider_track"
         android:importantForAccessibility="no" />
 
-    <!-- Uvek vidljiva trojka (Marinin predlog) - Play-pauza / Kontrole / Nazad. Play-pauza je
-    NAMERNO prva u bloku (ne Kontrole) - tako fizicki sedi vise, blize sredini ekrana, kako je
-    Marina trazila. Ceo blok DELI rastegljivi prostor sa tastaturom iznad (umesto da tastatura
-    pojede sve, a ovaj blok ostane sicusan, zbijen na samom dnu). Play-pauza dobija najveci
-    deo (weight 2) unutar bloka, da bude vidno najveca/najistaknutija, kako i treba. -->
+    <!-- Play-pauza - JEDINI element koji raste (weight=1), pa prirodno "sedne" u sredinu
+         preostalog prostora, jer je tastatura iznad FIKSNE visine, a Kontrole/Nazad/klizač
+         ispod su takođe fiksni. Ovo tačno prati Marinin opis: sve ostalo fiksno, Play-pauza
+         negde na sredini ekrana, veliko i istaknuto. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
-            android:orientation="horizontal">
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPlayPause" style="@style/KeyButton"
+            android:backgroundTint="@color/btn_play"
+            android:contentDescription="@string/btn_play_pause"
+            android:text="▶ / ⏸" />
+    </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPlayPause" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_play"
-                android:contentDescription="@string/btn_play_pause"
-                android:text="▶ / ⏸" />
-        </LinearLayout>
+    <!-- Kontrole (levo) i Nazad (desno) - JEDAN red, fiksna visina, tačno iznad klizača,
+         kako je Marina tražila. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="6dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnToggleControls"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="6dp"
             android:textSize="18sp"
             android:backgroundTint="@color/btn_combined"
             android:textColor="@color/button_text"
@@ -289,12 +287,10 @@
 
         <Button
             android:id="@+id/btnBack"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginStart="6dp"
             android:textSize="18sp"
             android:backgroundTint="@color/btn_combined"
             android:textColor="@color/button_text"
@@ -303,18 +299,14 @@
 
     </LinearLayout>
 
-    <!-- Klizač napretka kroz knjigu - namerno POSLEDNJI element na ekranu i namerno
-    NEUPADLJIV (manji, prigušena boja) - ne sme da "vuce paznju" niti da lici na dugme koje
-    poziva na dodir. Kraća izloženost slucajnom gore/dole pokretu koji bi promenio poziciju
-    u knjizi dok se zuri ka Kontrole/Play/Nazad, jer se do klizaca dolazi samo ako se
-    namerno nastavi dalje posle Nazad, ne "usput". -->
+    <!-- Klizač napretka kroz knjigu - namerno POSLEDNJI element na ekranu, na samom dnu, i
+         namerno NEUPADLJIV (manji, prigušena boja). -->
     <SeekBar
         android:id="@+id/seekProgress"
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="14dp"
         android:contentDescription="@string/slider_position"
         android:max="100"

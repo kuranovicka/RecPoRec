@@ -1,0 +1,4 @@
+What's new:
+
+1. Fully rearranged the bottom of the reader per spec: the keyboard now has a fixed (unchanging) row-by-row height instead of a stretchy one. Play-pause stands alone in the middle of the remaining space, large and prominent. Show-hide controls and Back are now side by side in one row (Controls left, Back right), directly above the slider, which stays last at the very bottom.
+2. The status bar (title, pages, time) is smaller - reduced font and spacing, freeing up more room for the keyboard and buttons.

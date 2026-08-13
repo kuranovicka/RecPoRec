@@ -117,19 +117,18 @@ class HelpActivity : AppCompatActivity() {
         Vraća čitanje unazad za broj minuta koji izabereš na klizaču, a dug pritisak ponavlja poslednje korišćeno vreme.
         Treće dugme ide na sledeći element.
         Dug pritisak poništava tvoju poslednju radnju, koja god da je bila.
-        Ispod tastature su, jedno ispod drugog, tri dugmeta koja ostaju prisutna u svim slučajevima, čak i kad se ostala dugmad sakriju: Pusti-pauziraj, Prikaži-sakrij kontrole, i Nazad.
-        Prvo je dugme koje pokreće i pauzira čitanje.
+        Ispod tastature su tri dugmeta koja ostaju prisutna u svim slučajevima, čak i kad se ostala dugmad sakriju.
+        Prvo, samo, u svom redu, je dugme koje pokreće i pauzira čitanje.
         Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
-        Drugo je Prikaži-sakrij kontrole.
-        Sakriva skoro svu dugmad i statusne redove.
+        Ispod njega, jedno pored drugog, su Prikaži-sakrij kontrole levo i Nazad desno.
+        Prikaži-sakrij kontrole sakriva skoro svu dugmad i statusne redove.
         Dug pritisak pauzira čitanje na 15 minuta.
         Minut pre kraja pauze ćeš čuti kratak zvučni signal.
         Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
-        Treće je dugme Nazad.
-        Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
+        Nazad zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Dug pritisak šalje aplikaciju u pozadinu, kao dugme Home na telefonu.
         Tada dokument ostaje otvoren.
-        Na samom kraju, posle Nazad, je veći klizač za lakši dodir, preko celog ekrana.
+        Na samom kraju, na dnu ekrana, je veći klizač za lakši dodir, preko celog ekrana.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Dug pritisak na prečicu Reč po reč na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
