@@ -84,18 +84,18 @@ class HelpActivity : AppCompatActivity() {
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
-        Drugo dugme je Tajmer.
-        Otvara klizač od pet do sto dvadeset minuta, za automatski prekid čitanja.
-        Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
-        Dug pritisak isključuje tajmer.
-        Treće dugme je Sledeće poglavlje.
-        Vodi na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
-        U trećem redu, prvo dugme je Automatski listaj dokument.
+        Drugo dugme je Automatski listaj dokument.
         Biraš između stranice, oznaka, poglavlja ili minuta.
         Zatim odabereš da li dokument listaš unapred ili unazad.
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
+        Treće dugme je Sledeće poglavlje.
+        Vodi na sledeće poglavlje, a dug pritisak otvara spisak svih poglavlja za brz izbor.
+        U trećem redu, prvo dugme je Tajmer.
+        Otvara klizač od pet do sto dvadeset minuta, za automatski prekid čitanja.
+        Minut pre isteka tajmera, dobijaš kratko zvučno upozorenje.
+        Dug pritisak isključuje tajmer.
         Drugo dugme je Probudi me u tačno vreme.
         Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
         Kad dođe vreme za buđenje, alarm zvoni jedan minut.
