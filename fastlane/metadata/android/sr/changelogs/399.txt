@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Klizač napretka kroz knjigu premešten na sam kraj ekrana, posle dugmeta Nazad - manja šansa da se slučajnim gore/dole pokretom promeni pozicija u knjizi dok se žuri ka Kontrole, Pusti-pauziraj ili Nazad.
+2. Pomoć ažurirana da prati novi redosled.

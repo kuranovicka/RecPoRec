@@ -117,9 +117,7 @@ class HelpActivity : AppCompatActivity() {
         Vraća čitanje unazad za broj minuta koji izabereš na klizaču, a dug pritisak ponavlja poslednje korišćeno vreme.
         Treće dugme ide na sledeći element.
         Dug pritisak poništava tvoju poslednju radnju, koja god da je bila.
-        Ispod tastature je veći klizač za lakši dodir, preko celog ekrana.
-        Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
-        Ispod klizača su, jedno ispod drugog, tri dugmeta koja ostaju prisutna u svim slučajevima, čak i kad se ostala dugmad sakriju: Prikaži-sakrij kontrole, Pusti-pauziraj, i Nazad.
+        Ispod tastature su, jedno ispod drugog, tri dugmeta koja ostaju prisutna u svim slučajevima, čak i kad se ostala dugmad sakriju: Prikaži-sakrij kontrole, Pusti-pauziraj, i Nazad.
         Prvo je Prikaži-sakrij kontrole.
         Sakriva skoro svu dugmad i statusne redove.
         Dug pritisak pauzira čitanje na 15 minuta.
@@ -131,6 +129,9 @@ class HelpActivity : AppCompatActivity() {
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Dug pritisak šalje aplikaciju u pozadinu, kao dugme Home na telefonu.
         Tada dokument ostaje otvoren.
+        Na samom kraju, posle Nazad, je veći klizač za lakši dodir, preko celog ekrana.
+        Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
+        Namerno je poslednji, posle Nazad, da se do njega ne dođe usput dok žuriš ka Kontrole, Pusti-pauziraj ili Nazad.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Dug pritisak na prečicu Reč po reč na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
         Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga pustiš ili pauziraš.

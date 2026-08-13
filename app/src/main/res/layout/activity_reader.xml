@@ -237,19 +237,6 @@
 
     </LinearLayout>
 
-    <!-- Klizač napretka kroz knjigu - sam u svom redu, pun širine. -->
-    <SeekBar
-        android:id="@+id/seekProgress"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"
-        android:contentDescription="@string/slider_position"
-        android:max="100"
-        android:progressTint="@color/btn_voice"
-        android:thumbTint="@color/btn_voice" />
-
     <View
         android:id="@+id/dividerRow4"
         android:layout_width="match_parent"
@@ -295,11 +282,27 @@
         android:layout_height="56dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         android:textSize="18sp"
         android:backgroundTint="@color/btn_combined"
         android:textColor="@color/button_text"
         android:contentDescription="Nazad. Zatvara dokument, vraća na listu. Dug pritisak: pošalji aplikaciju u pozadinu."
         android:text="Nazad" />
+
+    <!-- Klizač napretka kroz knjigu - namerno POSLEDNJI element na ekranu (Marinin zahtev):
+    kraća izloženost slucajnom gore/dole pokretu koji bi promenio poziciju u knjizi dok se
+    zuri ka Kontrole/Play/Nazad, jer se do klizaca dolazi samo ako se namerno nastavi dalje
+    posle Nazad, ne "usput". -->
+    <SeekBar
+        android:id="@+id/seekProgress"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/slider_position"
+        android:max="100"
+        android:progressTint="@color/btn_voice"
+        android:thumbTint="@color/btn_voice" />
 
 </LinearLayout>

@@ -1,0 +1,4 @@
+What's new:
+
+1. The book progress slider moved to the very end of the screen, after the Back button - less chance of an accidental up/down swipe changing your position in the book while hurrying toward Show controls, Play-pause, or Back.
+2. Help screen updated to match the new order.
