@@ -10,11 +10,14 @@
         <item name="android:background">@drawable/key_button_shape</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:elevation">0dp</item>
-        <!-- Materijal tema po difoltu primorava jedan red bez preloma (tekst se seče, ne
-             skracuje sa "..."). Ovo dozvoljava prelazak u 2 reda kad tekst ne stane, i
-             skida Materijalov ugradjeni razmak (insetTop/Bottom) koji krade prostor. -->
-        <item name="android:singleLine">false</item>
-        <item name="android:maxLines">2</item>
+        <!-- Materijal tema po difoltu primorava jedan red bez preloma i tiho seče tekst.
+             Pokušaj sa prelaskom u 2 reda je napravio preklapanje sa susednim redom (nema
+             dovoljno visine) - vraćen jedan red, ali sa ellipsize="end" kao sigurnosna mreža
+             (ako nešto ipak ne stane, dodaju se "..." umesto tihog sečenja bez traga).
+             VAŽNO: TalkBack čita contentDescription, NE vidljivi tekst - ovo je bio čisto
+             vizuelni problem, nikad nije uticao na čitač ekrana. -->
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingStart">4dp</item>
         <item name="android:paddingEnd">4dp</item>

@@ -1,0 +1,3 @@
+Šta je novo:
+
+1. Ispravljeno preklapanje teksta na dugmadima (prelazak u 2 reda je pravio sudar sa susednim redom). Vraćen jedan red, uz skraćene vidljive natpise na par najdužih dugmadi (npr. "Odaberi sve" → "Odaberi", "Automatski listaj" → "Automatski"). Čitač ekrana i dalje čita pun, nekraćen opis - ovo je čisto vizuelna ispravka.

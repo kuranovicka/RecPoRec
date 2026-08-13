@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed button text overlap (wrapping to 2 lines was colliding with the next row). Reverted to one line, with shortened visible labels on a few of the longest buttons (e.g. "Select all" → "Select", "Auto-scroll document" → "Auto-scroll"). The screen reader still announces the full, unshortened description - this is a purely visual fix.
