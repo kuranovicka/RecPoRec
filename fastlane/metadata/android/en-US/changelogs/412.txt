@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed text clipping on the "Controls" button (the 👁 emoji has a taller natural line height than plain text, causing letters to be cut at the bottom). Now uses the same reliable button type as the keyboard.
