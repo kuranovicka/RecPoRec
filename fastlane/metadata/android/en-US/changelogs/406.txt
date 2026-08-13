@@ -1,0 +1,3 @@
+What's new:
+
+1. Refreshed the screenshots in the app listing - confirming readable keyboard button text (cleanly truncated with "...", no overlap) and a clean "hide controls" view with no stray lines.
