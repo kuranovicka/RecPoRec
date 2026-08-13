@@ -134,6 +134,7 @@
         <!-- Samo vizuelna linija - razdvaja redove za slabovide, TalkBack je potpuno
              preskace (importantForAccessibility="no") i ne menja redosled dugmadi. -->
         <View
+            android:id="@+id/dividerRow1"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="4dp"
@@ -168,6 +169,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/dividerRow2"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="4dp"
@@ -196,6 +198,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/dividerRow3"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="4dp"
@@ -217,6 +220,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/dividerRow4"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="4dp"

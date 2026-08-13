@@ -274,6 +274,13 @@ class ReaderActivity : AppCompatActivity() {
         layoutRow3.visibility = visibility
         layoutRow5.visibility = visibility
         seekProgress.visibility = visibility
+        // Linije su samo vizuelno razdvajanje REDOVA - kad su redovi sakriveni, nema sta da
+        // se razdvaja, pa i one nestaju (inace ostaju kao gomila crta bez svrhe iznad Play
+        // dugmeta, primeceno na slici pre nego sto je otislo na build).
+        dividerRow1.visibility = visibility
+        dividerRow2.visibility = visibility
+        dividerRow3.visibility = visibility
+        dividerRow4.visibility = visibility
         // NAMERNO se ne dira - Nazad treba da bude prisutan u SVAKOM prozoru/stanju, i kad su
         // ostale kontrole sakrivene (korisnicka prijava - ranije je nestajalo sa ostalim).
         btnToggleControls.contentDescription = if (controlsHidden) {

@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Ispravljen bag: linije između redova tastature su ostajale vidljive (kao gomila crta) i kad se kontrole sakriju dugmetom Prikaži-sakrij kontrole - sad nestaju zajedno sa redovima.
+2. Osvežene slike u opisu aplikacije.

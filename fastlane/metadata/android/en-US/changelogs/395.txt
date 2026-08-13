@@ -1,0 +1,4 @@
+What's new:
+
+1. Fixed a bug: the divider lines between keyboard rows stayed visible (as a stack of lines) even when controls were hidden with the Show-hide controls button - they now disappear together with the rows.
+2. Refreshed the screenshots in the app listing.
