@@ -1,0 +1,3 @@
+What's new:
+
+1. Reader keyboard buttons are now taller (closer to square, less like thin rectangles) - the keyboard gets twice the space share compared to the bottom block (Play-pause/Show controls/Back), instead of an even split.

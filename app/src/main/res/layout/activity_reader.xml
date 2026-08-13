@@ -84,13 +84,14 @@
             android:text="Odmor nije aktivan." />
     </LinearLayout>
 
-    <!-- Numerička tastatura, 4 reda x 3 kolone, fiksna, ravna -->
+    <!-- Numerička tastatura, redovi dugmadi - fiksna, ravna. weight=2 (naspram weight=1 na
+    donjem bloku) da dugmad budu visa, blize kvadratu, ne tanki pravougaonici. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:padding="6dp">
 
         <!-- Red: Oznake / Idi na -->
         <LinearLayout
