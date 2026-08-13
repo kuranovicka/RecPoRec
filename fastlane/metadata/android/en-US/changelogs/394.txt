@@ -1,0 +1,3 @@
+What's new:
+
+1. Added subtle divider lines between keyboard rows in the reader - visual grouping for low-vision users, with zero change to screen-reader button order.

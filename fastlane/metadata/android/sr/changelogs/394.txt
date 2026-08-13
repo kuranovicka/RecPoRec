@@ -1,0 +1,3 @@
+Šta je novo:
+
+1. Dodate suptilne linije između redova tastature u čitaču - vizuelno razdvajanje za slabovide, bez ijedne izmene redosleda dugmadi za ekranski čitač.

@@ -131,6 +131,16 @@
                 android:text="🔍 Pretraga" />
         </LinearLayout>
 
+        <!-- Samo vizuelna linija - razdvaja redove za slabovide, TalkBack je potpuno
+             preskace (importantForAccessibility="no") i ne menja redosled dugmadi. -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/slider_track"
+            android:importantForAccessibility="no" />
+
         <!-- Red: Prethodno poglavlje / Tajmer / Sledeće poglavlje -->
         <LinearLayout
             android:id="@+id/layoutRow2"
@@ -157,6 +167,14 @@
                 android:text="Poglavlje ⏭" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/slider_track"
+            android:importantForAccessibility="no" />
+
         <!-- Red: Automatski listaj dokument / Zakaži čitanje - promovisano iz dugih pritisaka
              u svoja, obicna dugmad. -->
         <LinearLayout
@@ -177,6 +195,14 @@
                 android:text="Zakaži čitanje" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/slider_track"
+            android:importantForAccessibility="no" />
+
         <!-- Red: Pusti/Pauziraj -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -189,6 +215,14 @@
                 android:contentDescription="@string/btn_play_pause"
                 android:text="▶ / ⏸" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/slider_track"
+            android:importantForAccessibility="no" />
 
         <!-- Red: korak nazad / korak napred -->
         <LinearLayout
