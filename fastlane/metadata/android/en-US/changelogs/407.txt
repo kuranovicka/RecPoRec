@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed the "empty top, cramped bottom" feel - the keyboard used to claim all leftover screen space (buttons stretched, looked empty), while Show controls/Play-pause/Back stayed tiny at the very bottom. That block now shares the space with the keyboard, and Play-pause is noticeably bigger and more prominent.

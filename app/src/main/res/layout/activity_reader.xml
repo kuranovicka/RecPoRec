@@ -246,49 +246,61 @@
         android:background="@color/slider_track"
         android:importantForAccessibility="no" />
 
-    <!-- Uvek vidljiva trojka (Marinin predlog) - Kontrole / Play-pauza / Nazad stoje
-    zajedno, jednim ispod drugog, TESNO (mali razmak) da deluju kao jedna celina - jedine
-    su tri koje ostaju prisutne kad se ostatak kontrola sakrije. Play/pauza namerno ostaje
-    najveća/najistaknutija (nepromenjena). -->
-    <Button
-        android:id="@+id/btnToggleControls"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"
-        android:backgroundTint="@color/btn_combined"
-        android:textColor="@color/button_text"
-        android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
-        android:text="👁 Kontrole" />
-
+    <!-- Uvek vidljiva trojka (Marinin predlog) - Kontrole / Play-pauza / Nazad. Ceo blok
+    sad DELI rastegljivi prostor sa tastaturom iznad (umesto da tastatura pojede sve, a
+    ovaj blok ostane sicusan, zbijen na samom dnu - to je pravilo utisak "gore prazno, dole
+    zbijeno, sve prenisko"). Play-pauza dobija najveci deo (weight 2) unutar bloka, da bude
+    vidno najveca/najistaknutija, kako i treba. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPlayPause" style="@style/KeyButton"
-            android:backgroundTint="@color/btn_play"
-            android:contentDescription="@string/btn_play_pause"
-            android:text="▶ / ⏸" />
+        <Button
+            android:id="@+id/btnToggleControls"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
+            android:text="👁 Kontrole" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPlayPause" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_play"
+                android:contentDescription="@string/btn_play_pause"
+                android:text="▶ / ⏸" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:contentDescription="Nazad. Zatvara dokument, vraća na listu. Dug pritisak: pošalji aplikaciju u pozadinu."
+            android:text="Nazad" />
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnBack"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="10dp"
-        android:textSize="18sp"
-        android:backgroundTint="@color/btn_combined"
-        android:textColor="@color/button_text"
-        android:contentDescription="Nazad. Zatvara dokument, vraća na listu. Dug pritisak: pošalji aplikaciju u pozadinu."
-        android:text="Nazad" />
 
     <!-- Klizač napretka kroz knjigu - namerno POSLEDNJI element na ekranu i namerno
     NEUPADLJIV (manji, prigušena boja) - ne sme da "vuce paznju" niti da lici na dugme koje
