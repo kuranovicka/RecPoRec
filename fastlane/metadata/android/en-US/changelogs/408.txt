@@ -1,0 +1,3 @@
+What's new:
+
+1. Play-pause is now first in the always-visible block (before Show-hide controls and Back) - it sits a bit higher, closer to the middle of the screen. Help screen updated to match.

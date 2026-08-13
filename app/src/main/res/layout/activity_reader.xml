@@ -246,30 +246,16 @@
         android:background="@color/slider_track"
         android:importantForAccessibility="no" />
 
-    <!-- Uvek vidljiva trojka (Marinin predlog) - Kontrole / Play-pauza / Nazad. Ceo blok
-    sad DELI rastegljivi prostor sa tastaturom iznad (umesto da tastatura pojede sve, a
-    ovaj blok ostane sicusan, zbijen na samom dnu - to je pravilo utisak "gore prazno, dole
-    zbijeno, sve prenisko"). Play-pauza dobija najveci deo (weight 2) unutar bloka, da bude
-    vidno najveca/najistaknutija, kako i treba. -->
+    <!-- Uvek vidljiva trojka (Marinin predlog) - Play-pauza / Kontrole / Nazad. Play-pauza je
+    NAMERNO prva u bloku (ne Kontrole) - tako fizicki sedi vise, blize sredini ekrana, kako je
+    Marina trazila. Ceo blok DELI rastegljivi prostor sa tastaturom iznad (umesto da tastatura
+    pojede sve, a ovaj blok ostane sicusan, zbijen na samom dnu). Play-pauza dobija najveci
+    deo (weight 2) unutar bloka, da bude vidno najveca/najistaknutija, kako i treba. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical">
-
-        <Button
-            android:id="@+id/btnToggleControls"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
-            android:textSize="18sp"
-            android:backgroundTint="@color/btn_combined"
-            android:textColor="@color/button_text"
-            android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
-            android:text="👁 Kontrole" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -285,6 +271,20 @@
                 android:contentDescription="@string/btn_play_pause"
                 android:text="▶ / ⏸" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnToggleControls"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:textSize="18sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
+            android:text="👁 Kontrole" />
 
         <Button
             android:id="@+id/btnBack"
