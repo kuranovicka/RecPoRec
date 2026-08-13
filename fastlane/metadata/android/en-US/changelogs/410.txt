@@ -1,0 +1,3 @@
+What's new:
+
+1. The "Timer not active" and "Nothing scheduled" lines now only show when there actually IS an active timer, wake-up, or scheduled reading - otherwise they're hidden, freeing up screen space for the rest of the document view. Nothing is lost - long-pressing Play-pause still announces the full status - the space is just used better.

@@ -1643,23 +1643,32 @@ class ReaderActivity : AppCompatActivity() {
         seek.requestAccessibilityFocusNow()
     }
 
+    /** Ove dve linije zauzimaju ceo red i kad se NIŠTA ne dešava (što je većina vremena
+     * čitanja) - sakrivaju se kad su neaktivne, oslobađajući prostor za ostatak ekrana, i
+     * pojavljuju se čim postoji nešto stvarno da se javi. */
     private fun updateTimerStatusText() {
         val remaining = PlaybackController.timerRemainingSeconds
         if (remaining <= 0) {
             binding.textTimerStatus.text = "Tajmer nije aktivan."
+            binding.textTimerStatus.visibility = android.view.View.GONE
         } else {
             binding.textTimerStatus.text = "Tajmer: preostalo ${formatTime(remaining.toLong())}."
+            binding.textTimerStatus.visibility = android.view.View.VISIBLE
         }
     }
 
     private fun updateRestStatusText() {
         val remaining = PlaybackController.restRemainingSeconds
+        val inactive = !PlaybackController.isRestAlarmRinging() &&
+            !PlaybackController.isScheduledReadingActive() &&
+            remaining <= 0
         binding.textRestStatus.text = when {
             PlaybackController.isRestAlarmRinging() -> "Buđenje: alarm zvoni."
             PlaybackController.isScheduledReadingActive() -> "Predah ističe za ${formatTime(remaining.toLong())}."
             remaining > 0 -> "Do buđenja ostalo još ${formatHoursMinutes(remaining)}."
             else -> "Nije ništa zakazano."
         }
+        binding.textRestStatus.visibility = if (inactive) android.view.View.GONE else android.view.View.VISIBLE
     }
 
     private fun startTicker() {

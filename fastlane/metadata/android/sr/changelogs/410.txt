@@ -1,0 +1,3 @@
+Šta je novo:
+
+1. Redovi "Tajmer nije aktivan." i "Nije ništa zakazano." sad se prikazuju samo kad stvarno IMA tajmera, buđenja ili zakazanog čitanja - u suprotnom se sklanjaju, oslobađajući prostor na ekranu za ostatak dokumenta. Ovo je pravi kompromis: ništa se ne gubi (dug pritisak na Pusti-pauziraj i dalje javlja pun status), samo se prostor koristi bolje.
