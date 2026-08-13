@@ -1,0 +1,5 @@
+Šta je novo:
+
+1. Prikaži-sakrij kontrole, Pusti-pauziraj i Nazad sad stoje zajedno, jedno ispod drugog na dnu ekrana - iste tri koje su i do sad ostajale vidljive kad se ostala dugmad sakriju, sad su i fizički grupisane. Play-pauza ostaje najveće dugme, nepromenjeno.
+2. Klizač napretka kroz knjigu sad je sam u svom redu, preko celog ekrana.
+3. Pomoć ažurirana da prati novi raspored.

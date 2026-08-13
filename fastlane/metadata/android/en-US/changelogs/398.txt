@@ -1,0 +1,5 @@
+What's new:
+
+1. Show-hide controls, Play-pause, and Back now sit together, one below the other at the bottom of the screen - the same three that already stayed visible when other buttons are hidden are now also grouped physically. Play-pause remains the biggest button, unchanged.
+2. The book progress slider is now alone in its own row, full width.
+3. Help screen updated to match the new layout.

@@ -207,29 +207,8 @@
             android:background="@color/slider_track"
             android:importantForAccessibility="no" />
 
-        <!-- Red: Pusti/Pauziraj -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_play"
-                android:contentDescription="@string/btn_play_pause"
-                android:text="▶ / ⏸" />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/dividerRow4"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:background="@color/slider_track"
-            android:importantForAccessibility="no" />
-
-        <!-- Red: korak nazad / korak napred -->
+        <!-- Red: korak nazad / korak napred - Play/pauza premesten odavde dole, da stoji
+             zajedno sa Kontrole i Nazad (uvek vidljiva trojka), na Marinin zahtev. -->
         <LinearLayout
             android:id="@+id/layoutRow5"
             android:layout_width="match_parent"
@@ -258,47 +237,58 @@
 
     </LinearLayout>
 
-    <!-- Klizač napretka kroz knjigu - uvecan, i pored njega dugme za sakrivanje/prikazivanje
-    kontrola (predlog korisnika - "cist" ekran za citanje ocima, samo Kontrole i Play/Pauza
-    ostaju vidljivi kad se kontrole sakriju). -->
-    <LinearLayout
+    <!-- Klizač napretka kroz knjigu - sam u svom redu, pun širine. -->
+    <SeekBar
+        android:id="@+id/seekProgress"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:layout_height="56dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp">
+        android:contentDescription="@string/slider_position"
+        android:max="100"
+        android:progressTint="@color/btn_voice"
+        android:thumbTint="@color/btn_voice" />
 
-        <SeekBar
-            android:id="@+id/seekProgress"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="56dp"
-            android:contentDescription="@string/slider_position"
-            android:max="100"
-            android:progressTint="@color/btn_voice"
-            android:thumbTint="@color/btn_voice" />
+    <View
+        android:id="@+id/dividerRow4"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/slider_track"
+        android:importantForAccessibility="no" />
 
-        <Button
-            android:id="@+id/btnToggleControls"
-            android:layout_width="wrap_content"
-            android:layout_height="56dp"
-            android:layout_marginStart="10dp"
-            android:minWidth="0dp"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:textSize="14sp"
-            android:backgroundTint="@color/btn_combined"
-            android:textColor="@color/button_text"
-            android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
-            android:text="👁 Kontrole" />
+    <!-- Uvek vidljiva trojka (Marinin predlog) - Kontrole / Play-pauza / Nazad stoje
+    zajedno, jednim ispod drugog, jer su jedine tri koje ostaju prisutne kad se ostatak
+    kontrola sakrije. Play/pauza namerno ostaje najveća/najistaknutija (nepromenjena). -->
+    <Button
+        android:id="@+id/btnToggleControls"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="18sp"
+        android:backgroundTint="@color/btn_combined"
+        android:textColor="@color/button_text"
+        android:contentDescription="Prikaži ili sakrij kontrole. Dug pritisak: Kratak predah, pauzira čitanje na 15 minuta."
+        android:text="👁 Kontrole" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
+            android:backgroundTint="@color/btn_play"
+            android:contentDescription="@string/btn_play_pause"
+            android:text="▶ / ⏸" />
     </LinearLayout>
 
-    <!-- Namerno IZVAN gornje tastature od 20 dugmica (koja je pazljivo podesena, 5 redova x
-    weight=1) - dodato ovde kao poseban, fiksni red da se ne dira postojeci raspored/proporcije
-    tih 20 dugmica. Sakriva se zajedno sa ostalim kontrolama. -->
     <Button
         android:id="@+id/btnBack"
         android:layout_width="match_parent"

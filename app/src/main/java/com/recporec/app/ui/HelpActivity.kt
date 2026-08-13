@@ -73,8 +73,8 @@ class HelpActivity : AppCompatActivity() {
         Sada idemo u sam dokument.
         Gore desno je opet dugme Opcije, isto kao na prvom ekranu.
         Tako ne moraš izaći iz knjige da bi promenio-la glas ili podešavanja.
-        Tastatura ima četrnaest dugmadi, raspoređenih u pet redova.
-        Pored toga ima i dve dodatne kontrole: Nazad i Prikaži-sakrij kontrole.
+        Tastatura ima trinaest dugmadi, raspoređenih u četiri reda.
+        Pored toga ima i tri dodatne kontrole koje ostaju uvek prisutne, čak i kad se ostala dugmad sakriju: Prikaži-sakrij kontrole, Pusti-pauziraj, i Nazad.
         U prvom redu odozgo, prvo dugme je Oznake.
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
@@ -111,23 +111,23 @@ class HelpActivity : AppCompatActivity() {
         Upišeš tačno vreme, na primer 5:20.
         Čitanje tada tiho krene, bez alarma i bez punog ekrana.
         Ako pustiš knjigu ranije, zakazano čitanje se prekida.
-        U četvrtom redu je samo jedno dugme koje pokreće i pauzira čitanje.
-        Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
-        U petom redu, prvo dugme ide na prethodni element: stranicu, minut, oznaku ili rečenice, zavisno od Navigacije.
+        U četvrtom redu, prvo dugme ide na prethodni element: stranicu, minut, oznaku ili rečenice, zavisno od Navigacije.
         Dug pritisak ponavlja trenutnu stranicu od početka, ili prethodne rečenice ako je Navigacija podešena na rečenice.
         Drugo dugme je Podseti me.
         Vraća čitanje unazad za broj minuta koji izabereš na klizaču, a dug pritisak ponavlja poslednje korišćeno vreme.
         Treće dugme ide na sledeći element.
         Dug pritisak poništava tvoju poslednju radnju, koja god da je bila.
-        Ispod tastature je veći klizač za lakši dodir.
+        Ispod tastature je veći klizač za lakši dodir, preko celog ekrana.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
-        Desno od klizača je dugme Prikaži-sakrij kontrole.
+        Ispod klizača su, jedno ispod drugog, tri dugmeta koja ostaju prisutna u svim slučajevima, čak i kad se ostala dugmad sakriju: Prikaži-sakrij kontrole, Pusti-pauziraj, i Nazad.
+        Prvo je Prikaži-sakrij kontrole.
         Sakriva skoro svu dugmad i statusne redove.
-        Samo play pauza, dugme nazad i kontrole prikaži-sakri, ostaju prisutne u svim slučajevima.
         Dug pritisak pauzira čitanje na 15 minuta.
         Minut pre kraja pauze ćeš čuti kratak zvučni signal.
         Ako ponovo dugo pritisneš ovo dugme, predah će trajati još 15 minuta.
-        Ispod klizača je dugme Nazad.
+        Drugo je dugme koje pokreće i pauzira čitanje.
+        Dug pritisak kaže naglas trenutni status: stranicu, poglavlje, proteklo i preostalo vreme, info o tajmeru, preostalo vreme do buđenja ili do zakazanog čitanja.
+        Treće je dugme Nazad.
         Zatvara ovaj dokument i vraća te na listu dokumenata, bez prekidanja čitanja ako je aktivno u pozadini.
         Dug pritisak šalje aplikaciju u pozadinu, kao dugme Home na telefonu.
         Tada dokument ostaje otvoren.
