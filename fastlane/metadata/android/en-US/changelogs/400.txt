@@ -1,0 +1,4 @@
+What's new:
+
+1. Show controls / Play-pause / Back now sit closer together (tighter spacing), reading as one clear unit.
+2. The progress slider has visible spacing above it, so it clearly stands out as the last, separate element - not blended with the buttons above.

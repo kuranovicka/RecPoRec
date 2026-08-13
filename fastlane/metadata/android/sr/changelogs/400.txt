@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Kontrole / Play-pauza / Nazad sad stoje tešnje jedno uz drugo (manji razmak), da deluju kao jedna jasna celina.
+2. Klizač napretka ima vidljiv razmak iznad sebe, da se jasno izdvoji kao poslednji, poseban element - ne stopljen sa dugmadima iznad.
