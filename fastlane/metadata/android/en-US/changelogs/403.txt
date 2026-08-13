@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed keyboard button text clipping in the reader (e.g. "Odaberi sve" used to be cut to just "ODA"). Text now wraps to two lines when too long, instead of being clipped.
