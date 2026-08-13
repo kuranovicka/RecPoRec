@@ -1,0 +1,4 @@
+What's new:
+
+1. The Wake me up button moved from the first to the third keyboard row, between Auto-scroll and Schedule reading - all three are "do something at a set time", so they're now grouped together. Rows are also more evenly balanced by button count.
+2. Help screen updated to match the new layout.

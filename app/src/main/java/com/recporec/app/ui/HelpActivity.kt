@@ -79,19 +79,8 @@ class HelpActivity : AppCompatActivity() {
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
         Vodi na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
-        Treće dugme je Probudi me u tačno vreme.
-        Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
-        Kad dođe vreme za buđenje, alarm zvoni jedan minut.
-        Na zaključanom ekranu se tada pojave dva dugmeta.
-        Knjiga se nastavlja samo ako aktiviraš dugme Prekini buđenje.
-        Ako ne reaguješ, ili aktiviraš dugme Spavaj još malo, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
-        Ako u međuvremenu pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
-        Dug pritisak isključuje buđenje.
-        Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
-        Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
-        Ponovno pokretanje pamti samo gde nastavljaš knjigu.
-        Četvrto dugme je Odaberi sve, a dug pritisak kopira odabrani tekst u privremenu memoriju.
-        Peto dugme je Pretraga.
+        Treće dugme je Odaberi sve, a dug pritisak kopira odabrani tekst u privremenu memoriju.
+        Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
         U drugom redu, prvo dugme je Prethodno poglavlje.
         Vodi na početak prethodnog poglavlja, a dug pritisak ponavlja trenutno poglavlje od početka.
@@ -107,7 +96,18 @@ class HelpActivity : AppCompatActivity() {
         Tada kreće automatsko listanje.
         Čitač ekrana te obaveštava gde se trenutno nalaziš.
         Dugmetom play-pauza zaustavljaš listanje i čitaš od mesta na kome je listanje zaustavljeno.
-        Drugo dugme je Zakaži čitanje.
+        Drugo dugme je Probudi me u tačno vreme.
+        Upišeš tačno vreme, na primer 5:20, i knjiga te budi u to vreme.
+        Kad dođe vreme za buđenje, alarm zvoni jedan minut.
+        Na zaključanom ekranu se tada pojave dva dugmeta.
+        Knjiga se nastavlja samo ako aktiviraš dugme Prekini buđenje.
+        Ako ne reaguješ, ili aktiviraš dugme Spavaj još malo, alarm se ponovo oglašava posle deset minuta tišine, najviše pet puta.
+        Ako u međuvremenu pritisneš dugme za nastavak, buđenje se odmah završava i knjiga kreće.
+        Dug pritisak isključuje buđenje.
+        Buđenje i zakazano čitanje su aktivni samo ako aplikacija radi u pozadini.
+        Ako pritisneš dugme Izlaz, ove dve funkcije neće raditi.
+        Ponovno pokretanje pamti samo gde nastavljaš knjigu.
+        Treće dugme je Zakaži čitanje.
         Upišeš tačno vreme, na primer 5:20.
         Čitanje tada tiho krene, bez alarma i bez punog ekrana.
         Ako pustiš knjigu ranije, zakazano čitanje se prekida.

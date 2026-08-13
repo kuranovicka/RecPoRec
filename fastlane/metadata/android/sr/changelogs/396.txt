@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Dugme Probudi me premešteno iz prvog u treći red tastature, između Automatski listaj i Zakaži čitanje - sve tri su "uradi nešto u zakazano vreme", pa su sad grupisane zajedno. Redovi su usput i ujednačeniji po broju dugmadi.
+2. Pomoć ažurirana da prati novi raspored.

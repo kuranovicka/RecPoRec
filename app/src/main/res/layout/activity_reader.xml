@@ -112,12 +112,6 @@
                 android:textSize="18sp"
                 android:text="➜ Idi na" />
 
-            <Button android:id="@+id/btnWakeUp" style="@style/KeyButton"
-                android:backgroundTint="@color/btn_wakeup"
-                android:contentDescription="Probudi me u tačno vreme. Dug pritisak: isključi buđenje."
-                android:textSize="18sp"
-                android:text="⏰ Probudi" />
-
             <Button android:id="@+id/btnSelectAll" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
                 android:contentDescription="Odaberi sve. Dug pritisak: kopiraj odabrano."
@@ -177,8 +171,9 @@
             android:background="@color/slider_track"
             android:importantForAccessibility="no" />
 
-        <!-- Red: Automatski listaj dokument / Zakaži čitanje - promovisano iz dugih pritisaka
-             u svoja, obicna dugmad. -->
+        <!-- Red: Automatski listaj dokument / Probudi me / Zakaži čitanje - grupisano po
+             logici (sve tri su "uradi nešto samo u zakazano vreme/automatski"), Probudi
+             premešten ovde iz Reda 1 na Marinin zahtev. -->
         <LinearLayout
             android:id="@+id/layoutRow3"
             android:layout_width="match_parent"
@@ -190,6 +185,12 @@
                 android:backgroundTint="@color/btn_combined"
                 android:contentDescription="Automatski listaj dokument."
                 android:text="Automatski listaj" />
+
+            <Button android:id="@+id/btnWakeUp" style="@style/KeyButton"
+                android:backgroundTint="@color/btn_wakeup"
+                android:contentDescription="Probudi me u tačno vreme. Dug pritisak: isključi buđenje."
+                android:textSize="18sp"
+                android:text="⏰ Probudi" />
 
             <Button android:id="@+id/btnScheduleReading" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_voice"
