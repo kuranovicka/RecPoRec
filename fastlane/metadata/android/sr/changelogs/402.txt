@@ -1,0 +1,4 @@
+Šta je novo:
+
+1. Skraćen tekst u Pomoći oko klizača - uklonjena suvišna rečenica.
+2. Osvežene slike u opisu aplikacije, uključujući potvrdu da "sakrij kontrole" prikaz sad ostaje potpuno čist.

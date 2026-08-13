@@ -1,0 +1,4 @@
+What's new:
+
+1. Trimmed the Help text about the slider - removed a redundant sentence.
+2. Refreshed the screenshots in the app listing, including confirmation that the "hide controls" view now stays completely clean.

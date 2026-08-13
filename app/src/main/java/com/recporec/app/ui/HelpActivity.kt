@@ -131,7 +131,6 @@ class HelpActivity : AppCompatActivity() {
         Tada dokument ostaje otvoren.
         Na samom kraju, posle Nazad, je veći klizač za lakši dodir, preko celog ekrana.
         Pokazuje gde si u knjizi, i možeš ga prstom prevući na drugo mesto.
-        Namerno je poslednji, posle Nazad, da se do njega ne dođe usput dok žuriš ka Kontrole, Pusti-pauziraj ili Nazad.
         Pri vrhu ekrana piše broj stranica, proteklo i preostalo vreme, informacije o buđenju i zakazanom čitanju.
         Dug pritisak na prečicu Reč po reč na početnom ekranu, pored uobičajenih sistemskih mogućnosti, nudi ti nastavak i pauziranje čitanja.
         Pauza-nastavak direktno otvara poslednji dokument i omogućava ti da ga pustiš ili pauziraš.
