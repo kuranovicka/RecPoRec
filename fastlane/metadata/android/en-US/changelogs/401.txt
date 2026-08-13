@@ -1,0 +1,3 @@
+What's new:
+
+1. The book progress slider is now smaller and visually understated (muted gray instead of blue) - it stays as the last element at the bottom of the screen, but no longer draws attention like a button.
