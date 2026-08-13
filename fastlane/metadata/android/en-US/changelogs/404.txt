@@ -1,0 +1,3 @@
+What's new:
+
+1. Additional fix for keyboard button text clipping in the reader - the previous fix solved most of it, but the Material button was still silently blocking two-line wrapping for a couple of the longest labels (e.g. "Select all", "Chapter"). Now using a plain button that respects the settings.

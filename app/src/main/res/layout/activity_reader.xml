@@ -100,25 +100,25 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnBookmarks" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnBookmarks" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Oznake - dodaj, ukloni ili ukloni sve oznake u ovom dokumentu. Dug pritisak: brzo dodaj oznaku."
                 android:textSize="18sp"
                 android:text="🔖 Oznake" />
 
-            <Button android:id="@+id/btnGoTo" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnGoTo" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Idi na stranicu, minut ili oznaku. Dug pritisak: idi na početak dokumenta."
                 android:textSize="18sp"
                 android:text="➜ Idi na" />
 
-            <Button android:id="@+id/btnSelectAll" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnSelectAll" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
                 android:contentDescription="Odaberi sve. Dug pritisak: kopiraj odabrano."
                 android:textSize="18sp"
                 android:text="Odaberi sve" />
 
-            <Button android:id="@+id/btnSearchText" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnSearchText" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_goto_page"
                 android:contentDescription="Pretraži tekst dokumenta. Dug pritisak: ponovi poslednju pretragu."
                 android:textSize="18sp"
@@ -145,18 +145,18 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnPrevChapter" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPrevChapter" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_chapter"
                 android:contentDescription="@string/btn_prev_chapter"
                 android:textSize="18sp"
                 android:text="⏮ Poglavlje" />
 
-            <Button android:id="@+id/btnAutoScroll" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnAutoScroll" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_combined"
                 android:contentDescription="Automatski listaj dokument."
                 android:text="Automatski listaj" />
 
-            <Button android:id="@+id/btnNextChapter" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnNextChapter" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_chapter"
                 android:contentDescription="@string/btn_next_chapter"
                 android:textSize="18sp"
@@ -181,18 +181,18 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnTimer" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnTimer" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_timer"
                 android:contentDescription="@string/btn_timer"
                 android:text="⏱ Tajmer" />
 
-            <Button android:id="@+id/btnWakeUp" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnWakeUp" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_wakeup"
                 android:contentDescription="Probudi me u tačno vreme. Dug pritisak: isključi buđenje."
                 android:textSize="18sp"
                 android:text="⏰ Probudi" />
 
-            <Button android:id="@+id/btnScheduleReading" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnScheduleReading" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_voice"
                 android:contentDescription="Zakaži čitanje."
                 android:text="Zakaži čitanje" />
@@ -216,19 +216,19 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnStepBack" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnStepBack" style="@style/KeyButton"
                 android:layout_weight="2"
                 android:backgroundTint="@color/btn_page_nav"
                 android:contentDescription="@string/slider_back"
                 android:text="◀ 5%" />
 
-            <Button android:id="@+id/btnRemindMe" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnRemindMe" style="@style/KeyButton"
                 android:backgroundTint="@color/btn_timer"
                 android:contentDescription="Podsetnik, vraća dokument unazad. Dug pritisak: ponovi poslednji podsetnik."
                 android:textSize="18sp"
                 android:text="⏰ Podseti" />
 
-            <Button android:id="@+id/btnStepForward" style="@style/KeyButton"
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnStepForward" style="@style/KeyButton"
                 android:layout_weight="2"
                 android:backgroundTint="@color/btn_page_nav"
                 android:contentDescription="@string/slider_forward"
@@ -271,7 +271,7 @@
         android:layout_marginBottom="4dp"
         android:orientation="horizontal">
 
-        <Button android:id="@+id/btnPlayPause" style="@style/KeyButton"
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnPlayPause" style="@style/KeyButton"
             android:backgroundTint="@color/btn_play"
             android:contentDescription="@string/btn_play_pause"
             android:text="▶ / ⏸" />
