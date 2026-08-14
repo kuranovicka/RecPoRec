@@ -1,0 +1,3 @@
+What's new:
+
+1. Refreshed the screenshots in the app listing - confirming correct text on the "Controls" button and a stable reader layout (fixed keyboard, Play-pause centered, Controls/Back side by side, slider at the bottom).
