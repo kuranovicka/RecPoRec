@@ -1,0 +1,3 @@
+What's new:
+
+1. Added a screenshot to the app listing - the reader's Options menu, with "Settings for this document" as the first item.
