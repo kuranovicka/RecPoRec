@@ -455,6 +455,7 @@ class ReaderActivity : AppCompatActivity() {
                     finalEntityWithTimestamp,
                     resolveCombinedVoiceConfig(
                         finalEntityWithTimestamp.id,
+                        finalEntityWithTimestamp.voiceName,
                         finalEntityWithTimestamp.voiceName ?: settings.globalVoiceName,
                         finalEntityWithTimestamp.voiceEngine ?: settings.globalVoiceEngine
                     )
@@ -478,6 +479,7 @@ class ReaderActivity : AppCompatActivity() {
      * odvojenu, unapred upaljenu vezu po motoru. */
     private suspend fun resolveCombinedVoiceConfig(
         docId: Long,
+        docOwnVoiceName: String?,
         regularVoiceName: String?,
         regularEngine: String?
     ): CombinedVoiceConfig? {
@@ -507,10 +509,16 @@ class ReaderActivity : AppCompatActivity() {
         // ovde nikad nisu ni gledali).
         // Ako je dokument SVESNO diran (postoji red u combined_voice_settings, cak i ako je
         // trenutno prazan) - ne prelazi na opste, postuje se ono sto dokument kaze (moze biti
-        // "nema kombinacije za ovaj dokument", namerno). Samo NIKAD-DIRAN dokument nasledjuje
-        // opste - ovo resava bag "uklonim kombinaciju kod dokumenta, a pusti onu iz opstih".
+        // "nema kombinacije za ovaj dokument", namerno).
         val docTouched = dao.getSettings(docId) != null
-        return if (docTouched) resolveForScope(docId) else resolveForScope(0L)
+        return when {
+            docTouched -> resolveForScope(docId)
+            // Dokument ima SVOJ glas ali NEMA svoju kombinaciju - ne sme da se "razblazi"
+            // opstom kombinacijom (koja bi ga naizmenicno smenjivala sa opstim glasom). Samo
+            // POTPUNO nedirani dokument (ni glas ni kombinacija) nasledjuje bas sve od opsteg.
+            docOwnVoiceName != null -> null
+            else -> resolveForScope(0L)
+        }
     }
 
     /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
@@ -1848,12 +1856,18 @@ class ReaderActivity : AppCompatActivity() {
             val tts = PlaybackController.ttsManager ?: return@launch
             val combined = resolveCombinedVoiceConfig(
                 documentId,
+                doc?.voiceName,
                 doc?.voiceName ?: settings.globalVoiceName,
                 doc?.voiceEngine ?: settings.globalVoiceEngine
             )
             if (combined != null) {
                 tts.setCombinedVoices(combined.voices, combined.sentencesPerVoice)
             } else {
+                // Postavi eksplicitno redovan glas PRE gasenja kombinacije (isti redosled kao
+                // pri prvom otvaranju dokumenta u PlaybackController) - sigurnosna mreza uz
+                // TtsManager-ovo unutrasnje pracenje regularVoiceName.
+                val voiceName = doc?.voiceName ?: settings.globalVoiceName
+                if (voiceName != null) tts.setVoiceByName(voiceName)
                 tts.setCombinedVoices(emptyList(), 1)
             }
             // Isto - ako je Brzina/Visina/Jačina promenjena u Opštim podešavanjima dok je ovaj

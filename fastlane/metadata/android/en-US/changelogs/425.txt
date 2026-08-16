@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a deeper cause of the document-voice bugs: a document with its own voice (e.g. Ivana) but no combo of its own was silently inheriting the GENERAL combo and getting alternated with the general voice (e.g. Stefan) during reading - which made it seem like the general voice "kept coming back". A document with its own voice now stays clean and isn't mixed into someone else's rotation - only a fully untouched document inherits the general combo.

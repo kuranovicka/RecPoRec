@@ -765,7 +765,7 @@ object PlaybackController {
         val tts = ttsManager ?: return
 
         val combined = resolveCombinedVoiceConfigInBackground(
-            db, finalEntity.id,
+            db, finalEntity.id, finalEntity.voiceName,
             finalEntity.voiceName ?: settings.globalVoiceName,
             finalEntity.voiceEngine ?: settings.globalVoiceEngine
         )
@@ -826,7 +826,7 @@ object PlaybackController {
     /** Isto kao ReaderActivity.resolveCombinedVoiceConfig, samo bez zavisnosti od Activity-ja -
      * kombinovani glasovi za dokument imaju prednost nad opštim. */
     private suspend fun resolveCombinedVoiceConfigInBackground(
-        db: AppDatabase, docId: Long, regularVoiceName: String?, regularEngine: String?
+        db: AppDatabase, docId: Long, docOwnVoiceName: String?, regularVoiceName: String?, regularEngine: String?
     ): BgCombinedVoiceConfig? {
         val dao = db.combinedVoiceDao()
         suspend fun resolveForScope(scopeId: Long): BgCombinedVoiceConfig? {
@@ -843,10 +843,18 @@ object PlaybackController {
         }
         // Ako je dokument SVESNO diran (postoji red u combined_voice_settings, cak i ako je
         // trenutno prazan) - ne prelazi na opste, postuje se ono sto dokument kaze (moze biti
-        // "nema kombinacije za ovaj dokument", namerno). Samo NIKAD-DIRAN dokument nasledjuje
-        // opste - ovo resava bag "uklonim kombinaciju kod dokumenta, a pusti onu iz opstih".
+        // "nema kombinacije za ovaj dokument", namerno).
         val docTouched = dao.getSettings(docId) != null
-        return if (docTouched) resolveForScope(docId) else resolveForScope(0L)
+        return when {
+            docTouched -> resolveForScope(docId)
+            // Dokument ima SVOJ glas (npr. Ivana) ali NEMA svoju kombinaciju - ne sme da se
+            // "razblazi" opstom kombinacijom (koja bi ga naizmenicno smenjivala sa opstim
+            // glasom, npr. Stefanom). Njen izbor jednog glasa za ovaj dokument mora ostati
+            // ciste, ne postati clan tudje rotacije. Samo POTPUNO nedirani dokument (ni glas
+            // ni kombinacija) nasledjuje bas sve od opsteg, ukljucujuci kombinaciju.
+            docOwnVoiceName != null -> null
+            else -> resolveForScope(0L)
+        }
     }
 
     private fun startTickerIfNeeded() {
