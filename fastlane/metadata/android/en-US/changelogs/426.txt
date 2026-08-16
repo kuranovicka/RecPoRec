@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a real inconsistency in combined-voice inheritance: a document with its own regular voice but no combo of its own previously did NOT inherit the general combo at all (an intentional safeguard that turned out to be wrong). It now inherits consistently - the exact same rule as speed/volume/pitch. When inherited, the general regular voice is used for merging (not the document's), so the inherited combo faithfully matches the general one instead of being a mix.

@@ -455,7 +455,6 @@ class ReaderActivity : AppCompatActivity() {
                     finalEntityWithTimestamp,
                     resolveCombinedVoiceConfig(
                         finalEntityWithTimestamp.id,
-                        finalEntityWithTimestamp.voiceName,
                         finalEntityWithTimestamp.voiceName ?: settings.globalVoiceName,
                         finalEntityWithTimestamp.voiceEngine ?: settings.globalVoiceEngine
                     )
@@ -479,21 +478,20 @@ class ReaderActivity : AppCompatActivity() {
      * odvojenu, unapred upaljenu vezu po motoru. */
     private suspend fun resolveCombinedVoiceConfig(
         docId: Long,
-        docOwnVoiceName: String?,
-        regularVoiceName: String?,
-        regularEngine: String?
+        docRegularVoiceName: String?,
+        docRegularEngine: String?
     ): CombinedVoiceConfig? {
         val dao = db.combinedVoiceDao()
 
-        suspend fun resolveForScope(scopeId: Long): CombinedVoiceConfig? {
+        suspend fun resolveForScope(scopeId: Long, mergeVoiceName: String?, mergeEngine: String?): CombinedVoiceConfig? {
             val explicit = dao.getVoices(scopeId)
             if (explicit.isEmpty()) return null
 
             val refs = mutableListOf<com.recporec.app.tts.CombinedVoiceRef>()
-            if (regularVoiceName != null && regularEngine != null &&
-                explicit.none { it.voiceName == regularVoiceName }
+            if (mergeVoiceName != null && mergeEngine != null &&
+                explicit.none { it.voiceName == mergeVoiceName }
             ) {
-                refs.add(com.recporec.app.tts.CombinedVoiceRef(regularEngine, regularVoiceName))
+                refs.add(com.recporec.app.tts.CombinedVoiceRef(mergeEngine, mergeVoiceName))
             }
             refs.addAll(explicit.map { com.recporec.app.tts.CombinedVoiceRef(it.voiceEngine, it.voiceName) })
             if (refs.size < 2) return null
@@ -509,15 +507,15 @@ class ReaderActivity : AppCompatActivity() {
         // ovde nikad nisu ni gledali).
         // Ako je dokument SVESNO diran (postoji red u combined_voice_settings, cak i ako je
         // trenutno prazan) - ne prelazi na opste, postuje se ono sto dokument kaze (moze biti
-        // "nema kombinacije za ovaj dokument", namerno).
+        // "nema kombinacije za ovaj dokument", namerno). Samo NIKAD-DIRAN dokument nasledjuje
+        // opste - PRAVO nasledjivanje, koristi OPSTI redovni glas za spajanje (ne dokumentov),
+        // da nasledjena kombinacija bude verna opstoj, ne mesavina dokumentovog izbora i tudje
+        // rotacije.
         val docTouched = dao.getSettings(docId) != null
-        return when {
-            docTouched -> resolveForScope(docId)
-            // Dokument ima SVOJ glas ali NEMA svoju kombinaciju - ne sme da se "razblazi"
-            // opstom kombinacijom (koja bi ga naizmenicno smenjivala sa opstim glasom). Samo
-            // POTPUNO nedirani dokument (ni glas ni kombinacija) nasledjuje bas sve od opsteg.
-            docOwnVoiceName != null -> null
-            else -> resolveForScope(0L)
+        return if (docTouched) {
+            resolveForScope(docId, docRegularVoiceName, docRegularEngine)
+        } else {
+            resolveForScope(0L, settings.globalVoiceName, settings.globalVoiceEngine)
         }
     }
 
@@ -1856,7 +1854,6 @@ class ReaderActivity : AppCompatActivity() {
             val tts = PlaybackController.ttsManager ?: return@launch
             val combined = resolveCombinedVoiceConfig(
                 documentId,
-                doc?.voiceName,
                 doc?.voiceName ?: settings.globalVoiceName,
                 doc?.voiceEngine ?: settings.globalVoiceEngine
             )

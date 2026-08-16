@@ -765,7 +765,7 @@ object PlaybackController {
         val tts = ttsManager ?: return
 
         val combined = resolveCombinedVoiceConfigInBackground(
-            db, finalEntity.id, finalEntity.voiceName,
+            db, finalEntity.id,
             finalEntity.voiceName ?: settings.globalVoiceName,
             finalEntity.voiceEngine ?: settings.globalVoiceEngine
         )
@@ -826,15 +826,15 @@ object PlaybackController {
     /** Isto kao ReaderActivity.resolveCombinedVoiceConfig, samo bez zavisnosti od Activity-ja -
      * kombinovani glasovi za dokument imaju prednost nad opštim. */
     private suspend fun resolveCombinedVoiceConfigInBackground(
-        db: AppDatabase, docId: Long, docOwnVoiceName: String?, regularVoiceName: String?, regularEngine: String?
+        db: AppDatabase, docId: Long, docRegularVoiceName: String?, docRegularEngine: String?
     ): BgCombinedVoiceConfig? {
         val dao = db.combinedVoiceDao()
-        suspend fun resolveForScope(scopeId: Long): BgCombinedVoiceConfig? {
+        suspend fun resolveForScope(scopeId: Long, mergeVoiceName: String?, mergeEngine: String?): BgCombinedVoiceConfig? {
             val explicit = dao.getVoices(scopeId)
             if (explicit.isEmpty()) return null
             val refs = mutableListOf<com.recporec.app.tts.CombinedVoiceRef>()
-            if (regularVoiceName != null && regularEngine != null && explicit.none { it.voiceName == regularVoiceName }) {
-                refs.add(com.recporec.app.tts.CombinedVoiceRef(regularEngine, regularVoiceName))
+            if (mergeVoiceName != null && mergeEngine != null && explicit.none { it.voiceName == mergeVoiceName }) {
+                refs.add(com.recporec.app.tts.CombinedVoiceRef(mergeEngine, mergeVoiceName))
             }
             refs.addAll(explicit.map { com.recporec.app.tts.CombinedVoiceRef(it.voiceEngine, it.voiceName) })
             if (refs.size < 2) return null
@@ -843,17 +843,14 @@ object PlaybackController {
         }
         // Ako je dokument SVESNO diran (postoji red u combined_voice_settings, cak i ako je
         // trenutno prazan) - ne prelazi na opste, postuje se ono sto dokument kaze (moze biti
-        // "nema kombinacije za ovaj dokument", namerno).
+        // "nema kombinacije za ovaj dokument", namerno). Samo NIKAD-DIRAN dokument nasledjuje
+        // opste - PRAVO nasledjivanje: koristi se OPSTI redovni glas za spajanje (ne dokumentov
+        // eventualno drugaciji glas), da nasledjena kombinacija bude verna opstoj, ne mesavina.
         val docTouched = dao.getSettings(docId) != null
-        return when {
-            docTouched -> resolveForScope(docId)
-            // Dokument ima SVOJ glas (npr. Ivana) ali NEMA svoju kombinaciju - ne sme da se
-            // "razblazi" opstom kombinacijom (koja bi ga naizmenicno smenjivala sa opstim
-            // glasom, npr. Stefanom). Njen izbor jednog glasa za ovaj dokument mora ostati
-            // ciste, ne postati clan tudje rotacije. Samo POTPUNO nedirani dokument (ni glas
-            // ni kombinacija) nasledjuje bas sve od opsteg, ukljucujuci kombinaciju.
-            docOwnVoiceName != null -> null
-            else -> resolveForScope(0L)
+        return if (docTouched) {
+            resolveForScope(docId, docRegularVoiceName, docRegularEngine)
+        } else {
+            resolveForScope(0L, settings.globalVoiceName, settings.globalVoiceEngine)
         }
     }
 
