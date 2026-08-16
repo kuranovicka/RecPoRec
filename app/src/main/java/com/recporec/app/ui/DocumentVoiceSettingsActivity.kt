@@ -116,13 +116,21 @@ class DocumentVoiceSettingsActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener { finish() }
     }
 
-    /** Menja SAMO ovaj dokument u bazi (ne AppSettings) i osvežava lokalnu kopiju + prikaz. */
+    /** Menja SAMO ovaj dokument u bazi (ne AppSettings) i osvežava lokalnu kopiju + prikaz.
+     * VAŽNO: ako je ovo TRENUTNO aktivan dokument u PlaybackController (npr. čita se u
+     * pozadini), mora se osvežiti i ta KEŠIRANA kopija (PlaybackController.currentDocument) -
+     * inače bi sledeće periodično čuvanje pozicije (persistCurrentDocument, koje upisuje
+     * CEO entitet iz te kešrane kopije) tiho vratilo ovu promenu nazad na staro, i izgledalo
+     * bi kao da se ništa ne pamti. */
     private fun updateDocument(change: (DocumentEntity) -> DocumentEntity) {
         val current = document ?: return
         val updated = change(current)
         document = updated
         lifecycleScope.launch {
             db.documentDao().update(updated)
+            if (com.recporec.app.tts.PlaybackController.currentDocument?.id == documentId) {
+                com.recporec.app.tts.PlaybackController.currentDocument = updated
+            }
             refreshStatusTexts()
         }
     }
@@ -145,6 +153,9 @@ class DocumentVoiceSettingsActivity : AppCompatActivity() {
                     document = reset
                     db.documentDao().update(reset)
                     db.combinedVoiceDao().clearScope(documentId)
+                    if (com.recporec.app.tts.PlaybackController.currentDocument?.id == documentId) {
+                        com.recporec.app.tts.PlaybackController.currentDocument = reset
+                    }
                     setupControls()
                     refreshStatusTexts()
                     android.widget.Toast.makeText(

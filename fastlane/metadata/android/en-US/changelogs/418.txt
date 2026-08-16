@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a bug: per-document settings (voice, language, speed, volume, pitch) were being "forgotten" - the background position-saving used a stale cached copy of the document and silently reverted the change. That copy now refreshes immediately.
