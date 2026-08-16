@@ -500,7 +500,12 @@ class ReaderActivity : AppCompatActivity() {
             return CombinedVoiceConfig(refs, count)
         }
 
-        return resolveForScope(0L)
+        // Dokument ima prednost ako ima SVOJE kombinovane glasove; inace se koristi opsti
+        // (scope 0L). Ranije je ovo UVEK gledalo samo opste (resolveForScope(0L)), ignorisuci
+        // docId potpuno - zato je delovalo da se dokument-specificni kombinovani glasovi
+        // "zaglave" i ne mogu da se primene/uklone (menjali su se u bazi ispravno, ali se
+        // ovde nikad nisu ni gledali).
+        return resolveForScope(docId) ?: resolveForScope(0L)
     }
 
     /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
@@ -783,15 +788,19 @@ class ReaderActivity : AppCompatActivity() {
      * postavljena (vrednost > 0), inače opšta (globalna). Isti obrazac kao kod glasa/jezika -
      * bez ovoga, promena Brzine u Opštim podešavanjima ne bi uticala ni na jedan dokument
      * koji je ikad otvoren (jer bi već imao "snimljenu" staru vrednost od trenutka dodavanja). */
-    /** UVEK opšta (globalna) vrednost - brzina/visina/jačina sad važe za SVE dokumente,
-     * nema više posebnog izbora po dokumentu. DocumentEntity polja (speechRate/pitch/
-     * volumePercent) ostaju u bazi (bezopasno, neiskoriscena) radi kompatibilnosti sa
-     * starim rezervnim kopijama - samo se vise ne citaju ovde. */
-    private fun effectiveRate(entity: DocumentEntity?): Float = settings.globalSpeechRate
+    /** Dokument ima prednost ako ima svoju vrednost (>0 za brzinu/visinu, >=0 za jačinu),
+     * inače se koristi opšta (globalna) vrednost - isti obrazac kao u PlaybackController.
+     * Ranije (dok je postojao samo globalni izbor) ove funkcije su UVEK vraćale opštu
+     * vrednost, ignorišući entity - to je bio uzrok baga "Podešavanja za ovaj dokument
+     * deluju da rade, ali se drže opštih". */
+    private fun effectiveRate(entity: DocumentEntity?): Float =
+        entity?.speechRate?.let { if (it > 0f) it else null } ?: settings.globalSpeechRate
 
-    private fun effectivePitch(entity: DocumentEntity?): Float = settings.globalPitch
+    private fun effectivePitch(entity: DocumentEntity?): Float =
+        entity?.pitch?.let { if (it > 0f) it else null } ?: settings.globalPitch
 
-    private fun effectiveVolume(entity: DocumentEntity?): Int = settings.globalVolumePercent
+    private fun effectiveVolume(entity: DocumentEntity?): Int =
+        entity?.volumePercent?.let { if (it >= 0) it else null } ?: settings.globalVolumePercent
 
     private fun updateNavigationButtonLabels() {
         val mode = settings.navigationMode

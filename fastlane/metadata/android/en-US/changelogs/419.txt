@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed the real cause of the Settings-for-this-document bugs: two forgotten functions from the earlier reorganization always returned the general (global) speed/volume/pitch and general combined voices, completely ignoring document-specific values - even though those values were being saved correctly. They're now actually applied.
