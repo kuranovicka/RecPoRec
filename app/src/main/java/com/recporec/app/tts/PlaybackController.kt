@@ -767,7 +767,8 @@ object PlaybackController {
         val combined = resolveCombinedVoiceConfigInBackground(
             db, finalEntity.id,
             finalEntity.voiceName ?: settings.globalVoiceName,
-            finalEntity.voiceEngine ?: settings.globalVoiceEngine
+            finalEntity.voiceEngine ?: settings.globalVoiceEngine,
+            settings
         )
         val effectiveVoiceName = combined?.voices?.first()?.voiceName ?: (finalEntity.voiceName ?: settings.globalVoiceName)
         val effectiveEngine = combined?.voices?.first()?.enginePackage ?: (finalEntity.voiceEngine ?: settings.globalVoiceEngine)
@@ -826,7 +827,8 @@ object PlaybackController {
     /** Isto kao ReaderActivity.resolveCombinedVoiceConfig, samo bez zavisnosti od Activity-ja -
      * kombinovani glasovi za dokument imaju prednost nad opštim. */
     private suspend fun resolveCombinedVoiceConfigInBackground(
-        db: AppDatabase, docId: Long, docRegularVoiceName: String?, docRegularEngine: String?
+        db: AppDatabase, docId: Long, docRegularVoiceName: String?, docRegularEngine: String?,
+        settings: com.recporec.app.data.AppSettings
     ): BgCombinedVoiceConfig? {
         val dao = db.combinedVoiceDao()
         suspend fun resolveForScope(scopeId: Long, mergeVoiceName: String?, mergeEngine: String?): BgCombinedVoiceConfig? {
