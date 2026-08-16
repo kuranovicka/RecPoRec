@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a bug: tapping "Remove language"/"Remove voice" when nothing has been added for that document now counts as a deliberate "this document has no combo" decision and stops inheriting the combo from general settings. Previously you had to first add something and then remove it for this to stick.

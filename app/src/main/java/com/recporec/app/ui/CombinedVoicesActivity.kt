@@ -124,6 +124,11 @@ class CombinedVoicesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val languages = db.combinedVoiceDao().getLanguages(scopeId)
             if (languages.isEmpty()) {
+                // I dodir na "Ukloni" kad nema ničega da se ukloni SE RAČUNA kao svesna
+                // odluka (posebno za dokument - "želim da OVAJ dokument nema kombinaciju,
+                // makar opšta postojala") - bez ovoga bi ostalo nasledjeno od opštih, sto
+                // je bas ono sto je Marina prijavila.
+                markScopeConfigured()
                 AlertDialog.Builder(this@CombinedVoicesActivity)
                     .setTitle("Ukloni jezik")
                     .setMessage("Nema dodatih jezika.")
@@ -242,6 +247,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val voices = db.combinedVoiceDao().getVoices(scopeId)
             if (voices.isEmpty()) {
+                markScopeConfigured()
                 AlertDialog.Builder(this@CombinedVoicesActivity)
                     .setTitle("Ukloni glas")
                     .setMessage("Nema dodatih glasova.")
