@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/btn_voice"
+            android:titleTextColor="@color/text_primary"
+            app:title="Podešavanja za ovaj dokument" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:text="Ovo važi SAMO za ovaj dokument. Ako ovde ništa ne izabereš, koristi se opšte podešavanje glasa." />
+
+        <Button
+            android:id="@+id/btnLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="22sp"
+            android:backgroundTint="@color/btn_chapter"
+            android:textColor="@color/button_text"
+            android:text="Jezik" />
+
+        <TextView
+            android:id="@+id/textLanguageStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:textSize="18sp"
+            android:textColor="@color/btn_page_nav"
+            android:accessibilityLiveRegion="polite"
+            android:text="Nije izabrano" />
+
+        <Button
+            android:id="@+id/btnVoice"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="22sp"
+            android:backgroundTint="@color/btn_voice"
+            android:textColor="@color/button_text"
+            android:text="Glas" />
+
+        <TextView
+            android:id="@+id/textVoiceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:textSize="18sp"
+            android:textColor="@color/btn_page_nav"
+            android:accessibilityLiveRegion="polite"
+            android:text="Nije izabran" />
+
+        <Button
+            android:id="@+id/btnCombinedVoices"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="16dp"
+            android:textSize="22sp"
+            android:backgroundTint="@color/btn_timer"
+            android:textColor="@color/button_text"
+            android:text="Kombinovani glasovi" />
+
+        <SeekBar
+            android:id="@+id/seekSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="Brzina čitanja. Dvostruko dodirni i prevuci prstom."
+            android:max="270"
+            android:progress="70"
+            android:progressTint="@color/btn_speed"
+            android:thumbTint="@color/btn_speed" />
+
+        <TextView
+            android:id="@+id/textSpeedStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Brzina: 100%" />
+
+        <SeekBar
+            android:id="@+id/seekVolume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="Jačina zvuka. Dvostruko dodirni i prevuci prstom."
+            android:max="100"
+            android:progress="100"
+            android:progressTint="@color/btn_volume"
+            android:thumbTint="@color/btn_volume" />
+
+        <TextView
+            android:id="@+id/textVolumeStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Jačina: 100%" />
+
+        <SeekBar
+            android:id="@+id/seekPitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="Visina glasa. Dvostruko dodirni i prevuci prstom."
+            android:max="150"
+            android:progress="50"
+            android:progressTint="@color/btn_pitch"
+            android:thumbTint="@color/btn_pitch" />
+
+        <TextView
+            android:id="@+id/textPitchStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/text_primary"
+            android:accessibilityLiveRegion="polite"
+            android:text="Visina: 100%" />
+
+        <Button
+            android:id="@+id/btnResetVoiceDefaults"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_margin="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_page_nav"
+            android:textColor="@color/button_text"
+            android:text="Vrati na zadano" />
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:textSize="20sp"
+            android:backgroundTint="@color/btn_combined"
+            android:textColor="@color/button_text"
+            android:text="Nazad" />
+
+    </LinearLayout>
+</ScrollView>

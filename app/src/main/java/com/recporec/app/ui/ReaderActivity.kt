@@ -180,11 +180,18 @@ class ReaderActivity : AppCompatActivity() {
         // se izlaziti iz citaca da bi se promenio glas/podesavanja).
         binding.btnOverflow.setOnClickListener { view ->
             val popup = androidx.appcompat.widget.PopupMenu(this@ReaderActivity, view)
-            popup.menuInflater.inflate(R.menu.menu_main_options, popup.menu)
+            popup.menuInflater.inflate(R.menu.menu_reader_options, popup.menu)
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_global_voice -> {
                         startActivity(android.content.Intent(this@ReaderActivity, GlobalVoiceSettingsActivity::class.java))
+                        true
+                    }
+                    R.id.action_document_voice -> {
+                        startActivity(
+                            android.content.Intent(this@ReaderActivity, DocumentVoiceSettingsActivity::class.java)
+                                .putExtra(DocumentVoiceSettingsActivity.EXTRA_DOCUMENT_ID, documentId)
+                        )
                         true
                     }
                     R.id.action_settings -> {

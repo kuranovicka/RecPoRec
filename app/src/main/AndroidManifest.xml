@@ -135,6 +135,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.DocumentVoiceSettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.CombinedVoicesActivity"
             android:exported="false" />
 
