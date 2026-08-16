@@ -71,11 +71,9 @@ class HelpActivity : AppCompatActivity() {
         Isto kao i na prethodnom ekranu, vraća baš sva podešavanja na početak.
         Treća stavka je Pomoć.
         Sada idemo u sam dokument.
-        Gore desno je opet dugme Opcije, sa jednom stavkom više nego na prvom ekranu: Opšta podešavanja glasa, Podešavanja za ovaj dokument, Podešavanja programa i Pomoć.
-        Tako ne moraš izaći iz knjige da bi promenio-la glas ili podešavanja.
-        Podešavanja za ovaj dokument izgleda isto kao Opšta podešavanja glasa - jezik, glas, kombinovani glasovi, brzina, jačina, visina i Vrati na zadano - ali važi SAMO za dokument koji trenutno čitaš.
-        Ako ovde ništa ne izabereš, dokument prati opšta podešavanja kao i do sad.
-        Vrati na zadano na ovom ekranu briše samo podešavanje ovog dokumenta, ne dira opšta podešavanja programa.
+        Gore desno je opet dugme Opcije, isto kao na prvom ekranu.
+        Pre svih podešavanja se nalaze podešavanja jezika, glasa, kombinovanih glasova, brzine, visine i jačine samo za taj dokument.
+        Na kraju je dugme vrati na zadano, gde sve vraćaš na zadano, opet samo za taj, trenutno otvoreni dokument.
         Tastatura ima trinaest dugmadi, raspoređenih u četiri reda.
         Pored toga ima i tri dodatne kontrole koje ostaju uvek prisutne, čak i kad se ostala dugmad sakriju: Prikaži-sakrij kontrole, Pusti-pauziraj, i Nazad.
         U prvom redu odozgo, prvo dugme je Oznake.
