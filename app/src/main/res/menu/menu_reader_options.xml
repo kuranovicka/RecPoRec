@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/action_global_voice"
-        android:title="Opšta podešavanja glasa"
-        android:showAsAction="never" />
-    <item
         android:id="@+id/action_document_voice"
         android:title="Podešavanja za ovaj dokument"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_global_voice"
+        android:title="Opšta podešavanja glasa"
         android:showAsAction="never" />
     <item
         android:id="@+id/action_settings"

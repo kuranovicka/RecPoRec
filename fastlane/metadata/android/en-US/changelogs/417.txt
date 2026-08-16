@@ -1,0 +1,3 @@
+What's new:
+
+1. "Settings for this document" moved to the first position in the reader's Options menu, before "General voice settings".
