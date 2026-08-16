@@ -1,0 +1,3 @@
+Šta je novo:
+
+1. Ispravljen bag: kad se kombinacija glasova ugasi (uklanjanjem za dokument), sam TTS motor je ostajao "zaglavljen" na poslednjem glasu iz kombinacije, iako je ekran ispravno pokazivao "nema". Sad se glas stvarno vraća na tvoj redovni glas.

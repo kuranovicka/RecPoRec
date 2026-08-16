@@ -187,6 +187,12 @@ class TtsManager(private val appContext: Context) {
     // Kombinovani glasovi (2+) koji se smenjuju na svakih N rečenica. Prazna/jednočlana lista
     // isključuje kombinovane glasove (čita se normalno, jednim glasom).
     private var combinedVoices: List<CombinedVoiceRef> = emptyList()
+    /** Poslednji "redovni" (ne-kombinovani) glas postavljen kroz setVoiceByName ili
+     * applyIndependentDefaultVoice - pamti se da bi se moglo VRATITI na njega kad se
+     * kombinacija ugasi (voices.size < 2 u setCombinedVoices). Bez ovoga, applyCombinedVoice
+     * direktno menja glas na samom TTS motoru (instance.voice = voice), i ništa ga ne vraća
+     * nazad pri gašenju kombinacije - glas ostaje "zaglavljen" na poslednjem iz kombinacije. */
+    private var regularVoiceName: String? = null
     private var combinedSentencesPerVoice: Int = 1
     private var combinedVoiceIndex = 0
     private var sentencesReadInCurrentVoice = 0
@@ -211,6 +217,10 @@ class TtsManager(private val appContext: Context) {
             applyCombinedVoice(voices[0])
         } else {
             activeInstance = tts
+            // KLJUČNO: applyCombinedVoice ranije direktno menja glas na motoru
+            // (instance.voice = voice) - bez ovoga bi taj glas ostao "zaglavljen" i posle
+            // gašenja kombinacije, jer ništa drugo ga ne vraća nazad na redovni glas.
+            regularVoiceName?.let { setVoiceByName(it) }
         }
     }
 
@@ -369,6 +379,7 @@ class TtsManager(private val appContext: Context) {
 
     fun setVoiceByName(name: String) {
         val voice = tts?.voices?.firstOrNull { it.name == name } ?: return
+        regularVoiceName = name
         // setLanguage() se poziva SAMO kad se jezik stvarno menja - kod nekih motora, poziv
         // sa VEĆ AKTIVNIM jezikom (npr. prelazak sa jednog na drugi glas istog jezika) zna
         // tiho da vrati podrazumevani glas tog jezika, poništavajući baš izabrani glas.
@@ -398,7 +409,7 @@ class TtsManager(private val appContext: Context) {
             .ifEmpty { allEngineVoices }
         val chosen = candidates.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.name })
             .firstOrNull()
-        chosen?.let { tts?.voice = it }
+        chosen?.let { tts?.voice = it; regularVoiceName = it.name }
         return chosen
     }
 

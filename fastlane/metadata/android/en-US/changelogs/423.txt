@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a bug: when the voice combination was turned off (by removing it for a document), the TTS engine itself stayed "stuck" on the last combo voice, even though the screen correctly showed "none". The voice now actually reverts to your regular one.
