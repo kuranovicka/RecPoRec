@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a bug: when combined voices were removed for a single document (down to "none"), the app was silently inheriting the combo from general settings instead of respecting that you deliberately left the document without one. It now remembers that the document was consciously configured, even if it ends up empty.

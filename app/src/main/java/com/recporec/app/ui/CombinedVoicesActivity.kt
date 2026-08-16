@@ -66,6 +66,17 @@ class CombinedVoicesActivity : AppCompatActivity() {
     private fun langLabel(tag: String): String =
         Locale(tag).displayLanguage.replaceFirstChar { it.uppercase() }
 
+    /** Beleži da je OVAJ opseg (dokument, ili opšte) SVESNO dirao kombinovane glasove -
+     * čak i ako na kraju ostane prazan (npr. korisnica dodala pa uklonila, ili samo uklonila
+     * ono što je nasledila od opštih). Bez ovoga, prazan dokument-opseg izgleda IDENTIČNO
+     * kao "nikad nije ni dirano", pa bi se tiho vraćalo na opšte - baš bag koji je Marina
+     * prijavila ("uklonim, a pusti onaj iz opštih"). */
+    private suspend fun markScopeConfigured() {
+        if (db.combinedVoiceDao().getSettings(scopeId) == null) {
+            db.combinedVoiceDao().setSettings(CombinedVoiceSettingsEntity(scopeId = scopeId, sentencesPerVoice = 1))
+        }
+    }
+
     private fun showAddLanguageDialog() {
         lifecycleScope.launch {
             val alreadyAdded = db.combinedVoiceDao().getLanguages(scopeId)
@@ -92,6 +103,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
                         Toast.makeText(this@CombinedVoicesActivity, "Taj jezik je već dodat.", Toast.LENGTH_SHORT).show()
                     } else {
                         db.combinedVoiceDao().insertLanguage(CombinedVoiceLanguageEntity(scopeId = scopeId, languageTag = tag))
+                        markScopeConfigured()
                         Toast.makeText(this@CombinedVoicesActivity, "Dodat jezik: ${labels[index]}.", Toast.LENGTH_SHORT).show()
                         refreshStatusTexts()
                     }
@@ -129,6 +141,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
                         lifecycleScope.launch {
                             db.combinedVoiceDao().deleteVoicesForLanguage(scopeId, lang.languageTag)
                             db.combinedVoiceDao().deleteLanguage(lang.id)
+                            markScopeConfigured()
                             refreshStatusTexts()
                         }
                     }
@@ -205,6 +218,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
                             orderIndex = nextOrder
                         )
                     )
+                    markScopeConfigured()
                     Toast.makeText(this@CombinedVoicesActivity, "Dodat glas: ${labels[index]}.", Toast.LENGTH_SHORT).show()
                     refreshStatusTexts()
                 }
@@ -248,6 +262,7 @@ class CombinedVoicesActivity : AppCompatActivity() {
                     .setPositiveButton(getString(R.string.delete)) { _, _ ->
                         lifecycleScope.launch {
                             db.combinedVoiceDao().deleteVoice(voice.id)
+                            markScopeConfigured()
                             refreshStatusTexts()
                         }
                     }

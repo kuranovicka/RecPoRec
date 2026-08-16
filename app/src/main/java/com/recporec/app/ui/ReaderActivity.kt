@@ -505,7 +505,12 @@ class ReaderActivity : AppCompatActivity() {
         // docId potpuno - zato je delovalo da se dokument-specificni kombinovani glasovi
         // "zaglave" i ne mogu da se primene/uklone (menjali su se u bazi ispravno, ali se
         // ovde nikad nisu ni gledali).
-        return resolveForScope(docId) ?: resolveForScope(0L)
+        // Ako je dokument SVESNO diran (postoji red u combined_voice_settings, cak i ako je
+        // trenutno prazan) - ne prelazi na opste, postuje se ono sto dokument kaze (moze biti
+        // "nema kombinacije za ovaj dokument", namerno). Samo NIKAD-DIRAN dokument nasledjuje
+        // opste - ovo resava bag "uklonim kombinaciju kod dokumenta, a pusti onu iz opstih".
+        val docTouched = dao.getSettings(docId) != null
+        return if (docTouched) resolveForScope(docId) else resolveForScope(0L)
     }
 
     /** POZIVA SE kad je tekst/glas pripremljen (setupTts zavrsen) - NE znaci da je i sam TTS
