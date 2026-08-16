@@ -1,0 +1,3 @@
+What's new:
+
+1. Brought back the ability to set voice, language, speed, volume, and pitch separately for each document, at users' request. New "Settings for this document" item in the Options menu inside a book, looks just like General voice settings, but applies to that one document. If nothing is set, the document keeps following the general settings as before.
