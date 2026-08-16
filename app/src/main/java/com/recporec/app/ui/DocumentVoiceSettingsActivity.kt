@@ -62,12 +62,17 @@ class DocumentVoiceSettingsActivity : AppCompatActivity() {
         binding.btnLanguage.setOnClickListener { showLanguagePicker() }
         binding.btnVoice.setOnClickListener { showVoicePicker() }
         binding.btnCombinedVoices.setOnClickListener {
+            // VAŽNO: čita SVEŽ "document" (ne zarobljeni "doc" iznad, koji je snimak od
+            // otvaranja ekrana) - inače bi Kombinovani glasovi uvek video jezik/glas OD PRE
+            // eventualne izmene, i tiho posezao za opštim umesto za upravo izabranim
+            // dokument-specifičnim jezikom/glasom.
+            val fresh = document ?: return@setOnClickListener
             startActivity(
                 android.content.Intent(this, CombinedVoicesActivity::class.java)
                     .putExtra(CombinedVoicesActivity.EXTRA_SCOPE_ID, documentId)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, doc.languageTag ?: settings.globalLanguageTag)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, doc.voiceName ?: settings.globalVoiceName)
-                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, doc.voiceEngine ?: settings.globalVoiceEngine)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_LANGUAGE_TAG, fresh.languageTag ?: settings.globalLanguageTag)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_NAME, fresh.voiceName ?: settings.globalVoiceName)
+                    .putExtra(CombinedVoicesActivity.EXTRA_DEFAULT_VOICE_ENGINE, fresh.voiceEngine ?: settings.globalVoiceEngine)
             )
         }
 

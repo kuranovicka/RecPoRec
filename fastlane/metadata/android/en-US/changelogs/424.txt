@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed a bug: the "Combined voices" button on the Settings-for-this-document screen was reading the language/voice from BEFORE any change (a stale snapshot from when the screen opened), silently falling back to the general voice instead of the just-chosen document-specific language/voice. It now reads a fresh value at the moment of the tap.
