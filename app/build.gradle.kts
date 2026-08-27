@@ -95,5 +95,7 @@ dependencies {
 
     // Za rad sa folderom (ACTION_OPEN_DOCUMENT_TREE) pri dodavanju audio knjige.
     implementation("androidx.documentfile:documentfile:1.0.1")
+
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }
