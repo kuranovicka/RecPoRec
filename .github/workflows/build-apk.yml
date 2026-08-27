@@ -34,20 +34,7 @@ jobs:
           gradle-version: "8.10"
 
       - name: Build debug APK
-        shell: bash
-        run: |
-          set -o pipefail
-          gradle assembleDebug --stacktrace 2>&1 | tee /tmp/build.log
-
-      - name: Report build error as issue (privremeno, za dijagnozu)
-        if: failure()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tail -c 60000 /tmp/build.log > /tmp/build_tail.log
-          gh issue create \
-            --title "Build ${{ github.run_number }} failed - auto log" \
-            --body-file /tmp/build_tail.log
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4

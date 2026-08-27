@@ -499,6 +499,7 @@ class DocumentListActivity : AppCompatActivity() {
     }
 
 
+    private suspend fun insertDocument(localUri: Uri, name: String, format: String) {
         val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
         db.documentDao().insert(
             DocumentEntity(
