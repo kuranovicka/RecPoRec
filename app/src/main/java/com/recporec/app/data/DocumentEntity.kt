@@ -43,5 +43,14 @@ data class DocumentEntity(
     /** Kad je dokument poslednji put otvoren (System.currentTimeMillis()) - koristi se da
      * se pronađe "poslednji aktivni dokument" za automatsko čitanje pri otvaranju
      * aplikacije. 0 znači nikad otvoren (ili otvoren pre nego što je ovo polje uvedeno). */
-    val lastOpenedTimestamp: Long = 0
+    val lastOpenedTimestamp: Long = 0,
+    /** Za audio knjige (format = "audio"): redni broj trenutnog zvučnog fajla unutar
+     * zip arhive (0 = prvi fajl u folderu/"odeljku"). Nebitno za tekstualne formate. */
+    val audioFileIndex: Int = 0,
+    /** Za audio knjige: pozicija u milisekundama unutar TRENUTNOG zvučnog fajla
+     * (audioFileIndex). Nebitno za tekstualne formate. */
+    val audioPositionMs: Long = 0,
+    /** Za audio knjige: trajanje trenutnog zvučnog fajla u milisekundama, radi prikaza
+     * napretka. 0 znači "još nije izmereno". Nebitno za tekstualne formate. */
+    val audioDurationMs: Long = 0
 )

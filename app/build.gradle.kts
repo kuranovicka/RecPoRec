@@ -87,6 +87,12 @@ dependencies {
     // Za otvaranje fajlova (uključujući Google Disk kroz sistemski birač)
     implementation("androidx.activity:activity-ktx:1.9.1")
 
+    // Audio knjige - reprodukcija zvučnih fajlova (MP3, WAV, OGG, FLAC, M4A/AAC).
+    // Potpuno offline, Apache 2.0 licenca, ne zahteva FFmpeg ekstenziju (native build) -
+    // podržani formati su pokriveni ugrađenim ExoPlayer ekstraktorima.
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-common:1.4.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }
