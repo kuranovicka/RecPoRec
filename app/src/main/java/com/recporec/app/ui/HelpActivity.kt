@@ -24,9 +24,12 @@ class HelpActivity : AppCompatActivity() {
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.
-        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi i slikovni formati.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi, slikovni formati, i zvučni formati mp3, wav, ogg, flac i m4a.
         Dug pritisak izgovara statistiku čitanja, bez otvaranja novog ekrana:
         koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja i koliko ih je u toku.
+        Ispod njega je dugme Dodaj folder.
+        Dodaje ceo folder sa zvučnim fajlovima kao jednu audio knjigu.
+        Program ga pakuje u zip arhivu i prikazuje ga u listi kao i sve ostale knjige.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.

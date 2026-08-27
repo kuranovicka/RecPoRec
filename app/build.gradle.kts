@@ -93,6 +93,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-common:1.4.1")
 
-    testImplementation("junit:junit:4.13.2")
+    // Za rad sa folderom (ACTION_OPEN_DOCUMENT_TREE) pri dodavanju audio knjige.
+    implementation("androidx.documentfile:documentfile:1.0.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }

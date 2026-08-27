@@ -81,6 +81,17 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
+    // "Dodaj folder" - bira ceo folder (SAF, ACTION_OPEN_DOCUMENT_TREE) sa zvučnim
+    // fajlovima, pakuje ga u zip i uvozi kao jednu audio knjigu - tretira se identično
+    // kao svaki drugi dokument u listi, bez posebne logike.
+    private val pickFolderLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.data?.let { handlePickedFolder(it) }
+        }
+    }
+
     // Cuva "sledeci korak" u lancu dozvola dok cekamo da se SISTEMSKI dijalog (za dozvolu)
     // zatvori - da se nas sledeci dijalog ne bi pojavio PREKO sistemskog, u isto vreme.
     private var pendingPermissionChainNext: (() -> Unit)? = null
@@ -128,6 +139,13 @@ class DocumentListActivity : AppCompatActivity() {
             type = "*/*"
         }
         pickFileLauncher.launch(intent)
+    }
+
+    /** Otvara sistemski birač FOLDERA (ACTION_OPEN_DOCUMENT_TREE) - korisnik bira ceo
+     * folder sa zvučnim fajlovima, koji se zatim pakuje u zip i uvozi kao audio knjiga. */
+    private fun launchFolderPicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        pickFolderLauncher.launch(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,6 +213,10 @@ class DocumentListActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this@DocumentListActivity, text, android.widget.Toast.LENGTH_LONG).show()
             }
             true
+        }
+
+        binding.btnAddFolder.setOnClickListener {
+            launchFolderPicker()
         }
 
         // SVE dozvole (obavestenja, stanje telefona, izuzetak od stednje baterije, pun ekran
@@ -398,7 +420,85 @@ class DocumentListActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun insertDocument(localUri: Uri, name: String, format: String) {
+    /** Folder → zip → uvoz kao audio knjiga. Bira SVE zvučne fajlove iz odabranog foldera
+     * (uključujući podfoldere), pakuje ih u jedan zip (bez filozofiranja oko strukture -
+     * prosto svi fajlovi, po imenu), i uvozi ga kao dokument sa format = "audio", tretiran
+     * identično kao svaka druga knjiga u listi. */
+    private fun handlePickedFolder(treeUri: Uri) {
+        lifecycleScope.launch {
+            val folder = androidx.documentfile.provider.DocumentFile.fromTreeUri(this@DocumentListActivity, treeUri)
+            if (folder == null || !folder.isDirectory) {
+                AlertDialog.Builder(this@DocumentListActivity)
+                    .setMessage("Nije moguće pročitati folder.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+                return@launch
+            }
+            val folderName = folder.name ?: "audio knjiga"
+
+            val audioFiles = withContext(Dispatchers.IO) { collectAudioFiles(folder) }
+            if (audioFiles.isEmpty()) {
+                AlertDialog.Builder(this@DocumentListActivity)
+                    .setMessage("U ovom folderu nema podržanih zvučnih fajlova.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+                return@launch
+            }
+
+            val localUri = withContext(Dispatchers.IO) { zipAudioFiles(audioFiles) }
+            if (localUri == null) {
+                AlertDialog.Builder(this@DocumentListActivity)
+                    .setMessage("Nije moguće upakovati folder.")
+                    .setPositiveButton("U redu", null)
+                    .show()
+                return@launch
+            }
+
+            insertDocument(localUri, folderName, "audio")
+        }
+    }
+
+    /** Rekurzivno skuplja sve fajlove sa podržanim zvučnim nastavkom iz foldera i njegovih
+     * podfoldera - redosled po imenu, da bude predvidljiv (isti redosled u kom se pušta). */
+    private fun collectAudioFiles(dir: androidx.documentfile.provider.DocumentFile): List<androidx.documentfile.provider.DocumentFile> {
+        val result = mutableListOf<androidx.documentfile.provider.DocumentFile>()
+        for (child in dir.listFiles()) {
+            if (child.isDirectory) {
+                result += collectAudioFiles(child)
+            } else {
+                val name = child.name ?: continue
+                val ext = name.substringAfterLast(".", "").lowercase()
+                if (ext in com.recporec.app.parser.DocumentParser.AUDIO_EXTENSIONS) {
+                    result += child
+                }
+            }
+        }
+        return result.sortedBy { it.name }
+    }
+
+    /** Pakuje listu zvučnih fajlova u jedan .zip u internoj memoriji aplikacije - isti
+     * princip kao copyToLocalStorage, samo za više fajlova odjednom. */
+    private fun zipAudioFiles(files: List<androidx.documentfile.provider.DocumentFile>): Uri? {
+        return try {
+            val dir = java.io.File(filesDir, "documents").apply { mkdirs() }
+            val destFile = java.io.File(dir, "${java.util.UUID.randomUUID()}.zip")
+            java.util.zip.ZipOutputStream(destFile.outputStream()).use { zipOut ->
+                for (file in files) {
+                    val name = file.name ?: continue
+                    contentResolver.openInputStream(file.uri)?.use { input ->
+                        zipOut.putNextEntry(java.util.zip.ZipEntry(name))
+                        input.copyTo(zipOut)
+                        zipOut.closeEntry()
+                    }
+                }
+            }
+            Uri.fromFile(destFile)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
         val bottomOrder = (db.documentDao().maxSortOrder() ?: 0) + 1
         db.documentDao().insert(
             DocumentEntity(
@@ -573,7 +673,10 @@ class DocumentListActivity : AppCompatActivity() {
             // naslovom.
             val safeTitle = sanitizeFileName(doc.title)
             val shareDir = java.io.File(cacheDir, "share").apply { mkdirs() }
-            val shareFile = java.io.File(shareDir, "$safeTitle.${doc.format}")
+            // Audio knjige se interno čuvaju kao .zip (format="audio" je LOGICKI tip, ne
+            // stvarni nastavak fajla) - ostali formati koriste nastavak = format.
+            val shareExtension = if (doc.format == "audio") "zip" else doc.format
+            val shareFile = java.io.File(shareDir, "$safeTitle.$shareExtension")
             srcFile.copyTo(shareFile, overwrite = true)
             val fileUri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", shareFile)
             val mimeType = when (doc.format) {
@@ -584,6 +687,7 @@ class DocumentListActivity : AppCompatActivity() {
                 "html" -> "text/html"
                 "fb2" -> "text/xml"
                 "rtf" -> "application/rtf"
+                "audio" -> "application/zip"
                 else -> "application/octet-stream"
             }
             val intent = Intent(Intent.ACTION_SEND).apply {

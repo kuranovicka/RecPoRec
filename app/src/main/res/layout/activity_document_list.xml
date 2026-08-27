@@ -74,6 +74,19 @@
                 android:text="@string/add_document" />
 
             <Button
+                android:id="@+id/btnAddFolder"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:textSize="16sp"
+                android:backgroundTint="@color/btn_chapter"
+                android:textColor="@color/button_text"
+                android:background="@drawable/key_button_shape"
+                android:contentDescription="Dodaj folder sa zvučnim fajlovima kao audio knjigu."
+                android:text="Dodaj folder" />
+
+            <Button
                 android:id="@+id/btnGeneralActions"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

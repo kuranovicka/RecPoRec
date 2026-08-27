@@ -5,6 +5,10 @@ import android.net.Uri
 
 object DocumentParser {
 
+    /** Podržani zvučni formati za audio knjige (folder → zip uvoz) - pokriveni ugrađenim
+     * ExoPlayer ekstraktorima, bez potrebe za FFmpeg ekstenzijom. */
+    val AUDIO_EXTENSIONS = setOf("mp3", "wav", "ogg", "flac", "m4a", "aac")
+
     /** Vraća format na osnovu imena fajla i/ili MIME tipa, ili null ako nije podržan. */
     fun detectFormat(fileName: String, mimeType: String? = null): String? {
         val lower = fileName.lowercase()
@@ -44,6 +48,9 @@ object DocumentParser {
             "fb2" -> Fb2Parser.parse(context, uri)
             "rtf" -> RtfParser.parse(context, uri)
             "mobi" -> MobiParser.parse(context, uri)
+            // Audio knjige nemaju tekst za izvlačenje - stvarna reprodukcija (ExoPlayer)
+            // se ne oslanja na ovaj parser, dolazi u sledećem koraku.
+            "audio" -> ParsedDocument(fullText = "")
             else -> ParsedDocument(fullText = "")
         }
         return raw.copy(fullText = stripJunkCharacters(raw.fullText))

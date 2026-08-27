@@ -1,0 +1,6 @@
+What's new:
+
+1. New "Add folder" button on the home screen, below "Add document". Lets you add a folder of audio files as an audio book: the app packs the folder into a zip and shows it in the list like any other book. Supported audio formats: mp3, wav, ogg, flac, m4a, aac.
+2. Help screen updated to mention the new button and the supported audio formats.
+
+Note: full audio playback (speed/pitch/volume controls, position memory) is coming in a follow-up build.
