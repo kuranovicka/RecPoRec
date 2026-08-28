@@ -59,7 +59,11 @@ class ReadingService : Service() {
                     // znaju povremeno da posalju PLAY i kad VEC svira, sto bi inace nasilno
                     // restartovalo trenutnu recenicu usred citanja.
                     if (!PlaybackController.isActive()) {
-                        PlaybackController.resumeCancelingRestIfNeeded()
+                        if (PlaybackController.currentDocument?.format == "audio") {
+                            PlaybackController.audioPlayer?.play()
+                        } else {
+                            PlaybackController.resumeCancelingRestIfNeeded()
+                        }
                         // KRITICNO: bez ovoga, MediaSession i dalje "misli" da je citanje
                         // pauzirano (staro stanje) - sledeci pritisak na JEDAN kombinovan
                         // play/pauza taster (kakav ima spoljna tastatura) bi sistem opet
@@ -76,7 +80,11 @@ class ReadingService : Service() {
                 }
                 override fun onPause() {
                     if (PlaybackController.isActive()) {
-                        PlaybackController.ttsManager?.pause()
+                        if (PlaybackController.currentDocument?.format == "audio") {
+                            PlaybackController.audioPlayer?.pause()
+                        } else {
+                            PlaybackController.ttsManager?.pause()
+                        }
                         AppSettings(this@ReadingService).userManuallyPaused = true
                         // Isti razlog kao gore - prijavi NOVO (pauzirano) stanje odmah, ne
                         // cekaj da nesto drugo to uradi.
@@ -89,7 +97,11 @@ class ReadingService : Service() {
                 // isto kao Pauza (nemamo poseban koncept "potpuno zaustavi" razlicit od pauze).
                 override fun onStop() {
                     if (PlaybackController.isActive()) {
-                        PlaybackController.ttsManager?.pause()
+                        if (PlaybackController.currentDocument?.format == "audio") {
+                            PlaybackController.audioPlayer?.pause()
+                        } else {
+                            PlaybackController.ttsManager?.pause()
+                        }
                         AppSettings(this@ReadingService).userManuallyPaused = true
                         PlaybackController.notifyPlaybackStateChanged()
                         playServiceClickSound()
