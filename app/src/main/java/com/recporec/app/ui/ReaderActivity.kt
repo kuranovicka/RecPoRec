@@ -636,7 +636,25 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    /** Play/Pauza za audio knjigu - namerno potpuno odvojeno od TTS grane ispod (bez
+     * tajmera/Odmora/pozadinskog nastavka za sada, kao što smo se dogovorile - to dolazi
+     * kasnije, pažljivo). Samo pusti/pauziraj ExoPlayer i pošalji pozicijom uinformisan
+     * pregled ekrana. */
+    private fun toggleAudioPlayPause() {
+        val player = PlaybackController.audioPlayer ?: return
+        if (player.isPlaying) {
+            player.pause()
+        } else {
+            player.play()
+        }
+        updateStatusTexts()
+    }
+
     private fun togglePlayPause(manual: Boolean = true) {
+        if (doc?.format == "audio") {
+            toggleAudioPlayPause()
+            return
+        }
         if (autoScrollRunnable != null) {
             // Pusti/Pauziraj zaustavlja "Automatski listaj dokument" i cita OD TE tacke -
             // tts.isSpeaking je vec false (listanje samo, bez citanja), pa ce nastavak ove
