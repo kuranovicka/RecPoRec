@@ -1847,8 +1847,28 @@ class ReaderActivity : AppCompatActivity() {
         android.widget.Toast.makeText(this, parts.joinToString(" "), android.widget.Toast.LENGTH_LONG).show()
     }
 
+    /** Status (Proteklo/Preostalo/broj zapisa) za audio knjigu - STVARNE vrednosti sa
+     * ExoPlayer-a, ne procena kao kod teksta. Poziva se umesto celog ostatka
+     * updateStatusTexts() (koji računa po broju karaktera - besmisleno za audio). */
+    private fun updateAudioStatusTexts(entity: DocumentEntity) {
+        val player = PlaybackController.audioPlayer
+        val fileIndex = (player?.currentMediaItemIndex ?: entity.audioFileIndex) + 1
+        val fileCount = (player?.mediaItemCount ?: 1).coerceAtLeast(1)
+        binding.textPages.text = "Zapis $fileIndex od $fileCount"
+
+        val elapsedMs = (player?.currentPosition ?: entity.audioPositionMs).coerceAtLeast(0)
+        val totalMs = (player?.duration?.takeIf { it > 0 } ?: entity.audioDurationMs).coerceAtLeast(0)
+        val remainingMs = (totalMs - elapsedMs).coerceAtLeast(0)
+        binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(elapsedMs / 1000))
+        binding.textRemaining.text = getString(R.string.status_remaining, formatTime(remainingMs / 1000))
+    }
+
     private fun updateStatusTexts() {
         val entity = doc ?: return
+        if (entity.format == "audio") {
+            updateAudioStatusTexts(entity)
+            return
+        }
         val length = parsed?.length ?: 1
         val currentPage = min(entity.totalPages, (entity.currentCharacterOffset / charsPerPage) + 1)
 
@@ -1878,6 +1898,15 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun updateSeekBar() {
+        val entity = doc
+        if (entity?.format == "audio") {
+            val player = PlaybackController.audioPlayer
+            val elapsedMs = (player?.currentPosition ?: entity.audioPositionMs).coerceAtLeast(0)
+            val totalMs = (player?.duration?.takeIf { it > 0 } ?: entity.audioDurationMs).coerceAtLeast(0)
+            val percent = if (totalMs == 0L) 0 else (elapsedMs * 100 / totalMs).toInt()
+            binding.seekProgress.progress = percent.coerceIn(0, 100)
+            return
+        }
         val length = parsed?.length ?: return
         val current = doc?.currentCharacterOffset ?: 0
         val percent = if (length == 0) 0 else (current * 100 / length)
