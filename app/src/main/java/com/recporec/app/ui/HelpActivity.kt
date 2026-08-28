@@ -24,16 +24,14 @@ class HelpActivity : AppCompatActivity() {
         Biraš koje knjige se prikazuju na listi.
         Dugme Dodaj dokument je desno, na sredini ekrana.
         Dodaje knjigu sa telefona, ili sa Google diska, OneDrive-a, Dropboxa i slično.
-        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi, slikovni formati, i zvučni formati mp3, wav, ogg, flac i m4a.
+        Podržani formati su: txt, epub, pdf, docx, html, fb2, rtf, mobi, slikovni formati, zvučni formati mp3, wav, ogg, flac i m4a.
         Dug pritisak izgovara statistiku čitanja, bez otvaranja novog ekrana:
         koliko si ukupno slušao-la, koliko knjiga si pročitao-la do kraja i koliko ih je u toku.
         Ispod njega je dugme Dodaj folder.
         Dodaje ceo folder sa zvučnim fajlovima kao jednu audio knjigu.
         Program ga pakuje u zip arhivu i prikazuje ga u listi kao i sve ostale knjige.
-        Kod audio knjige, dugmad Odaberi sve i Pretraga su sakrivena, jer nema teksta.
-        Dugmad Prethodna i Sledeća premotavaju po minutima, isto podešeno kao i za tekst.
-        Prethodno i Sledeće poglavlje prelaze na prethodni ili sledeći zvučni fajl u folderu.
-        Radi u pozadini i notifikacija rade isto kao za tekst - brzina, visina i jačina se pamte po knjizi.
+        Za audio su dostupne osnovne kontrole:
+        - Premotavanje po minutima, tajmer, buđenje, odmor, brzina, visina, jačina, oznake.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
@@ -70,6 +68,8 @@ class HelpActivity : AppCompatActivity() {
         Dugme Navigacija bira šta rade dugmad za pomeranje: stranicu, minute, oznaku ili rečenice.
         Ako biraš minute, biraš: 1, 5, 10.
         Ako izabereš rečenice, biraš: jednu, tri, pet ili deset.
+        Prekidač Obriši originalni zvučni folder nakon pakovanja, po zadatom je isključen.
+        Ako ga uključiš, originalni folder sa audio knjigom će biti obrisan.
         Tu su i dugmad Izvezi podešavanja u fajl, i Uvezi podešavanja iz fajla.
         Čuvaju glas, brzinu i sve prekidače u fajl, ili ih vraćaju iz ranije sačuvanog fajla.
         Ne čuvaju samu listu knjiga.

@@ -191,6 +191,13 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_AUTO_NEXT, false)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_NEXT, value).apply()
 
+    /** Kad se folder sa zvučnim fajlovima upakuje u zip (Dodaj folder sa zvučnim fajlovima),
+     * da li da se ORIGINALNI folder posle toga obriše - korisno da se ne zauzima duplo mesto
+     * za veliku audio knjigu. Po zadatom isključeno. */
+    var deleteOriginalAudioFolder: Boolean
+        get() = prefs.getBoolean(KEY_DELETE_ORIGINAL_AUDIO_FOLDER, false)
+        set(value) = prefs.edit().putBoolean(KEY_DELETE_ORIGINAL_AUDIO_FOLDER, value).apply()
+
     // Opšta (globalna) podešavanja glasa - važe za svaki dokument dok se ne prepiše posebno
     var globalLanguageTag: String?
         get() = prefs.getString(KEY_G_LANG, null)
@@ -256,6 +263,7 @@ class AppSettings(context: Context) {
             .remove(KEY_SENTENCE_NAV_COUNT)
             .remove(KEY_MINUTE_NAV_COUNT)
             .remove(KEY_BUILTIN_PRONUNCIATION_DICT)
+            .remove(KEY_DELETE_ORIGINAL_AUDIO_FOLDER)
             .apply()
     }
 
@@ -316,6 +324,7 @@ class AppSettings(context: Context) {
         private const val KEY_PARAGRAPH_PAUSE_ENABLED = "paragraph_pause_enabled"
         private const val KEY_PARAGRAPH_PAUSE_MS = "paragraph_pause_ms"
         private const val KEY_AUTO_NEXT = "auto_next_document_enabled"
+        private const val KEY_DELETE_ORIGINAL_AUDIO_FOLDER = "delete_original_audio_folder"
         private const val KEY_G_LANG = "global_language_tag"
         private const val KEY_G_VOICE = "global_voice_name"
         private const val KEY_G_ENGINE = "global_voice_engine"
@@ -339,7 +348,7 @@ class AppSettings(context: Context) {
             KEY_PARAGRAPH_PAUSE_ENABLED, KEY_PARAGRAPH_PAUSE_MS, KEY_AUTO_NEXT,
             KEY_G_LANG, KEY_G_VOICE, KEY_G_ENGINE, KEY_G_RATE, KEY_G_VOLUME, KEY_G_PITCH,
             KEY_AUTO_READ_ENABLED, KEY_AUTO_READ_TRIGGER, KEY_SENTENCE_NAV_COUNT, KEY_MINUTE_NAV_COUNT,
-            KEY_BUILTIN_PRONUNCIATION_DICT
+            KEY_BUILTIN_PRONUNCIATION_DICT, KEY_DELETE_ORIGINAL_AUDIO_FOLDER
         )
     }
 }

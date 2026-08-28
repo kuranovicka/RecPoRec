@@ -110,6 +110,9 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchAutoNext.setOnCheckedChangeListener { _, checked ->
             settings.autoNextDocumentEnabled = checked
         }
+        binding.switchDeleteOriginalAudioFolder.setOnCheckedChangeListener { _, checked ->
+            settings.deleteOriginalAudioFolder = checked
+        }
         binding.switchAutoRead.setOnCheckedChangeListener { _, checked ->
             settings.autoReadEnabled = checked
             if (checked) showAutoReadTriggerPicker()
@@ -319,6 +322,7 @@ class SettingsActivity : AppCompatActivity() {
         updateShakeLabel()
         binding.switchSound.isChecked = settings.soundFeedbackEnabled
         binding.switchAutoNext.isChecked = settings.autoNextDocumentEnabled
+        binding.switchDeleteOriginalAudioFolder.isChecked = settings.deleteOriginalAudioFolder
         // Isti razlog kao kod Drmanja iznad - bez detach/reattach, izbor "kada citati" bi
         // iskakao SVAKI PUT kad se ekran otvori (ako je vec ukljuceno), ne samo pri dodiru.
         binding.switchAutoRead.setOnCheckedChangeListener(null)
