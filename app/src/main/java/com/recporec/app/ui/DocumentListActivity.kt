@@ -460,9 +460,11 @@ class DocumentListActivity : AppCompatActivity() {
             if (settings.deleteOriginalAudioFolder) {
                 val zipValid = withContext(Dispatchers.IO) { verifyZipEntryCount(localUri, audioFiles.size) }
                 if (zipValid) {
-                    withContext(Dispatchers.IO) {
-                        for (file in audioFiles) file.delete()
-                    }
+                    // Brise se CEO originalni folder (rekurzivno) - ne samo pojedinacni
+                    // zvucni fajlovi. Brisanje samo fajlova ostavlja prazan folder (i sve
+                    // podfoldere) da i dalje vidljivo stoji u exploreru - to je i bio uzrok
+                    // utiska da "brisanje ne radi".
+                    withContext(Dispatchers.IO) { folder.delete() }
                 } else {
                     android.widget.Toast.makeText(
                         this@DocumentListActivity,

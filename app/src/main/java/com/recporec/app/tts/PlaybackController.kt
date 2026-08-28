@@ -36,6 +36,11 @@ object PlaybackController {
     var audioPlayer: androidx.media3.exoplayer.ExoPlayer? = null
         private set
 
+    /** Ako korisnica pritisne Play PRE nego što se audio motor pripremi (zip se još
+     * raspakuje/priprema), ovo pamti da treba da krene ODMAH čim motor bude spreman - bez
+     * ovoga bi prvi pritisak izgledao kao da "ne radi ništa" (moralo se pritisnuti dvaput). */
+    var audioAutoPlayPending = false
+
     private var _currentDocument: DocumentEntity? = null
 
     /** Kad se ovo polje promeni na DRUGI dokument (razlicit id) DOK nesto trenutno cita,
@@ -1060,6 +1065,12 @@ object PlaybackController {
                 player.seekTo(startIndex, doc.audioPositionMs)
                 player.playWhenReady = false
                 audioPlayer = player
+
+                if (audioAutoPlayPending) {
+                    audioAutoPlayPending = false
+                    player.play()
+                    notifyPlaybackStateChanged()
+                }
             }
         }
     }

@@ -208,10 +208,20 @@ class ReaderActivity : AppCompatActivity() {
             popup.show()
         }
 
-        btnPrevChapter.setOnClickListener(clickSound { jumpChapter(-1) })
-        btnPrevChapter.setOnLongClickListener { repeatCurrentChapter(); true }
-        btnNextChapter.setOnClickListener(clickSound { jumpChapter(1) })
-        btnNextChapter.setOnLongClickListener { showChapterList(); true }
+        btnPrevChapter.setOnClickListener(clickSound {
+            if (doc?.format == "audio") stepAudioFile(-1) else jumpChapter(-1)
+        })
+        btnPrevChapter.setOnLongClickListener {
+            if (doc?.format == "audio") restartCurrentAudioFile() else repeatCurrentChapter()
+            true
+        }
+        btnNextChapter.setOnClickListener(clickSound {
+            if (doc?.format == "audio") stepAudioFile(1) else jumpChapter(1)
+        })
+        btnNextChapter.setOnLongClickListener {
+            if (doc?.format == "audio") showAudioFileList() else showChapterList()
+            true
+        }
 
         btnTimer.setOnClickListener(clickSound { showTimerMenu() })
         btnTimer.setOnLongClickListener { turnOffTimer(); true }
@@ -283,11 +293,17 @@ class ReaderActivity : AppCompatActivity() {
         btnSearchText.visibility = android.view.View.GONE
         btnSelectAll.visibility = android.view.View.GONE
         // "Izvezi u txt" - nema teksta za izvoz.
-        btnGoTo.visibility = android.view.View.GONE // ide na stranicu/oznaku po karakteru - tekstualno
-        btnPrevChapter.visibility = android.view.View.GONE // poglavlja iz teksta - audio ih nema
-        btnNextChapter.visibility = android.view.View.GONE
         btnAutoScroll.visibility = android.view.View.GONE // automatsko LISTANJE teksta - nema smisla
         btnRemindMe.visibility = android.view.View.GONE // racuna po karakteru pozicije - nebezbedno za audio
+
+        // "Idi na" i "Prethodno/Sledeće poglavlje" OSTAJU vidljivi (isti raspored tastature,
+        // vazno za navigaciju dodirom/TalkBack-om) - ali su PRENAMENJENI za audio: idu na
+        // FILE po broju, umesto na stranicu/poglavlje po karakteru.
+        btnGoTo.contentDescription = "Idi na file."
+        btnPrevChapter.text = "◀ FILE"
+        btnPrevChapter.contentDescription = "Prethodni file."
+        btnNextChapter.text = "FILE ▶"
+        btnNextChapter.contentDescription = "Sledeći file."
     }
 
     private fun applyControlsVisibility() = with(binding) {
@@ -685,10 +701,56 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    /** "Prethodni/Sledeći file" - jedini smisleni ekvivalent poglavlja za audio (folder od
+     * više zvučnih fajlova = "poglavlja" u praksi). */
+    private fun stepAudioFile(direction: Int) {
+        val player = PlaybackController.audioPlayer ?: return
+        if (direction > 0) player.seekToNextMediaItem() else player.seekToPreviousMediaItem()
+        updateStatusTexts()
+        updateSeekBar()
+    }
+
+    /** Dug pritisak na "Prethodni file" - ekvivalent "ponovi trenutno poglavlje": vrati na
+     * pocetak TRENUTNOG fajla, ne na prethodni. */
+    private fun restartCurrentAudioFile() {
+        val player = PlaybackController.audioPlayer ?: return
+        player.seekTo(0)
+        updateStatusTexts()
+        updateSeekBar()
+    }
+
+    /** Dug pritisak na "Sledeći file" - ekvivalent spiska poglavlja: lista svih fajlova u
+     * folderu za brz izbor, po rednom broju (imena fajlova nisu uvek smislena naglas). */
+    private fun showAudioFileList() {
+        val player = PlaybackController.audioPlayer ?: return
+        val count = player.mediaItemCount
+        if (count <= 0) return
+        val items = (1..count).map { "File $it" }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Idi na file")
+            .setItems(items) { _, which ->
+                player.seekTo(which, 0)
+                updateStatusTexts()
+                updateSeekBar()
+            }
+            .show()
+    }
+
     /** Play/Pauza za audio knjigu - sad sa PUNOM podrškom za Tajmer/Odmor/Buđenje, isto kao
      * TTS grana ispod (deljena logika iznad, deljen pozadinski servis). */
     private fun toggleAudioPlayPause() {
-        val player = PlaybackController.audioPlayer ?: return
+        val player = PlaybackController.audioPlayer
+        if (player == null) {
+            // Motor jos nije spreman (zip se jos raspakuje/priprema) - zapamti da treba da
+            // krene ODMAH cim bude spreman, umesto da ovaj pritisak "ne uradi nista".
+            PlaybackController.audioAutoPlayPending = true
+            settings.userManuallyPaused = false
+            handleManualResumeRestLogic()
+            if (settings.backgroundEnabled) {
+                ReadingService.start(this)
+            }
+            return
+        }
         if (player.isPlaying) {
             player.pause()
             settings.userManuallyPaused = true
@@ -934,6 +996,15 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Dug pritisak na "Idi na" - vraća na sam početak dokumenta. */
     private fun goToDocumentStart() {
+        if (doc?.format == "audio") {
+            val player = PlaybackController.audioPlayer ?: return
+            player.seekTo(0, 0)
+            updateStatusTexts()
+            updateSeekBar()
+            playClickSound()
+            android.widget.Toast.makeText(this, "Vraćeno na početak knjige.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         moveTo(0)
         playClickSound()
         android.widget.Toast.makeText(this, "Vraćeno na početak dokumenta.", android.widget.Toast.LENGTH_SHORT).show()
@@ -1070,6 +1141,19 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Meni "Idi na": stranica, minut ili oznaka. */
     private fun showGoToMenu() {
+        if (doc?.format == "audio") {
+            AlertDialog.Builder(this)
+                .setTitle("Idi na")
+                .setItems(arrayOf("Idi na file", "Idi na minut", "Idi na oznaku")) { _, which ->
+                    when (which) {
+                        0 -> showGotoAudioFileDialog()
+                        1 -> showGotoMinuteDialog()
+                        2 -> showGoToBookmarkDialog()
+                    }
+                }
+                .show()
+            return
+        }
         AlertDialog.Builder(this)
             .setTitle("Idi na")
             .setItems(arrayOf("Idi na stranicu", "Idi na minut", "Idi na oznaku")) { _, which ->
@@ -1080,6 +1164,36 @@ class ReaderActivity : AppCompatActivity() {
                 }
             }
             .show()
+    }
+
+    /** "Idi na file" - audio ekvivalent "Idi na stranicu": upišeš redni broj zvučnog fajla u
+     * folderu, a odlazi na njegov početak. */
+    private fun showGotoAudioFileDialog() {
+        val player = PlaybackController.audioPlayer ?: return
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.imeOptions = EditorInfo.IME_ACTION_GO
+        input.hint = "Broj file-a"
+        input.contentDescription = "Broj zvučnog fajla na koji treba preći"
+        fun confirm() {
+            val fileNumber = input.text.toString().toIntOrNull() ?: return
+            val safeIndex = (fileNumber - 1).coerceIn(0, player.mediaItemCount - 1)
+            player.seekTo(safeIndex, 0)
+            updateStatusTexts()
+            updateSeekBar()
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setView(input)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                confirm()
+                dialog.dismiss()
+                true
+            } else false
+        }
+        dialog.show()
     }
 
     /** Dug pritisak na "Oznake" - odmah dodaje oznaku na trenutnu poziciju, bez otvaranja
@@ -1858,14 +1972,37 @@ class ReaderActivity : AppCompatActivity() {
     /** Status (Proteklo/Preostalo/broj zapisa) za audio knjigu - STVARNE vrednosti sa
      * ExoPlayer-a, ne procena kao kod teksta. Poziva se umesto celog ostatka
      * updateStatusTexts() (koji računa po broju karaktera - besmisleno za audio). */
+    /** Ukupno trajanje CELE audio knjige (svih fajlova u folderu zajedno), i koliko je od
+     * toga proteklo (svi ZAVRŠENI fajlovi + pozicija u trenutnom) - ne samo trenutni fajl.
+     * Koristi ExoPlayer-ovu Timeline; dostupno tek kad je player pripremljen (prepare() već
+     * pozvat u setupAudioEngine, pa je ovde uvek spreman ako player postoji). */
+    private fun audioTotalElapsedAndDurationMs(player: androidx.media3.exoplayer.ExoPlayer): Pair<Long, Long> {
+        val timeline = player.currentTimeline
+        if (timeline.windowCount == 0) return player.currentPosition.coerceAtLeast(0) to player.duration.coerceAtLeast(0)
+        val window = androidx.media3.common.Timeline.Window()
+        var totalMs = 0L
+        var elapsedMs = 0L
+        for (i in 0 until timeline.windowCount) {
+            timeline.getWindow(i, window)
+            val dur = window.durationMs.coerceAtLeast(0)
+            totalMs += dur
+            if (i < player.currentMediaItemIndex) elapsedMs += dur
+        }
+        elapsedMs += player.currentPosition.coerceAtLeast(0)
+        return elapsedMs to totalMs
+    }
+
     private fun updateAudioStatusTexts(entity: DocumentEntity) {
         val player = PlaybackController.audioPlayer
         val fileIndex = (player?.currentMediaItemIndex ?: entity.audioFileIndex) + 1
         val fileCount = (player?.mediaItemCount ?: 1).coerceAtLeast(1)
         binding.textPages.text = "Zapis $fileIndex od $fileCount"
 
-        val elapsedMs = (player?.currentPosition ?: entity.audioPositionMs).coerceAtLeast(0)
-        val totalMs = (player?.duration?.takeIf { it > 0 } ?: entity.audioDurationMs).coerceAtLeast(0)
+        val (elapsedMs, totalMs) = if (player != null) {
+            audioTotalElapsedAndDurationMs(player)
+        } else {
+            entity.audioPositionMs.coerceAtLeast(0) to entity.audioDurationMs.coerceAtLeast(0)
+        }
         val remainingMs = (totalMs - elapsedMs).coerceAtLeast(0)
         binding.textElapsed.text = getString(R.string.status_elapsed, formatTime(elapsedMs / 1000))
         binding.textRemaining.text = getString(R.string.status_remaining, formatTime(remainingMs / 1000))
@@ -1909,8 +2046,11 @@ class ReaderActivity : AppCompatActivity() {
         val entity = doc
         if (entity?.format == "audio") {
             val player = PlaybackController.audioPlayer
-            val elapsedMs = (player?.currentPosition ?: entity.audioPositionMs).coerceAtLeast(0)
-            val totalMs = (player?.duration?.takeIf { it > 0 } ?: entity.audioDurationMs).coerceAtLeast(0)
+            val (elapsedMs, totalMs) = if (player != null) {
+                audioTotalElapsedAndDurationMs(player)
+            } else {
+                entity.audioPositionMs.coerceAtLeast(0) to entity.audioDurationMs.coerceAtLeast(0)
+            }
             val percent = if (totalMs == 0L) 0 else (elapsedMs * 100 / totalMs).toInt()
             binding.seekProgress.progress = percent.coerceIn(0, 100)
             return

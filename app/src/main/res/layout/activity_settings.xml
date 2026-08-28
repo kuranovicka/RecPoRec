@@ -222,7 +222,7 @@
         android:thumbTint="@color/btn_chapter"
         android:trackTint="@color/btn_chapter"
         android:text="Obriši originalni zvučni folder nakon pakovanja"
-        android:contentDescription="Obriši originalni zvučni folder nakon pakovanja - kad dodaš folder sa zvučnim fajlovima kao audio knjigu, originalni folder se briše posle uspešnog pakovanja u zip. Po zadatom isključeno." />
+        android:contentDescription="Obriši originalni zvučni folder nakon pakovanja." />
 
     <Button
         android:id="@+id/btnExportSettings"

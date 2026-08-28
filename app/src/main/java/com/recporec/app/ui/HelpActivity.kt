@@ -31,7 +31,7 @@ class HelpActivity : AppCompatActivity() {
         Dodaje ceo folder sa zvučnim fajlovima kao jednu audio knjigu.
         Program ga pakuje u zip arhivu i prikazuje ga u listi kao i sve ostale knjige.
         Za audio su dostupne osnovne kontrole:
-        - Premotavanje po minutima, tajmer, buđenje, odmor, brzina, visina, jačina, oznake.
+        - Premotavanje po minutima, tajmer, buđenje, odmor, brzina, visina, jačina, oznake, prethodni file, sledeći file.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
