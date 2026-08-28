@@ -27,6 +27,14 @@ object PlaybackController {
     var ttsManager: TtsManager? = null
         private set
 
+    /** "Audio motor" - ExoPlayer za audio knjige, paralelno sa ttsManager (TTS motor za
+     * tekstualne knjige). U svakom trenutku aktivan je NAJVIŠE JEDAN od njih (u zavisnosti
+     * od formata trenutno otvorenog dokumenta). Trenutno se samo drži ovde (nullable) - sama
+     * reprodukcija (kreiranje, playlist, pozicija) dolazi u sledećem koraku; do tada ostaje
+     * uvek null, pa isActive() ispod ostaje potpuno nepromenjenog ponašanja. */
+    var audioPlayer: androidx.media3.exoplayer.ExoPlayer? = null
+        private set
+
     private var _currentDocument: DocumentEntity? = null
 
     /** Kad se ovo polje promeni na DRUGI dokument (razlicit id) DOK nesto trenutno cita,
@@ -1002,12 +1010,12 @@ object PlaybackController {
         persistCurrentDocument()
     }
 
-    /** JEDINO mesto koje odgovara na pitanje "da li NEŠTO trenutno čita/svira" - trenutno
-     * samo TTS, ali OVDE (i samo ovde) će se kasnije dodati i audio-knjiga grana, kad
-     * ExoPlayer bude uveden. Svi ostali delovi koda (PlaybackController, ReadingService)
-     * pitaju OVU funkciju, ne diraju ttsManager direktno za "da li svira" pitanja - to je
-     * namerno, da integracija audija kasnije zahteva izmenu SAMO ovde. */
-    fun isActive(): Boolean = ttsManager?.isSpeaking == true
+    /** JEDINO mesto koje odgovara na pitanje "da li NEŠTO trenutno čita/svira" - grana na
+     * TTS motor ili audio motor, u zavisnosti od toga koji je trenutno aktivan (audioPlayer
+     * je non-null SAMO kad je otvorena audio knjiga - videti sledeći korak). Svi ostali
+     * delovi koda (PlaybackController, ReadingService, ReaderActivity) pitaju OVU funkciju,
+     * ne diraju ttsManager/audioPlayer direktno za "da li svira" pitanja. */
+    fun isActive(): Boolean = ttsManager?.isSpeaking == true || audioPlayer?.isPlaying == true
 
     /** Isto što i dugmad "Prethodna/Sledeća" u čitaču (zavisno od podešavanja Navigacije) -
      * ovde postoji posebno da bi radilo i pozvano iz servisa (npr. sa tastera za premotavanje
