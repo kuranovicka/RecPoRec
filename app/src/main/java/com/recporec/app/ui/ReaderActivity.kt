@@ -403,6 +403,19 @@ class ReaderActivity : AppCompatActivity() {
                 db.documentDao().updateLastOpenedTimestamp(finalEntityWithTimestamp.id, now)
             }
 
+            // Audio knjiga (folder -> zip): potpuno drugi motor (ExoPlayer, ne TTS), pa se
+            // ovde grana PRE cele TTS logike ispod (auto-nastavak, setupTts, kombinovani
+            // glasovi...) - ništa od toga se ne odnosi na audio. Za sada SAMO priprema
+            // motor (raspakivanje, playlist, sačuvana pozicija) - dugme Play/Pauza se
+            // povezuje u sledećem koraku.
+            if (finalEntityWithTimestamp.format == "audio") {
+                PlaybackController.setupAudioEngine(this@ReaderActivity, finalEntityWithTimestamp)
+                updateStatusTexts()
+                updateSeekBar()
+                updateNavigationButtonLabels()
+                return@launch
+            }
+
             // Ako je PlaybackController VEĆ imao ovaj TAČAN dokument spreman i motor već
             // radi (npr. čitanje je pokrenuto automatski - buđenje, odmor, ili prelazak na
             // sledeći dokument dok ovaj ekran nije bio otvoren), NE ponavljamo celu pripremu
