@@ -2,6 +2,7 @@ package com.recporec.app.tts
 
 import android.content.Context
 import com.recporec.app.data.AppDatabase
+import com.recporec.app.data.AppSettings
 import com.recporec.app.data.DocumentEntity
 import com.recporec.app.parser.ParsedDocument
 import com.recporec.app.service.WakeAlarmReceiver
@@ -1008,6 +1009,60 @@ object PlaybackController {
     fun persistDocumentNow(entity: DocumentEntity) {
         currentDocument = entity
         persistCurrentDocument()
+    }
+
+    /** Raspakuje audio zip (ako već nije raspakovan) i priprema ExoPlayer sa playlistom -
+     * NE pokreće automatski reprodukciju (playWhenReady = false), samo priprema motor na
+     * sačuvanoj poziciji. Poziva se pri otvaranju audio knjige (format == "audio"),
+     * analogno setupTts() za tekstualne knjige. Trenutno se NIODAKLE ne poziva - dodaje se
+     * u sledećem koraku, kad se poveže sa otvaranjem dokumenta i dugmetom Play/Pauza. */
+    suspend fun setupAudioEngine(context: Context, doc: DocumentEntity) {
+        withContext(Dispatchers.IO) {
+            val extractDir = java.io.File(context.cacheDir, "audio_extracted/${doc.id}")
+            if (!extractDir.exists() || extractDir.listFiles().isNullOrEmpty()) {
+                extractDir.mkdirs()
+                val zipPath = android.net.Uri.parse(doc.uri).path ?: return@withContext
+                val zipFile = java.io.File(zipPath)
+                java.util.zip.ZipInputStream(zipFile.inputStream()).use { zipIn ->
+                    var entry = zipIn.nextEntry
+                    while (entry != null) {
+                        val outFile = java.io.File(extractDir, entry.name)
+                        outFile.outputStream().use { out -> zipIn.copyTo(out) }
+                        zipIn.closeEntry()
+                        entry = zipIn.nextEntry
+                    }
+                }
+            }
+            val files = extractDir.listFiles()?.sortedBy { it.name } ?: emptyList()
+            if (files.isEmpty()) return@withContext
+
+            withContext(Dispatchers.Main) {
+                releaseAudioEngine()
+                val player = androidx.media3.exoplayer.ExoPlayer.Builder(context).build()
+                val mediaItems = files.map { androidx.media3.common.MediaItem.fromUri(android.net.Uri.fromFile(it)) }
+                player.setMediaItems(mediaItems)
+
+                val settings = AppSettings(context)
+                val speed = if (doc.speechRate > 0f) doc.speechRate else settings.globalSpeechRate
+                val pitch = if (doc.pitch > 0f) doc.pitch else settings.globalPitch
+                val volumePercent = if (doc.volumePercent >= 0) doc.volumePercent else settings.globalVolumePercent
+                player.playbackParameters = androidx.media3.common.PlaybackParameters(speed, pitch)
+                player.volume = volumePercent / 100f
+
+                player.prepare()
+                val startIndex = doc.audioFileIndex.coerceIn(0, mediaItems.size - 1)
+                player.seekTo(startIndex, doc.audioPositionMs)
+                player.playWhenReady = false
+                audioPlayer = player
+            }
+        }
+    }
+
+    /** Oslobađa audio motor (ExoPlayer) - poziva se pri zatvaranju audio knjige ili prelasku
+     * na drugi dokument, da ne ostane da drži fajlove/resurse otvorene u pozadini. */
+    fun releaseAudioEngine() {
+        audioPlayer?.release()
+        audioPlayer = null
     }
 
     /** JEDINO mesto koje odgovara na pitanje "da li NEŠTO trenutno čita/svira" - grana na
