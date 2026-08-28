@@ -273,6 +273,15 @@ class ReaderActivity : AppCompatActivity() {
     /** Postavlja vidljivost kontrola prema TRENUTNOJ vrednosti controlsHidden - koristi se i
      * pri prebacivanju (toggleControlsVisibility) i pri otvaranju dokumenta (da odmah prikaze
      * sacuvano stanje za taj dokument, bez potrebe da korisnica prvo sama pritisne dugme). */
+    /** Sakriva dugmad koja nemaju smisla za audio knjigu - Pretraga teksta i Selektuj
+     * sve/kopiraj rade nad tekstom koji za audio fizički ne postoji. Poziva se JEDNOM, pri
+     * otvaranju audio dokumenta - za tekstualne dokumente sva dugmad ostaju kako jesu
+     * (podrazumevana vidljivost iz layout-a). */
+    private fun applyAudioOnlyControlsVisibility() = with(binding) {
+        btnSearchText.visibility = android.view.View.GONE
+        btnSelectAll.visibility = android.view.View.GONE
+    }
+
     private fun applyControlsVisibility() = with(binding) {
         val visibility = if (controlsHidden) android.view.View.GONE else android.view.View.VISIBLE
         layoutStatus.visibility = visibility
@@ -410,6 +419,7 @@ class ReaderActivity : AppCompatActivity() {
             // povezuje u sledećem koraku.
             if (finalEntityWithTimestamp.format == "audio") {
                 PlaybackController.setupAudioEngine(this@ReaderActivity, finalEntityWithTimestamp)
+                applyAudioOnlyControlsVisibility()
                 updateStatusTexts()
                 updateSeekBar()
                 updateNavigationButtonLabels()
