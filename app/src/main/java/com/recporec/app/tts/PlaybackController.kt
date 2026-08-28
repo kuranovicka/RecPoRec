@@ -1076,9 +1076,16 @@ object PlaybackController {
      * ovde postoji posebno da bi radilo i pozvano iz servisa (npr. sa tastera za premotavanje
      * na slušalicama/spoljnoj tastaturi), nezavisno od toga da li je ekran otvoren. */
     fun stepNavigate(forward: Boolean, context: Context) {
+        val entity = currentDocument ?: return
+        if (entity.format == "audio") {
+            // Audio: "Prethodni/Sledeći zapis" menja FAJL u folderu (kao poglavlje), ne
+            // premotava po minutima - to radi dugme Prethodna/Sledeća u čitaču, odvojeno.
+            val player = audioPlayer ?: return
+            if (forward) player.seekToNextMediaItem() else player.seekToPreviousMediaItem()
+            return
+        }
         val settings = com.recporec.app.data.AppSettings(context)
         val mode = settings.navigationMode
-        val entity = currentDocument ?: return
         val length = parsedDocument?.length ?: return
 
         if (mode == "bookmark") {
