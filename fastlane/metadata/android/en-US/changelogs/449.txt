@@ -1,0 +1,3 @@
+What's new:
+
+1. Audio books now fully support Timer, Rest, Wake-up alarm, and Scheduled reading - the same way text-to-speech books do. Shake-to-resume and headset/keyboard media buttons work identically for both.
