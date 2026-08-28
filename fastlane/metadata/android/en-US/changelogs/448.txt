@@ -1,0 +1,6 @@
+What's new:
+
+1. Audio books: pick a folder of audio files (mp3, wav, ogg, flac, m4a) with "Add folder" and it's packed into a zip and shown in your book list like any other book.
+2. Full playback: Play/Pause, seek forward/back by minutes, jump to the previous/next audio file, and per-book speed/pitch/volume - saved automatically.
+3. Background playback and notification controls work the same way they do for text-to-speech books, including Bluetooth headset and external keyboard media buttons.
+4. Help screen updated to describe the new audio controls.

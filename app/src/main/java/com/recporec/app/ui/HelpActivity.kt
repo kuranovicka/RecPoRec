@@ -30,6 +30,10 @@ class HelpActivity : AppCompatActivity() {
         Ispod njega je dugme Dodaj folder.
         Dodaje ceo folder sa zvučnim fajlovima kao jednu audio knjigu.
         Program ga pakuje u zip arhivu i prikazuje ga u listi kao i sve ostale knjige.
+        Kod audio knjige, dugmad Odaberi sve i Pretraga su sakrivena, jer nema teksta.
+        Dugmad Prethodna i Sledeća premotavaju po minutima, isto podešeno kao i za tekst.
+        Prethodno i Sledeće poglavlje prelaze na prethodni ili sledeći zvučni fajl u folderu.
+        Radi u pozadini i notifikacija rade isto kao za tekst - brzina, visina i jačina se pamte po knjizi.
         Ispod njega je dugme Opšte radnje.
         Pojavljuje se samo kada ima dokumenata.
         Otvara opcije: odaberi sve, obriši odabrano, ili opozovi izbor.
