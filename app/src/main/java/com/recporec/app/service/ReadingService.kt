@@ -302,18 +302,38 @@ class ReadingService : Service() {
         // = 800, brzina citanja) kao "Proteklo/preostalo vreme" na ekranu citaca - dovoljno
         // tacno za ovu svrhu, ne mora biti savrseno.
         val doc = PlaybackController.currentDocument
-        val settingsForRate = AppSettings(this)
-        val rate = (doc?.speechRate?.takeIf { it > 0f }) ?: settingsForRate.globalSpeechRate
-        val safeRate = rate.coerceAtLeast(0.3f)
-        val baseCharsPerMinute = 800f
-        val totalChars = doc?.totalCharacters ?: 0
-        val currentChars = (doc?.currentCharacterOffset ?: 0).coerceIn(0, totalChars)
-        val totalDurationMs = if (totalChars > 0) {
-            (totalChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
-        } else 0L
-        val positionMs = if (totalChars > 0) {
-            (currentChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
-        } else 0L
+        val totalDurationMs: Long
+        val positionMs: Long
+        if (doc?.format == "audio") {
+            // Audio knjiga: STVARNE vrednosti sa ExoPlayer-a, ne procena - preciznije nego
+            // za tekst, i dostupno bez ikakvog racunanja.
+            val player = PlaybackController.audioPlayer
+            totalDurationMs = player?.duration?.coerceAtLeast(0) ?: 0L
+            positionMs = player?.currentPosition?.coerceAtLeast(0) ?: 0L
+        } else {
+            // NOVO POKUSAJ za Bluetooth slusalice sa fizickim dodirom (AVRCP): do sad smo
+            // UVEK prijavljivale poziciju kao "nepoznato" i NIKAD nismo postavljale trajanje
+            // - neki Bluetooth uredjaji/AVRCP implementacije zahtevaju STVARNE (makar
+            // procenjene) vrednosti da bi uopste tretirale sesiju kao "pravi" medijski
+            // sadrzaj kojim mogu da upravljaju fizickim dodirom - bez toga, sistemski
+            // KEYCODE_MEDIA_* dogadjaji (kakve salje spoljna tastatura) i dalje rade, ali
+            // direktan AVRCP dodir na slusalici moze da bude ignorisan. Procena
+            // trajanja/pozicije koristi ISTU formulu (baseCharsPerMinute = 800, brzina
+            // citanja) kao "Proteklo/preostalo vreme" na ekranu citaca - dovoljno tacno za
+            // ovu svrhu, ne mora biti savrseno.
+            val settingsForRate = AppSettings(this)
+            val rate = (doc?.speechRate?.takeIf { it > 0f }) ?: settingsForRate.globalSpeechRate
+            val safeRate = rate.coerceAtLeast(0.3f)
+            val baseCharsPerMinute = 800f
+            val totalChars = doc?.totalCharacters ?: 0
+            val currentChars = (doc?.currentCharacterOffset ?: 0).coerceIn(0, totalChars)
+            totalDurationMs = if (totalChars > 0) {
+                (totalChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
+            } else 0L
+            positionMs = if (totalChars > 0) {
+                (currentChars / (baseCharsPerMinute * safeRate) * 60_000L).toLong()
+            } else 0L
+        }
 
         mediaSession?.setMetadata(
             android.support.v4.media.MediaMetadataCompat.Builder()
