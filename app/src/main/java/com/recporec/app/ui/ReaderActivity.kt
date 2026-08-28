@@ -654,9 +654,17 @@ class ReaderActivity : AppCompatActivity() {
         val player = PlaybackController.audioPlayer ?: return
         if (player.isPlaying) {
             player.pause()
+            settings.userManuallyPaused = true
         } else {
+            settings.userManuallyPaused = false
+            // Isti obrazac kao TTS grana ispod - servis (drzi audio aktivnim u pozadini) se
+            // pokrece PRE pocetka reprodukcije.
+            if (settings.backgroundEnabled) {
+                ReadingService.start(this)
+            }
             player.play()
         }
+        PlaybackController.notifyPlaybackStateChanged()
         updateStatusTexts()
     }
 
@@ -2003,12 +2011,10 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiTimerExpiredListener = null
         persistState()
         if (doc?.format == "audio") {
-            // Audio JOS UVEK nema pozadinski rad (dolazi u kasnijem koraku) - za sada UVEK
-            // pauziramo pri izlasku sa ekrana, bez obzira na "Radi u pozadini" podešavanje
-            // (koje se odnosi samo na TTS), da reprodukcija ne ostane "viseći" bez ikakve
-            // notifikacije/kontrole nad njom.
             saveAudioPosition()
-            PlaybackController.audioPlayer?.pause()
+            if (!settings.backgroundEnabled) {
+                PlaybackController.audioPlayer?.pause()
+            }
         } else if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
         }
@@ -2018,9 +2024,6 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
-        if (isFinishing && doc?.format == "audio") {
-            PlaybackController.releaseAudioEngine()
-        }
     }
 
     companion object {

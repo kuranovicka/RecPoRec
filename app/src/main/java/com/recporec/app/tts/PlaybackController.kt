@@ -1131,6 +1131,7 @@ object PlaybackController {
     fun release() {
         ttsManager?.shutdown()
         ttsManager = null
+        releaseAudioEngine()
         currentDocument = null
         parsedDocument = null
         elapsedSeconds = 0
