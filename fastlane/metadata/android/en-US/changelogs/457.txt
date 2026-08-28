@@ -1,0 +1,8 @@
+What's new:
+
+1. Fixed: the first tap on Play for an audio book sometimes did nothing (had to tap twice) - now it starts as soon as the book finishes preparing, no double-tap needed.
+2. Fixed: "Delete original folder after packing" wasn't actually removing the folder - it now deletes the whole original folder (not just the individual files), so nothing is left behind.
+3. Elapsed/remaining time for audio books now covers the whole book (all audio files combined), not just the current one.
+4. "Go to" and "Previous/Next chapter" are no longer hidden for audio books - they're repurposed to jump by file number instead of page/chapter.
+5. Shortened the "Delete original audio folder" switch's screen-reader description.
+6. Help screen updated to list "previous file" / "next file" among the audio controls.
