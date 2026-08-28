@@ -646,10 +646,39 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    /** Play/Pauza za audio knjigu - namerno potpuno odvojeno od TTS grane ispod (bez
-     * tajmera/Odmora/pozadinskog nastavka za sada, kao što smo se dogovorile - to dolazi
-     * kasnije, pažljivo). Samo pusti/pauziraj ExoPlayer i pošalji pozicijom uinformisan
-     * pregled ekrana. */
+    /** Deljena logika za "šta se dešava sa Odmorom/Buđenjem/Zakazanim čitanjem kad korisnica
+     * RUČNO pritisne dugme Pusti" - identična za TTS i audio, sa istim porukama, da se
+     * ponašanje ne razlikuje zavisno od toga koju vrstu knjige trenutno slušaš. */
+    private fun handleManualResumeRestLogic() {
+        if (PlaybackController.isRestAlarmRinging()) {
+            // Alarm VEC zvoni (probudila se) - dugme Play ovde znaci "probudjena sam",
+            // isto kao "Prekini buđenje" - tek SAD se ceo niz stvarno prekida.
+            PlaybackController.cancelRest()
+            updateRestStatusText()
+            android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
+        } else if (PlaybackController.isWakeUpActive()) {
+            // JEDINO "Probudi me u" JOS NIJE zazvonilo (npr. za 6 ujutru, ali želiš da
+            // slušaš VEĆ sada, pre spavanja) - NE otkazuje se, ostaje aktivno za svoje
+            // pravo vreme, bez obzira što je knjiga u međuvremenu već ručno puštena.
+            android.widget.Toast.makeText(this, "Čitaš sada - buđenje ostaje zakazano.", android.widget.Toast.LENGTH_SHORT).show()
+        } else if (PlaybackController.restIsQuickBreak) {
+            // "Kratak predah" - rucno nastavljanje OVDE znaci "gotova sam sa predahom" -
+            // to je i poenta kratke pauze, prekida se odmah.
+            PlaybackController.cancelRest()
+            updateRestStatusText()
+        } else if (PlaybackController.restRemainingSeconds > 0) {
+            // "Zakaži čitanje" (ne Probudi, ne Kratak predah) - PRETPOSTAVKA te funkcije
+            // je da neko vreme nećeš biti tu da rucno pustis (zato se i zakazuje unapred);
+            // ako ipak rucno pustis ranije, to znaci da ta pretpostavka vise ne vazi, pa
+            // se zakazivanje prekida - kao i pre.
+            PlaybackController.cancelRest()
+            updateRestStatusText()
+            android.widget.Toast.makeText(this, "Zakazano čitanje prekinuto.", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** Play/Pauza za audio knjigu - sad sa PUNOM podrškom za Tajmer/Odmor/Buđenje, isto kao
+     * TTS grana ispod (deljena logika iznad, deljen pozadinski servis). */
     private fun toggleAudioPlayPause() {
         val player = PlaybackController.audioPlayer ?: return
         if (player.isPlaying) {
@@ -657,6 +686,7 @@ class ReaderActivity : AppCompatActivity() {
             settings.userManuallyPaused = true
         } else {
             settings.userManuallyPaused = false
+            handleManualResumeRestLogic()
             // Isti obrazac kao TTS grana ispod - servis (drzi audio aktivnim u pozadini) se
             // pokrece PRE pocetka reprodukcije.
             if (settings.backgroundEnabled) {
@@ -696,31 +726,7 @@ class ReaderActivity : AppCompatActivity() {
             PlaybackController.notifyPlaybackStateChanged()
         } else {
             if (manual) settings.userManuallyPaused = false
-            if (PlaybackController.isRestAlarmRinging()) {
-                // Alarm VEC zvoni (probudila se) - dugme Play ovde znaci "probudjena sam",
-                // isto kao "Prekini buđenje" - tek SAD se ceo niz stvarno prekida.
-                PlaybackController.cancelRest()
-                updateRestStatusText()
-                android.widget.Toast.makeText(this, "Buđenje isključeno.", android.widget.Toast.LENGTH_SHORT).show()
-            } else if (PlaybackController.isWakeUpActive()) {
-                // JEDINO "Probudi me u" JOS NIJE zazvonilo (npr. za 6 ujutru, ali želiš da
-                // slušaš VEĆ sada, pre spavanja) - NE otkazuje se, ostaje aktivno za svoje
-                // pravo vreme, bez obzira što je knjiga u međuvremenu već ručno puštena.
-                android.widget.Toast.makeText(this, "Čitaš sada - buđenje ostaje zakazano.", android.widget.Toast.LENGTH_SHORT).show()
-            } else if (PlaybackController.restIsQuickBreak) {
-                // "Kratak predah" - rucno nastavljanje OVDE znaci "gotova sam sa predahom" -
-                // to je i poenta kratke pauze, prekida se odmah.
-                PlaybackController.cancelRest()
-                updateRestStatusText()
-            } else if (PlaybackController.restRemainingSeconds > 0) {
-                // "Zakaži čitanje" (ne Probudi, ne Kratak predah) - PRETPOSTAVKA te funkcije
-                // je da neko vreme nećeš biti tu da rucno pustis (zato se i zakazuje unapred);
-                // ako ipak rucno pustis ranije, to znaci da ta pretpostavka vise ne vazi, pa
-                // se zakazivanje prekida - kao i pre.
-                PlaybackController.cancelRest()
-                updateRestStatusText()
-                android.widget.Toast.makeText(this, "Zakazano čitanje prekinuto.", android.widget.Toast.LENGTH_SHORT).show()
-            }
+            handleManualResumeRestLogic()
             // Servis (drzi drmanje aktivnim) se pokrece PRE pocetka citanja, ne posle - isti
             // razlog kao kod "Pri otvaranju dokumenta" iznad: pokretanje servisa nije trenutno,
             // pa bi drmanje odmah po pritisku Play moglo tiho da ne stigne da se registruje.

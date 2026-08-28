@@ -51,7 +51,7 @@ object PlaybackController {
             val oldId = _currentDocument?.id
             val newId = value?.id
             if (oldId != null && newId != null && oldId != newId && isActive()) {
-                ttsManager?.pause()
+                pauseEngine()
             }
             _currentDocument = value
         }
@@ -271,10 +271,10 @@ object PlaybackController {
                 // registruje na vreme.
                 ensureBackgroundServiceRunning()
                 val offset = currentDocument?.currentCharacterOffset
-                if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                resumeEngine(offset)
                 notifyPlaybackStateChanged()
             } else {
-                ttsManager?.pause()
+                pauseEngine()
                 restAlarmActive = true
                 restAlarmSecondsLeft = ALARM_RING_SECONDS
                 acquireRestWakeLock()
@@ -302,7 +302,7 @@ object PlaybackController {
     /** "Probudi" - odmor do TAČNO određenog vremena, SA alarmom (ponavlja se ako se ne
      * prekine, do pet puta) - namenjeno za buđenje. */
     fun startRestUntil(totalSeconds: Int) {
-        ttsManager?.pause()
+        pauseEngine()
         stopRestAlarm()
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = totalSeconds > 0
@@ -328,7 +328,7 @@ object PlaybackController {
      * BUĐENJE PROCESA (da se garantovano pokrene čak i uz Doze/pozadinsko throttlovanje),
      * samo bez zvuka i punog ekrana kad taj trenutak stigne. */
     fun startScheduledReading(totalSeconds: Int, isQuickBreak: Boolean = false) {
-        ttsManager?.pause()
+        pauseEngine()
         stopRestAlarm()
         restRemainingSeconds = if (totalSeconds <= 0) 0 else totalSeconds
         restIsWakeTime = false
@@ -416,7 +416,8 @@ object PlaybackController {
         // pokusaj tiho ne bi uradio nista (chunks prazni). Umesto da samo odustanemo,
         // sacekamo kratko i pokusamo ponovo, do par puta - dovoljno da priprema stigne da
         // zavrsi, bez potrebe da korisnica sama shvati da treba da drmne opet.
-        if (ttsManager?.isEngineReady != true || currentDocument == null) {
+        val engineReady = if (currentDocument?.format == "audio") audioPlayer != null else ttsManager?.isEngineReady == true
+        if (!engineReady || currentDocument == null) {
             // Sprecava da svako naredno drmanje (dok jos nije spremno) pokrene JOS JEDAN,
             // preklapajuci pokusaj cekanja - vise takvih istovremeno moglo je da izazove
             // nepredvidivo ponasanje (npr. dupli pokusaji nastavka u istom trenutku).
@@ -425,7 +426,8 @@ object PlaybackController {
                 scope.launch {
                     repeat(10) {
                         delay(300)
-                        if (ttsManager?.isEngineReady == true && currentDocument != null) {
+                        val readyNow = if (currentDocument?.format == "audio") audioPlayer != null else ttsManager?.isEngineReady == true
+                        if (readyNow && currentDocument != null) {
                             isRetryingShakeResume = false
                             resumeCancelingRestIfNeeded()
                             return@launch
@@ -450,11 +452,7 @@ object PlaybackController {
         // duže pauze (odmor/buđenje) kad taj indeks moze da se razidje sa stvarno sacuvanom
         // pozicijom.
         val offset = currentDocument?.currentCharacterOffset
-        if (offset != null) {
-            ttsManager?.startFromOffset(offset)
-        } else {
-            ttsManager?.resume()
-        }
+        resumeEngine(offset)
         // KRITICNO, CENTRALIZOVANO OVDE (ne kod svakog pozivaoca): bez ovoga MediaSession
         // ostaje "zaglavljena" na starom stanju dok neka DRUGA, rucna akcija (npr. dodir na
         // dugme u citacu) to prvi put ne osvezi - objasnjava prijave da dvoprst/slusalice ne
@@ -915,7 +913,7 @@ object PlaybackController {
                             if (!isActive()) {
                                 ensureBackgroundServiceRunning()
                                 val offset = currentDocument?.currentCharacterOffset
-                                if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+                                resumeEngine(offset)
                             }
                             notifyPlaybackStateChanged()
                         } else {
@@ -925,7 +923,7 @@ object PlaybackController {
                             // otkad Play vise ne otkazuje zakazano budjenje), pauziramo je PRE
                             // nego sto alarm pocne da zvoni - inace bi se glas i alarm culi
                             // istovremeno.
-                            ttsManager?.pause()
+                            pauseEngine()
                             restAlarmActive = true
                             restAlarmSecondsLeft = ALARM_RING_SECONDS
                             acquireRestWakeLock()
@@ -955,7 +953,7 @@ object PlaybackController {
                             // ostalo "na cekanju" u podesavanjima i posle automatskog odustajanja.
                             appContext?.let { com.recporec.app.data.AppSettings(it).clearPendingWake() }
                             ensureBackgroundServiceRunning()
-                            ttsManager?.resume()
+                            resumeEngine()
                             notifyPlaybackStateChanged()
                         }
                     }
@@ -981,7 +979,7 @@ object PlaybackController {
                         }
                         if (timerRemainingSeconds <= 0) {
                             timerRemainingSeconds = 0
-                            ttsManager?.pause()
+                            pauseEngine()
                             notifyPlaybackStateChanged()
                             // Kad istekne, tajmer se prosto iskljuci - jednostavno, kao pre.
                             currentDocument = currentDocument?.copy(timerMinutes = 0)
@@ -1063,6 +1061,27 @@ object PlaybackController {
     fun releaseAudioEngine() {
         audioPlayer?.release()
         audioPlayer = null
+    }
+
+    /** Pauzira TRENUTNO AKTIVAN motor (TTS ili audio) - koristi JEDINO isActive()-u odgovarajuća
+     * grana, da tajmer/Odmor/buđenje rade identično za oba tipa knjige bez ponavljanja iste
+     * provere na svakom pojedinačnom mestu. */
+    private fun pauseEngine() {
+        if (currentDocument?.format == "audio") {
+            audioPlayer?.pause()
+        } else {
+            ttsManager?.pause()
+        }
+    }
+
+    /** Nastavlja TRENUTNO otvoren dokument - za audio prosto pusti (ExoPlayer već zna svoju
+     * poziciju), za tekst ili počinje OD DATOG offseta ili nastavlja odakle je stalo. */
+    private fun resumeEngine(offset: Int? = null) {
+        if (currentDocument?.format == "audio") {
+            audioPlayer?.play()
+        } else {
+            if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
+        }
     }
 
     /** JEDINO mesto koje odgovara na pitanje "da li NEŠTO trenutno čita/svira" - grana na

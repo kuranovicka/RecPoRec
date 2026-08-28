@@ -59,11 +59,7 @@ class ReadingService : Service() {
                     // znaju povremeno da posalju PLAY i kad VEC svira, sto bi inace nasilno
                     // restartovalo trenutnu recenicu usred citanja.
                     if (!PlaybackController.isActive()) {
-                        if (PlaybackController.currentDocument?.format == "audio") {
-                            PlaybackController.audioPlayer?.play()
-                        } else {
-                            PlaybackController.resumeCancelingRestIfNeeded()
-                        }
+                        PlaybackController.resumeCancelingRestIfNeeded()
                         // KRITICNO: bez ovoga, MediaSession i dalje "misli" da je citanje
                         // pauzirano (staro stanje) - sledeci pritisak na JEDAN kombinovan
                         // play/pauza taster (kakav ima spoljna tastatura) bi sistem opet
