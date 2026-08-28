@@ -454,7 +454,40 @@ class DocumentListActivity : AppCompatActivity() {
                 return@launch
             }
 
+            // "Obriši originalni zvučni folder nakon pakovanja" - SME da se izvrši SAMO
+            // posle potvrde da je zip stvaran, kompletan (isti broj fajlova) - inače bi
+            // greška usred pakovanja mogla da obriše jedini primerak knjige.
+            if (settings.deleteOriginalAudioFolder) {
+                val zipValid = withContext(Dispatchers.IO) { verifyZipEntryCount(localUri, audioFiles.size) }
+                if (zipValid) {
+                    withContext(Dispatchers.IO) {
+                        for (file in audioFiles) file.delete()
+                    }
+                } else {
+                    android.widget.Toast.makeText(
+                        this@DocumentListActivity,
+                        "Original nije obrisan - zip nije mogao da se potvrdi.",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
             insertDocument(localUri, folderName, "audio")
+        }
+    }
+
+    /** Brza provera integriteta pre brisanja originala - broj upakovanih zapisa u zip-u mora
+     * da se poklopi sa brojem originalnih fajlova, inače se NE briše ništa. Ne otvara/proverava
+     * sadržaj svakog fajla pojedinačno (dovoljno za razumnu sigurnost, bez usporavanja). */
+    private fun verifyZipEntryCount(zipUri: Uri, expectedCount: Int): Boolean {
+        return try {
+            var count = 0
+            java.util.zip.ZipInputStream(contentResolver.openInputStream(zipUri) ?: return false).use { zipIn ->
+                while (zipIn.nextEntry != null) count++
+            }
+            count == expectedCount
+        } catch (e: Exception) {
+            false
         }
     }
 
