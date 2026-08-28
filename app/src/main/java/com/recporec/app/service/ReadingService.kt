@@ -58,7 +58,7 @@ class ReadingService : Service() {
                     // Zastita od udvostrucene komande - neki Bluetooth uredjaji/AVRCP steka
                     // znaju povremeno da posalju PLAY i kad VEC svira, sto bi inace nasilno
                     // restartovalo trenutnu recenicu usred citanja.
-                    if (PlaybackController.ttsManager?.isSpeaking != true) {
+                    if (!PlaybackController.isActive()) {
                         PlaybackController.resumeCancelingRestIfNeeded()
                         // KRITICNO: bez ovoga, MediaSession i dalje "misli" da je citanje
                         // pauzirano (staro stanje) - sledeci pritisak na JEDAN kombinovan
@@ -75,7 +75,7 @@ class ReadingService : Service() {
                     }
                 }
                 override fun onPause() {
-                    if (PlaybackController.ttsManager?.isSpeaking == true) {
+                    if (PlaybackController.isActive()) {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
                         // Isti razlog kao gore - prijavi NOVO (pauzirano) stanje odmah, ne
@@ -88,7 +88,7 @@ class ReadingService : Service() {
                 // razlicit od Pauze - bez ovoga bi taj taster tiho ne uradio nista. Ponasa se
                 // isto kao Pauza (nemamo poseban koncept "potpuno zaustavi" razlicit od pauze).
                 override fun onStop() {
-                    if (PlaybackController.ttsManager?.isSpeaking == true) {
+                    if (PlaybackController.isActive()) {
                         PlaybackController.ttsManager?.pause()
                         AppSettings(this@ReadingService).userManuallyPaused = true
                         PlaybackController.notifyPlaybackStateChanged()
@@ -278,7 +278,7 @@ class ReadingService : Service() {
         )
 
         val title = PlaybackController.currentDocument?.title ?: "RečPoReč"
-        val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
+        val isSpeaking = PlaybackController.isActive()
 
         // NOVO POKUSAJ za Bluetooth slusalice sa fizickim dodirom (AVRCP): do sad smo UVEK
         // prijavljivale poziciju kao "nepoznato" i NIKAD nismo postavljale trajanje - neki

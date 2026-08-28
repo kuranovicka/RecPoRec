@@ -41,7 +41,7 @@ object PlaybackController {
         set(value) {
             val oldId = _currentDocument?.id
             val newId = value?.id
-            if (oldId != null && newId != null && oldId != newId && ttsManager?.isSpeaking == true) {
+            if (oldId != null && newId != null && oldId != newId && isActive()) {
                 ttsManager?.pause()
             }
             _currentDocument = value
@@ -668,7 +668,7 @@ object PlaybackController {
     fun autoResumeLastActiveDocument(context: Context, autoPlay: Boolean = true) {
         val loadToken = beginLoadRequest()
         scope.launch {
-            if (ttsManager?.isSpeaking == true) return@launch // vec nesto cita, ne diramo
+            if (isActive()) return@launch // vec nesto cita, ne diramo
             // KRITICNO: ako je BUDJENJE ili ZAKAZANO CITANJE trenutno aktivno (odbrojava, ili
             // alarm vec zvoni), NIKAKO ne diramo nista ovde - ta funkcija ima SVOJ, odvojen
             // tok upravljanja (AlarmManager, WakeAlarmActivity...), i ako bismo ovde pripremili
@@ -903,7 +903,7 @@ object PlaybackController {
                             stopRestAlarm()
                             releaseRestWakeLock()
                             cancelWakeAlarm()
-                            if (ttsManager?.isSpeaking != true) {
+                            if (!isActive()) {
                                 ensureBackgroundServiceRunning()
                                 val offset = currentDocument?.currentCharacterOffset
                                 if (offset != null) ttsManager?.startFromOffset(offset) else ttsManager?.resume()
@@ -952,7 +952,7 @@ object PlaybackController {
                     }
                 }
 
-                if (ttsManager?.isSpeaking == true) {
+                if (isActive()) {
                     elapsedSeconds += 1
                     currentDocument = currentDocument?.copy(elapsedSeconds = elapsedSeconds)
                     tick++
@@ -1002,6 +1002,11 @@ object PlaybackController {
         persistCurrentDocument()
     }
 
+    /** JEDINO mesto koje odgovara na pitanje "da li NEŠTO trenutno čita/svira" - trenutno
+     * samo TTS, ali OVDE (i samo ovde) će se kasnije dodati i audio-knjiga grana, kad
+     * ExoPlayer bude uveden. Svi ostali delovi koda (PlaybackController, ReadingService)
+     * pitaju OVU funkciju, ne diraju ttsManager direktno za "da li svira" pitanja - to je
+     * namerno, da integracija audija kasnije zahteva izmenu SAMO ovde. */
     fun isActive(): Boolean = ttsManager?.isSpeaking == true
 
     /** Isto što i dugmad "Prethodna/Sledeća" u čitaču (zavisno od podešavanja Navigacije) -

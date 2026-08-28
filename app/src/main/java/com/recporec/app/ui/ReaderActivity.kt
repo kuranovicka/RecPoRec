@@ -326,7 +326,7 @@ class ReaderActivity : AppCompatActivity() {
         // tok), umesto da stane i ceka rucni pritisak na Play, cak i ako "Automatski citaj
         // pri otvaranju dokumenta" nije ukljuceno.
         val wasSpeakingBeforeSwitch =
-            PlaybackController.currentDocument?.id != documentId && PlaybackController.ttsManager?.isSpeaking == true
+            PlaybackController.currentDocument?.id != documentId && PlaybackController.isActive()
         // Ako TRENUTNO neki DRUGI dokument aktivno cita (ne ovaj koji upravo otvaramo),
         // eksplicitno ga zaustavi PRE nego sto pocnemo bilo sta drugo - jasnije i pouzdanije
         // nego osloniti se da ce novo ucitavanje samo nekako "preklopiti" staro.
@@ -411,7 +411,7 @@ class ReaderActivity : AppCompatActivity() {
             // završi, što bi u tom prozoru pogrešno prikazalo "Glas se priprema" na svaki
             // dodir dugmadi, čak i dok se knjiga već čuje.
             val sessionAlreadyActive = usingCachedParse && PlaybackController.ttsManager?.isEngineReady == true
-            val alreadySpeaking = PlaybackController.ttsManager?.isSpeaking == true
+            val alreadySpeaking = PlaybackController.isActive()
             // "Automatski čitaj aktivni dokument" - "Pri otvaranju dokumenta": čim se OVAJ
             // dokument otvori, samo krene da čita, bez potrebe da se pritisne Play. Koristi
             // isti mehanizam kao "nastavi čim glas bude spreman" (pendingPlayAfterReady).
@@ -445,7 +445,7 @@ class ReaderActivity : AppCompatActivity() {
                     // ekran uopste otvorio), togglePlayPause() bi je POGRESNO pauzirao umesto
                     // pokrenuo (otud "procita rec dve i stane"). Pokrecemo SAMO ako stvarno
                     // JOS UVEK nista ne cita.
-                    if (PlaybackController.ttsManager?.isSpeaking != true) {
+                    if (!PlaybackController.isActive()) {
                         togglePlayPause(manual = false)
                     }
                 }
@@ -1527,7 +1527,7 @@ class ReaderActivity : AppCompatActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 if (autoScrollUnit == null) return // vec zaustavljeno na neki drugi nacin
-                if (PlaybackController.ttsManager?.isSpeaking == true) {
+                if (PlaybackController.isActive()) {
                     stopAutoScroll()
                     return
                 }
@@ -1701,7 +1701,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun startTicker() {
         tickerRunnable = object : Runnable {
             override fun run() {
-                val isSpeaking = PlaybackController.ttsManager?.isSpeaking == true
+                val isSpeaking = PlaybackController.isActive()
                 if (isSpeaking) {
                     PlaybackController.currentDocument?.let { pcDoc ->
                         if (pcDoc.id == doc?.id) {
