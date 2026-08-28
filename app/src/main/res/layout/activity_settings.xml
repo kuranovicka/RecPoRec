@@ -212,6 +212,18 @@
             android:text="Stranica" />
     </LinearLayout>
 
+    <Switch
+        android:id="@+id/switchDeleteOriginalAudioFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:thumbTint="@color/btn_chapter"
+        android:trackTint="@color/btn_chapter"
+        android:text="Obriši originalni zvučni folder nakon pakovanja"
+        android:contentDescription="Obriši originalni zvučni folder nakon pakovanja - kad dodaš folder sa zvučnim fajlovima kao audio knjigu, originalni folder se briše posle uspešnog pakovanja u zip. Po zadatom isključeno." />
+
     <Button
         android:id="@+id/btnExportSettings"
         android:layout_width="match_parent"
@@ -234,18 +246,6 @@
         android:textColor="@color/button_text"
         android:contentDescription="Uvezi podešavanja iz fajla. Dug pritisak: vrati rezervnu kopiju."
         android:text="Uvezi podešavanja iz fajla" />
-
-    <Switch
-        android:id="@+id/switchDeleteOriginalAudioFolder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="20sp"
-        android:textColor="@color/text_primary"
-        android:thumbTint="@color/btn_chapter"
-        android:trackTint="@color/btn_chapter"
-        android:text="Obriši originalni zvučni folder nakon pakovanja"
-        android:contentDescription="Obriši originalni zvučni folder nakon pakovanja - kad dodaš folder sa zvučnim fajlovima kao audio knjigu, originalni folder se briše posle uspešnog pakovanja u zip. Po zadatom isključeno." />
 
     <Button
         android:id="@+id/btnResetGeneralDefaults"

@@ -50,8 +50,16 @@ object PlaybackController {
         set(value) {
             val oldId = _currentDocument?.id
             val newId = value?.id
-            if (oldId != null && newId != null && oldId != newId && isActive()) {
-                pauseEngine()
+            if (oldId != null && newId != null && oldId != newId) {
+                if (isActive()) pauseEngine()
+                // KRITICNO za performanse: ExoPlayer NIJE besplatan da drzi u memoriji -
+                // ako se ne oslobodi ovde, ostaje "visi" (pauziran, ali ziv, sa svojim
+                // internim thread-ovima/baferima) sve dok korisnica ne pritisne Izlaz -
+                // cak i ako narednih sat vremena cita SAMO tekstualne knjige. Ovo je
+                // verovatan uzrok primecenog usporenja aplikacije posle uvodjenja audija.
+                if (_currentDocument?.format == "audio") {
+                    releaseAudioEngine()
+                }
             }
             _currentDocument = value
         }

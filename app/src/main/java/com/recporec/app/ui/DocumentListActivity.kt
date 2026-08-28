@@ -670,16 +670,32 @@ class DocumentListActivity : AppCompatActivity() {
     }
 
     private fun showActionsMenu(doc: DocumentEntity) {
+        // "Izvezi u txt" nema smisla za audio knjigu - nema teksta koji bi se izvukao.
+        val items = if (doc.format == "audio") {
+            arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Obriši")
+        } else {
+            arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Izvezi u txt", "Obriši")
+        }
         AlertDialog.Builder(this)
             .setTitle(doc.title)
-            .setItems(arrayOf("Premesti nagore", "Premesti nadole", "Preimenuj", "Podeli", "Izvezi u txt", "Obriši")) { _, which ->
-                when (which) {
-                    0 -> moveDocument(doc, up = true)
-                    1 -> moveDocument(doc, up = false)
-                    2 -> showRenameDialog(doc)
-                    3 -> shareDocument(doc)
-                    4 -> showExportDestinationDialog(doc)
-                    5 -> confirmDelete(doc)
+            .setItems(items) { _, which ->
+                if (doc.format == "audio") {
+                    when (which) {
+                        0 -> moveDocument(doc, up = true)
+                        1 -> moveDocument(doc, up = false)
+                        2 -> showRenameDialog(doc)
+                        3 -> shareDocument(doc)
+                        4 -> confirmDelete(doc)
+                    }
+                } else {
+                    when (which) {
+                        0 -> moveDocument(doc, up = true)
+                        1 -> moveDocument(doc, up = false)
+                        2 -> showRenameDialog(doc)
+                        3 -> shareDocument(doc)
+                        4 -> showExportDestinationDialog(doc)
+                        5 -> confirmDelete(doc)
+                    }
                 }
             }
             .show()

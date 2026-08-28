@@ -273,13 +273,21 @@ class ReaderActivity : AppCompatActivity() {
     /** Postavlja vidljivost kontrola prema TRENUTNOJ vrednosti controlsHidden - koristi se i
      * pri prebacivanju (toggleControlsVisibility) i pri otvaranju dokumenta (da odmah prikaze
      * sacuvano stanje za taj dokument, bez potrebe da korisnica prvo sama pritisne dugme). */
-    /** Sakriva dugmad koja nemaju smisla za audio knjigu - Pretraga teksta i Selektuj
-     * sve/kopiraj rade nad tekstom koji za audio fizički ne postoji. Poziva se JEDNOM, pri
-     * otvaranju audio dokumenta - za tekstualne dokumente sva dugmad ostaju kako jesu
-     * (podrazumevana vidljivost iz layout-a). */
+    /** Sakriva dugmad koja nemaju smisla ili nisu bezbedna za audio knjigu - sve što je
+     * vezano za tekstualnu poziciju (karakter/stranica/poglavlje) umesto za vreme/fajl u
+     * folderu. Poziva se JEDNOM, pri otvaranju audio dokumenta - za tekstualne dokumente
+     * sva dugmad ostaju kako jesu (podrazumevana vidljivost iz layout-a). Dostupno za audio
+     * (nije ovde sakriveno): premotavanje po minutima, tajmer, buđenje, odmor,
+     * brzina/visina/jačina, oznake. */
     private fun applyAudioOnlyControlsVisibility() = with(binding) {
         btnSearchText.visibility = android.view.View.GONE
         btnSelectAll.visibility = android.view.View.GONE
+        // "Izvezi u txt" - nema teksta za izvoz.
+        btnGoTo.visibility = android.view.View.GONE // ide na stranicu/oznaku po karakteru - tekstualno
+        btnPrevChapter.visibility = android.view.View.GONE // poglavlja iz teksta - audio ih nema
+        btnNextChapter.visibility = android.view.View.GONE
+        btnAutoScroll.visibility = android.view.View.GONE // automatsko LISTANJE teksta - nema smisla
+        btnRemindMe.visibility = android.view.View.GONE // racuna po karakteru pozicije - nebezbedno za audio
     }
 
     private fun applyControlsVisibility() = with(binding) {

@@ -59,6 +59,16 @@ class DocumentVoiceSettingsActivity : AppCompatActivity() {
     private fun setupControls() {
         val doc = document ?: return
 
+        // Jezik/Glas/Kombinovani glasovi su TTS-specificni - za audio knjigu nemaju smisla,
+        // ostaju samo brzina/visina/jacina (koje audio motor takodje koristi).
+        if (doc.format == "audio") {
+            binding.btnLanguage.visibility = android.view.View.GONE
+            binding.textLanguageStatus.visibility = android.view.View.GONE
+            binding.btnVoice.visibility = android.view.View.GONE
+            binding.textVoiceStatus.visibility = android.view.View.GONE
+            binding.btnCombinedVoices.visibility = android.view.View.GONE
+        }
+
         binding.btnLanguage.setOnClickListener { showLanguagePicker() }
         binding.btnVoice.setOnClickListener { showVoicePicker() }
         binding.btnCombinedVoices.setOnClickListener {
