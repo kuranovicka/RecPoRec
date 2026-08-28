@@ -759,7 +759,22 @@ class ReaderActivity : AppCompatActivity() {
         moveTo(offset)
     }
 
+    /** Premotavanje za audio knjigu - po MINUTIMA (isto podešavanje broja minuta koje već
+     * postoji za tekstualne knjige, "minute" režim navigacije), ne po rečenicama/stranicama
+     * jer to fizički ne postoji za audio. */
+    private fun stepNavigateAudio(forward: Boolean) {
+        val player = PlaybackController.audioPlayer ?: return
+        val deltaMs = settings.minuteNavigationCount * 60_000L
+        val target = player.currentPosition + if (forward) deltaMs else -deltaMs
+        player.seekTo(target.coerceAtLeast(0))
+        updateStatusTexts()
+    }
+
     private fun stepNavigate(forward: Boolean) {
+        if (doc?.format == "audio") {
+            stepNavigateAudio(forward)
+            return
+        }
         val mode = settings.navigationMode
         if (mode == "bookmark") {
             jumpBookmark(forward)
@@ -1729,6 +1744,8 @@ class ReaderActivity : AppCompatActivity() {
         binding.textRestStatus.visibility = if (inactive) android.view.View.GONE else android.view.View.VISIBLE
     }
 
+    private var audioSaveTickCounter = 0
+
     private fun startTicker() {
         tickerRunnable = object : Runnable {
             override fun run() {
@@ -1741,6 +1758,15 @@ class ReaderActivity : AppCompatActivity() {
                     }
                     updateStatusTexts()
                 }
+                // Audio knjiga: pozicija se pamti svakih ~5 sekundi dok svira - isti razmak
+                // koji TTS grana koristi za svoje periodično čuvanje (persistCurrentDocument).
+                val player = PlaybackController.audioPlayer
+                if (doc?.format == "audio" && player != null && player.isPlaying) {
+                    audioSaveTickCounter++
+                    if (audioSaveTickCounter % 5 == 0) {
+                        saveAudioPosition()
+                    }
+                }
                 if (PlaybackController.timerRemainingSeconds > 0) {
                     updateTimerStatusText()
                 }
@@ -1749,6 +1775,24 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         handler.postDelayed(tickerRunnable!!, 1000)
+    }
+
+    /** Upisuje trenutnu poziciju (fajl u folderu + milisekunda unutar njega) audio knjige u
+     * bazu - poziva se periodično dok svira, i pri izlasku sa ekrana, da se čitanje uvek
+     * nastavi tačno odatle gde je stalo. */
+    private fun saveAudioPosition() {
+        val player = PlaybackController.audioPlayer ?: return
+        val entity = doc ?: return
+        if (entity.format != "audio") return
+        val updated = entity.copy(
+            audioFileIndex = player.currentMediaItemIndex,
+            audioPositionMs = player.currentPosition,
+            audioDurationMs = player.duration.coerceAtLeast(0)
+        )
+        doc = updated
+        lifecycleScope.launch(Dispatchers.IO) {
+            db.documentDao().update(updated)
+        }
     }
 
     /** Dug pritisak na Play/Pauza - naglas (Toast koji TalkBack pročita) kaže trenutni status:
@@ -1948,7 +1992,14 @@ class ReaderActivity : AppCompatActivity() {
         PlaybackController.uiFinishedListener = null
         PlaybackController.uiTimerExpiredListener = null
         persistState()
-        if (!settings.backgroundEnabled) {
+        if (doc?.format == "audio") {
+            // Audio JOS UVEK nema pozadinski rad (dolazi u kasnijem koraku) - za sada UVEK
+            // pauziramo pri izlasku sa ekrana, bez obzira na "Radi u pozadini" podešavanje
+            // (koje se odnosi samo na TTS), da reprodukcija ne ostane "viseći" bez ikakve
+            // notifikacije/kontrole nad njom.
+            saveAudioPosition()
+            PlaybackController.audioPlayer?.pause()
+        } else if (!settings.backgroundEnabled) {
             PlaybackController.ttsManager?.pause()
         }
     }
@@ -1957,6 +2008,9 @@ class ReaderActivity : AppCompatActivity() {
         super.onDestroy()
         tickerRunnable?.let { handler.removeCallbacks(it) }
         toneGenerator?.release()
+        if (isFinishing && doc?.format == "audio") {
+            PlaybackController.releaseAudioEngine()
+        }
     }
 
     companion object {
