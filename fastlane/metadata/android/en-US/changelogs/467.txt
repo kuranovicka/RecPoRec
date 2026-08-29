@@ -1,0 +1,3 @@
+What's new:
+
+1. Bookmarks now properly support audio books - they save the exact spot (which audio file and how many seconds in), instead of a meaningless text position. Adding, removing, and jumping to a bookmark all work correctly for audio.
