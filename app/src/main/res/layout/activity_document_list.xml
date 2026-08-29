@@ -84,7 +84,7 @@
                 android:textColor="@color/button_text"
                 android:background="@drawable/key_button_shape"
                 android:contentDescription="Dodaj folder sa zvučnim fajlovima."
-                android:text="Dodaj folder sa zvučnim fajlovima" />
+                android:text="Dodaj audio folder" />
 
             <Button
                 android:id="@+id/btnGeneralActions"
