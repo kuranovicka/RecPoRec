@@ -974,6 +974,17 @@ class ReaderActivity : AppCompatActivity() {
         entity?.volumePercent?.let { if (it >= 0) it else null } ?: settings.globalVolumePercent
 
     private fun updateNavigationButtonLabels() {
+        // Audio UVEK premotava po minutima (dug pritisak: brz izbor broja minuta) - bez
+        // obzira na globalno podešenu Navigaciju (koja je za tekst). Natpis mora to da
+        // odražava, inače dugme kaže "Rečenice" a zapravo radi minute kad se pritisne.
+        if (doc?.format == "audio") {
+            val n = settings.minuteNavigationCount
+            binding.btnStepBack.text = "◀ $n min"
+            binding.btnStepBack.contentDescription = "$n minuta unazad. Dug pritisak: izaberi broj minuta."
+            binding.btnStepForward.text = "$n min ▶"
+            binding.btnStepForward.contentDescription = "$n minuta unapred. Dug pritisak: izaberi broj minuta."
+            return
+        }
         val mode = settings.navigationMode
         val backHint = " Dug pritisak: ponovi trenutnu stranicu."
         val forwardHint = " Dug pritisak: poništi poslednju radnju."
@@ -1164,11 +1175,11 @@ class ReaderActivity : AppCompatActivity() {
         if (doc?.format == "audio") {
             AlertDialog.Builder(this)
                 .setTitle("Idi na")
-                .setItems(arrayOf("Idi na file", "Idi na minut", "Idi na oznaku")) { _, which ->
+                .setItems(arrayOf("Idi na oznaku", "Idi na minut", "Idi na file")) { _, which ->
                     when (which) {
-                        0 -> showGotoAudioFileDialog()
+                        0 -> showGoToBookmarkDialog()
                         1 -> showGotoMinuteDialog()
-                        2 -> showGoToBookmarkDialog()
+                        2 -> showGotoAudioFileDialog()
                     }
                 }
                 .show()
