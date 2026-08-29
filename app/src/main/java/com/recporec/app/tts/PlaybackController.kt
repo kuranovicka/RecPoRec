@@ -36,6 +36,14 @@ object PlaybackController {
     var audioPlayer: androidx.media3.exoplayer.ExoPlayer? = null
         private set
 
+    /** Trajanje SVAKOG zvučnog fajla ponaosob (u milisekundama), u istom redosledu kao
+     * playlista - čita se direktno iz fajlova (MediaMetadataRetriever) pri pripremi motora,
+     * NE iz ExoPlayer-ove Timeline (koja ne zna unapred trajanje fajlova koje još nije
+     * učitala - zbog toga je "ukupno vreme cele knjige" ranije ispadalo pogrešno, kao da
+     * se računa samo trenutni fajl). Prazna lista dok motor nije spreman. */
+    var audioFileDurationsMs: List<Long> = emptyList()
+        private set
+
     /** Ako korisnica pritisne Play PRE nego što se audio motor pripremi (zip se još
      * raspakuje/priprema), ovo pamti da treba da krene ODMAH čim motor bude spreman - bez
      * ovoga bi prvi pritisak izgledao kao da "ne radi ništa" (moralo se pritisnuti dvaput). */
@@ -1047,11 +1055,27 @@ object PlaybackController {
             val files = extractDir.listFiles()?.sortedBy { it.name } ?: emptyList()
             if (files.isEmpty()) return@withContext
 
+            // Trajanje SVAKOG fajla - citano direktno iz fajla, POUZDANO i odmah dostupno,
+            // za razliku od ExoPlayer Timeline-a koji ne zna unapred trajanje fajlova koje
+            // jos nije stigao da ucita (zbog cega je "ukupno vreme" ranije bilo pogresno).
+            val durations = files.map { file ->
+                try {
+                    val retriever = android.media.MediaMetadataRetriever()
+                    retriever.setDataSource(file.absolutePath)
+                    val ms = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+                    retriever.release()
+                    ms
+                } catch (e: Exception) {
+                    0L
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 releaseAudioEngine()
                 val player = androidx.media3.exoplayer.ExoPlayer.Builder(context).build()
                 val mediaItems = files.map { androidx.media3.common.MediaItem.fromUri(android.net.Uri.fromFile(it)) }
                 player.setMediaItems(mediaItems)
+                audioFileDurationsMs = durations
 
                 val settings = AppSettings(context)
                 val speed = if (doc.speechRate > 0f) doc.speechRate else settings.globalSpeechRate
@@ -1080,6 +1104,7 @@ object PlaybackController {
     fun releaseAudioEngine() {
         audioPlayer?.release()
         audioPlayer = null
+        audioFileDurationsMs = emptyList()
     }
 
     /** Pauzira TRENUTNO AKTIVAN motor (TTS ili audio) - koristi JEDINO isActive()-u odgovarajuća

@@ -235,9 +235,15 @@ class ReaderActivity : AppCompatActivity() {
         btnRemindMe.setOnLongClickListener { reactivateLastReminder(); true }
 
         btnStepBack.setOnClickListener(clickSound { stepNavigate(forward = false) })
-        btnStepBack.setOnLongClickListener { repeatCurrentStep(); true }
+        btnStepBack.setOnLongClickListener {
+            if (doc?.format == "audio") showMinuteNavCountPicker() else repeatCurrentStep()
+            true
+        }
         btnStepForward.setOnClickListener(clickSound { stepNavigate(forward = true) })
-        btnStepForward.setOnLongClickListener { undoLastJump(); true }
+        btnStepForward.setOnLongClickListener {
+            if (doc?.format == "audio") showMinuteNavCountPicker() else undoLastJump()
+            true
+        }
 
         seekProgress.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -703,6 +709,20 @@ class ReaderActivity : AppCompatActivity() {
 
     /** "Prethodni/Sledeći file" - jedini smisleni ekvivalent poglavlja za audio (folder od
      * više zvučnih fajlova = "poglavlja" u praksi). */
+    /** Brz pristup izboru "koliko minuta po koraku" direktno sa dugmeta Prethodna/Sledeća u
+     * audio knjizi - dug pritisak, bez odlaska u Podešavanja. Isto podešavanje (i ista lista)
+     * kao za tekst kad je Navigacija podešena na minute - samo brži put do njega za audio,
+     * pošto audio UVEK koristi minute (nema drugog izbora navigacije). */
+    private fun showMinuteNavCountPicker() {
+        val labels = listOf("1 minut", "2 minuta", "5 minuta", "10 minuta")
+        val values = listOf(1, 2, 5, 10)
+        val currentLabel = labels[values.indexOf(settings.minuteNavigationCount).coerceAtLeast(0)]
+        PickerDialog.show(this, "Koliko minuta po koraku", labels, currentLabel, autoConfirm = true, showSearch = false) { index ->
+            settings.minuteNavigationCount = values[index]
+            updateNavigationButtonLabels()
+        }
+    }
+
     private fun stepAudioFile(direction: Int) {
         val player = PlaybackController.audioPlayer ?: return
         if (direction > 0) player.seekToNextMediaItem() else player.seekToPreviousMediaItem()
@@ -2031,19 +2051,18 @@ class ReaderActivity : AppCompatActivity() {
      * updateStatusTexts() (koji računa po broju karaktera - besmisleno za audio). */
     /** Ukupno trajanje CELE audio knjige (svih fajlova u folderu zajedno), i koliko je od
      * toga proteklo (svi ZAVRŠENI fajlovi + pozicija u trenutnom) - ne samo trenutni fajl.
-     * Koristi ExoPlayer-ovu Timeline; dostupno tek kad je player pripremljen (prepare() već
-     * pozvat u setupAudioEngine, pa je ovde uvek spreman ako player postoji). */
+     * Koristi POUZDANA, unapred pročitana trajanja (PlaybackController.audioFileDurationsMs),
+     * NE ExoPlayer-ovu Timeline - ona ne zna unapred trajanje fajlova koje još nije stigla da
+     * učita, zbog čega je "ukupno vreme" ranije ispadalo pogrešno (kao da se računa samo
+     * trenutni fajl). */
     private fun audioTotalElapsedAndDurationMs(player: androidx.media3.exoplayer.ExoPlayer): Pair<Long, Long> {
-        val timeline = player.currentTimeline
-        if (timeline.windowCount == 0) return player.currentPosition.coerceAtLeast(0) to player.duration.coerceAtLeast(0)
-        val window = androidx.media3.common.Timeline.Window()
-        var totalMs = 0L
+        val durations = PlaybackController.audioFileDurationsMs
+        if (durations.isEmpty()) return player.currentPosition.coerceAtLeast(0) to player.duration.coerceAtLeast(0)
+        val totalMs = durations.sum()
+        val currentIndex = player.currentMediaItemIndex
         var elapsedMs = 0L
-        for (i in 0 until timeline.windowCount) {
-            timeline.getWindow(i, window)
-            val dur = window.durationMs.coerceAtLeast(0)
-            totalMs += dur
-            if (i < player.currentMediaItemIndex) elapsedMs += dur
+        for (i in durations.indices) {
+            if (i < currentIndex) elapsedMs += durations[i]
         }
         elapsedMs += player.currentPosition.coerceAtLeast(0)
         return elapsedMs to totalMs

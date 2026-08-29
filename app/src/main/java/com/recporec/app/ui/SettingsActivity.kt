@@ -134,8 +134,8 @@ class SettingsActivity : AppCompatActivity() {
                 // "Minuti" - konsolidovano iz tri odvojene opcije (1/5/10 minuta) u jednu, sa
                 // pod-izborom - isti obrazac kao "Rečenice" ispod.
                 if (chosenMode == "minute") {
-                    val minuteLabels = listOf("1 minut", "5 minuta", "10 minuta")
-                    val minuteValues = listOf(1, 5, 10)
+                    val minuteLabels = listOf("1 minut", "2 minuta", "5 minuta", "10 minuta")
+                    val minuteValues = listOf(1, 2, 5, 10)
                     val currentMinuteLabel = minuteLabels[minuteValues.indexOf(settings.minuteNavigationCount).coerceAtLeast(0)]
                     PickerDialog.show(this, "Koliko minuta po koraku", minuteLabels, currentMinuteLabel, autoConfirm = true, showSearch = false) { minIndex ->
                         settings.minuteNavigationCount = minuteValues[minIndex]
