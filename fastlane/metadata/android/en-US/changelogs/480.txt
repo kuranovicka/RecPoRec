@@ -1,0 +1,3 @@
+What's new:
+
+1. Fixed: changing speed, pitch, or volume for an audio book while it was open didn't actually apply until you closed and reopened the book - it looked like a big delay, but the change simply wasn't reaching the player. It now applies immediately.
