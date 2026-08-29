@@ -497,13 +497,20 @@ class DocumentListActivity : AppCompatActivity() {
     /** Brza provera integriteta pre brisanja originala - broj upakovanih zapisa u zip-u mora
      * da se poklopi sa brojem originalnih fajlova, inače se NE briše ništa. Ne otvara/proverava
      * sadržaj svakog fajla pojedinačno (dovoljno za razumnu sigurnost, bez usporavanja). */
+    /** Brza provera integriteta pre brisanja originala - broj upakovanih zapisa u zip-u mora
+     * da se poklopi sa brojem originalnih fajlova, inače se NE briše ništa. Koristi ZipFile
+     * (čita SAMO centralni direktorijum - spisak sadržaja na kraju fajla), NE ZipInputStream
+     * (koji bi morao da "prođe kroz" - praktično raspakuje - svaki zapis redom da bi stigao
+     * do sledećeg). Za veću audio knjigu ta razlika je ogromna: ZipFile je skoro trenutan bez
+     * obzira na veličinu, dok je stari pristup mogao ozbiljno da uspori uređaj JER se dešavao
+     * BAŠ u trenutku kad korisnica otvara i pušta tu istu, tek dodatu knjigu (dva istovremena
+     * teška I/O posla nad istim fajlom - ovaj i pravo raspakivanje pri otvaranju). */
     private fun verifyZipEntryCount(zipUri: Uri, expectedCount: Int): Boolean {
         return try {
-            var count = 0
-            java.util.zip.ZipInputStream(contentResolver.openInputStream(zipUri) ?: return false).use { zipIn ->
-                while (zipIn.nextEntry != null) count++
+            val path = zipUri.path ?: return false
+            java.util.zip.ZipFile(java.io.File(path)).use { zipFile ->
+                zipFile.size() == expectedCount
             }
-            count == expectedCount
         } catch (e: Exception) {
             false
         }
