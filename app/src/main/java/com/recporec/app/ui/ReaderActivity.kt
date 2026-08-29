@@ -837,6 +837,25 @@ class ReaderActivity : AppCompatActivity() {
         input.contentDescription = "Broj minuta od početka dokumenta"
         fun confirm() {
             val minute = input.text.toString().toIntOrNull() ?: return
+            if (doc?.format == "audio") {
+                val player = PlaybackController.audioPlayer ?: return
+                val durations = PlaybackController.audioFileDurationsMs
+                var remainingMs = minute * 60_000L
+                var fileIndex = 0
+                if (durations.isNotEmpty()) {
+                    for (i in durations.indices) {
+                        if (i == durations.lastIndex || remainingMs < durations[i]) {
+                            fileIndex = i
+                            break
+                        }
+                        remainingMs -= durations[i]
+                    }
+                }
+                player.seekTo(fileIndex, remainingMs.coerceAtLeast(0))
+                updateStatusTexts()
+                updateSeekBar()
+                return
+            }
             val length = parsed?.length ?: return
             val offset = minutesToChars(minute).coerceIn(0, max(0, length - 1))
             moveTo(offset)
