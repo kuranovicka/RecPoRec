@@ -1226,6 +1226,29 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun quickAddBookmark() {
         val currentDocId = documentId
+        if (doc?.format == "audio") {
+            val player = PlaybackController.audioPlayer ?: return
+            val fileIndex = player.currentMediaItemIndex
+            val positionMs = player.currentPosition
+            lifecycleScope.launch {
+                val count = db.bookmarkDao().countForDocument(currentDocId)
+                val name = (count + 1).toString()
+                db.bookmarkDao().insert(
+                    com.recporec.app.data.BookmarkEntity(
+                        documentId = currentDocId,
+                        name = name,
+                        characterOffset = 0,
+                        audioFileIndex = fileIndex,
+                        audioPositionMs = positionMs
+                    )
+                )
+                playClickSound()
+                android.widget.Toast.makeText(
+                    this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+            return
+        }
         val offset = doc?.currentCharacterOffset ?: 0
         lifecycleScope.launch {
             val count = db.bookmarkDao().countForDocument(currentDocId)
@@ -1266,8 +1289,34 @@ class ReaderActivity : AppCompatActivity() {
         input.contentDescription = "Naziv nove oznake, nije obavezno - ako ostane prazno, dobija broj"
         fun confirm() {
             val currentDocId = documentId
-            val offset = doc?.currentCharacterOffset ?: 0
             val typedName = input.text.toString().trim()
+            if (doc?.format == "audio") {
+                val player = PlaybackController.audioPlayer ?: return
+                val fileIndex = player.currentMediaItemIndex
+                val positionMs = player.currentPosition
+                lifecycleScope.launch {
+                    val name = if (typedName.isNotEmpty()) {
+                        typedName
+                    } else {
+                        val count = db.bookmarkDao().countForDocument(currentDocId)
+                        (count + 1).toString()
+                    }
+                    db.bookmarkDao().insert(
+                        com.recporec.app.data.BookmarkEntity(
+                            documentId = currentDocId,
+                            name = name,
+                            characterOffset = 0,
+                            audioFileIndex = fileIndex,
+                            audioPositionMs = positionMs
+                        )
+                    )
+                    android.widget.Toast.makeText(
+                        this@ReaderActivity, "Oznaka \"$name\" je dodata.", android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+            val offset = doc?.currentCharacterOffset ?: 0
             lifecycleScope.launch {
                 val name = if (typedName.isNotEmpty()) {
                     typedName
@@ -1369,7 +1418,15 @@ class ReaderActivity : AppCompatActivity() {
             AlertDialog.Builder(this@ReaderActivity)
                 .setTitle("Idi na oznaku")
                 .setItems(names) { _, which ->
-                    moveTo(bookmarks[which].characterOffset)
+                    val bookmark = bookmarks[which]
+                    if (doc?.format == "audio") {
+                        val player = PlaybackController.audioPlayer ?: return@setItems
+                        player.seekTo(bookmark.audioFileIndex.coerceAtLeast(0), bookmark.audioPositionMs)
+                        updateStatusTexts()
+                        updateSeekBar()
+                    } else {
+                        moveTo(bookmark.characterOffset)
+                    }
                 }
                 .show()
         }
