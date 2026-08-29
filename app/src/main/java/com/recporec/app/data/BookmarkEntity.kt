@@ -10,5 +10,10 @@ data class BookmarkEntity(
     val documentId: Long,
     val name: String,
     val characterOffset: Int,
-    val dateAdded: Long = System.currentTimeMillis()
+    val dateAdded: Long = System.currentTimeMillis(),
+    /** Za oznake u AUDIO knjizi: redni broj zvučnog fajla u folderu (0 = prvi) i pozicija u
+     * milisekundama unutar njega. -1 znači "ovo NIJE audio oznaka" (obična, tekstualna
+     * oznaka koristi characterOffset iznad, kao i do sad). */
+    val audioFileIndex: Int = -1,
+    val audioPositionMs: Long = 0
 )
