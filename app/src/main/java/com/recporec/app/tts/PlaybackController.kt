@@ -73,6 +73,28 @@ object PlaybackController {
                 if (_currentDocument?.format == "audio") {
                     releaseAudioEngine()
                 }
+            } else if (oldId != null && newId != null && oldId == newId && value?.format == "audio") {
+                // ISTI dokument, samo su mu se promenile vrednosti (npr. korisnica pomera
+                // klizac Brzina/Visina/Jacina u podesavanjima OVOG dokumenta dok je audio
+                // vec otvoren/pusten) - primeni ODMAH na zivi ExoPlayer, ne cekaj da se
+                // knjiga ponovo otvori (setupAudioEngine cita ove vrednosti SAMO pri
+                // pripremi, pa se bez ovoga promena "ne dogodi" dok se knjiga ne zatvori i
+                // ponovo otvori - izgleda kao veliko kasnjenje, a zapravo se uopste ne
+                // primenjuje na trenutnu sesiju).
+                audioPlayer?.let { player ->
+                    val oldSpeed = _currentDocument?.speechRate ?: -1f
+                    val oldPitch = _currentDocument?.pitch ?: -1f
+                    val oldVolume = _currentDocument?.volumePercent ?: -1
+                    val speed = if (value.speechRate > 0f) value.speechRate else oldSpeed.takeIf { it > 0f } ?: 1f
+                    val pitch = if (value.pitch > 0f) value.pitch else oldPitch.takeIf { it > 0f } ?: 1f
+                    if (value.speechRate != oldSpeed || value.pitch != oldPitch) {
+                        player.playbackParameters = androidx.media3.common.PlaybackParameters(speed, pitch)
+                    }
+                    if (value.volumePercent != oldVolume) {
+                        val volumePercent = if (value.volumePercent >= 0) value.volumePercent else 100
+                        player.volume = volumePercent / 100f
+                    }
+                }
             }
             _currentDocument = value
         }
