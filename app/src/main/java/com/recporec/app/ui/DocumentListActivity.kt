@@ -454,27 +454,36 @@ class DocumentListActivity : AppCompatActivity() {
                 return@launch
             }
 
+            // Knjiga se odmah ubacuje u listu - ne čeka se brisanje originala. Brisanje ide u
+            // pozadini POSLE ovoga, potpuno nezavisno: makar bilo sporo (SAF brisanje foldera
+            // sa puno fajlova zna da potraje), to više neće usporavati koliko brzo možeš da
+            // otvoriš i pustiš tek dodatu knjigu.
+            insertDocument(localUri, folderName, "audio")
+
             // "Obriši originalni zvučni folder nakon pakovanja" - SME da se izvrši SAMO
             // posle potvrde da je zip stvaran, kompletan (isti broj fajlova) - inače bi
-            // greška usred pakovanja mogla da obriše jedini primerak knjige.
+            // greška usred pakovanja mogla da obriše jedini primerak knjige. Ide u ODVOJENOJ
+            // korutini da ne blokira ništa drugo dok traje.
             if (settings.deleteOriginalAudioFolder) {
-                val zipValid = withContext(Dispatchers.IO) { verifyZipEntryCount(localUri, audioFiles.size) }
-                if (zipValid) {
-                    // Brise se CEO originalni folder (rekurzivno) - ne samo pojedinacni
-                    // zvucni fajlovi. Brisanje samo fajlova ostavlja prazan folder (i sve
-                    // podfoldere) da i dalje vidljivo stoji u exploreru - to je i bio uzrok
-                    // utiska da "brisanje ne radi".
-                    withContext(Dispatchers.IO) { folder.delete() }
-                } else {
-                    android.widget.Toast.makeText(
-                        this@DocumentListActivity,
-                        "Original nije obrisan - zip nije mogao da se potvrdi.",
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val zipValid = verifyZipEntryCount(localUri, audioFiles.size)
+                    if (zipValid) {
+                        // Brise se CEO originalni folder (rekurzivno) - ne samo pojedinacni
+                        // zvucni fajlovi. Brisanje samo fajlova ostavlja prazan folder (i sve
+                        // podfoldere) da i dalje vidljivo stoji u exploreru - to je i bio
+                        // uzrok utiska da "brisanje ne radi".
+                        folder.delete()
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            android.widget.Toast.makeText(
+                                this@DocumentListActivity,
+                                "Original nije obrisan - zip nije mogao da se potvrdi.",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
             }
-
-            insertDocument(localUri, folderName, "audio")
         }
     }
 
