@@ -300,12 +300,11 @@ class ReaderActivity : AppCompatActivity() {
         btnSelectAll.visibility = android.view.View.GONE
         // "Izvezi u txt" - nema teksta za izvoz.
         btnAutoScroll.visibility = android.view.View.GONE // automatsko LISTANJE teksta - nema smisla
-        btnRemindMe.visibility = android.view.View.GONE // racuna po karakteru pozicije - nebezbedno za audio
 
         // "Idi na" i "Prethodno/Sledeće poglavlje" OSTAJU vidljivi (isti raspored tastature,
         // vazno za navigaciju dodirom/TalkBack-om) - ali su PRENAMENJENI za audio: idu na
         // FILE po broju, umesto na stranicu/poglavlje po karakteru.
-        btnGoTo.contentDescription = "Idi na."
+        btnGoTo.contentDescription = "Idi na oznaku, minut ili file."
         btnPrevChapter.text = "◀ FILE"
         btnPrevChapter.contentDescription = "Prethodni file."
         btnNextChapter.text = "FILE ▶"
@@ -1922,6 +1921,30 @@ class ReaderActivity : AppCompatActivity() {
 
     /** Sama radnja premotavanja unazad za dati broj minuta - deli je i klizač i dug pritisak. */
     private fun applyRemind(minutes: Int) {
+        if (doc?.format == "audio") {
+            val player = PlaybackController.audioPlayer ?: return
+            val durations = PlaybackController.audioFileDurationsMs
+            val (elapsedMs, _) = audioTotalElapsedAndDurationMs(player)
+            var targetMs = (elapsedMs - minutes * 60_000L).coerceAtLeast(0)
+            var fileIndex = 0
+            if (durations.isNotEmpty()) {
+                for (i in durations.indices) {
+                    if (i == durations.lastIndex || targetMs < durations[i]) {
+                        fileIndex = i
+                        break
+                    }
+                    targetMs -= durations[i]
+                }
+            }
+            player.seekTo(fileIndex, targetMs.coerceAtLeast(0))
+            updateStatusTexts()
+            updateSeekBar()
+            lastRemindMinutes = minutes
+            android.widget.Toast.makeText(
+                this, "Vraćeno $minutes minuta unazad.", android.widget.Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         val current = doc?.currentCharacterOffset ?: 0
         val target = (current - minutesToChars(minutes)).coerceAtLeast(0)
         moveTo(target)
