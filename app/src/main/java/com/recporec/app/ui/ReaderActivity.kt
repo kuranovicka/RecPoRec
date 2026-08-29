@@ -114,7 +114,7 @@ class ReaderActivity : AppCompatActivity() {
             android.view.MotionEvent.ACTION_POINTER_UP, android.view.MotionEvent.ACTION_UP -> {
                 if (twoFingerActive) {
                     val elapsed = System.currentTimeMillis() - twoFingerStartTime
-                    if (elapsed in 0..500) {
+                    if (elapsed in 0..700) {
                         togglePlayPause()
                     }
                     twoFingerActive = false

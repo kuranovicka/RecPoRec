@@ -15,6 +15,7 @@ import com.recporec.app.databinding.ActivityDocumentListBinding
 import com.recporec.app.parser.DocumentParser
 import com.recporec.app.util.requestAccessibilityFocusNow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -466,6 +467,12 @@ class DocumentListActivity : AppCompatActivity() {
             // korutini da ne blokira ništa drugo dok traje.
             if (settings.deleteOriginalAudioFolder) {
                 lifecycleScope.launch(Dispatchers.IO) {
+                    // Namerno odlaganje - da provera zip-a i brisanje foldera (I/O rad) ne
+                    // "otimaju" resurse uredjaja bas u prvih par sekundi, kad korisnica
+                    // najverovatnije odmah otvara i pusta tek dodatu knjigu. Bez ovoga, na
+                    // sporijim uredjajima I/O konkurencija je mogla da izazove kratak zastoj
+                    // dovoljan da propusti strogo vremensko okno dvoprstnog dodira za pauzu.
+                    delay(4000)
                     val zipValid = verifyZipEntryCount(localUri, audioFiles.size)
                     if (zipValid) {
                         // Brise se CEO originalni folder (rekurzivno) - ne samo pojedinacni
