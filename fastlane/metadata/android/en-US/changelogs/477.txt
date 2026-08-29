@@ -1,0 +1,6 @@
+What's new:
+
+1. Fixed a real slowdown: verifying the packed zip before deleting the original folder was reading through the whole archive (as if unpacking it) just to count files - very slow for a large audio book, and it happened right when opening the same book, competing for resources. It now just reads the archive's file list, which is instant regardless of size.
+2. "Go to minute" inside "Go to" now works correctly for audio books - it used to always jump to the very start regardless of what you typed.
+3. "Remind me" (rewind by N minutes) now works for audio books too - it was hidden before because it only supported text.
+4. Minor: the "Go to" button description for audio now says "Go to bookmark, minute, or file" to match the audio-specific menu.
