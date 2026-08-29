@@ -305,7 +305,7 @@ class ReaderActivity : AppCompatActivity() {
         // "Idi na" i "Prethodno/Sledeće poglavlje" OSTAJU vidljivi (isti raspored tastature,
         // vazno za navigaciju dodirom/TalkBack-om) - ali su PRENAMENJENI za audio: idu na
         // FILE po broju, umesto na stranicu/poglavlje po karakteru.
-        btnGoTo.contentDescription = "Idi na file."
+        btnGoTo.contentDescription = "Idi na."
         btnPrevChapter.text = "◀ FILE"
         btnPrevChapter.contentDescription = "Prethodni file."
         btnNextChapter.text = "FILE ▶"

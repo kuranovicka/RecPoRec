@@ -87,7 +87,6 @@ class HelpActivity : AppCompatActivity() {
         Dodaje, uklanja ili briše sve oznake u dokumentu, a dug pritisak odmah dodaje oznaku na trenutno mesto.
         Drugo dugme je Idi na.
         Vodi na tačnu stranicu, minut ili oznaku, a dug pritisak vraća na sam početak dokumenta.
-        Za audio, umesto stranice, nudi file - upišeš njegov broj i odlazi na njega.
         Treće dugme je Odaberi sve, a dug pritisak kopira odabrani tekst u privremenu memoriju.
         Četvrto dugme je Pretraga.
         Pronalazi reč u dokumentu, a dug pritisak ponavlja poslednju pretragu.
